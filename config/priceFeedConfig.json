@@ -1,0 +1,104 @@
+[
+  {
+    "network": "testnet",
+    "ids": [
+      {
+        "symbol": "BTC-USD",
+        "id": "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b",
+        "type": "pyth",
+        "origin": "Crypto.BTC/USD"
+      },
+      {
+        "symbol": "ETH-USD",
+        "id": "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
+        "type": "pyth",
+        "origin": "Crypto.ETH/USD"
+      },
+      {
+        "symbol": "MATIC-USD",
+        "id": "0xd2c2c1f2bba8e0964f9589e060c2ee97f5e19057267ac3284caef3bd50bd2cb5",
+        "type": "pyth",
+        "origin": "Crypto.MATIC/USD"
+      },
+      {
+        "symbol": "USDC-USD",
+        "id": "0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
+        "type": "pyth",
+        "origin": "Crypto.USDC/USD"
+      },
+      {
+        "symbol": "XAU-USD",
+        "id": "0x30a19158f5a54c0adf8fb7560627343f22a1bc852b89d56be1accdc5dbf96d0e",
+        "type": "pyth",
+        "origin": "Metal.XAU/USD"
+      },
+      {
+        "symbol": "USD-CHF",
+        "id": "0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
+        "type": "pyth",
+        "origin": "FX.USD/CHF"
+      },
+      {
+        "symbol": "GBP-USD",
+        "id": "0xbcbdc2755bd74a2065f9d3283c2b8acbd898e473bdb90a6764b3dbd467c56ecd",
+        "type": "pyth",
+        "origin": "FX.GBP/USD"
+      },
+      {
+        "symbol": "EUR-USD",
+        "id": "0xc1b12769f6633798d45adfd62bfc70114839232e2949b01fb3d3f927d2606154",
+        "type": "pyth",
+        "origin": "FX.EUR/USD"
+      },
+      {
+        "symbol": "USD-JPY",
+        "id": "0x20a938f54b68f1f2ef18ea0328f6dd0747f8ea11486d22b021e83a900be89776",
+        "type": "pyth",
+        "origin": "FX.USD/JPY"
+      }
+    ],
+    "endpoints": [{ "type": "pyth", "endpoint": "https://xc-testnet.pyth.network/api" }]
+  },
+  {
+    "network": "mainnet",
+    "ids": [
+      {
+        "symbol": "USDC-USD",
+        "id": "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
+        "type": "pyth",
+        "origin": "Crypto.USDC/USD"
+      },
+      {
+        "symbol": "BTC-USD",
+        "id": "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
+        "type": "pyth",
+        "origin": "Crypto.BTC/USD"
+      },
+      {
+        "symbol": "ETH-USD",
+        "id": "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
+        "type": "pyth",
+        "origin": "Crypto.ETH/USD"
+      },
+      {
+        "symbol": "MATIC-USD",
+        "id": "0x5de33a9112c2b700b8d30b8a3402c103578ccfa2765696471cc672bd5cf6ac52",
+        "type": "pyth",
+        "origin": "Crypto.MATIC/USD"
+      },
+      {
+        "symbol": "USD-CHF",
+        "id": "0x0b1e3297e69f162877b577b0d6a47a0d63b2392bc8499e6540da4187a63e28f8",
+        "type": "pyth",
+        "origin": "FX.USD/CHF"
+      },
+      {
+        "symbol": "XAU-USD",
+        "id": "0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee34bb2",
+        "type": "pyth",
+        "origin": "Metal.XAU/USD"
+      }
+    ],
+    "endpoints": [{ "type": "pyth", "endpoint": "https://xc-mainnet.pyth.network/api" }]
+  }
+]
