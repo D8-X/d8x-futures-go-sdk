@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-func createPerpetualManagerInstance(config Config) *IPerpetualManager {
+func CreatePerpetualManagerInstance(config Config) *IPerpetualManager {
 	rpc, err := ethclient.Dial(config.NodeURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to RPC %v", err)
