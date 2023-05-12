@@ -5,10 +5,6 @@
       "version": 7,
       "proxyAddr": "0x7Fb76c91e4950bD48Ed1C812EdE98A5Db96cb4e7",
       "nodeURL": "https://polygon-mumbai.blockpi.network/v1/rpc/public",
-      "priceFeedConfigNetwork": "testnet",
-      "shareTokenABILocation": "testnet/v7/ShareToken.json",
-      "proxyABILocation": "testnet/v7/IPerpetualManager.json",
-      "limitOrderBookFactoryABILocation": "testnet/v7/LimitOrderBookFactory.json",
-      "limitOrderBookABILocation": "testnet/v7/LimitOrderBook.json"
+      "priceFeedConfigNetwork": "testnet"
     }
 ]

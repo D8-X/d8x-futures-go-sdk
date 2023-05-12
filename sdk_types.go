@@ -1,24 +1,42 @@
 package d8x_futures
 
+import (
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
+)
+
+type NestedPerpetualIds struct {
+	PerpetualIds        [][]*big.Int
+	PoolShareTokenAddr  []common.Address
+	PoolMarginTokenAddr []common.Address
+	OracleFactoryAddr   common.Address
+}
+
+type StaticExchangeInfo struct {
+	Pools             []PoolStaticInfo
+	Perpetuals        []PerpetualStaticInfo
+	OracleFactoryAddr common.Address
+}
+
 type PoolStaticInfo struct {
 	PoolId              int32
 	PoolMarginSymbol    string
-	PoolMarginTokenAddr string
-	ShareTokenAddr      string
-	OracleFactoryAddr   string
-	isRunning           bool
+	PoolMarginTokenAddr common.Address
+	ShareTokenAddr      common.Address
 }
 
 type PerpetualStaticInfo struct {
 	Id                     int32
 	PoolId                 int32
-	LimitOrderBookAddr     string
+	LimitOrderBookAddr     common.Address
 	InitialMarginRate      float64
 	MaintenanceMarginRate  float64
 	CollateralCurrencyType CollateralCCY
 	S2Symbol               string
 	S3Symbol               string
-	LotSizeBC              int32
+	LotSizeBC              float64
 	ReferralRebate         float64
 	PriceIds               []string
 }
@@ -30,6 +48,12 @@ const (
 	BASE
 	QUANTO
 )
+
+type BlockChainConnector struct {
+	Rpc              *ethclient.Client
+	PerpetualManager *IPerpetualManager
+	SymbolMapping    *map[string]string
+}
 
 type ExchangeInfo struct {
 	pools             []PoolState

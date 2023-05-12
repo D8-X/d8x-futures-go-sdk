@@ -10,16 +10,12 @@ import (
 )
 
 type Config struct {
-	Name                             string         `json:"name"`
-	ChainId                          int64          `json:"chainId"`
-	Version                          int32          `json:"version"`
-	ProxyAddr                        common.Address `json:"proxyAddr"`
-	NodeURL                          string         `json:"nodeURL"`
-	PriceFeedConfigNetwork           string         `json:"priceFeedConfigNetwork"`
-	ShareTokenABILocation            string         `json:"shareTokenABILocation"`
-	ProxyABILocation                 string         `json:"proxyABILocation"`
-	LimitOrderBookFactoryABILocation string         `json:"limitOrderBookFactoryABILocation"`
-	LimitOrderBookABILocation        string         `json:"limitOrderBookABILocation"`
+	Name                   string         `json:"name"`
+	ChainId                int64          `json:"chainId"`
+	Version                int32          `json:"version"`
+	ProxyAddr              common.Address `json:"proxyAddr"`
+	NodeURL                string         `json:"nodeURL"`
+	PriceFeedConfigNetwork string         `json:"priceFeedConfigNetwork"`
 }
 
 type PriceFeedConfig struct {
