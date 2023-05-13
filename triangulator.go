@@ -40,9 +40,9 @@ func Triangulate(symbol string, pxConfig PriceFeedConfig) []TriangulationElement
 			}
 		}
 		if invert {
-			triang[j] = TriangulationElement{isInverse: true, symbol: currSym[1] + "-" + currSym[0]}
+			triang[j] = TriangulationElement{IsInverse: true, Symbol: currSym[1] + "-" + currSym[0]}
 		} else {
-			triang[j] = TriangulationElement{isInverse: false, symbol: currSym[0] + "-" + currSym[1]}
+			triang[j] = TriangulationElement{IsInverse: false, Symbol: currSym[0] + "-" + currSym[1]}
 		}
 	}
 	return triang

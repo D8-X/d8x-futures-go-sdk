@@ -12,3 +12,5 @@ package d8x_futures
 //     );
 //     return mgnAcct;
 //   }
+
+//func fetchPricesForPerpetual()

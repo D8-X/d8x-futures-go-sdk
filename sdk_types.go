@@ -17,6 +17,7 @@ type NestedPerpetualIds struct {
 type StaticExchangeInfo struct {
 	Pools                  []PoolStaticInfo
 	Perpetuals             []PerpetualStaticInfo
+	PerpetualSymbolToId    map[string]int32
 	PriceFeedInfo          PriceFeedConfig
 	IdxPriceTriangulations Triangulations
 	OracleFactoryAddr      common.Address
@@ -65,8 +66,8 @@ type ExchangeInfo struct {
 }
 
 type TriangulationElement struct {
-	isInverse bool
-	symbol    string // BTC-USD
+	IsInverse bool
+	Symbol    string // BTC-USD
 }
 
 type Triangulations map[string][]TriangulationElement

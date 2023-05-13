@@ -1,5 +1,5 @@
 package d8x_futures
 
-func FetchPricesForPerpetual(perpStatic PerpetualStaticInfo) {
+func FetchPricesForPerpetual(staticInfo StaticExchangeInfo, perpetualSymbol string) {
 
 }

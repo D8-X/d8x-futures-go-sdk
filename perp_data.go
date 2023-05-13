@@ -66,17 +66,17 @@ func QueryPoolStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) Stat
 	symbolsSet := make(Set)
 
 	perpIds := nest.PerpetualIds
-	var pools []PoolStaticInfo
+	pools := make([]PoolStaticInfo, len(perpIds))
 	var perpetuals []PerpetualStaticInfo
+	perpetualSymbolToId := make(map[string]int32)
 	for i, poolPerpIds := range perpIds {
 
-		pool := PoolStaticInfo{
+		pools[i] = PoolStaticInfo{
 			PoolId:              int32(i + 1),
 			PoolMarginSymbol:    "", // fill later
 			PoolMarginTokenAddr: nest.PoolMarginTokenAddr[i],
 			ShareTokenAddr:      nest.PoolShareTokenAddr[i],
 		}
-		pools = append(pools, pool)
 		// we query all perpetuals within the current pool
 		perpGetterStaticInfos, err := conn.PerpetualManager.GetPerpetualStaticInfo(nil, poolPerpIds)
 		if err != nil {
@@ -94,11 +94,16 @@ func QueryPoolStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) Stat
 		// pool currency
 		switch perpetuals[0].CollateralCurrencyType {
 		case QUOTE:
-			pool.PoolMarginSymbol = strings.Split(perpetuals[0].S2Symbol, "-")[0]
+			pools[i].PoolMarginSymbol = strings.Split(perpetuals[0].S2Symbol, "-")[1]
 		case BASE:
-			pool.PoolMarginSymbol = strings.Split(perpetuals[0].S2Symbol, "-")[1]
+			pools[i].PoolMarginSymbol = strings.Split(perpetuals[0].S2Symbol, "-")[0]
 		default:
-			pool.PoolMarginSymbol = strings.Split(perpetuals[0].S3Symbol, "-")[0]
+			pools[i].PoolMarginSymbol = strings.Split(perpetuals[0].S3Symbol, "-")[0]
+		}
+		// amend mapping perpetual symbol -> perpetual Id
+		for _, perpStatic := range perpetuals {
+			perpSymbol := perpStatic.S2Symbol + "-" + pools[i].PoolMarginSymbol
+			perpetualSymbolToId[perpSymbol] = perpStatic.Id
 		}
 	}
 	pxConfig, err := LoadPriceFeedConfig(conn.PriceFeedNetwork)
@@ -109,11 +114,42 @@ func QueryPoolStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) Stat
 	xInfo := StaticExchangeInfo{
 		Pools:                  pools,
 		Perpetuals:             perpetuals,
+		PerpetualSymbolToId:    perpetualSymbolToId,
 		OracleFactoryAddr:      nest.OracleFactoryAddr,
 		PriceFeedInfo:          pxConfig,
 		IdxPriceTriangulations: triangulations,
 	}
 	return xInfo
+}
+
+// Store stores the StaticExchangeInfo in a file
+func (s *StaticExchangeInfo) Store(filename string) error {
+	jsonData, err := json.Marshal(s)
+	if err != nil {
+		return err
+	}
+	// Saving JSON to a file
+	err = ioutil.WriteFile(filename, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Load loads StaticExchangeInfo from a JSON-file created with
+// the Store function.
+func (s *StaticExchangeInfo) Load(filename string) error {
+	// Reading JSON from file
+	jsonData, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	// Unmarshaling JSON into the struct
+	err = json.Unmarshal(jsonData, s)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // initPriceFeeds determines the triangulation for each symbol in symbolSet

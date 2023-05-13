@@ -33,6 +33,7 @@ func TestQueryPoolStaticInfo(t *testing.T) {
 	nest := QueryNestedPerpetualInfo(conn)
 	info := QueryPoolStaticInfo(conn, nest)
 	fmt.Println(info)
+	info.Store("./tmpXchInfo.json")
 }
 
 func TestFindPath(t *testing.T) {
