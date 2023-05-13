@@ -6,7 +6,7 @@ import (
 )
 
 func TestQueryNestedPerpetualInfo(t *testing.T) {
-	config, err := loadConfig("testnet")
+	config, err := LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -25,7 +25,7 @@ func TestReadSymbolList(t *testing.T) {
 }
 
 func TestQueryPoolStaticInfo(t *testing.T) {
-	config, err := loadConfig("testnet")
+	config, err := LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -33,4 +33,23 @@ func TestQueryPoolStaticInfo(t *testing.T) {
 	nest := QueryNestedPerpetualInfo(conn)
 	info := QueryPoolStaticInfo(conn, nest)
 	fmt.Println(info)
+}
+
+func TestFindPath(t *testing.T) {
+	ccyBase := []string{"USD", "USDC", "EUR", "BTC", "BTC"}
+	ccyQuote := []string{"CHF", "USD", "USD", "CHF", "EUR"}
+	pair := "CHF-USDC"
+
+	paths := findPath(append(ccyBase, ccyQuote...), append(ccyQuote, ccyBase...), pair)
+	fmt.Println(paths)
+
+}
+
+func TestTriangulate(t *testing.T) {
+	pxConfig, err := LoadPriceFeedConfig("testnet")
+	if err != nil {
+		panic(err)
+	}
+	triangs := Triangulate("CHF-USDC", pxConfig)
+	fmt.Println(triangs)
 }

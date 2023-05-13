@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	Name                   string         `json:"name"`
+	PriceFeedNetwork       string         `json:"priceFeedNetwork"`
 	ChainId                int64          `json:"chainId"`
 	Version                int32          `json:"version"`
 	ProxyAddr              common.Address `json:"proxyAddr"`
@@ -36,7 +37,7 @@ type PriceFeedEndpoint struct {
 	EndpointUrl string `json:"endpoint"`
 }
 
-func loadPriceFeedConfig(configNetwork string) (PriceFeedConfig, error) {
+func LoadPriceFeedConfig(configNetwork string) (PriceFeedConfig, error) {
 	// Read the JSON file
 	data, err := ioutil.ReadFile("config/priceFeedConfig.json")
 	if err != nil {
@@ -58,7 +59,7 @@ func loadPriceFeedConfig(configNetwork string) (PriceFeedConfig, error) {
 	return PriceFeedConfig{}, errors.New("config not found")
 }
 
-func loadConfig(configName string) (Config, error) {
+func LoadConfig(configName string) (Config, error) {
 	// Read the JSON file
 	data, err := ioutil.ReadFile("config/config.json")
 	if err != nil {

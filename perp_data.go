@@ -62,6 +62,8 @@ func QueryNestedPerpetualInfo(conn BlockChainConnector) NestedPerpetualIds {
 }
 
 func QueryPoolStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) StaticExchangeInfo {
+	symbolsSet := make(Set)
+
 	perpIds := nest.PerpetualIds
 	var pools []PoolStaticInfo
 	var perpetuals []PerpetualStaticInfo
@@ -83,7 +85,10 @@ func QueryPoolStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) Stat
 		for _, perpStatic := range perpGetterStaticInfos {
 			info := getterDataToPerpetualStaticInfo(perpStatic, conn.SymbolMapping)
 			perpetuals = append(perpetuals, info)
-
+			symbolsSet.Add(info.S2Symbol)
+			if info.S3Symbol != "" {
+				symbolsSet.Add(info.S3Symbol)
+			}
 		}
 		// pool currency
 		switch perpetuals[0].CollateralCurrencyType {
@@ -101,6 +106,17 @@ func QueryPoolStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) Stat
 		OracleFactoryAddr: nest.OracleFactoryAddr,
 	}
 	return xInfo
+}
+
+func initPriceFeeds(config Config, symbolSet Set) {
+	//pxConfig, err := LoadPriceFeedConfig(config.PriceFeedNetwork)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//var triangulations []Triangulation
+	//for sym := range symbolSet {
+	//triangulations = append(triangulations, Triangulate(sym, pxConfig))
+	//}
 }
 
 func getterDataToPerpetualStaticInfo(pIn IPerpetualGetterPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {

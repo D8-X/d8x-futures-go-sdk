@@ -17,6 +17,7 @@ type NestedPerpetualIds struct {
 type StaticExchangeInfo struct {
 	Pools             []PoolStaticInfo
 	Perpetuals        []PerpetualStaticInfo
+	PriceFeedInfo     PriceFeedConfig
 	OracleFactoryAddr common.Address
 }
 
@@ -60,6 +61,13 @@ type ExchangeInfo struct {
 	oracleFactoryAddr string
 	proxyAddr         string
 }
+
+type TriangulationElement struct {
+	isInverse bool
+	symbol    string // BTC-USD
+}
+
+type Triangulations map[string][]TriangulationElement
 
 type PoolState struct {
 	IsRunning                bool
