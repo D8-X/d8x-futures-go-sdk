@@ -51,5 +51,10 @@ func TestTriangulate(t *testing.T) {
 		panic(err)
 	}
 	triangs := Triangulate("CHF-USDC", pxConfig)
+	fmt.Println("Triangulate")
 	fmt.Println(triangs)
+
+	// test an impossible path
+	triangs2 := Triangulate("CHF-DOGE", pxConfig)
+	fmt.Println(triangs2)
 }

@@ -15,10 +15,11 @@ type NestedPerpetualIds struct {
 }
 
 type StaticExchangeInfo struct {
-	Pools             []PoolStaticInfo
-	Perpetuals        []PerpetualStaticInfo
-	PriceFeedInfo     PriceFeedConfig
-	OracleFactoryAddr common.Address
+	Pools                  []PoolStaticInfo
+	Perpetuals             []PerpetualStaticInfo
+	PriceFeedInfo          PriceFeedConfig
+	IdxPriceTriangulations Triangulations
+	OracleFactoryAddr      common.Address
 }
 
 type PoolStaticInfo struct {
@@ -54,6 +55,7 @@ type BlockChainConnector struct {
 	Rpc              *ethclient.Client
 	PerpetualManager *IPerpetualManager
 	SymbolMapping    *map[string]string
+	PriceFeedNetwork string
 }
 
 type ExchangeInfo struct {

@@ -39,7 +39,8 @@ func CreateBlockChainConnector(config Config) BlockChainConnector {
 	if err != nil {
 		panic(err)
 	}
-	var b = BlockChainConnector{Rpc: rpc, PerpetualManager: proxy, SymbolMapping: symbolMap}
+	priceFeedNetwork := config.PriceFeedNetwork
+	var b = BlockChainConnector{Rpc: rpc, PerpetualManager: proxy, SymbolMapping: symbolMap, PriceFeedNetwork: priceFeedNetwork}
 	return b
 }
 
@@ -100,23 +101,28 @@ func QueryPoolStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) Stat
 			pool.PoolMarginSymbol = strings.Split(perpetuals[0].S3Symbol, "-")[0]
 		}
 	}
+	pxConfig, err := LoadPriceFeedConfig(conn.PriceFeedNetwork)
+	if err != nil {
+		panic(err)
+	}
+	triangulations := initPriceFeeds(pxConfig, symbolsSet)
 	xInfo := StaticExchangeInfo{
-		Pools:             pools,
-		Perpetuals:        perpetuals,
-		OracleFactoryAddr: nest.OracleFactoryAddr,
+		Pools:                  pools,
+		Perpetuals:             perpetuals,
+		OracleFactoryAddr:      nest.OracleFactoryAddr,
+		PriceFeedInfo:          pxConfig,
+		IdxPriceTriangulations: triangulations,
 	}
 	return xInfo
 }
 
-func initPriceFeeds(config Config, symbolSet Set) {
-	//pxConfig, err := LoadPriceFeedConfig(config.PriceFeedNetwork)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//var triangulations []Triangulation
-	//for sym := range symbolSet {
-	//triangulations = append(triangulations, Triangulate(sym, pxConfig))
-	//}
+// initPriceFeeds determines the triangulation for each symbol in symbolSet
+func initPriceFeeds(pxConfig PriceFeedConfig, symbolSet Set) Triangulations {
+	triangulations := make(Triangulations)
+	for sym := range symbolSet {
+		triangulations[sym] = Triangulate(sym, pxConfig)
+	}
+	return triangulations
 }
 
 func getterDataToPerpetualStaticInfo(pIn IPerpetualGetterPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {

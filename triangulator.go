@@ -2,6 +2,8 @@ package d8x_futures
 
 import "strings"
 
+// Triangulate finds the shortest triangulation path for symbol (e.g. BTC-USDC) using
+// all price sources in pxConfig. Returns an empty array if no triangulation found.
 func Triangulate(symbol string, pxConfig PriceFeedConfig) []TriangulationElement {
 	var feedSymBase []string
 	var feedSymQuote []string
@@ -12,6 +14,9 @@ func Triangulate(symbol string, pxConfig PriceFeedConfig) []TriangulationElement
 		feedSymQuote = append(feedSymQuote, syms[1])
 	}
 	paths := findPath(append(feedSymBase, feedSymQuote...), append(feedSymQuote, feedSymBase...), symbol)
+	if len(paths) == 0 {
+		return []TriangulationElement{}
+	}
 	// get shortest path
 	var minPath int = 1000
 	var minIdx int = -1
@@ -35,14 +40,17 @@ func Triangulate(symbol string, pxConfig PriceFeedConfig) []TriangulationElement
 			}
 		}
 		if invert {
-			triang = append(triang, TriangulationElement{isInverse: true, symbol: currSym[1] + "-" + currSym[0]})
+			triang[j] = TriangulationElement{isInverse: true, symbol: currSym[1] + "-" + currSym[0]}
 		} else {
-			triang = append(triang, TriangulationElement{isInverse: false, symbol: currSym[0] + "-" + currSym[1]})
+			triang[j] = TriangulationElement{isInverse: false, symbol: currSym[0] + "-" + currSym[1]}
 		}
 	}
 	return triang
 }
 
+// findPath finds all possible non-circular paths to triangulate 'pair' (e.g. ETH-USDC).
+// The input requires an array of all base currencies and an array of all quote correncies
+// in which each base-quote pair occurs twice (e.g., ccyBase=[BTC, USD], ccyQuote=[USD, BTC])
 func findPath(ccyBase []string, ccyQuote []string, pair string) [][]string {
 	syms := strings.Split(pair, "-")
 	base, quote := syms[0], syms[1]
