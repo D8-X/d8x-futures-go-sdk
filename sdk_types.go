@@ -14,6 +14,10 @@ type NestedPerpetualIds struct {
 	OracleFactoryAddr   common.Address
 }
 
+// StaticExchangeInfo is the main information with which
+// many functions can operate on the exchange
+// It can be stored into a JSON file (info.Store) and loaded
+// from a JSON file (info.Load)
 type StaticExchangeInfo struct {
 	Pools                  []PoolStaticInfo
 	Perpetuals             []PerpetualStaticInfo
@@ -55,8 +59,8 @@ const (
 type BlockChainConnector struct {
 	Rpc              *ethclient.Client
 	PerpetualManager *IPerpetualManager
-	SymbolMapping    *map[string]string
-	PriceFeedNetwork string
+	SymbolMapping    *map[string]string //chain-symbol (MATC) to long format (MATIC)
+	PriceFeedNetwork string             //testnet or mainnet
 }
 
 type ExchangeInfo struct {
@@ -65,12 +69,33 @@ type ExchangeInfo struct {
 	proxyAddr         string
 }
 
-type TriangulationElement struct {
-	IsInverse bool
-	Symbol    string // BTC-USD
+type Triangulation struct {
+	IsInverse []bool   //[false, true]
+	Symbol    []string // [BTC-USD, USDC-USD]
 }
 
-type Triangulations map[string][]TriangulationElement
+type Triangulations map[string]Triangulation
+
+type PriceFeedData struct {
+	Symbols        []string
+	PriceIds       []string
+	Prices         []float64
+	IsMarketClosed []bool
+}
+
+type ResponsePythLatestPriceFeed struct {
+	EmaPrice ResponsePythPrice `json:"ema_price"`
+	Id       string            `json:"id"`
+	Price    ResponsePythPrice `json:"price"`
+	Vaa      string            `json:"vaa"`
+}
+
+type ResponsePythPrice struct {
+	Conf        string `json:"conf"`
+	Expo        int32  `json:"expo"`
+	Price       string `json:"price"`
+	PublishTime int32  `json:"publish_time"`
+}
 
 type PoolState struct {
 	IsRunning                bool

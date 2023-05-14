@@ -4,7 +4,7 @@ import "strings"
 
 // Triangulate finds the shortest triangulation path for symbol (e.g. BTC-USDC) using
 // all price sources in pxConfig. Returns an empty array if no triangulation found.
-func Triangulate(symbol string, pxConfig PriceFeedConfig) []TriangulationElement {
+func Triangulate(symbol string, pxConfig PriceFeedConfig) Triangulation {
 	var feedSymBase []string
 	var feedSymQuote []string
 	// extract all base and quote currencies
@@ -15,7 +15,7 @@ func Triangulate(symbol string, pxConfig PriceFeedConfig) []TriangulationElement
 	}
 	paths := findPath(append(feedSymBase, feedSymQuote...), append(feedSymQuote, feedSymBase...), symbol)
 	if len(paths) == 0 {
-		return []TriangulationElement{}
+		return Triangulation{}
 	}
 	// get shortest path
 	var minPath int = 1000
@@ -27,7 +27,11 @@ func Triangulate(symbol string, pxConfig PriceFeedConfig) []TriangulationElement
 		}
 	}
 	// make it a triangulation
-	triang := make([]TriangulationElement, len(paths[minIdx]))
+	triang := Triangulation{
+		IsInverse: make([]bool, len(paths[minIdx])),
+		Symbol:    make([]string, len(paths[minIdx])),
+	}
+
 	for j := 0; j < len(paths[minIdx]); j++ {
 		currSym := strings.Split(paths[minIdx][j], "-")
 		// is this symbol in the original config?
@@ -40,9 +44,11 @@ func Triangulate(symbol string, pxConfig PriceFeedConfig) []TriangulationElement
 			}
 		}
 		if invert {
-			triang[j] = TriangulationElement{IsInverse: true, Symbol: currSym[1] + "-" + currSym[0]}
+			triang.IsInverse[j] = true
+			triang.Symbol[j] = currSym[1] + "-" + currSym[0]
 		} else {
-			triang[j] = TriangulationElement{IsInverse: false, Symbol: currSym[0] + "-" + currSym[1]}
+			triang.IsInverse[j] = false
+			triang.Symbol[j] = currSym[0] + "-" + currSym[1]
 		}
 	}
 	return triang

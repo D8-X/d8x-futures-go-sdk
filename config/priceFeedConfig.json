@@ -57,6 +57,7 @@
         "origin": "FX.USD/JPY"
       }
     ],
+    "threshold_market_closed_sec": 15,
     "endpoints": [{ "type": "pyth", "endpoint": "https://xc-testnet.pyth.network/api" }]
   },
   {
@@ -99,6 +100,7 @@
         "origin": "Metal.XAU/USD"
       }
     ],
+    "threshold_market_closed_sec": 15,
     "endpoints": [{ "type": "pyth", "endpoint": "https://xc-mainnet.pyth.network/api" }]
   }
 ]

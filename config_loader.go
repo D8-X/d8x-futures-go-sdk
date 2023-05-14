@@ -20,9 +20,10 @@ type Config struct {
 }
 
 type PriceFeedConfig struct {
-	Network      string              `json:"network"`
-	PriceFeedIds []PriceFeedId       `json:"ids"`
-	EndPoints    []PriceFeedEndpoint `json:"endpoints"`
+	Network                  string              `json:"network"`
+	PriceFeedIds             []PriceFeedId       `json:"ids"`
+	EndPoints                []PriceFeedEndpoint `json:"endpoints"`
+	ThresholdMarketClosedSec int32               `json:"threshold_market_closed_sec"`
 }
 
 type PriceFeedId struct {

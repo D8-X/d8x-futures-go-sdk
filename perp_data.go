@@ -62,7 +62,7 @@ func QueryNestedPerpetualInfo(conn BlockChainConnector) NestedPerpetualIds {
 	return p
 }
 
-func QueryPoolStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) StaticExchangeInfo {
+func QueryExchangeStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) StaticExchangeInfo {
 	symbolsSet := make(Set)
 
 	perpIds := nest.PerpetualIds

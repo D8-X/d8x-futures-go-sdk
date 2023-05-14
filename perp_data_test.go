@@ -31,7 +31,7 @@ func TestQueryPoolStaticInfo(t *testing.T) {
 	}
 	conn := CreateBlockChainConnector(config)
 	nest := QueryNestedPerpetualInfo(conn)
-	info := QueryPoolStaticInfo(conn, nest)
+	info := QueryExchangeStaticInfo(conn, nest)
 	fmt.Println(info)
 	info.Store("./tmpXchInfo.json")
 }
@@ -44,6 +44,11 @@ func TestFindPath(t *testing.T) {
 	paths := findPath(append(ccyBase, ccyQuote...), append(ccyQuote, ccyBase...), pair)
 	fmt.Println(paths)
 
+}
+
+func TestPythNToFloat64(t *testing.T) {
+	v := PythNToFloat64("314159265358979", -14)
+	fmt.Println("v=", v)
 }
 
 func TestTriangulate(t *testing.T) {
