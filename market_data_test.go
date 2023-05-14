@@ -3,6 +3,8 @@ package d8x_futures
 import (
 	"fmt"
 	"testing"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 func TestFetchPricesFromAPI(t *testing.T) {
@@ -21,4 +23,20 @@ func TestFetchPricesForPerpetual(t *testing.T) {
 	info.Load("./tmpXchInfo.json")
 	pxBundle := FetchPricesForPerpetual(info, "BTC-USD-MATIC")
 	fmt.Println(pxBundle)
+}
+
+func TestGetPositionRisk(t *testing.T) {
+	var info StaticExchangeInfo
+	info.Load("./tmpXchInfo.json")
+	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
+	config, err := LoadConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(config)
+	pRisk, err := GetPositionRisk(info, conn, (*common.Address)(&traderAddr), "ETH-USD-MATIC")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(pRisk)
 }

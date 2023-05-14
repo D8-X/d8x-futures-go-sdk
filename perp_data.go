@@ -232,3 +232,13 @@ func readSymbolList() (*map[string]string, error) {
 	}
 	return &data, nil
 }
+
+/*
+	FLockedInValueQC             *big.Int
+	FCashCC                      *big.Int
+	FPositionBC                  *big.Int
+	FUnitAccumulatedFundingStart *big.Int
+	ILastOpenTimestamp           uint64
+	FeeTbps                      uint16
+	BrokerFeeTbps                uint16
+	PositionId                   [16]byte*/
