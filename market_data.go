@@ -21,39 +21,48 @@ import (
 //     return mgnAcct;
 //   }
 
-func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string) {
-	/*
-		perpId := exchangeInfo.PerpetualSymbolToId[symbol]
-		var symS2, symS3 string
-		for _, p := range exchangeInfo.Perpetuals {
-			if p.Id == perpId {
-				symS2 = p.S2Symbol
-				symS3 = p.S3Symbol
-				break
-			}
-		}
-		/*
-			triang1 := exchangeInfo.IdxPriceTriangulations[symS2]
-			triang2 := []TriangulationElement{}
-			if symS3 != "" {
-				triang2 := exchangeInfo.IdxPriceTriangulations[symS2]
-			}
+// FetchPricesForPerpetual queries the REST-endpoints of the oracles and calculates S2,S3
+// index prices, also returns the price-feed-data required for blockchain submission and
+// information whether the market is closed or not.
+func FetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string) PerpetualPriceInfo {
 
-			/*pxS2 := fetchPriceFromTriangulation(triang, exchangeInfo.PriceFeedInfo)
-			var pxS3 float64 = 0.0
-
-			return pxS2, pxS3
-	*/
+	j := GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo, symbol)
+	if j == -1 {
+		panic("symbol does not exist in static perpetual info")
+	}
+	// get underlying data from rest-api
+	feedData := fetchPricesFromAPI(exchangeInfo.Perpetuals[j].PriceIds, exchangeInfo.PriceFeedInfo)
+	// triangulate fetched prices to obtain index prices
+	triang := exchangeInfo.IdxPriceTriangulations[exchangeInfo.Perpetuals[j].S2Symbol]
+	pxS2, isMarketClosedS2 := CalculateTriangulation(triang, feedData)
+	var pxS3 float64 = 0
+	var isMarketClosedS3 bool = false
+	// triangulate S3 if there is an S3 index
+	if exchangeInfo.Perpetuals[j].S3Symbol != "" {
+		triang = exchangeInfo.IdxPriceTriangulations[exchangeInfo.Perpetuals[j].S3Symbol]
+		pxS3, isMarketClosedS3 = CalculateTriangulation(triang, feedData)
+	}
+	var priceInfo = PerpetualPriceInfo{
+		S2Price:          pxS2,
+		S3Price:          pxS3,
+		IsMarketClosedS2: isMarketClosedS2,
+		IsMarketClosedS3: isMarketClosedS3,
+		PriceFeed:        feedData,
+	}
+	return priceInfo
 }
 
-// fetchPricesFromAPI get the prices for the given priceIds from the
-// configured REST-API.
+// fetchPricesFromAPI gets the prices for the given priceIds from the
+// configured REST-API. The PriceFeedConfig is needed to extract the
+// correct endpoint per feed, and store what symbol (e.g. BTC-USD) the
+// price feed covers.
 func fetchPricesFromAPI(priceIds []string, config PriceFeedConfig) PriceFeedData {
 	pxData := PriceFeedData{
 		Symbols:        make([]string, len(priceIds)),
 		PriceIds:       priceIds,
 		Prices:         make([]float64, len(priceIds)),
 		IsMarketClosed: make([]bool, len(priceIds)),
+		Vaas:           make([]string, len(priceIds)),
 	}
 	queries := make(map[string]string)
 	for _, el := range config.EndPoints {
@@ -62,7 +71,7 @@ func fetchPricesFromAPI(priceIds []string, config PriceFeedConfig) PriceFeedData
 	// loop through price id's, find its endpoints and prepare the query
 	for i, id := range priceIds {
 		for _, c := range config.PriceFeedIds {
-			if c.Id == id {
+			if c.Id == "0x"+id {
 				queries[c.Type] += "ids[]=" + id + "&"
 				pxData.Symbols[i] = c.Symbol
 				break
@@ -95,9 +104,10 @@ func fetchPricesFromAPI(priceIds []string, config PriceFeedConfig) PriceFeedData
 		for _, d := range data {
 			//find idx of d.Id
 			for i, id := range priceIds {
-				if id == "0x"+d.Id {
+				if id == d.Id {
 					pxData.Prices[i] = PythNToFloat64(d.Price.Price, d.Price.Expo)
 					pxData.IsMarketClosed[i] = timestampNow-int64(d.Price.PublishTime) > int64(config.ThresholdMarketClosedSec)
+					pxData.Vaas[i] = d.Vaa
 					break
 				}
 			}

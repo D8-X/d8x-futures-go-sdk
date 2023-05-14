@@ -15,3 +15,10 @@ func TestFetchPricesFromAPI(t *testing.T) {
 	data := fetchPricesFromAPI(priceIds, pxConfig)
 	fmt.Println(data)
 }
+
+func TestFetchPricesForPerpetual(t *testing.T) {
+	var info StaticExchangeInfo
+	info.Load("./tmpXchInfo.json")
+	pxBundle := FetchPricesForPerpetual(info, "BTC-USD-MATIC")
+	fmt.Println(pxBundle)
+}

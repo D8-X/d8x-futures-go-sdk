@@ -69,6 +69,14 @@ type ExchangeInfo struct {
 	proxyAddr         string
 }
 
+type PerpetualPriceInfo struct {
+	S2Price          float64
+	S3Price          float64
+	IsMarketClosedS2 bool
+	IsMarketClosedS3 bool
+	PriceFeed        PriceFeedData
+}
+
 type Triangulation struct {
 	IsInverse []bool   //[false, true]
 	Symbol    []string // [BTC-USD, USDC-USD]
@@ -81,6 +89,7 @@ type PriceFeedData struct {
 	PriceIds       []string
 	Prices         []float64
 	IsMarketClosed []bool
+	Vaas           []string
 }
 
 type ResponsePythLatestPriceFeed struct {

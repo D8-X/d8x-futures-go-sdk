@@ -62,6 +62,18 @@ func QueryNestedPerpetualInfo(conn BlockChainConnector) NestedPerpetualIds {
 	return p
 }
 
+// GetPerpetualStaticInfoIdxFromSymbol returns the idx of the perpetual within StaticExchangeInfo,
+// given the perpetual symbol (e.g., MATIC-USD-USDC). Returns -1 if not found.
+func GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo StaticExchangeInfo, symbol string) int {
+	perpId := exchangeInfo.PerpetualSymbolToId[symbol]
+	for i, p := range exchangeInfo.Perpetuals {
+		if p.Id == perpId {
+			return i
+		}
+	}
+	return -1
+}
+
 func QueryExchangeStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) StaticExchangeInfo {
 	symbolsSet := make(Set)
 
