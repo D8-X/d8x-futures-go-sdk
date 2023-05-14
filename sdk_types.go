@@ -56,6 +56,12 @@ const (
 	QUANTO
 )
 
+var (
+	SIDE_CLOSED = "CLOSED"
+	SIDE_BUY    = "BUY"
+	SIDE_SELL   = "SELL"
+)
+
 type BlockChainConnector struct {
 	Rpc              *ethclient.Client
 	PerpetualManager *IPerpetualManager
@@ -133,7 +139,7 @@ type PerpetualState struct {
 	IsMarketClosed        bool
 }
 
-type MarginAccount struct {
+type PositionRisk struct {
 	Symbol                         string
 	PositionNotionalBaseCCY        float64
 	Side                           string

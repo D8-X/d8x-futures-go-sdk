@@ -4,22 +4,109 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
+	"math/big"
 	"net/http"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
-// func PositionRisk(proxyContract IPerpetualManager, traderAddr string, symbol string) MarginAccount {
+func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderAddr *common.Address, symbol string) (PositionRisk, error) {
+	priceData := FetchPricesForPerpetual(xInfo, symbol)
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
+		panic("symbol does not exist in static perpetual info")
+	}
+	indexPrices := [2]*big.Int{Float64ToABDK(priceData.S2Price), Float64ToABDK(priceData.S3Price)}
 
-//     let obj = await this.priceFeedGetter.fetchPricesForPerpetual(symbol);
-//     let mgnAcct = await PerpetualDataHandler.getMarginAccount(
-//       traderAddr,
-//       symbol,
-//       this.symbolToPerpStaticInfo,
-//       this.proxyContract,
-//       [obj.idxPrices[0], obj.idxPrices[1]]
-//     );
-//     return mgnAcct;
-//   }
+	traderState, err := conn.PerpetualManager.GetTraderState(
+		nil,
+		new(big.Int).SetInt64(int64(xInfo.Perpetuals[j].Id)),
+		*traderAddr,
+		indexPrices)
+	if err != nil {
+		fmt.Println("Error fetching margin account:", err)
+		return PositionRisk{}, err
+	}
+	const idxAvailableCashCC = 2
+	const idxCash = 3
+	const idxNotional = 4
+	const idxLockedIn = 5
+	const idxMarkPrice = 8
+	const idxLvg = 7
+	const idxS3 = 9
+	var S3Liq float64
+	lockedInValue := ABDKToFloat64(traderState[idxLockedIn])
+	cashCC := ABDKToFloat64(traderState[idxCash])
+	posBC := ABDKToFloat64(traderState[idxNotional])
+	Sm := ABDKToFloat64(traderState[idxMarkPrice])
+	S3 := ABDKToFloat64(traderState[idxS3])
+	unpaidFundingCC := ABDKToFloat64(traderState[idxAvailableCashCC]) - cashCC
+	unpaidFundingQC := unpaidFundingCC
+	S2Liq := CalculateLiquidationPrice(xInfo.Perpetuals[j].CollateralCurrencyType, lockedInValue, posBC, cashCC, xInfo.Perpetuals[j].MaintenanceMarginRate, S3, Sm)
+	if xInfo.Perpetuals[j].CollateralCurrencyType == BASE {
+		// convert CC to quote
+		unpaidFundingQC = unpaidFundingQC / priceData.S2Price
+	} else if xInfo.Perpetuals[j].CollateralCurrencyType == QUANTO {
+		// convert CC to quote
+		unpaidFundingQC = unpaidFundingQC / priceData.S3Price
+		S3Liq = ABDKToFloat64(traderState[idxS3])
+	}
+	// floor at zero
+	S2Liq = math.Max(0, S2Liq)
+	S3Liq = math.Max(0, S3Liq)
+
+	var side string
+	if posBC == 0 {
+		side = SIDE_CLOSED
+	} else if lockedInValue < 0 {
+		side = SIDE_SELL
+	} else {
+		side = SIDE_BUY
+	}
+	var entryPrice, leverage, pnl, liqLeverage float64
+	if posBC != 0 {
+		entryPrice = math.Abs(lockedInValue / posBC)
+		leverage = ABDKToFloat64(traderState[idxLvg])
+		pnl = posBC*Sm - lockedInValue + unpaidFundingQC
+		liqLeverage = 1 / xInfo.Perpetuals[j].MaintenanceMarginRate
+	} else {
+		S3Liq = 0
+	}
+	m := PositionRisk{
+		Symbol:                         symbol,
+		PositionNotionalBaseCCY:        math.Abs(posBC),
+		Side:                           side,
+		EntryPrice:                     entryPrice,
+		Leverage:                       leverage,
+		MarkPrice:                      Sm,
+		UnrealizedPnlQuoteCCY:          pnl,
+		UnrealizedFundingCollateralCCY: unpaidFundingCC,
+		CollateralCC:                   cashCC,
+		LiquidationPrice:               [2]float64{S2Liq, S3Liq},
+		LiquidationLvg:                 liqLeverage,
+		CollToQuoteConversion:          S3,
+	}
+	return m, nil
+}
+
+func CalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, positionBC float64, cashCC float64, tau float64, S3 float64, Sm float64) float64 {
+	if positionBC == 0 {
+		return float64(0)
+	}
+	if ccy == QUANTO {
+		numerator := -lockedInValue + cashCC*S3*(1-sign(positionBC))
+		denominator := tau*math.Abs(positionBC) - positionBC - (cashCC*S3*sign(positionBC))/Sm
+		return numerator / denominator
+	} else if ccy == BASE {
+		numerator := -lockedInValue + cashCC
+		denominator := tau*math.Abs(positionBC) - positionBC
+		return numerator / denominator
+	} else {
+		return lockedInValue / (positionBC - tau*math.Abs(positionBC) + cashCC)
+	}
+}
 
 // FetchPricesForPerpetual queries the REST-endpoints of the oracles and calculates S2,S3
 // index prices, also returns the price-feed-data required for blockchain submission and
