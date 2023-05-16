@@ -31,7 +31,7 @@ func TestQueryPoolStaticInfo(t *testing.T) {
 	}
 	conn := CreateBlockChainConnector(config)
 	nest := QueryNestedPerpetualInfo(conn)
-	info := QueryExchangeStaticInfo(conn, nest)
+	info := QueryExchangeStaticInfo(conn, config, nest)
 	fmt.Println(info)
 	info.Store("./tmpXchInfo.json")
 }

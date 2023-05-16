@@ -25,6 +25,7 @@ type StaticExchangeInfo struct {
 	PriceFeedInfo          PriceFeedConfig
 	IdxPriceTriangulations Triangulations
 	OracleFactoryAddr      common.Address
+	ProxyAddr              common.Address
 }
 
 type PoolStaticInfo struct {
@@ -64,15 +65,14 @@ var (
 
 type BlockChainConnector struct {
 	Rpc              *ethclient.Client
+	ChainId          int64
 	PerpetualManager *IPerpetualManager
 	SymbolMapping    *map[string]string //chain-symbol (MATC) to long format (MATIC)
 	PriceFeedNetwork string             //testnet or mainnet
 }
 
 type ExchangeInfo struct {
-	pools             []PoolState
-	oracleFactoryAddr string
-	proxyAddr         string
+	pools []PoolState
 }
 
 type PerpetualPriceInfo struct {
@@ -110,6 +110,28 @@ type ResponsePythPrice struct {
 	Expo        int32  `json:"expo"`
 	Price       string `json:"price"`
 	PublishTime int32  `json:"publish_time"`
+}
+
+type Keccak256Hash [32]byte
+
+type Order struct {
+	Symbol              string //symbol of the form ETH-USD-MATIC
+	Side                string
+	Type                string
+	Quantity            float64
+	reduceOnly          bool
+	LimitPrice          float64
+	TriggerPrice        float64
+	KeepPositionLvg     bool
+	BrokerFeeTbps       float64
+	BrokerAddr          common.Address
+	BrokerSignature     []byte
+	Flags               uint32
+	StopPrice           float64
+	Leverage            float64
+	Deadline            uint32
+	ExecutionTimestamp  uint32
+	parentChildOrderIds [2]*[32]byte
 }
 
 type PoolState struct {
