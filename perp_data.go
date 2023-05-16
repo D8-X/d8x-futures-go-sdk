@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"math/big"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -24,6 +25,22 @@ func CreatePerpetualManagerInstance(rpc *ethclient.Client, proxyAddr common.Addr
 	return proxy
 }
 
+func CreateLimitOrderBookFactoryInstance(rpc *ethclient.Client, factoryAddr common.Address) *LimitOrderBookFactory {
+	loFactory, err := NewLimitOrderBookFactory(factoryAddr, rpc)
+	if err != nil {
+		log.Fatalf("Failed to instantiate LimitOrderBookFactory contract: %v", err)
+	}
+	return loFactory
+}
+
+func CreateLimitOrderBookInstance(rpc *ethclient.Client, lobAddr common.Address) *LimitOrderBook {
+	lob, err := NewLimitOrderBook(lobAddr, rpc)
+	if err != nil {
+		log.Fatalf("Failed to instantiate LOB contract: %v", err)
+	}
+	return lob
+}
+
 func CreateRPC(nodeURL string) *ethclient.Client {
 	rpc, err := ethclient.Dial(nodeURL)
 	if err != nil {
@@ -40,7 +57,9 @@ func CreateBlockChainConnector(config Config) BlockChainConnector {
 		panic(err)
 	}
 	priceFeedNetwork := config.PriceFeedNetwork
-	var b = BlockChainConnector{Rpc: rpc, PerpetualManager: proxy, SymbolMapping: symbolMap, PriceFeedNetwork: priceFeedNetwork}
+
+	var b = BlockChainConnector{Rpc: rpc, ChainId: config.ChainId, PerpetualManager: proxy, SymbolMapping: symbolMap, PriceFeedNetwork: priceFeedNetwork}
+
 	return b
 }
 
@@ -74,7 +93,7 @@ func GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo StaticExchangeInfo, symbol
 	return -1
 }
 
-func QueryExchangeStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) StaticExchangeInfo {
+func QueryExchangeStaticInfo(conn BlockChainConnector, config Config, nest NestedPerpetualIds) StaticExchangeInfo {
 	symbolsSet := make(Set)
 
 	perpIds := nest.PerpetualIds
@@ -128,6 +147,7 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, nest NestedPerpetualIds) 
 		Perpetuals:             perpetuals,
 		PerpetualSymbolToId:    perpetualSymbolToId,
 		OracleFactoryAddr:      nest.OracleFactoryAddr,
+		ProxyAddr:              config.ProxyAddr,
 		PriceFeedInfo:          pxConfig,
 		IdxPriceTriangulations: triangulations,
 	}
@@ -231,6 +251,27 @@ func readSymbolList() (*map[string]string, error) {
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Address) IClientOrderClientOrder {
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
+	cOrder := IClientOrderClientOrder{
+		IPerpetualId:       big.NewInt(int64(xInfo.Perpetuals[j].Id)),
+		FLimitPrice:        Float64ToABDK(order.LimitPrice),
+		LeverageTDR:        uint16(100 * order.Leverage),
+		ExecutionTimestamp: uint32(order.ExecutionTimestamp),
+		Flags:              order.Flags,
+		IDeadline:          order.Deadline,
+		BrokerAddr:         order.BrokerAddr,
+		FTriggerPrice:      Float64ToABDK(order.TriggerPrice),
+		FAmount:            Float64ToABDK(order.Quantity),
+		BrokerSignature:    order.BrokerSignature,
+		ParentChildDigest1: *order.parentChildOrderIds[0],
+		ParentChildDigest2: *order.parentChildOrderIds[1],
+		TraderAddr:         traderAddr,
+		BrokerFeeTbps:      uint16(order.BrokerFeeTbps),
+	}
+	return cOrder
 }
 
 /*

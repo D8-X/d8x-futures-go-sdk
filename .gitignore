@@ -22,3 +22,5 @@ go.work
 
 # tmp testing files
 tmpXchInfo.json
+
+__debug_*

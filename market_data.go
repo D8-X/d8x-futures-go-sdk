@@ -91,6 +91,10 @@ func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderA
 	return m, nil
 }
 
+func GetMinimalPositionSize(perp PerpetualStaticInfo) float64 {
+	return 10 * perp.LotSizeBC
+}
+
 func CalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, positionBC float64, cashCC float64, tau float64, S3 float64, Sm float64) float64 {
 	if positionBC == 0 {
 		return float64(0)
