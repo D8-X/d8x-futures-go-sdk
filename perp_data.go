@@ -58,7 +58,14 @@ func CreateBlockChainConnector(config Config) BlockChainConnector {
 	}
 	priceFeedNetwork := config.PriceFeedNetwork
 
-	var b = BlockChainConnector{Rpc: rpc, ChainId: config.ChainId, PerpetualManager: proxy, SymbolMapping: symbolMap, PriceFeedNetwork: priceFeedNetwork}
+	var b = BlockChainConnector{
+		Rpc:               rpc,
+		ChainId:           config.ChainId,
+		PerpetualManager:  proxy,
+		SymbolMapping:     symbolMap,
+		PriceFeedNetwork:  priceFeedNetwork,
+		PostOrderGasLimit: config.PostOrderGasLimit,
+	}
 
 	return b
 }

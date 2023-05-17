@@ -78,11 +78,12 @@ var (
 )
 
 type BlockChainConnector struct {
-	Rpc              *ethclient.Client
-	ChainId          int64
-	PerpetualManager *IPerpetualManager
-	SymbolMapping    *map[string]string //chain-symbol (MATC) to long format (MATIC)
-	PriceFeedNetwork string             //testnet or mainnet
+	Rpc               *ethclient.Client
+	ChainId           int64
+	PerpetualManager  *IPerpetualManager
+	SymbolMapping     *map[string]string //chain-symbol (MATC) to long format (MATIC)
+	PriceFeedNetwork  string             //testnet or mainnet
+	PostOrderGasLimit int64              //gas limit for posting orders
 }
 
 type ExchangeInfo struct {
