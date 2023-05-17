@@ -11,8 +11,7 @@ import (
 func TestABI(t *testing.T) {
 	types := []string{"uint256", "address", "int128", "bytes32"}
 	//domainBuf := []byte("EIP712Domain(string name,uint256 chainId,address verifyingContract)")
-	var domainHash Keccak256Hash
-	domainHash.Keccak256FromString("EIP712Domain(string name,uint256 chainId,address verifyingContract)")
+	domainHash := Keccak256FromString("EIP712Domain(string name,uint256 chainId,address verifyingContract)")
 	//v := "0x" + hex.EncodeToString(hash)
 	//var hashArray [32]byte
 	//copy(hashArray[:], hash)
@@ -23,7 +22,7 @@ func TestABI(t *testing.T) {
 		domainHash,
 	}
 
-	result, err := AbiEncode(types, values...)
+	result, err := AbiEncodeHexString(types, values...)
 	if err != nil {
 		fmt.Println("Encoding error:", err)
 		return
@@ -34,4 +33,37 @@ func TestABI(t *testing.T) {
 	if resExpected != result {
 		panic("wrong encoding")
 	}
+}
+
+func TestOrderHash(t *testing.T) {
+	var info StaticExchangeInfo
+	info.Load("./tmpXchInfo.json")
+	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
+	var emptyArray [32]byte
+	order := Order{
+		Symbol:              "ETH-USD-MATIC",
+		Side:                SIDE_BUY,
+		Type:                ORDER_TYPE_MARKET,
+		Quantity:            15,
+		reduceOnly:          false,
+		LimitPrice:          0,
+		TriggerPrice:        0,
+		KeepPositionLvg:     false,
+		BrokerFeeTbps:       0,
+		BrokerAddr:          common.Address{},
+		BrokerSignature:     []byte{},
+		Flags:               MASK_MARKET_ORDER,
+		StopPrice:           0,
+		Leverage:            5,
+		Deadline:            1684863656,
+		ExecutionTimestamp:  1684263656,
+		parentChildOrderId1: emptyArray,
+		parentChildOrderId2: emptyArray,
+	}
+	scOrder := order.ToChainType(info, traderAddr)
+	dgst, err := CreateOrderDigest(scOrder, 80001, true, info.ProxyAddr.String())
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(dgst)
 }

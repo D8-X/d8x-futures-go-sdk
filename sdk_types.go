@@ -62,6 +62,20 @@ var (
 	SIDE_BUY    = "BUY"
 	SIDE_SELL   = "SELL"
 )
+var (
+	ORDER_TYPE_LIMIT       = "LIMIT"
+	ORDER_TYPE_MARKET      = "MARKET"
+	ORDER_TYPE_STOP_MARKET = "STOP_MARKET"
+	ORDER_TYPE_STOP_LIMIT  = "STOP_LIMIT"
+)
+
+var (
+	MASK_CLOSE_ONLY        uint32 = 0x80000000
+	MASK_LIMIT_ORDER       uint32 = 0x04000000
+	MASK_MARKET_ORDER      uint32 = 0x40000000
+	MASK_STOP_ORDER        uint32 = 0x20000000
+	MASK_KEEP_POS_LEVERAGE uint32 = 0x08000000
+)
 
 type BlockChainConnector struct {
 	Rpc              *ethclient.Client
@@ -131,7 +145,8 @@ type Order struct {
 	Leverage            float64
 	Deadline            uint32
 	ExecutionTimestamp  uint32
-	parentChildOrderIds [2]*[32]byte
+	parentChildOrderId1 [32]byte
+	parentChildOrderId2 [32]byte
 }
 
 type PoolState struct {

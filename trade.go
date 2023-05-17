@@ -3,6 +3,8 @@ package d8x_futures
 import (
 	"encoding/hex"
 	"fmt"
+	"math/big"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -23,121 +25,143 @@ import (
 		var proxyAddr = xInfo.ProxyAddr
 
 }
-
-	func CreateDigest(order IClientOrderClientOrder, chainID int, isNewOrder bool, proxyAddress string) (string, error) {
-		var NAME = "Perpetual Trade Manager"
-		var DOMAIN_TYPEHASH = "0x" + hashString("EIP712Domain(string name,uint256 chainId,address verifyingContract)")
-
-		domainSeparator := "0x" + hashBytes(abiEncode([]interface{}{
-			[]byte(NAME),
-			big.NewInt(int64(chainID)),
-			proxyAddress,
-		}))
-
-		var TRADE_ORDER_TYPEHASH = "0x" + hashString("Order(uint24 iPerpetualId,uint16 brokerFeeTbps,address traderAddr,address brokerAddr,int128 fAmount,int128 fLimitPrice,int128 fTriggerPrice,uint32 iDeadline,uint32 flags,uint16 leverageTDR,uint32 executionTimestamp)")
-
-		structHash := "0x" + hashBytes(abiEncode([]interface{}{
-			order.iPerpetualId,
-			order.brokerFeeTbps,
-			order.traderAddr,
-			order.brokerAddr,
-			order.fAmount,
-			order.fLimitPrice,
-			order.fTriggerPrice,
-			order.iDeadline,
-			order.flags,
-			order.leverageTDR,
-			order.executionTimestamp,
-		}))
-
-		digest := "0x" + hashBytes(abiEncode([]interface{}{
-			domainSeparator,
-			structHash,
-			isNewOrder,
-		}))
-
-		return digest, nil
-	}
-
-	func hashString(data string) string {
-		hash := sha256.New()
-		hash.Write([]byte(data))
-		return hex.EncodeToString(hash.Sum(nil))
-	}
-
-	func hashBytes(data []byte) string {
-		hash := sha256.New()
-		hash.Write(data)
-		return hex.EncodeToString(hash.Sum(nil))
-	}
-
-	func abiEncode(params []interface{}) []byte {
-		// Encode parameters using the desired encoding format
-		// This implementation assumes the use of the Ethereum ABI encoding
-		var buf bytes.Buffer
-		for _, param := range params {
-			// Perform the appropriate encoding for each parameter type
-			switch param := param.(type) {
-			case int:
-				buf.Write(big.NewInt(int64(param)).Bytes())
-			case int64:
-				buf.Write(big.NewInt(param).Bytes())
-			case uint32:
-				buf.Write(big.NewInt(int64(param)).Bytes())
-			case uint64:
-				buf.Write(big.NewInt(int64(param)).Bytes())
-			case *big.Int:
-				buf.Write(param.Bytes())
-			case bool:
-				if param {
-					buf.WriteByte(0x01)
-				} else {
-					buf.WriteByte(0x00)
-				}
-			case string:
-				buf.Write([]byte(param))
-			case []byte:
-				buf.Write(param)
-				// Add cases for other parameter types if needed
-			}
-		}
-		return buf.Bytes()
-	}
 */
-
-func BufferFrom(v string) []byte {
-	decoded, err := hex.DecodeString(v)
-	if err != nil {
-		panic(err)
+func CreateOrderDigest(order IClientOrderClientOrder, chainId int, isNewOrder bool, proxyAddress string) (string, error) {
+	nameHash := Keccak256FromString("Perpetual Trade Manager")
+	fmt.Println("nameHash=", common.Bytes2Hex(nameHash[:]))
+	domainHash := Keccak256FromString("EIP712Domain(string name,uint256 chainId,address verifyingContract)")
+	types := []string{"bytes32", "bytes32", "uint256", "address"}
+	values := []interface{}{
+		domainHash,
+		nameHash,
+		big.NewInt(int64(chainId)),
+		common.HexToAddress(proxyAddress),
 	}
-	return decoded
+	domainSeparator2, _ := AbiEncodeHexString(types, values...)
+	myres := Keccak256FromHexString(domainSeparator2)
+	fmt.Println("myresKeccakDomainSeparator=", common.Bytes2Hex(myres[:]))
+	data, _ := hex.DecodeString(strings.TrimPrefix(domainSeparator2, "0x"))
+	dH := solsha3.SoliditySHA3(data)
+	//dH := Keccak256FromString(domainSeparator2)
+	fmt.Println(dH)
+	fmt.Println("domainSeparator=", common.Bytes2Hex(dH[:]))
+	fmt.Println(domainSeparator2)
+
+	tradeOrderTypeHash := Keccak256FromString("Order(uint24 iPerpetualId,uint16 brokerFeeTbps,address traderAddr,address brokerAddr,int128 fAmount,int128 fLimitPrice,int128 fTriggerPrice,uint32 iDeadline,uint32 flags,uint16 leverageTDR,uint32 executionTimestamp)")
+	fmt.Println("tradeOrderTypeHash=", common.Bytes2Hex(tradeOrderTypeHash[:]))
+	types = []string{"bytes32",
+		"uint24",
+		"uint16",
+		"address",
+		"address",
+		"int128",
+		"int128",
+		"int128",
+		"uint32",
+		"uint32",
+		"uint16",
+		"uint32"}
+	values = []interface{}{
+		tradeOrderTypeHash,
+		order.IPerpetualId,
+		order.BrokerFeeTbps,
+		order.TraderAddr,
+		order.BrokerAddr,
+		order.FAmount,
+		order.FLimitPrice,
+		order.FTriggerPrice,
+		order.IDeadline,
+		order.Flags,
+		order.LeverageTDR,
+		order.ExecutionTimestamp,
+	}
+	fmt.Println("orderamt=", order.FAmount)
+	structHash, _ := AbiEncodeBytes32(types, values...)
+	structHash2, _ := AbiEncodeHexString(types, values...)
+	fmt.Println("structHash=", structHash2)
+	// identical
+	fmt.Println("structHash=", common.Bytes2Hex(structHash[:]))
+	types = []string{"bytes32", "bytes32", "bool"}
+	var DHbyteArray [32]byte
+	copy(DHbyteArray[:], dH)
+
+	data2, _ := hex.DecodeString(strings.TrimPrefix(structHash2, "0x"))
+	dH2 := solsha3.SoliditySHA3(data2)
+	var DHbyteArray2 [32]byte
+	copy(DHbyteArray2[:], dH2)
+
+	values = []interface{}{DHbyteArray, DHbyteArray2, isNewOrder}
+	digest0, _ := AbiEncodeHexString(types, values...)
+	digest := Keccak256FromHexString(digest0)
+	dgstStr := common.Bytes2Hex(digest[:])
+	// all identical to typescript -- but a little cumbersome
+	return dgstStr, nil
 }
 
-func AbiEncode(types []string, values ...interface{}) (string, error) {
+func AbiEncodeBytes32(types []string, values ...interface{}) ([32]byte, error) {
+	if len(types) != len(values) {
+		return [32]byte{}, fmt.Errorf("number of types and values do not match")
+	}
+	byteSlice, err := AbiEncode(types, values...)
+	if err != nil {
+		return [32]byte{}, err
+	}
+	var byteArray [32]byte
+	copy(byteArray[:], byteSlice)
+	return byteArray, nil
+}
+
+func AbiEncodeHexString(types []string, values ...interface{}) (string, error) {
 	if len(types) != len(values) {
 		return "", fmt.Errorf("number of types and values do not match")
+	}
+	byteSlice, err := AbiEncode(types, values...)
+	if err != nil {
+		return "", err
+	}
+	result := "0x" + common.Bytes2Hex(byteSlice)
+	return result, nil
+}
+
+// AbiEncode encodes the provided types (e.g., string, uint256, int32) and
+// corresponding values into a hex-string for EVM
+func AbiEncode(types []string, values ...interface{}) ([]byte, error) {
+	if len(types) != len(values) {
+		return []byte{}, fmt.Errorf("number of types and values do not match")
 	}
 
 	arguments := abi.Arguments{}
 	for _, typ := range types {
 		t, err := abi.NewType(typ, "", nil)
 		if err != nil {
-			return "", fmt.Errorf("failed to create ABI type: %v", err)
+			return []byte{}, fmt.Errorf("failed to create ABI type: %v", err)
 		}
 		arguments = append(arguments, abi.Argument{Type: t})
 	}
 
 	bytes, err := arguments.Pack(values...)
 	if err != nil {
-		return "", fmt.Errorf("failed to encode arguments: %v", err)
+		return []byte{}, fmt.Errorf("failed to encode arguments: %v", err)
 	}
+	return bytes, nil
 
-	result := "0x" + common.Bytes2Hex(bytes)
-	return result, nil
 }
 
-func (hArr *Keccak256Hash) Keccak256FromString(v string) {
+func Keccak256FromHexString(hexNumber string) Keccak256Hash {
+	data, err := hex.DecodeString(strings.TrimPrefix(hexNumber, "0x"))
+	if err != nil {
+		panic(err)
+	}
+	hash := solsha3.SoliditySHA3(data)
+	var hArr Keccak256Hash
+	copy(hArr[:], hash)
+	return hArr
+}
+
+func Keccak256FromString(v string) Keccak256Hash {
 	domainBuf := []byte(v)
 	hash := solsha3.SoliditySHA3([]string{"string"}, []interface{}{domainBuf})
+	var hArr Keccak256Hash
 	copy(hArr[:], hash)
+	return hArr
 }
