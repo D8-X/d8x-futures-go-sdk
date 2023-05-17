@@ -266,11 +266,12 @@ func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Addr
 		FTriggerPrice:      Float64ToABDK(order.TriggerPrice),
 		FAmount:            Float64ToABDK(order.Quantity),
 		BrokerSignature:    order.BrokerSignature,
-		ParentChildDigest1: *order.parentChildOrderIds[0],
-		ParentChildDigest2: *order.parentChildOrderIds[1],
+		ParentChildDigest1: order.parentChildOrderId1,
+		ParentChildDigest2: order.parentChildOrderId2,
 		TraderAddr:         traderAddr,
 		BrokerFeeTbps:      uint16(order.BrokerFeeTbps),
 	}
+
 	return cOrder
 }
 
