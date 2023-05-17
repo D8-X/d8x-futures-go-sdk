@@ -11,15 +11,22 @@ import (
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
-/*
-	func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, w Wallet, order Order, trader common.Address) {
-		j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
-		scOrder := order.ToChainType(xInfo, trader)
-		sig := CreateSignature(xInfo, conn.ChainId, scOrder, w)
-		ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-		tx, err := ob.PostOrder(w.Auth, scOrder, sig)
+func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, w Wallet, order Order, trader common.Address) (string, error) {
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
+	scOrder := order.ToChainType(xInfo, trader)
+	//sig := CreateSignature(xInfo, conn.ChainId, scOrder, w)
+	w.SetGasLimit(uint64(conn.PostOrderGasLimit))
+	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	sig := []byte{}
+	tx, err := ob.PostOrder(w.Auth, scOrder, sig)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
 	}
+	return tx.Hash().Hex(), nil
+}
 
+/*
 	func CreateSignature(xInfo StaticExchangeInfo, chainId int64, o IClientOrderClientOrder, w Wallet) []byte {
 		const isNewOrder = true
 		var proxyAddr = xInfo.ProxyAddr

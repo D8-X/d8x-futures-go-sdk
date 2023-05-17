@@ -3,6 +3,7 @@ package d8x_futures
 import (
 	"fmt"
 	"math/big"
+	"os"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -66,4 +67,45 @@ func TestOrderHash(t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(dgst)
+}
+
+func TestPostOrder(t *testing.T) {
+	//privateKey := os.Getenv("PK")
+	privateKey, isPkDefined := os.LookupEnv("PK")
+	if !isPkDefined {
+		panic("no private key defined")
+	}
+	config, err := LoadConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(config)
+	var wallet Wallet
+	wallet.NewWallet(privateKey, conn)
+	var xInfo StaticExchangeInfo
+	xInfo.Load("./tmpXchInfo.json")
+	traderAddr := common.HexToAddress("***REMOVED***")
+	var emptyArray [32]byte
+	order := Order{
+		Symbol:              "ETH-USD-MATIC",
+		Side:                SIDE_BUY,
+		Type:                ORDER_TYPE_MARKET,
+		Quantity:            15,
+		reduceOnly:          false,
+		LimitPrice:          0,
+		TriggerPrice:        0,
+		KeepPositionLvg:     false,
+		BrokerFeeTbps:       0,
+		BrokerAddr:          common.Address{},
+		BrokerSignature:     []byte{},
+		Flags:               MASK_MARKET_ORDER,
+		StopPrice:           0,
+		Leverage:            5,
+		Deadline:            1684863656,
+		ExecutionTimestamp:  1684263656,
+		parentChildOrderId1: emptyArray,
+		parentChildOrderId2: emptyArray,
+	}
+	txHash, _ := PostOrder(conn, xInfo, wallet, order, traderAddr)
+	fmt.Println("Tx hash = ", txHash)
 }

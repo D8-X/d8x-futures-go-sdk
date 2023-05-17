@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -29,6 +30,12 @@ func (w *Wallet) NewWallet(privateKeyHex string, conn BlockChainConnector) {
 	}
 	w.Address = crypto.PubkeyToAddress(*publicKeyECDSA)
 	w.Auth = bind.NewKeyedTransactor(privateKey)
+
+	signerFn := func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
+		chainID := big.NewInt(conn.ChainId)
+		return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
+	}
+	w.Auth.Signer = signerFn
 	// set default values
 	w.Auth.Value = big.NewInt(0)
 	w.Auth.GasLimit = uint64(300000)

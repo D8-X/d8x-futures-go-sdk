@@ -17,6 +17,7 @@ type Config struct {
 	ProxyAddr              common.Address `json:"proxyAddr"`
 	NodeURL                string         `json:"nodeURL"`
 	PriceFeedConfigNetwork string         `json:"priceFeedConfigNetwork"`
+	PostOrderGasLimit      int64          `json:"postOrderGasLimit"`
 }
 
 type PriceFeedConfig struct {
