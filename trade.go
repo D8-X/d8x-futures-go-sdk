@@ -1,6 +1,7 @@
 package d8x_futures
 
 import (
+	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
 	"math/big"
@@ -33,24 +34,31 @@ func CreateBrokerSignature(xInfo StaticExchangeInfo, chainId int64, w Wallet, iP
 	if err != nil {
 		return "", "", err
 	}
-	var evmHash common.Hash
-	//signedTx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(1)), w.PrivateKey)
-	hash := Keccak256FromString("\x19Ethereum Signed Message:\n" + "32" + common.Bytes2Hex(digestBytes32[:]))
-	copy(evmHash[:], hash[:])
 
-	// create ethers-style message to be signed
-	s, _ := accounts.TextAndHash(digestBytes32[:])
-	// sign and fix postfix (see https://medium.com/mycrypto/the-magic-of-digital-signatures-on-ethereum-98fe184dc9c7
-	// The recovery identifier "v")
-	sig, err := crypto.Sign(s, w.PrivateKey)
-	if sig[len(sig)-1] == 1 {
-		sig[len(sig)-1] += 27
-	} else {
-		sig[len(sig)-1] += 28
+	sig, err := CreateEvmSignature(digestBytes32[:], w.PrivateKey)
+	if err != nil {
+		return "", "", err
 	}
 	sigStr := "0x" + common.Bytes2Hex(sig[:])
 	dgstStr := common.Bytes2Hex(digestBytes32[:])
 	return dgstStr, sigStr, nil
+}
+
+func CreateEvmSignature(data []byte, prv *ecdsa.PrivateKey) ([]byte, error) {
+	// create ethers-style message to be signed
+	s, _ := accounts.TextAndHash(data)
+	// sign and fix postfix (see https://medium.com/mycrypto/the-magic-of-digital-signatures-on-ethereum-98fe184dc9c7
+	// The recovery identifier "v")
+	sig, err := crypto.Sign(s, prv)
+	if err != nil {
+		return []byte{}, err
+	}
+	if sig[len(sig)-1] == 1 {
+		sig[len(sig)-1] = 28
+	} else {
+		sig[len(sig)-1] = 27
+	}
+	return sig, nil
 }
 
 func createBrokerDigest(xInfo StaticExchangeInfo, chainId int64, w Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) ([32]byte, error) {

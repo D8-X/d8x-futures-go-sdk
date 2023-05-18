@@ -131,13 +131,13 @@ func TestBrokerSignature(t *testing.T) {
 	if err != nil {
 		panic("error creating wallet")
 	}
-	const brokerFeeTbps = 100
+	const brokerFeeTbps = 110
 	dgst, sig, _ := CreateBrokerSignature(xInfo, 80001, wallet, 10001, brokerFeeTbps, traderAddr.String(), 1684863656)
 	fmt.Print(dgst)
-	if dgst != "4050e0ce19e8572bcb26b6f48f5096a0e266f58d89563fba41a6cd814f5e23e5" {
+	if dgst != "dead408cb2d42f86476ab484b39e37a354f3cdcbdddb16422af74425324e8755" {
 		panic("wrong dgst result")
 	}
-	if sig != "0x8ce3aa9b6096e47c0f70dc65adf2e8a05fcac0d6b4d1aee69737939a2d5841905b12f7d91048160ca0af237313d06e40d42448eff2f262998f9ded98818e9c861c" {
+	if sig != "0x557248de61a8b5b9fb75b51c0b91e42da3be2281d47ed276f5650efaa9b7ada74fac81fb0d34e0887e1a81353f37acdf575d68ae04dce527df4baaa4a41a02f81b" {
 		panic("wrong signature result")
 	}
 }
