@@ -1204,31 +1204,6 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
-                "internalType": "uint8",
-                "name": "poolId",
-                "type": "uint8"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint24",
-                "name": "perpetualId",
-                "type": "uint24"
-            },
-            {
-                "indexed": false,
-                "internalType": "int128",
-                "name": "fNormalizedPerpetualWeight",
-                "type": "int128"
-            }
-        ],
-        "name": "UpdateFundAllocationWeight",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
                 "indexed": true,
                 "internalType": "uint24",
                 "name": "perpetualId",
@@ -3289,11 +3264,6 @@
                     },
                     {
                         "internalType": "int32",
-                        "name": "fMaintenanceMarginRate",
-                        "type": "int32"
-                    },
-                    {
-                        "internalType": "int32",
                         "name": "fSigma2",
                         "type": "int32"
                     },
@@ -3316,6 +3286,11 @@
                         "internalType": "uint32",
                         "name": "iLastDefaultFundTransfer",
                         "type": "uint32"
+                    },
+                    {
+                        "internalType": "int32",
+                        "name": "fMaintenanceMarginRate",
+                        "type": "int32"
                     },
                     {
                         "internalType": "enum PerpStorage.PerpetualState",
@@ -3391,6 +3366,11 @@
                     },
                     {
                         "internalType": "int128[2]",
+                        "name": "fStressReturnS3",
+                        "type": "int128[2]"
+                    },
+                    {
+                        "internalType": "int128[2]",
                         "name": "fDFLambda",
                         "type": "int128[2]"
                     },
@@ -3407,11 +3387,6 @@
                     {
                         "internalType": "int128[2]",
                         "name": "fStressReturnS2",
-                        "type": "int128[2]"
-                    },
-                    {
-                        "internalType": "int128[2]",
-                        "name": "fStressReturnS3",
                         "type": "int128[2]"
                     },
                     {
@@ -3471,7 +3446,7 @@
                     },
                     {
                         "internalType": "int128",
-                        "name": "fAMMMinSizeCC",
+                        "name": "fSettlementS3PriceData",
                         "type": "int128"
                     },
                     {
@@ -3486,12 +3461,12 @@
                     },
                     {
                         "internalType": "int128",
-                        "name": "fTotalMarginBalance",
+                        "name": "fAMMMinSizeCC",
                         "type": "int128"
                     },
                     {
                         "internalType": "int128",
-                        "name": "fSettlementS3PriceData",
+                        "name": "fTotalMarginBalance",
                         "type": "int128"
                     },
                     {
@@ -3706,11 +3681,6 @@
                     },
                     {
                         "internalType": "int32",
-                        "name": "fMaintenanceMarginRate",
-                        "type": "int32"
-                    },
-                    {
-                        "internalType": "int32",
                         "name": "fSigma2",
                         "type": "int32"
                     },
@@ -3733,6 +3703,11 @@
                         "internalType": "uint32",
                         "name": "iLastDefaultFundTransfer",
                         "type": "uint32"
+                    },
+                    {
+                        "internalType": "int32",
+                        "name": "fMaintenanceMarginRate",
+                        "type": "int32"
                     },
                     {
                         "internalType": "enum PerpStorage.PerpetualState",
@@ -3808,6 +3783,11 @@
                     },
                     {
                         "internalType": "int128[2]",
+                        "name": "fStressReturnS3",
+                        "type": "int128[2]"
+                    },
+                    {
+                        "internalType": "int128[2]",
                         "name": "fDFLambda",
                         "type": "int128[2]"
                     },
@@ -3824,11 +3804,6 @@
                     {
                         "internalType": "int128[2]",
                         "name": "fStressReturnS2",
-                        "type": "int128[2]"
-                    },
-                    {
-                        "internalType": "int128[2]",
-                        "name": "fStressReturnS3",
                         "type": "int128[2]"
                     },
                     {
@@ -3888,7 +3863,7 @@
                     },
                     {
                         "internalType": "int128",
-                        "name": "fAMMMinSizeCC",
+                        "name": "fSettlementS3PriceData",
                         "type": "int128"
                     },
                     {
@@ -3903,12 +3878,12 @@
                     },
                     {
                         "internalType": "int128",
-                        "name": "fTotalMarginBalance",
+                        "name": "fAMMMinSizeCC",
                         "type": "int128"
                     },
                     {
                         "internalType": "int128",
-                        "name": "fSettlementS3PriceData",
+                        "name": "fTotalMarginBalance",
                         "type": "int128"
                     },
                     {
@@ -4612,11 +4587,6 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "uint24",
-                "name": "_iPerpetualId",
-                "type": "uint24"
-            },
             {
                 "components": [
                     {
