@@ -3,8 +3,8 @@
       "name": "testnet",
       "priceFeedNetwork": "testnet",
       "chainId": 80001,
-      "version": 7,
-      "proxyAddr": "0x7Fb76c91e4950bD48Ed1C812EdE98A5Db96cb4e7",
+      "version": 8,
+      "proxyAddr": "0x947A868705Ef30419b4E961d862Aeb88DA2f220E",
       "nodeURL": "https://polygon-mumbai.blockpi.network/v1/rpc/public",
       "priceFeedConfigNetwork": "testnet",
       "postOrderGasLimit": 3000000
