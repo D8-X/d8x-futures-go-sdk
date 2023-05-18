@@ -138,7 +138,7 @@ type Order struct {
 	LimitPrice          float64
 	TriggerPrice        float64
 	KeepPositionLvg     bool
-	BrokerFeeTbps       float64
+	BrokerFeeTbps       uint16
 	BrokerAddr          common.Address
 	BrokerSignature     []byte
 	Flags               uint32

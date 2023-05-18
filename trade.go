@@ -6,8 +6,10 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
@@ -26,31 +28,74 @@ func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, w Wallet, ord
 	return tx.Hash().Hex(), nil
 }
 
-/*
-func CreateBrokerSignature(xInfo StaticExchangeInfo, chainId int64, w Wallet, int32 iPerpetualId, float64 brokerFeeTbps, string traderAddr, uint32 iDeadline) []byte {
-	const isNewOrder = true
-	var proxyAddr = xInfo.ProxyAddr
+func CreateBrokerSignature(xInfo StaticExchangeInfo, chainId int64, w Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
+	digestBytes32, err := createBrokerDigest(xInfo, chainId, w, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
+	if err != nil {
+		return "", "", err
+	}
+	var evmHash common.Hash
+	//signedTx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(1)), w.PrivateKey)
+	hash := Keccak256FromString("\x19Ethereum Signed Message:\n" + "32" + common.Bytes2Hex(digestBytes32[:]))
+	copy(evmHash[:], hash[:])
 
+	// create ethers-style message to be signed
+	s, _ := accounts.TextAndHash(digestBytes32[:])
+	// sign and fix postfix (see https://medium.com/mycrypto/the-magic-of-digital-signatures-on-ethereum-98fe184dc9c7
+	// The recovery identifier "v")
+	sig, err := crypto.Sign(s, w.PrivateKey)
+	if sig[len(sig)-1] == 1 {
+		sig[len(sig)-1] += 27
+	} else {
+		sig[len(sig)-1] += 28
+	}
+	sigStr := "0x" + common.Bytes2Hex(sig[:])
+	dgstStr := common.Bytes2Hex(digestBytes32[:])
+	return dgstStr, sigStr, nil
 }
-*/
 
-func CreateOrderDigest(order IClientOrderClientOrder, chainId int, isNewOrder bool, proxyAddress string) (string, error) {
+func createBrokerDigest(xInfo StaticExchangeInfo, chainId int64, w Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) ([32]byte, error) {
+	domainSeparatorHashBytes32 := getDomainHash(int64(chainId), xInfo.ProxyAddr.String())
+	brokerTypeHash := Keccak256FromString("Order(uint24 iPerpetualId,uint16 brokerFeeTbps,address traderAddr,uint32 iDeadline)")
+	types := []string{"bytes32", "uint32", "uint16", "address", "uint32"}
+	values := []interface{}{brokerTypeHash, uint32(iPerpetualId), uint16(brokerFeeTbps), common.HexToAddress(traderAddr), uint32(iDeadline)}
+	structHash, err := AbiEncodeBytes32(types, values...)
+	if err != nil {
+		return [32]byte{}, err
+	}
+	var StructHashBytes32 [32]byte
+	copy(StructHashBytes32[:], solsha3.SoliditySHA3(structHash))
+	types = []string{"bytes32", "bytes32"}
+	values = []interface{}{domainSeparatorHashBytes32, StructHashBytes32}
+	digest0, err := AbiEncodeBytes32(types, values...)
+	if err != nil {
+		return [32]byte{}, err
+	}
+	var digestBytes32 [32]byte
+	copy(digestBytes32[:], solsha3.SoliditySHA3(digest0))
+	return digestBytes32, nil
+}
+
+func getDomainHash(chainId int64, proxyAddress string) [32]byte {
 	nameHash := Keccak256FromString("Perpetual Trade Manager")
 	domainHash := Keccak256FromString("EIP712Domain(string name,uint256 chainId,address verifyingContract)")
 	types := []string{"bytes32", "bytes32", "uint256", "address"}
 	values := []interface{}{
 		domainHash,
 		nameHash,
-		big.NewInt(int64(chainId)),
+		big.NewInt(chainId),
 		common.HexToAddress(proxyAddress),
 	}
 	domainSeparator, _ := AbiEncodeBytes32(types, values...)
 	dH := solsha3.SoliditySHA3(domainSeparator)
 	var DomainSeparatorHashBytes32 [32]byte
 	copy(DomainSeparatorHashBytes32[:], dH)
+	return DomainSeparatorHashBytes32
+}
 
+func CreateOrderDigest(order IClientOrderClientOrder, chainId int, isNewOrder bool, proxyAddress string) (string, error) {
+	DomainSeparatorHashBytes32 := getDomainHash(int64(chainId), proxyAddress)
 	tradeOrderTypeHash := Keccak256FromString("Order(uint24 iPerpetualId,uint16 brokerFeeTbps,address traderAddr,address brokerAddr,int128 fAmount,int128 fLimitPrice,int128 fTriggerPrice,uint32 iDeadline,uint32 flags,uint16 leverageTDR,uint32 executionTimestamp)")
-	types = []string{"bytes32",
+	types := []string{"bytes32",
 		"uint24",
 		"uint16",
 		"address",
@@ -62,7 +107,7 @@ func CreateOrderDigest(order IClientOrderClientOrder, chainId int, isNewOrder bo
 		"uint32",
 		"uint16",
 		"uint32"}
-	values = []interface{}{
+	values := []interface{}{
 		tradeOrderTypeHash,
 		order.IPerpetualId,
 		order.BrokerFeeTbps,

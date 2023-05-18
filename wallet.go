@@ -3,6 +3,7 @@ package d8x_futures
 import (
 	"context"
 	"crypto/ecdsa"
+	"fmt"
 	"log"
 	"math/big"
 
@@ -18,19 +19,20 @@ type Wallet struct {
 	Auth       *bind.TransactOpts
 }
 
-func (w *Wallet) NewWallet(privateKeyHex string, conn BlockChainConnector) {
+func (w *Wallet) NewWallet(privateKeyHex string, conn BlockChainConnector) error {
 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 	publicKey := privateKey.Public()
 	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
 	if !ok {
-		log.Fatal("error casting public key to ECDSA")
+		return fmt.Errorf("error casting public key to ECDSA")
 	}
 	w.Address = crypto.PubkeyToAddress(*publicKeyECDSA)
 	w.Auth = bind.NewKeyedTransactor(privateKey)
-
+	w.PrivateKey = privateKey
 	signerFn := func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 		chainID := big.NewInt(conn.ChainId)
 		return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
@@ -42,13 +44,14 @@ func (w *Wallet) NewWallet(privateKeyHex string, conn BlockChainConnector) {
 	// query current values
 	w.Auth.GasPrice, err = GetGasPrice(conn)
 	if err != nil {
-		log.Fatal("RPC could not determine gas price")
+		return fmt.Errorf("RPC could not determine gas price")
 	}
 	n, err := GetNonce(conn, w.Address)
 	if err != nil {
-		log.Fatal("RPC could not determine gas price")
+		return fmt.Errorf("RPC could not determine gas price")
 	}
 	w.Auth.Nonce = big.NewInt(int64(n))
+	return nil
 }
 
 func (w *Wallet) SetGasPrice(p *big.Int) {
