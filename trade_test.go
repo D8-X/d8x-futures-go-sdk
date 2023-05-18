@@ -109,7 +109,7 @@ func TestPostOrder(t *testing.T) {
 		parentChildOrderId1: emptyArray,
 		parentChildOrderId2: emptyArray,
 	}
-	txHash, _ := PostOrder(conn, xInfo, wallet, order, traderAddr)
+	txHash, _ := PostOrder(conn, xInfo, wallet, []byte{}, order, traderAddr)
 	fmt.Println("Tx hash = ", txHash)
 }
 

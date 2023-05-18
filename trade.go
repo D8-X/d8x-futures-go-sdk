@@ -14,14 +14,18 @@ import (
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
-func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, trdrWallet Wallet, order Order, trader common.Address) (string, error) {
+// PostOrder posts an order to the correct limit order book. It needs the private key for the wallet
+// paying the gas fees. If the trader-address is not the address corresponding to the postingWallet, the func
+// also needs signature from the trader
+func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, postingWallet Wallet, traderSig []byte, order Order, trader common.Address) (string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	scOrder := order.ToChainType(xInfo, trader)
-	//sig := CreateSignature(xInfo, conn.ChainId, scOrder, w)
-	trdrWallet.SetGasLimit(uint64(conn.PostOrderGasLimit))
+
+	g := postingWallet.Auth.GasLimit
+	defer postingWallet.SetGasLimit(g)
+	postingWallet.SetGasLimit(uint64(conn.PostOrderGasLimit))
 	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-	sig := []byte{}
-	tx, err := ob.PostOrder(trdrWallet.Auth, scOrder, sig)
+	tx, err := ob.PostOrder(postingWallet.Auth, scOrder, traderSig)
 	if err != nil {
 		fmt.Println(err)
 		return "", err
