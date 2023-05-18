@@ -74,7 +74,6 @@ func TestOrderHash(t *testing.T) {
 }
 
 func TestPostOrder(t *testing.T) {
-	//privateKey := os.Getenv("PK")
 	privateKey, isPkDefined := os.LookupEnv("PK")
 	if !isPkDefined {
 		panic("no private key defined")
@@ -112,4 +111,33 @@ func TestPostOrder(t *testing.T) {
 	}
 	txHash, _ := PostOrder(conn, xInfo, wallet, order, traderAddr)
 	fmt.Println("Tx hash = ", txHash)
+}
+
+func TestBrokerSignature(t *testing.T) {
+	privateKey, isPkDefined := os.LookupEnv("PK")
+	if !isPkDefined {
+		panic("no private key defined")
+	}
+	config, err := LoadConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(config)
+	var xInfo StaticExchangeInfo
+	xInfo.Load("./tmpXchInfo.json")
+	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
+	var wallet Wallet
+	err = wallet.NewWallet(privateKey, conn)
+	if err != nil {
+		panic("error creating wallet")
+	}
+	const brokerFeeTbps = 100
+	dgst, sig, _ := CreateBrokerSignature(xInfo, 80001, wallet, 10001, brokerFeeTbps, traderAddr.String(), 1684863656)
+	fmt.Print(dgst)
+	if dgst != "4050e0ce19e8572bcb26b6f48f5096a0e266f58d89563fba41a6cd814f5e23e5" {
+		panic("wrong dgst result")
+	}
+	if sig != "0x8ce3aa9b6096e47c0f70dc65adf2e8a05fcac0d6b4d1aee69737939a2d5841905b12f7d91048160ca0af237313d06e40d42448eff2f262998f9ded98818e9c861c" {
+		panic("wrong signature result")
+	}
 }
