@@ -14,14 +14,14 @@ import (
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
-func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, w Wallet, order Order, trader common.Address) (string, error) {
+func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, trdrWallet Wallet, order Order, trader common.Address) (string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	scOrder := order.ToChainType(xInfo, trader)
 	//sig := CreateSignature(xInfo, conn.ChainId, scOrder, w)
-	w.SetGasLimit(uint64(conn.PostOrderGasLimit))
+	trdrWallet.SetGasLimit(uint64(conn.PostOrderGasLimit))
 	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	sig := []byte{}
-	tx, err := ob.PostOrder(w.Auth, scOrder, sig)
+	tx, err := ob.PostOrder(trdrWallet.Auth, scOrder, sig)
 	if err != nil {
 		fmt.Println(err)
 		return "", err
@@ -29,13 +29,13 @@ func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, w Wallet, ord
 	return tx.Hash().Hex(), nil
 }
 
-func CreateBrokerSignature(xInfo StaticExchangeInfo, chainId int64, w Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
-	digestBytes32, err := createBrokerDigest(xInfo, chainId, w, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
+func CreateBrokerSignature(xInfo StaticExchangeInfo, chainId int64, brokerWallet Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
+	digestBytes32, err := createBrokerDigest(xInfo, chainId, brokerWallet, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
 	if err != nil {
 		return "", "", err
 	}
 
-	sig, err := CreateEvmSignature(digestBytes32[:], w.PrivateKey)
+	sig, err := CreateEvmSignature(digestBytes32[:], brokerWallet.PrivateKey)
 	if err != nil {
 		return "", "", err
 	}
@@ -44,11 +44,14 @@ func CreateBrokerSignature(xInfo StaticExchangeInfo, chainId int64, w Wallet, iP
 	return dgstStr, sigStr, nil
 }
 
+// CreateEvmSignature signs the byte data with the given private key
+// per EVM convention, so that smart contracts can check the signature
 func CreateEvmSignature(data []byte, prv *ecdsa.PrivateKey) ([]byte, error) {
 	// create ethers-style message to be signed
 	s, _ := accounts.TextAndHash(data)
-	// sign and fix postfix (see https://medium.com/mycrypto/the-magic-of-digital-signatures-on-ethereum-98fe184dc9c7
-	// The recovery identifier "v")
+	// Sign and fix postfix
+	// See https://medium.com/mycrypto/the-magic-of-digital-signatures-on-ethereum-98fe184dc9c7
+	// "The recovery identifier `v`"
 	sig, err := crypto.Sign(s, prv)
 	if err != nil {
 		return []byte{}, err
