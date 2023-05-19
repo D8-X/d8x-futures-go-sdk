@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"math"
 	"math/big"
 	"strings"
 
@@ -262,6 +263,9 @@ func readSymbolList() (*map[string]string, error) {
 
 func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Address) IClientOrderClientOrder {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
+	if order.LimitPrice == 0 && order.Side == SIDE_BUY {
+		order.LimitPrice = math.MaxFloat64
+	}
 	cOrder := IClientOrderClientOrder{
 		IPerpetualId:       big.NewInt(int64(xInfo.Perpetuals[j].Id)),
 		FLimitPrice:        Float64ToABDK(order.LimitPrice),
