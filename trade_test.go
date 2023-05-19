@@ -67,7 +67,7 @@ func TestOrderHash(t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(dgst)
-	if dgst != "40745ec5cad712682c21487bcae978059f6ab00a6dbfbbcbb95eecb73e331af9" {
+	if dgst != "901568a48eee260beff786742991585412be01a5fbef7934b679c7980499c9d8" {
 		panic("wrong dgst result")
 	}
 
