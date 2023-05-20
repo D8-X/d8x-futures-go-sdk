@@ -162,6 +162,7 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, config Config, nest Neste
 		Pools:                  pools,
 		Perpetuals:             perpetuals,
 		PerpetualSymbolToId:    perpetualSymbolToId,
+		PerpetualIdToSymbol:    perpetualIdToSymbol,
 		OracleFactoryAddr:      nest.OracleFactoryAddr,
 		ProxyAddr:              config.ProxyAddr,
 		PriceFeedInfo:          pxConfig,
