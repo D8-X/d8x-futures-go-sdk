@@ -91,6 +91,80 @@ func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderA
 	return m, nil
 }
 
+// QueryPerpetualState collects PerpetualState by calling the off-chain prices and
+// blockchain queries
+func QueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, perpetualIds []int32) ([]PerpetualState, error) {
+	bigIntSlice := make([]*big.Int, len(perpetualIds))
+	for i, id := range perpetualIds {
+		bigIntSlice[i] = big.NewInt(int64(id))
+	}
+	// perpetual data via blockchain
+	perps, err := conn.PerpetualManager.GetPerpetuals(nil, bigIntSlice)
+	if err != nil {
+		return []PerpetualState{}, err
+	}
+	// gather perpetual index prices (offchain REST)
+	pxInfo := make([]*big.Int, len(perpetualIds)*2)
+	pxInfoFloat := make([]float64, len(perpetualIds)*2)
+	for i := range perpetualIds {
+		p := FetchPricesForPerpetualId(xInfo, perpetualIds[i])
+		pxInfoFloat[i*2] = p.S2Price
+		pxInfoFloat[i*2+1] = p.S3Price
+		pxInfo[i*2] = Float64ToABDK(p.S2Price)
+		pxInfo[i*2+1] = Float64ToABDK(p.S3Price)
+	}
+	// midprices via blockchain query
+	pxMid, err := conn.PerpetualManager.QueryMidPrices(nil, bigIntSlice, pxInfo)
+	if err != nil {
+		return []PerpetualState{}, err
+	}
+
+	perpStates := make([]PerpetualState, len(perps))
+	for i, perpData := range perps {
+		perpStates[i].Id = int32(perpData.Id.Int64())
+		perpStates[i].State = PerpetualStateEnum(perpData.State)
+		perpStates[i].IndexPrice = pxInfoFloat[i*2]
+		perpStates[i].CollToQuoteIndexPrice = pxInfoFloat[i*2+1]
+		perpStates[i].MarkPrice = pxInfoFloat[i*2] * (1 + ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
+		perpStates[i].CurrentFundingRateBps = ABDKToFloat64(perpData.FCurrentFundingRate)
+		perpStates[i].OpenInterestBC = ABDKToFloat64(perpData.FOpenInterest)
+		perpStates[i].MidPrice = ABDKToFloat64(pxMid[i])
+	}
+	return perpStates, nil
+}
+
+// QueryPoolStates gathers the pool states of all pools by querying the blockchain in
+// chunks of 10 pools
+func QueryPoolStates(conn BlockChainConnector, xInfo StaticExchangeInfo) ([]PoolState, error) {
+	numPools := len(xInfo.Pools)
+	poolStates := make([]PoolState, numPools)
+	// we query a maximum of 10 pools at once
+	const MAXPOOLS = 10
+	iterations := (numPools + MAXPOOLS - 1) / MAXPOOLS
+	for i := 0; i < iterations; i++ {
+		from := i * MAXPOOLS
+		to := (i+1)*MAXPOOLS - 1
+		if to > numPools {
+			to = numPools
+		}
+		pools, err := conn.PerpetualManager.GetLiquidityPools(nil, uint8(from+1), uint8(to+1))
+		if err != nil {
+			return []PoolState{}, nil
+		}
+		pIdx := 0
+		for j := from; j <= to; j++ {
+			poolStates[j].Id = int32(pools[pIdx].Id)
+			poolStates[j].DefaultFundCashCC = ABDKToFloat64(pools[pIdx].FDefaultFundCashCC)
+			poolStates[j].IsRunning = pools[pIdx].IsRunning
+			poolStates[j].PnlParticipantCashCC = ABDKToFloat64(pools[pIdx].FPnLparticipantsCashCC)
+			poolStates[j].TotalAMMFundCashCC = ABDKToFloat64(pools[pIdx].FAMMFundCashCC)
+			poolStates[j].TotalTargetAMMFundSizeCC = ABDKToFloat64(pools[pIdx].FTargetAMMFundSize)
+			pIdx++
+		}
+	}
+	return poolStates, nil
+}
+
 func GetMinimalPositionSize(perp PerpetualStaticInfo) float64 {
 	return 10 * perp.LotSizeBC
 }
@@ -112,6 +186,14 @@ func CalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, positio
 	}
 }
 
+func FetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32) PerpetualPriceInfo {
+	j := GetPerpetualStaticInfoIdxFromId(exchangeInfo, id)
+	if j == -1 {
+		panic("symbol does not exist in static perpetual info")
+	}
+	return fetchPricesForPerpetual(exchangeInfo, j)
+}
+
 // FetchPricesForPerpetual queries the REST-endpoints of the oracles and calculates S2,S3
 // index prices, also returns the price-feed-data required for blockchain submission and
 // information whether the market is closed or not.
@@ -121,6 +203,10 @@ func FetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string) Per
 	if j == -1 {
 		panic("symbol does not exist in static perpetual info")
 	}
+	return fetchPricesForPerpetual(exchangeInfo, j)
+}
+
+func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int) PerpetualPriceInfo {
 	// get underlying data from rest-api
 	feedData := fetchPricesFromAPI(exchangeInfo.Perpetuals[j].PriceIds, exchangeInfo.PriceFeedInfo)
 	// triangulate fetched prices to obtain index prices

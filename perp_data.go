@@ -93,6 +93,12 @@ func QueryNestedPerpetualInfo(conn BlockChainConnector) NestedPerpetualIds {
 // given the perpetual symbol (e.g., MATIC-USD-USDC). Returns -1 if not found.
 func GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo StaticExchangeInfo, symbol string) int {
 	perpId := exchangeInfo.PerpetualSymbolToId[symbol]
+	return GetPerpetualStaticInfoIdxFromId(exchangeInfo, perpId)
+}
+
+// GetPerpetualStaticInfoIdxFromId returns the idx of the perpetual within StaticExchangeInfo,
+// given the perpetual id (e.g., 10001). Returns -1 if not found.
+func GetPerpetualStaticInfoIdxFromId(exchangeInfo StaticExchangeInfo, perpId int32) int {
 	for i, p := range exchangeInfo.Perpetuals {
 		if p.Id == perpId {
 			return i
@@ -108,6 +114,7 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, config Config, nest Neste
 	pools := make([]PoolStaticInfo, len(perpIds))
 	var perpetuals []PerpetualStaticInfo
 	perpetualSymbolToId := make(map[string]int32)
+	perpetualIdToSymbol := make(map[int32]string)
 	for i, poolPerpIds := range perpIds {
 
 		pools[i] = PoolStaticInfo{
@@ -143,6 +150,7 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, config Config, nest Neste
 		for _, perpStatic := range perpetuals {
 			perpSymbol := perpStatic.S2Symbol + "-" + pools[i].PoolMarginSymbol
 			perpetualSymbolToId[perpSymbol] = perpStatic.Id
+			perpetualIdToSymbol[perpStatic.Id] = perpSymbol
 		}
 	}
 	pxConfig, err := LoadPriceFeedConfig(conn.PriceFeedNetwork)

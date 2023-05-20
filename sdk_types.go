@@ -22,6 +22,7 @@ type StaticExchangeInfo struct {
 	Pools                  []PoolStaticInfo
 	Perpetuals             []PerpetualStaticInfo
 	PerpetualSymbolToId    map[string]int32
+	PerpetualIdToSymbol    map[int32]string
 	PriceFeedInfo          PriceFeedConfig
 	IdxPriceTriangulations Triangulations
 	OracleFactoryAddr      common.Address
@@ -49,12 +50,44 @@ type PerpetualStaticInfo struct {
 	PriceIds               []string
 }
 
+type PoolState struct {
+	Id                       int32
+	IsRunning                bool
+	DefaultFundCashCC        float64
+	PnlParticipantCashCC     float64
+	TotalAMMFundCashCC       float64
+	TotalTargetAMMFundSizeCC float64
+}
+
+type PerpetualState struct {
+	Id                    int32
+	State                 PerpetualStateEnum
+	IndexPrice            float64
+	CollToQuoteIndexPrice float64
+	MarkPrice             float64
+	MidPrice              float64
+	CurrentFundingRateBps float64
+	OpenInterestBC        float64
+	IsMarketClosed        bool
+}
+
 type CollateralCCY int8
 
 const (
 	QUOTE CollateralCCY = iota
 	BASE
 	QUANTO
+)
+
+type PerpetualStateEnum int8
+
+const (
+	INVALID PerpetualStateEnum = iota
+	INITIALIZING
+	NORMAL
+	EMERGENCY
+	SETTLE
+	CLEARED
 )
 
 var (
@@ -142,39 +175,11 @@ type Order struct {
 	BrokerAddr          common.Address
 	BrokerSignature     []byte
 	Flags               uint32
-	StopPrice           float64
 	Leverage            float64
 	Deadline            uint32
 	ExecutionTimestamp  uint32
 	parentChildOrderId1 [32]byte
 	parentChildOrderId2 [32]byte
-}
-
-type PoolState struct {
-	IsRunning                bool
-	PoolSymbol               string
-	MarginTokenAddr          string
-	PoolShareTokenAddr       string
-	DefaultFundCashCC        float64
-	PnlParticipantCashCC     float64
-	TotalAMMFundCashCC       float64
-	TotalTargetAMMFundSizeCC float64
-	BrokerCollateralLotSize  int32
-	Perpetuals               []PerpetualState
-}
-
-type PerpetualState struct {
-	Id                    int32
-	State                 string
-	BaseCurrency          string
-	QuoteCurrency         string
-	IndexPrice            float64
-	CollToQuoteIndexPrice float64
-	MarkPrice             float64
-	MidPrice              float64
-	CurrentFundingRateBps float64
-	OpenInterestBC        float64
-	IsMarketClosed        bool
 }
 
 type PositionRisk struct {

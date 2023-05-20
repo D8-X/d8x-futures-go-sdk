@@ -40,3 +40,43 @@ func TestGetPositionRisk(t *testing.T) {
 	}
 	fmt.Println(pRisk)
 }
+
+func TestQueryPerpetualState(t *testing.T) {
+	var info StaticExchangeInfo
+	info.Load("./tmpXchInfo.json")
+	config, err := LoadConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(config)
+	perpIds := []int32{100001, 100002}
+	perpState, err := QueryPerpetualState(conn, info, perpIds)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(perpState)
+}
+
+func TestQueryPoolStates(t *testing.T) {
+	var info StaticExchangeInfo
+	info.Load("./tmpXchInfo.json")
+	config, err := LoadConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(config)
+	poolStates, err := QueryPoolStates(conn, info)
+	if err != nil {
+		panic(err)
+	}
+	for _, p := range poolStates {
+		fmt.Println("--- Pool ", p.Id, "---")
+		fmt.Println("")
+		fmt.Println(p.IsRunning)
+		fmt.Println("DefaultFundCashCC=", p.DefaultFundCashCC)
+		fmt.Println("PnlParticipantCashCC=", p.PnlParticipantCashCC)
+		fmt.Println("TotalAMMFundCashCC=", p.TotalAMMFundCashCC)
+		fmt.Println("TotalTargetAMMFundSizeCC=", p.TotalTargetAMMFundSizeCC)
+	}
+
+}
