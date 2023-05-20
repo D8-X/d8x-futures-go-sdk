@@ -167,14 +167,13 @@ type Order struct {
 	Side                string
 	Type                string
 	Quantity            float64
-	reduceOnly          bool
+	ReduceOnly          bool
 	LimitPrice          float64
 	TriggerPrice        float64
 	KeepPositionLvg     bool
 	BrokerFeeTbps       uint16
 	BrokerAddr          common.Address
 	BrokerSignature     []byte
-	Flags               uint32
 	Leverage            float64
 	Deadline            uint32
 	ExecutionTimestamp  uint32
