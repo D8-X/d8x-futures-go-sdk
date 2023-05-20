@@ -274,12 +274,30 @@ func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Addr
 	if order.LimitPrice == 0 && order.Side == SIDE_BUY {
 		order.LimitPrice = math.MaxFloat64
 	}
+	var flags uint32 = 0
+	if order.ReduceOnly {
+		flags = flags | MASK_CLOSE_ONLY
+	}
+	if order.KeepPositionLvg {
+		flags = flags | MASK_KEEP_POS_LEVERAGE
+	}
+	if order.Type == ORDER_TYPE_LIMIT {
+		flags = flags | MASK_LIMIT_ORDER
+	} else if order.Type == ORDER_TYPE_MARKET {
+		flags = flags | MASK_MARKET_ORDER
+	} else if order.Type == ORDER_TYPE_STOP_LIMIT {
+		flags = flags | MASK_STOP_ORDER
+		flags = flags | MASK_LIMIT_ORDER
+	} else if order.Type == ORDER_TYPE_STOP_MARKET {
+		flags = flags | MASK_STOP_ORDER
+		flags = flags | MASK_MARKET_ORDER
+	}
 	cOrder := IClientOrderClientOrder{
 		IPerpetualId:       big.NewInt(int64(xInfo.Perpetuals[j].Id)),
 		FLimitPrice:        Float64ToABDK(order.LimitPrice),
 		LeverageTDR:        uint16(100 * order.Leverage),
 		ExecutionTimestamp: uint32(order.ExecutionTimestamp),
-		Flags:              order.Flags,
+		Flags:              flags,
 		IDeadline:          order.Deadline,
 		BrokerAddr:         order.BrokerAddr,
 		FTriggerPrice:      Float64ToABDK(order.TriggerPrice),
@@ -292,6 +310,56 @@ func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Addr
 	}
 
 	return cOrder
+}
+
+func (scOrder *IClientOrderClientOrder) FromChainType(xInfo StaticExchangeInfo) Order {
+	perpId := int32(scOrder.IPerpetualId.Int64())
+	var side string
+	if scOrder.FAmount.Sign() > 0 {
+		side = SIDE_BUY
+	} else {
+		side = SIDE_SELL
+	}
+	var orderType string
+	if scOrder.Flags&MASK_LIMIT_ORDER == MASK_LIMIT_ORDER {
+		if scOrder.Flags&MASK_STOP_ORDER == MASK_STOP_ORDER {
+			orderType = ORDER_TYPE_STOP_LIMIT
+		} else {
+			orderType = ORDER_TYPE_LIMIT
+		}
+	} else if scOrder.Flags&MASK_MARKET_ORDER == MASK_MARKET_ORDER {
+		if scOrder.Flags&MASK_STOP_ORDER == MASK_STOP_ORDER {
+			orderType = ORDER_TYPE_STOP_MARKET
+		} else {
+			orderType = ORDER_TYPE_MARKET
+		}
+	}
+	var reduceOnly, keepPositionLvg = false, false
+	if scOrder.Flags&MASK_CLOSE_ONLY == MASK_CLOSE_ONLY {
+		reduceOnly = true
+	}
+	if scOrder.Flags&MASK_KEEP_POS_LEVERAGE == MASK_KEEP_POS_LEVERAGE {
+		keepPositionLvg = true
+	}
+	order := Order{
+		Symbol:              xInfo.PerpetualIdToSymbol[perpId],
+		Side:                side,
+		Type:                orderType,
+		Quantity:            math.Abs(ABDKToFloat64(scOrder.FAmount)),
+		ReduceOnly:          reduceOnly,
+		LimitPrice:          ABDKToFloat64(scOrder.FLimitPrice),
+		TriggerPrice:        ABDKToFloat64(scOrder.FTriggerPrice),
+		KeepPositionLvg:     keepPositionLvg,
+		BrokerFeeTbps:       scOrder.BrokerFeeTbps,
+		BrokerAddr:          scOrder.BrokerAddr,
+		BrokerSignature:     scOrder.BrokerSignature,
+		Leverage:            float64(scOrder.LeverageTDR) / 100,
+		Deadline:            scOrder.IDeadline,
+		ExecutionTimestamp:  scOrder.ExecutionTimestamp,
+		parentChildOrderId1: scOrder.ParentChildDigest1,
+		parentChildOrderId2: scOrder.ParentChildDigest2,
+	}
+	return order
 }
 
 /*

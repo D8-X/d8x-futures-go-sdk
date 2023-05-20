@@ -80,3 +80,19 @@ func TestQueryPoolStates(t *testing.T) {
 	}
 
 }
+func TestQueryOpenOrders(t *testing.T) {
+	var info StaticExchangeInfo
+	info.Load("./tmpXchInfo.json")
+	config, err := LoadConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	traderAddr := common.HexToAddress("***REMOVED***")
+	conn := CreateBlockChainConnector(config)
+	orders, digests, err := QueryOpenOrders(conn, info, "MATIC-USD-MATIC", traderAddr)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("--- orders ", orders, "\n---")
+	fmt.Println("--- digests ", digests, "\n---")
+}

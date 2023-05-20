@@ -152,7 +152,7 @@ func QueryPoolStates(conn BlockChainConnector, xInfo StaticExchangeInfo) ([]Pool
 			return []PoolState{}, nil
 		}
 		pIdx := 0
-		for j := from; j <= to; j++ {
+		for j := from; j < to; j++ {
 			poolStates[j].Id = int32(pools[pIdx].Id)
 			poolStates[j].DefaultFundCashCC = ABDKToFloat64(pools[pIdx].FDefaultFundCashCC)
 			poolStates[j].IsRunning = pools[pIdx].IsRunning
@@ -163,6 +163,44 @@ func QueryPoolStates(conn BlockChainConnector, xInfo StaticExchangeInfo) ([]Pool
 		}
 	}
 	return poolStates, nil
+}
+
+func QueryOpenOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string, traderAddr common.Address) ([]IClientOrderClientOrder, [][32]byte, error) {
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
+		return []IClientOrderClientOrder{}, [][32]byte{}, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+	}
+	lob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+
+	from := 0
+	count := 15
+	clientOrders := []IClientOrderClientOrder{}
+	zeroAddr := common.Address{}
+outerLoop:
+	for {
+		currOrders, err := lob.GetOrders(nil, traderAddr, big.NewInt(int64(from)), big.NewInt(int64(count)))
+		if err != nil {
+			return []IClientOrderClientOrder{}, [][32]byte{}, err
+		}
+		from = from + count
+		for _, order := range currOrders {
+			if order.TraderAddr == zeroAddr {
+				break outerLoop
+			} else {
+				clientOrders = append(clientOrders, order)
+			}
+		}
+	}
+	digests, err := lob.LimitDigestsOfTrader(
+		nil,
+		traderAddr,
+		big.NewInt(int64(0)),
+		big.NewInt(int64(len(clientOrders))),
+	)
+	if err != nil {
+		return []IClientOrderClientOrder{}, [][32]byte{}, err
+	}
+	return clientOrders, digests, nil
 }
 
 func GetMinimalPositionSize(perp PerpetualStaticInfo) float64 {
