@@ -240,6 +240,19 @@ func QueryOrderStatus(conn BlockChainConnector, xInfo StaticExchangeInfo, trader
 	return statusStr, nil
 }
 
+func QueryMaxTradeAmount(conn BlockChainConnector, xInfo StaticExchangeInfo, currentPositionNotional float64, symbol string, isBuy bool) (float64, error) {
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
+		return 0, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+	}
+	p := Float64ToABDK(currentPositionNotional)
+	t, err := conn.PerpetualManager.GetMaxSignedOpenTradeSizeForPos(nil, big.NewInt(int64(xInfo.Perpetuals[j].Id)), p, isBuy)
+	if err != nil {
+		return 0, err
+	}
+	return ABDKToFloat64(t), nil
+}
+
 func QueryTraderVolume(conn BlockChainConnector, xInfo StaticExchangeInfo, traderAddr common.Address, poolId int32) (float64, error) {
 	vol, err := conn.PerpetualManager.GetCurrentTraderVolume(nil, uint8(poolId), traderAddr)
 	if err != nil {
