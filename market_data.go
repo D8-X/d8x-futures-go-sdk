@@ -240,6 +240,22 @@ func QueryOrderStatus(conn BlockChainConnector, xInfo StaticExchangeInfo, trader
 	return statusStr, nil
 }
 
+func QueryTraderVolume(conn BlockChainConnector, xInfo StaticExchangeInfo, traderAddr common.Address, poolId int32) (float64, error) {
+	vol, err := conn.PerpetualManager.GetCurrentTraderVolume(nil, uint8(poolId), traderAddr)
+	if err != nil {
+		return 0, err
+	}
+	return ABDKToFloat64(vol), nil
+}
+
+func QueryExchangeFeeTbpsForTrader(conn BlockChainConnector, xInfo StaticExchangeInfo, poolId int32, traderAddr common.Address, brokerAddr common.Address) (uint16, error) {
+	feeTbps, err := conn.PerpetualManager.QueryExchangeFee(nil, uint8(poolId), traderAddr, brokerAddr)
+	if err != nil {
+		return 0, err
+	}
+	return feeTbps, nil
+}
+
 func GetMinimalPositionSize(perp PerpetualStaticInfo) float64 {
 	return 10 * perp.LotSizeBC
 }

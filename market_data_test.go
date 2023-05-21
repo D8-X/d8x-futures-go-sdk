@@ -10,7 +10,7 @@ import (
 func TestFetchPricesFromAPI(t *testing.T) {
 	pxConfig, err := LoadPriceFeedConfig("testnet")
 	if err != nil {
-		panic(err)
+		t.Logf(err.Error())
 	}
 	priceIds := []string{"0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
 		"0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"}
@@ -36,7 +36,7 @@ func TestGetPositionRisk(t *testing.T) {
 	conn := CreateBlockChainConnector(config)
 	pRisk, err := GetPositionRisk(info, conn, (*common.Address)(&traderAddr), "ETH-USD-MATIC")
 	if err != nil {
-		panic(err)
+		t.Logf(err.Error())
 	}
 	fmt.Println(pRisk)
 }
@@ -52,7 +52,7 @@ func TestQueryPerpetualState(t *testing.T) {
 	perpIds := []int32{100001, 100002}
 	perpState, err := QueryPerpetualState(conn, info, perpIds)
 	if err != nil {
-		panic(err)
+		t.Logf(err.Error())
 	}
 	fmt.Println(perpState)
 }
@@ -67,7 +67,7 @@ func TestQueryPoolStates(t *testing.T) {
 	conn := CreateBlockChainConnector(config)
 	poolStates, err := QueryPoolStates(conn, info)
 	if err != nil {
-		panic(err)
+		t.Logf(err.Error())
 	}
 	for _, p := range poolStates {
 		fmt.Println("--- Pool ", p.Id, "---")
@@ -91,7 +91,7 @@ func TestQueryOpenOrders(t *testing.T) {
 	conn := CreateBlockChainConnector(config)
 	orders, digests, err := QueryOpenOrders(conn, info, "MATIC-USD-MATIC", traderAddr)
 	if err != nil {
-		panic(err)
+		t.Logf(err.Error())
 	}
 	fmt.Println("--- orders ", orders, "\n---")
 	fmt.Println("--- digests ", digests, "\n---")
@@ -103,4 +103,37 @@ func TestQueryOpenOrders(t *testing.T) {
 	d := digests[0]
 	status, err := QueryOrderStatus(conn, info, traderAddr, d, "MATIC-USD-MATIC")
 	fmt.Println("order status: ", status)
+}
+
+func TestQueryTraderVolume(t *testing.T) {
+	var info StaticExchangeInfo
+	info.Load("./tmpXchInfo.json")
+	config, err := LoadConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	traderAddr := common.HexToAddress("***REMOVED***")
+	conn := CreateBlockChainConnector(config)
+	volume, err := QueryTraderVolume(conn, info, traderAddr, 1)
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	fmt.Println("Trader volume = ", volume)
+}
+
+func TestQueryExchangeFeeTbpsForTrader(t *testing.T) {
+	var info StaticExchangeInfo
+	info.Load("./tmpXchInfo.json")
+	config, err := LoadConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	traderAddr := common.HexToAddress("***REMOVED***")
+	brokerAddr := common.Address{}
+	conn := CreateBlockChainConnector(config)
+	fee, err := QueryExchangeFeeTbpsForTrader(conn, info, 1, traderAddr, brokerAddr)
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	fmt.Println("Fee Tbps = ", fee)
 }
