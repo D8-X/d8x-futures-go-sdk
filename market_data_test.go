@@ -137,3 +137,18 @@ func TestQueryExchangeFeeTbpsForTrader(t *testing.T) {
 	}
 	fmt.Println("Fee Tbps = ", fee)
 }
+
+func TestQueryMaxTradeAmount(t *testing.T) {
+	var info StaticExchangeInfo
+	info.Load("./tmpXchInfo.json")
+	config, err := LoadConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(config)
+	trade, err := QueryMaxTradeAmount(conn, info, 0.01, "ETH-USD-MATIC", true)
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	fmt.Println("Max Trade buy (0.01 ETH-USD-MATIC) = ", trade)
+}
