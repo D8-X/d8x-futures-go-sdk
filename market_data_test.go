@@ -95,4 +95,12 @@ func TestQueryOpenOrders(t *testing.T) {
 	}
 	fmt.Println("--- orders ", orders, "\n---")
 	fmt.Println("--- digests ", digests, "\n---")
+
+	// order status
+	if len(digests) < 1 {
+		return
+	}
+	d := digests[0]
+	status, err := QueryOrderStatus(conn, info, traderAddr, d, "MATIC-USD-MATIC")
+	fmt.Println("order status: ", status)
 }

@@ -7,6 +7,7 @@ import (
 	"math"
 	"math/big"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -209,6 +210,34 @@ outerLoop:
 		return []Order{}, []string{}, err
 	}
 	return orders, strDigests, nil
+}
+
+func QueryOrderStatus(conn BlockChainConnector, xInfo StaticExchangeInfo, traderAddr common.Address, orderDigest string, symbol string) (string, error) {
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
+		return "", fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+	}
+	lob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	// convert digest string to bytes 32
+	bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderDigest, "0x"))
+	var orderDigest32 [32]byte
+	copy(orderDigest32[:], bytesDigest)
+	status, err := lob.GetOrderStatus(nil, orderDigest32)
+	if err != nil {
+		return "", err
+	}
+	var statusStr string
+	switch status {
+	case ENUM_ORDER_STATUS_CANCELED:
+		statusStr = ORDER_STATUS_CANCELED
+	case ENUM_ORDER_STATUS_EXECUTED:
+		statusStr = ORDER_STATUS_EXECUTED
+	case ENUM_ORDER_STATUS_OPEN:
+		statusStr = ORDER_STATUS_OPEN
+	case ENUM_ORDER_STATUS_UNKNOWN:
+		statusStr = ORDER_STATUS_UNKNOWN
+	}
+	return statusStr, nil
 }
 
 func GetMinimalPositionSize(perp PerpetualStaticInfo) float64 {
