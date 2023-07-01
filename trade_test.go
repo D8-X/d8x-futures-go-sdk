@@ -128,7 +128,7 @@ func TestBrokerSignature(t *testing.T) {
 		panic("error creating wallet")
 	}
 	const brokerFeeTbps = 110
-	dgst, sig, _ := CreateBrokerSignature(xInfo, 80001, wallet, 10001, brokerFeeTbps, traderAddr.String(), 1684863656)
+	dgst, sig, _ := CreateBrokerSignature(xInfo.ProxyAddr, 80001, wallet, 10001, brokerFeeTbps, traderAddr.String(), 1684863656)
 	fmt.Print(dgst, sig)
 	/* result depend on proxy address
 	if dgst != "dead408cb2d42f86476ab484b39e37a354f3cdcbdddb16422af74425324e8755" {
