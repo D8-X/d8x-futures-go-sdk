@@ -82,7 +82,7 @@ func TestPostOrder(t *testing.T) {
 	}
 	conn := CreateBlockChainConnector(config)
 	var wallet Wallet
-	wallet.NewWallet(privateKey, conn.Rpc, conn.ChainId)
+	wallet.NewWallet(privateKey, conn.ChainId, conn.Rpc)
 	var xInfo StaticExchangeInfo
 	xInfo.Load("./tmpXchInfo.json")
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
@@ -122,7 +122,7 @@ func TestBrokerSignature(t *testing.T) {
 	xInfo.Load("./tmpXchInfo.json")
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	var wallet Wallet
-	err = wallet.NewWallet(privateKey, nil, config.ChainId)
+	err = wallet.NewWallet(privateKey, config.ChainId, nil)
 	if err != nil {
 		panic("error creating wallet")
 	}
