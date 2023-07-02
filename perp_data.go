@@ -42,16 +42,19 @@ func CreateLimitOrderBookInstance(rpc *ethclient.Client, lobAddr common.Address)
 	return lob
 }
 
-func CreateRPC(nodeURL string) *ethclient.Client {
+func CreateRPC(nodeURL string) (*ethclient.Client, error) {
 	rpc, err := ethclient.Dial(nodeURL)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return rpc
+	return rpc, nil
 }
 
 func CreateBlockChainConnector(config Config) BlockChainConnector {
-	rpc := CreateRPC(config.NodeURL)
+	rpc, err := CreateRPC(config.NodeURL)
+	if err != nil {
+		panic(err)
+	}
 	proxy := CreatePerpetualManagerInstance(rpc, config.ProxyAddr)
 	symbolMap, err := readSymbolList()
 	if err != nil {

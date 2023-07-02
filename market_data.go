@@ -158,7 +158,7 @@ func QueryPoolStates(conn BlockChainConnector, xInfo StaticExchangeInfo) ([]Pool
 			poolStates[j].DefaultFundCashCC = ABDKToFloat64(pools[pIdx].FDefaultFundCashCC)
 			poolStates[j].IsRunning = pools[pIdx].IsRunning
 			poolStates[j].PnlParticipantCashCC = ABDKToFloat64(pools[pIdx].FPnLparticipantsCashCC)
-			poolStates[j].TotalAMMFundCashCC = ABDKToFloat64(pools[pIdx].FAMMFundCashCC)
+			poolStates[j].TotalSupplyShareToken = ABDKToFloat64(pools[pIdx].TotalSupplyShareToken)
 			poolStates[j].TotalTargetAMMFundSizeCC = ABDKToFloat64(pools[pIdx].FTargetAMMFundSize)
 			pIdx++
 		}

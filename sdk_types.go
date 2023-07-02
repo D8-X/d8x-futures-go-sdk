@@ -55,7 +55,7 @@ type PoolState struct {
 	IsRunning                bool
 	DefaultFundCashCC        float64
 	PnlParticipantCashCC     float64
-	TotalAMMFundCashCC       float64
+	TotalSupplyShareToken    float64
 	TotalTargetAMMFundSizeCC float64
 }
 

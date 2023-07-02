@@ -34,7 +34,7 @@ func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, postingWallet
 }
 
 func CreateBrokerSignature(proxyAddr common.Address, chainId int64, brokerWallet Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
-	digestBytes32, err := createBrokerDigest(proxyAddr, chainId, brokerWallet, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
+	digestBytes32, err := createBrokerDigest(proxyAddr, chainId, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
 	if err != nil {
 		return "", "", err
 	}
@@ -68,7 +68,7 @@ func CreateEvmSignature(data []byte, prv *ecdsa.PrivateKey) ([]byte, error) {
 	return sig, nil
 }
 
-func createBrokerDigest(proxyAddr common.Address, chainId int64, w Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) ([32]byte, error) {
+func createBrokerDigest(proxyAddr common.Address, chainId int64, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) ([32]byte, error) {
 	domainSeparatorHashBytes32 := getDomainHash(int64(chainId), proxyAddr.String())
 	brokerTypeHash := Keccak256FromString("Order(uint24 iPerpetualId,uint16 brokerFeeTbps,address traderAddr,uint32 iDeadline)")
 	types := []string{"bytes32", "uint32", "uint16", "address", "uint32"}

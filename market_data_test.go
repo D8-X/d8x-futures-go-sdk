@@ -75,7 +75,7 @@ func TestQueryPoolStates(t *testing.T) {
 		fmt.Println(p.IsRunning)
 		fmt.Println("DefaultFundCashCC=", p.DefaultFundCashCC)
 		fmt.Println("PnlParticipantCashCC=", p.PnlParticipantCashCC)
-		fmt.Println("TotalAMMFundCashCC=", p.TotalAMMFundCashCC)
+		fmt.Println("TotalSupplyShareToken=", p.TotalSupplyShareToken)
 		fmt.Println("TotalTargetAMMFundSizeCC=", p.TotalTargetAMMFundSizeCC)
 	}
 
