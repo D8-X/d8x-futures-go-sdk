@@ -21,6 +21,8 @@ type Wallet struct {
 	Rpc        *ethclient.Client
 }
 
+// NewWallet constructs a new wallet. RPC can be nil in which case the nonce will not be
+// queried
 func (w *Wallet) NewWallet(privateKeyHex string, rpc *ethclient.Client, chainId int64) error {
 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
 	if err != nil {
@@ -32,10 +34,10 @@ func (w *Wallet) NewWallet(privateKeyHex string, rpc *ethclient.Client, chainId 
 	if !ok {
 		return fmt.Errorf("error casting public key to ECDSA")
 	}
-	w.Rpc = rpc
 	w.Address = crypto.PubkeyToAddress(*publicKeyECDSA)
-	w.Auth = bind.NewKeyedTransactor(privateKey)
 	w.PrivateKey = privateKey
+
+	w.Auth = bind.NewKeyedTransactor(privateKey)
 	signerFn := func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 		chainID := big.NewInt(chainId)
 		return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
@@ -44,16 +46,20 @@ func (w *Wallet) NewWallet(privateKeyHex string, rpc *ethclient.Client, chainId 
 	// set default values
 	w.Auth.Value = big.NewInt(0)
 	w.Auth.GasLimit = uint64(300000)
-	// query current values
-	w.Auth.GasPrice, err = GetGasPrice(rpc)
-	if err != nil {
-		return fmt.Errorf("RPC could not determine gas price")
+
+	w.Rpc = rpc
+	if rpc != nil {
+		// query current values
+		w.Auth.GasPrice, err = GetGasPrice(rpc)
+		if err != nil {
+			return fmt.Errorf("RPC could not determine gas price")
+		}
+		n, err := GetNonce(rpc, w.Address)
+		if err != nil {
+			return fmt.Errorf("RPC could not determine nonce")
+		}
+		w.Auth.Nonce = big.NewInt(int64(n))
 	}
-	n, err := GetNonce(rpc, w.Address)
-	if err != nil {
-		return fmt.Errorf("RPC could not determine nonce")
-	}
-	w.Auth.Nonce = big.NewInt(int64(n))
 	return nil
 }
 

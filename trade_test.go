@@ -118,12 +118,11 @@ func TestBrokerSignature(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(config)
 	var xInfo StaticExchangeInfo
 	xInfo.Load("./tmpXchInfo.json")
 	traderAddr := common.HexToAddress("***REMOVED***")
 	var wallet Wallet
-	err = wallet.NewWallet(privateKey, conn.Rpc, conn.ChainId)
+	err = wallet.NewWallet(privateKey, nil, config.ChainId)
 	if err != nil {
 		panic("error creating wallet")
 	}
