@@ -23,7 +23,7 @@ type Wallet struct {
 
 // NewWallet constructs a new wallet. RPC can be nil in which case the nonce will not be
 // queried
-func (w *Wallet) NewWallet(privateKeyHex string, rpc *ethclient.Client, chainId int64) error {
+func (w *Wallet) NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) error {
 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
 	if err != nil {
 		log.Fatal(err)
