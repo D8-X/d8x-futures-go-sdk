@@ -38,7 +38,9 @@ func CreateBrokerSignature(proxyAddr common.Address, chainId int64, brokerWallet
 	if err != nil {
 		return "", "", err
 	}
-
+	if brokerWallet.PrivateKey == nil {
+		return "", "", fmt.Errorf("Broker key not defined")
+	}
 	sig, err := CreateEvmSignature(digestBytes32[:], brokerWallet.PrivateKey)
 	if err != nil {
 		return "", "", err
