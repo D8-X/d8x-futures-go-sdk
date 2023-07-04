@@ -1,4 +1,4 @@
-package d8x_futures
+package utils
 
 import (
 	"math"
@@ -18,7 +18,7 @@ func I32ToFloat64(x int32) float64 {
 	return float64(x) / (math.Pow(2, 29))
 }
 
-func sign(x float64) float64 {
+func Sign(x float64) float64 {
 	if x < 0 {
 		return -1
 	} else if x > 0 {

@@ -33,8 +33,25 @@ func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, postingWallet
 	return tx.Hash().Hex(), nil
 }
 
-func CreateBrokerSignature(proxyAddr common.Address, chainId int64, brokerWallet Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
-	digestBytes32, err := createBrokerDigest(proxyAddr, chainId, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
+func CreateOrderBrokerSignature(proxyAddr common.Address, chainId int64, brokerWallet Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
+	digestBytes32, err := createOrderBrokerDigest(proxyAddr, chainId, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
+	if err != nil {
+		return "", "", err
+	}
+	if brokerWallet.PrivateKey == nil {
+		return "", "", fmt.Errorf("Broker key not defined")
+	}
+	sig, err := CreateEvmSignature(digestBytes32[:], brokerWallet.PrivateKey)
+	if err != nil {
+		return "", "", err
+	}
+	sigStr := "0x" + common.Bytes2Hex(sig[:])
+	dgstStr := common.Bytes2Hex(digestBytes32[:])
+	return dgstStr, sigStr, nil
+}
+
+func CreatePaymentBrokerSignature(multiPayCtrct common.Address, ps PaySummary, chainId int64, brokerWallet Wallet) (string, string, error) {
+	digestBytes32, err := createPaymentBrokerDigest(multiPayCtrct, chainId, ps)
 	if err != nil {
 		return "", "", err
 	}
@@ -70,8 +87,8 @@ func CreateEvmSignature(data []byte, prv *ecdsa.PrivateKey) ([]byte, error) {
 	return sig, nil
 }
 
-func createBrokerDigest(proxyAddr common.Address, chainId int64, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) ([32]byte, error) {
-	domainSeparatorHashBytes32 := getDomainHash(int64(chainId), proxyAddr.String())
+func createOrderBrokerDigest(proxyAddr common.Address, chainId int64, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) ([32]byte, error) {
+	domainSeparatorHashBytes32 := getDomainHash("Perpetual Trade Manager", int64(chainId), proxyAddr.String())
 	brokerTypeHash := Keccak256FromString("Order(uint24 iPerpetualId,uint16 brokerFeeTbps,address traderAddr,uint32 iDeadline)")
 	types := []string{"bytes32", "uint32", "uint16", "address", "uint32"}
 	values := []interface{}{brokerTypeHash, uint32(iPerpetualId), uint16(brokerFeeTbps), common.HexToAddress(traderAddr), uint32(iDeadline)}
@@ -92,15 +109,37 @@ func createBrokerDigest(proxyAddr common.Address, chainId int64, iPerpetualId in
 	return digestBytes32, nil
 }
 
-func getDomainHash(chainId int64, proxyAddress string) [32]byte {
-	nameHash := Keccak256FromString("Perpetual Trade Manager")
+func createPaymentBrokerDigest(multiPayCtrct common.Address, chainId int64, ps PaySummary) ([32]byte, error) {
+	domainSeparatorHashBytes32 := getDomainHash("Multipay", int64(chainId), multiPayCtrct.String())
+	typeHash := Keccak256FromString("PaySummary(address payer,address executor,address token,uint32 timestamp,uint32 id,uint256 totalAmount)")
+	types := []string{"bytes32", "address", "address", "address", "uint32", "uint32", "uint256"}
+	values := []interface{}{typeHash, ps.Payer, ps.Executor, ps.Token, ps.Timestamp, ps.Id, ps.TotalAmount}
+	structHash, err := AbiEncodeBytes32(types, values...)
+	if err != nil {
+		return [32]byte{}, err
+	}
+	var StructHashBytes32 [32]byte
+	copy(StructHashBytes32[:], solsha3.SoliditySHA3(structHash))
+	types = []string{"bytes32", "bytes32"}
+	values = []interface{}{domainSeparatorHashBytes32, StructHashBytes32}
+	digest0, err := AbiEncodeBytes32(types, values...)
+	if err != nil {
+		return [32]byte{}, err
+	}
+	var digestBytes32 [32]byte
+	copy(digestBytes32[:], solsha3.SoliditySHA3(digest0))
+	return digestBytes32, nil
+}
+
+func getDomainHash(name string, chainId int64, contractAddr string) [32]byte {
+	nameHash := Keccak256FromString(name)
 	domainHash := Keccak256FromString("EIP712Domain(string name,uint256 chainId,address verifyingContract)")
 	types := []string{"bytes32", "bytes32", "uint256", "address"}
 	values := []interface{}{
 		domainHash,
 		nameHash,
 		big.NewInt(chainId),
-		common.HexToAddress(proxyAddress),
+		common.HexToAddress(contractAddr),
 	}
 	domainSeparator, _ := AbiEncodeBytes32(types, values...)
 	dH := solsha3.SoliditySHA3(domainSeparator)
@@ -110,7 +149,7 @@ func getDomainHash(chainId int64, proxyAddress string) [32]byte {
 }
 
 func CreateOrderDigest(order IClientOrderClientOrder, chainId int, isNewOrder bool, proxyAddress string) (string, error) {
-	DomainSeparatorHashBytes32 := getDomainHash(int64(chainId), proxyAddress)
+	DomainSeparatorHashBytes32 := getDomainHash("Perpetual Trade Manager", int64(chainId), proxyAddress)
 	tradeOrderTypeHash := Keccak256FromString("Order(uint24 iPerpetualId,uint16 brokerFeeTbps,address traderAddr,address brokerAddr,int128 fAmount,int128 fLimitPrice,int128 fTriggerPrice,uint32 iDeadline,uint32 flags,uint16 leverageTDR,uint32 executionTimestamp)")
 	types := []string{"bytes32",
 		"uint24",

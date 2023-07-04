@@ -5,8 +5,11 @@ import (
 	"math/big"
 	"os"
 	"testing"
+	"time"
 
+	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 func TestABI(t *testing.T) {
@@ -76,7 +79,7 @@ func TestPostOrder(t *testing.T) {
 	if !isPkDefined {
 		panic("no private key defined")
 	}
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -114,7 +117,7 @@ func TestBrokerSignature(t *testing.T) {
 	if !isPkDefined {
 		panic("no private key defined")
 	}
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -127,7 +130,7 @@ func TestBrokerSignature(t *testing.T) {
 		panic("error creating wallet")
 	}
 	const brokerFeeTbps = 110
-	dgst, sig, _ := CreateBrokerSignature(xInfo.ProxyAddr, 80001, wallet, 10001, brokerFeeTbps, traderAddr.String(), 1684863656)
+	dgst, sig, _ := CreateOrderBrokerSignature(xInfo.ProxyAddr, 80001, wallet, 10001, brokerFeeTbps, traderAddr.String(), 1684863656)
 	fmt.Print(dgst, sig)
 	/* result depend on proxy address
 	if dgst != "dead408cb2d42f86476ab484b39e37a354f3cdcbdddb16422af74425324e8755" {
@@ -136,4 +139,42 @@ func TestBrokerSignature(t *testing.T) {
 	if sig != "0x557248de61a8b5b9fb75b51c0b91e42da3be2281d47ed276f5650efaa9b7ada74fac81fb0d34e0887e1a81353f37acdf575d68ae04dce527df4baaa4a41a02f81b" {
 		panic("wrong signature result")
 	}*/
+}
+
+func TestPaymentSignature(t *testing.T) {
+	privateKey, isPkDefined := os.LookupEnv("PK")
+	if !isPkDefined {
+		panic("no private key defined")
+	}
+	config, err := utils.LoadConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	var wallet Wallet
+	err = wallet.NewWallet(privateKey, config.ChainId, nil)
+	if err != nil {
+		panic("error creating wallet")
+	}
+	var totalAmount big.Int
+	totalAmount.SetString("1000000000000000000000", 10)
+
+	executorKey, err := crypto.GenerateKey()
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	tokenAddr := common.HexToAddress("0xeE53d536DFC355017147058a4197cAD3b4ac1964")
+	multiPayCtrct := common.HexToAddress("0x30b55550e02B663E15A95B50850ebD20363c2AD5")
+	timestamp := time.Now().UTC().Unix()
+	var ps PaySummary
+	ps.Payer = wallet.Address
+	ps.Executor = crypto.PubkeyToAddress(executorKey.PublicKey)
+	ps.Timestamp = uint32(timestamp)
+	ps.Token = tokenAddr
+	ps.TotalAmount = &totalAmount
+
+	dgst, sig, err := CreatePaymentBrokerSignature(multiPayCtrct, ps, config.ChainId, wallet)
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	fmt.Print(dgst, sig)
 }

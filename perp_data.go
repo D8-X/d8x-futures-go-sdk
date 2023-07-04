@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -50,7 +51,7 @@ func CreateRPC(nodeURL string) (*ethclient.Client, error) {
 	return rpc, nil
 }
 
-func CreateBlockChainConnector(config Config) BlockChainConnector {
+func CreateBlockChainConnector(config utils.Config) BlockChainConnector {
 	rpc, err := CreateRPC(config.NodeURL)
 	if err != nil {
 		panic(err)
@@ -110,8 +111,8 @@ func GetPerpetualStaticInfoIdxFromId(exchangeInfo StaticExchangeInfo, perpId int
 	return -1
 }
 
-func QueryExchangeStaticInfo(conn BlockChainConnector, config Config, nest NestedPerpetualIds) StaticExchangeInfo {
-	symbolsSet := make(Set)
+func QueryExchangeStaticInfo(conn BlockChainConnector, config utils.Config, nest NestedPerpetualIds) StaticExchangeInfo {
+	symbolsSet := make(utils.Set)
 
 	perpIds := nest.PerpetualIds
 	pools := make([]PoolStaticInfo, len(perpIds))
@@ -156,7 +157,7 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, config Config, nest Neste
 			perpetualIdToSymbol[perpStatic.Id] = perpSymbol
 		}
 	}
-	pxConfig, err := LoadPriceFeedConfig(conn.PriceFeedNetwork)
+	pxConfig, err := utils.LoadPriceFeedConfig(conn.PriceFeedNetwork)
 	if err != nil {
 		panic(err)
 	}
@@ -205,7 +206,7 @@ func (s *StaticExchangeInfo) Load(filename string) error {
 }
 
 // initPriceFeeds determines the triangulation for each symbol in symbolSet
-func initPriceFeeds(pxConfig PriceFeedConfig, symbolSet Set) Triangulations {
+func initPriceFeeds(pxConfig utils.PriceFeedConfig, symbolSet utils.Set) Triangulations {
 	triangulations := make(Triangulations)
 	for sym := range symbolSet {
 		triangulations[sym] = Triangulate(sym, pxConfig)
@@ -236,13 +237,13 @@ func getterDataToPerpetualStaticInfo(pIn IPerpetualGetterPerpetualStaticInfo, sy
 		Id:                     int32(pIn.Id.Int64()),
 		PoolId:                 poolId,
 		LimitOrderBookAddr:     pIn.LimitOrderBookAddr,
-		InitialMarginRate:      I32ToFloat64(pIn.FInitialMarginRate),
-		MaintenanceMarginRate:  I32ToFloat64(pIn.FMaintenanceMarginRate),
+		InitialMarginRate:      utils.I32ToFloat64(pIn.FInitialMarginRate),
+		MaintenanceMarginRate:  utils.I32ToFloat64(pIn.FMaintenanceMarginRate),
 		CollateralCurrencyType: CollateralCCY(pIn.CollCurrencyType),
 		S2Symbol:               S2Symbol,
 		S3Symbol:               S3Symbol,
-		LotSizeBC:              ABDKToFloat64(pIn.FLotSizeBC),
-		ReferralRebate:         ABDKToFloat64(pIn.FReferralRebateCC),
+		LotSizeBC:              utils.ABDKToFloat64(pIn.FLotSizeBC),
+		ReferralRebate:         utils.ABDKToFloat64(pIn.FReferralRebateCC),
 		PriceIds:               priceIds,
 	}
 	return pOut
@@ -298,14 +299,14 @@ func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Addr
 	}
 	cOrder := IClientOrderClientOrder{
 		IPerpetualId:       big.NewInt(int64(xInfo.Perpetuals[j].Id)),
-		FLimitPrice:        Float64ToABDK(order.LimitPrice),
+		FLimitPrice:        utils.Float64ToABDK(order.LimitPrice),
 		LeverageTDR:        uint16(100 * order.Leverage),
 		ExecutionTimestamp: uint32(order.ExecutionTimestamp),
 		Flags:              flags,
 		IDeadline:          order.Deadline,
 		BrokerAddr:         order.BrokerAddr,
-		FTriggerPrice:      Float64ToABDK(order.TriggerPrice),
-		FAmount:            Float64ToABDK(order.Quantity),
+		FTriggerPrice:      utils.Float64ToABDK(order.TriggerPrice),
+		FAmount:            utils.Float64ToABDK(order.Quantity),
 		BrokerSignature:    order.BrokerSignature,
 		ParentChildDigest1: order.parentChildOrderId1,
 		ParentChildDigest2: order.parentChildOrderId2,
@@ -349,10 +350,10 @@ func (scOrder *IClientOrderClientOrder) FromChainType(xInfo StaticExchangeInfo) 
 		Symbol:              xInfo.PerpetualIdToSymbol[perpId],
 		Side:                side,
 		Type:                orderType,
-		Quantity:            math.Abs(ABDKToFloat64(scOrder.FAmount)),
+		Quantity:            math.Abs(utils.ABDKToFloat64(scOrder.FAmount)),
 		ReduceOnly:          reduceOnly,
-		LimitPrice:          ABDKToFloat64(scOrder.FLimitPrice),
-		TriggerPrice:        ABDKToFloat64(scOrder.FTriggerPrice),
+		LimitPrice:          utils.ABDKToFloat64(scOrder.FLimitPrice),
+		TriggerPrice:        utils.ABDKToFloat64(scOrder.FTriggerPrice),
 		KeepPositionLvg:     keepPositionLvg,
 		BrokerFeeTbps:       scOrder.BrokerFeeTbps,
 		BrokerAddr:          scOrder.BrokerAddr,

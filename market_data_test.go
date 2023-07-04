@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 )
 
 func TestFetchPricesFromAPI(t *testing.T) {
-	pxConfig, err := LoadPriceFeedConfig("testnet")
+	pxConfig, err := utils.LoadPriceFeedConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -29,7 +30,7 @@ func TestGetPositionRisk(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
 	traderAddr := common.HexToAddress("***REMOVED***")
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -44,7 +45,7 @@ func TestGetPositionRisk(t *testing.T) {
 func TestQueryPerpetualState(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -60,7 +61,7 @@ func TestQueryPerpetualState(t *testing.T) {
 func TestQueryPoolStates(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -83,7 +84,7 @@ func TestQueryPoolStates(t *testing.T) {
 func TestQueryOpenOrders(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -108,7 +109,7 @@ func TestQueryOpenOrders(t *testing.T) {
 func TestQueryTraderVolume(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -124,7 +125,7 @@ func TestQueryTraderVolume(t *testing.T) {
 func TestQueryExchangeFeeTbpsForTrader(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -141,7 +142,7 @@ func TestQueryExchangeFeeTbpsForTrader(t *testing.T) {
 func TestQueryMaxTradeAmount(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}

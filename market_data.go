@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -19,7 +20,7 @@ func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderA
 	if j == -1 {
 		panic("symbol does not exist in static perpetual info")
 	}
-	indexPrices := [2]*big.Int{Float64ToABDK(priceData.S2Price), Float64ToABDK(priceData.S3Price)}
+	indexPrices := [2]*big.Int{utils.Float64ToABDK(priceData.S2Price), utils.Float64ToABDK(priceData.S3Price)}
 
 	traderState, err := conn.PerpetualManager.GetTraderState(
 		nil,
@@ -38,12 +39,12 @@ func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderA
 	const idxLvg = 7
 	const idxS3 = 9
 	var S3Liq float64
-	lockedInValue := ABDKToFloat64(traderState[idxLockedIn])
-	cashCC := ABDKToFloat64(traderState[idxCash])
-	posBC := ABDKToFloat64(traderState[idxNotional])
-	Sm := ABDKToFloat64(traderState[idxMarkPrice])
-	S3 := ABDKToFloat64(traderState[idxS3])
-	unpaidFundingCC := ABDKToFloat64(traderState[idxAvailableCashCC]) - cashCC
+	lockedInValue := utils.ABDKToFloat64(traderState[idxLockedIn])
+	cashCC := utils.ABDKToFloat64(traderState[idxCash])
+	posBC := utils.ABDKToFloat64(traderState[idxNotional])
+	Sm := utils.ABDKToFloat64(traderState[idxMarkPrice])
+	S3 := utils.ABDKToFloat64(traderState[idxS3])
+	unpaidFundingCC := utils.ABDKToFloat64(traderState[idxAvailableCashCC]) - cashCC
 	unpaidFundingQC := unpaidFundingCC
 	S2Liq := CalculateLiquidationPrice(xInfo.Perpetuals[j].CollateralCurrencyType, lockedInValue, posBC, cashCC, xInfo.Perpetuals[j].MaintenanceMarginRate, S3, Sm)
 	if xInfo.Perpetuals[j].CollateralCurrencyType == BASE {
@@ -52,7 +53,7 @@ func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderA
 	} else if xInfo.Perpetuals[j].CollateralCurrencyType == QUANTO {
 		// convert CC to quote
 		unpaidFundingQC = unpaidFundingQC / priceData.S3Price
-		S3Liq = ABDKToFloat64(traderState[idxS3])
+		S3Liq = utils.ABDKToFloat64(traderState[idxS3])
 	}
 	// floor at zero
 	S2Liq = math.Max(0, S2Liq)
@@ -69,7 +70,7 @@ func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderA
 	var entryPrice, leverage, pnl, liqLeverage float64
 	if posBC != 0 {
 		entryPrice = math.Abs(lockedInValue / posBC)
-		leverage = ABDKToFloat64(traderState[idxLvg])
+		leverage = utils.ABDKToFloat64(traderState[idxLvg])
 		pnl = posBC*Sm - lockedInValue + unpaidFundingQC
 		liqLeverage = 1 / xInfo.Perpetuals[j].MaintenanceMarginRate
 	} else {
@@ -111,8 +112,8 @@ func QueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, per
 		p := FetchPricesForPerpetualId(xInfo, perpetualIds[i])
 		pxInfoFloat[i*2] = p.S2Price
 		pxInfoFloat[i*2+1] = p.S3Price
-		pxInfo[i*2] = Float64ToABDK(p.S2Price)
-		pxInfo[i*2+1] = Float64ToABDK(p.S3Price)
+		pxInfo[i*2] = utils.Float64ToABDK(p.S2Price)
+		pxInfo[i*2+1] = utils.Float64ToABDK(p.S3Price)
 	}
 	// midprices via blockchain query
 	pxMid, err := conn.PerpetualManager.QueryMidPrices(nil, bigIntSlice, pxInfo)
@@ -126,10 +127,10 @@ func QueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, per
 		perpStates[i].State = PerpetualStateEnum(perpData.State)
 		perpStates[i].IndexPrice = pxInfoFloat[i*2]
 		perpStates[i].CollToQuoteIndexPrice = pxInfoFloat[i*2+1]
-		perpStates[i].MarkPrice = pxInfoFloat[i*2] * (1 + ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
-		perpStates[i].CurrentFundingRateBps = ABDKToFloat64(perpData.FCurrentFundingRate)
-		perpStates[i].OpenInterestBC = ABDKToFloat64(perpData.FOpenInterest)
-		perpStates[i].MidPrice = ABDKToFloat64(pxMid[i])
+		perpStates[i].MarkPrice = pxInfoFloat[i*2] * (1 + utils.ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
+		perpStates[i].CurrentFundingRateBps = utils.ABDKToFloat64(perpData.FCurrentFundingRate)
+		perpStates[i].OpenInterestBC = utils.ABDKToFloat64(perpData.FOpenInterest)
+		perpStates[i].MidPrice = utils.ABDKToFloat64(pxMid[i])
 	}
 	return perpStates, nil
 }
@@ -155,11 +156,11 @@ func QueryPoolStates(conn BlockChainConnector, xInfo StaticExchangeInfo) ([]Pool
 		pIdx := 0
 		for j := from; j < to; j++ {
 			poolStates[j].Id = int32(pools[pIdx].Id)
-			poolStates[j].DefaultFundCashCC = ABDKToFloat64(pools[pIdx].FDefaultFundCashCC)
+			poolStates[j].DefaultFundCashCC = utils.ABDKToFloat64(pools[pIdx].FDefaultFundCashCC)
 			poolStates[j].IsRunning = pools[pIdx].IsRunning
-			poolStates[j].PnlParticipantCashCC = ABDKToFloat64(pools[pIdx].FPnLparticipantsCashCC)
-			poolStates[j].TotalSupplyShareToken = ABDKToFloat64(pools[pIdx].TotalSupplyShareToken)
-			poolStates[j].TotalTargetAMMFundSizeCC = ABDKToFloat64(pools[pIdx].FTargetAMMFundSize)
+			poolStates[j].PnlParticipantCashCC = utils.ABDKToFloat64(pools[pIdx].FPnLparticipantsCashCC)
+			poolStates[j].TotalSupplyShareToken = utils.ABDKToFloat64(pools[pIdx].TotalSupplyShareToken)
+			poolStates[j].TotalTargetAMMFundSizeCC = utils.ABDKToFloat64(pools[pIdx].FTargetAMMFundSize)
 			pIdx++
 		}
 	}
@@ -245,12 +246,12 @@ func QueryMaxTradeAmount(conn BlockChainConnector, xInfo StaticExchangeInfo, cur
 	if j == -1 {
 		return 0, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
-	p := Float64ToABDK(currentPositionNotional)
+	p := utils.Float64ToABDK(currentPositionNotional)
 	t, err := conn.PerpetualManager.GetMaxSignedOpenTradeSizeForPos(nil, big.NewInt(int64(xInfo.Perpetuals[j].Id)), p, isBuy)
 	if err != nil {
 		return 0, err
 	}
-	return ABDKToFloat64(t), nil
+	return utils.ABDKToFloat64(t), nil
 }
 
 func QueryTraderVolume(conn BlockChainConnector, xInfo StaticExchangeInfo, traderAddr common.Address, poolId int32) (float64, error) {
@@ -258,7 +259,7 @@ func QueryTraderVolume(conn BlockChainConnector, xInfo StaticExchangeInfo, trade
 	if err != nil {
 		return 0, err
 	}
-	return ABDKToFloat64(vol), nil
+	return utils.ABDKToFloat64(vol), nil
 }
 
 func QueryExchangeFeeTbpsForTrader(conn BlockChainConnector, xInfo StaticExchangeInfo, poolId int32, traderAddr common.Address, brokerAddr common.Address) (uint16, error) {
@@ -278,8 +279,8 @@ func CalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, positio
 		return float64(0)
 	}
 	if ccy == QUANTO {
-		numerator := -lockedInValue + cashCC*S3*(1-sign(positionBC))
-		denominator := tau*math.Abs(positionBC) - positionBC - (cashCC*S3*sign(positionBC))/Sm
+		numerator := -lockedInValue + cashCC*S3*(1-utils.Sign(positionBC))
+		denominator := tau*math.Abs(positionBC) - positionBC - (cashCC*S3*utils.Sign(positionBC))/Sm
 		return numerator / denominator
 	} else if ccy == BASE {
 		numerator := -lockedInValue + cashCC
@@ -337,7 +338,7 @@ func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int) PerpetualPr
 // configured REST-API. The PriceFeedConfig is needed to extract the
 // correct endpoint per feed, and store what symbol (e.g. BTC-USD) the
 // price feed covers.
-func fetchPricesFromAPI(priceIds []string, config PriceFeedConfig) PriceFeedData {
+func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig) PriceFeedData {
 	pxData := PriceFeedData{
 		Symbols:        make([]string, len(priceIds)),
 		PriceIds:       priceIds,
@@ -386,7 +387,7 @@ func fetchPricesFromAPI(priceIds []string, config PriceFeedConfig) PriceFeedData
 			//find idx of d.Id
 			for i, id := range priceIds {
 				if id == d.Id {
-					pxData.Prices[i] = PythNToFloat64(d.Price.Price, d.Price.Expo)
+					pxData.Prices[i] = utils.PythNToFloat64(d.Price.Price, d.Price.Expo)
 					pxData.IsMarketClosed[i] = timestampNow-int64(d.Price.PublishTime) > int64(config.ThresholdMarketClosedSec)
 					pxData.Vaas[i] = d.Vaa
 					break

@@ -1,4 +1,4 @@
-package d8x_futures
+package utils
 
 type Set map[string]bool
 
