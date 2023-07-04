@@ -67,6 +67,22 @@ func CreatePaymentBrokerSignature(multiPayCtrct common.Address, ps PaySummary, c
 	return dgstStr, sigStr, nil
 }
 
+// RecoverPaymentSignatureAddr recovers the address that created the signature of PaySummary data for
+// the given chainId and multiPayContract address.
+// The function returns the recovered address or an error
+func RecoverPaymentSignatureAddr(sig []byte, multiPayCtrct common.Address, ps PaySummary, chainId int64) (common.Address, error) {
+	digestBytes32, err := createPaymentBrokerDigest(multiPayCtrct, chainId, ps)
+	if err != nil {
+		return common.Address{}, err
+	}
+
+	addr, err := RecoverEvmAddress(digestBytes32[:], sig[:])
+	if err != nil {
+		return common.Address{}, err
+	}
+	return addr, nil
+}
+
 // CreateEvmSignature signs the byte data with the given private key
 // per EVM convention, so that smart contracts can check the signature
 func CreateEvmSignature(data []byte, prv *ecdsa.PrivateKey) ([]byte, error) {
@@ -85,6 +101,26 @@ func CreateEvmSignature(data []byte, prv *ecdsa.PrivateKey) ([]byte, error) {
 		sig[len(sig)-1] = 27
 	}
 	return sig, nil
+}
+
+func RecoverEvmAddress(data, signature []byte) (common.Address, error) {
+	recoveryID := signature[len(signature)-1]
+	if recoveryID != 27 && recoveryID != 28 {
+		return common.Address{}, fmt.Errorf("invalid recovery id")
+	}
+	s, _ := accounts.TextAndHash(data)
+	adjustedSignature := append(signature[:len(signature)-1], recoveryID-27)
+
+	// Recover public key from encoded digest and signature
+	publicKey, err := crypto.SigToPub(s, adjustedSignature)
+	if err != nil {
+		return common.Address{}, err
+	}
+
+	// Get Ethereum address from the public key
+	recoveredAddress := crypto.PubkeyToAddress(*publicKey)
+
+	return recoveredAddress, nil
 }
 
 func createOrderBrokerDigest(proxyAddr common.Address, chainId int64, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) ([32]byte, error) {
@@ -240,7 +276,15 @@ func AbiEncode(types []string, values ...interface{}) ([]byte, error) {
 
 }
 
-func Keccak256FromHexString(hexNumber string) Keccak256Hash {
+func BytesFromHexString(hexNumber string) ([]byte, error) {
+	data, err := hex.DecodeString(strings.TrimPrefix(hexNumber, "0x"))
+	if err != nil {
+		return []byte{}, err
+	}
+	return data, nil
+}
+
+func Bytes32FromHexString(hexNumber string) Keccak256Hash {
 	data, err := hex.DecodeString(strings.TrimPrefix(hexNumber, "0x"))
 	if err != nil {
 		panic(err)
