@@ -3,6 +3,7 @@ package d8x_futures
 import (
 	"math/big"
 
+	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -23,7 +24,7 @@ type StaticExchangeInfo struct {
 	Perpetuals             []PerpetualStaticInfo
 	PerpetualSymbolToId    map[string]int32
 	PerpetualIdToSymbol    map[int32]string
-	PriceFeedInfo          PriceFeedConfig
+	PriceFeedInfo          utils.PriceFeedConfig
 	IdxPriceTriangulations Triangulations
 	OracleFactoryAddr      common.Address
 	ProxyAddr              common.Address
@@ -208,4 +209,15 @@ type PositionRisk struct {
 	LiquidationPrice               [2]float64
 	LiquidationLvg                 float64
 	CollToQuoteConversion          float64
+}
+
+// struct to be submitted by front-end provider
+// to get broker signature
+type PaySummary struct {
+	Payer       common.Address `json:"payer"`
+	Executor    common.Address `json:"executor"`
+	Token       common.Address `json:"token"`
+	Timestamp   uint32         `json:"timestamp"`
+	Id          uint32         `json:"id"`
+	TotalAmount *big.Int       `json:"totalAmount"`
 }

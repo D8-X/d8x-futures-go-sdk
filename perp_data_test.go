@@ -3,10 +3,12 @@ package d8x_futures
 import (
 	"fmt"
 	"testing"
+
+	"github.com/D8-X/d8x-futures-go-sdk/utils"
 )
 
 func TestQueryNestedPerpetualInfo(t *testing.T) {
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -25,7 +27,7 @@ func TestReadSymbolList(t *testing.T) {
 }
 
 func TestQueryPoolStaticInfo(t *testing.T) {
-	config, err := LoadConfig("testnet")
+	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -47,12 +49,12 @@ func TestFindPath(t *testing.T) {
 }
 
 func TestPythNToFloat64(t *testing.T) {
-	v := PythNToFloat64("314159265358979", -14)
+	v := utils.PythNToFloat64("314159265358979", -14)
 	fmt.Println("v=", v)
 }
 
 func TestTriangulate(t *testing.T) {
-	pxConfig, err := LoadPriceFeedConfig("testnet")
+	pxConfig, err := utils.LoadPriceFeedConfig("testnet")
 	if err != nil {
 		panic(err)
 	}

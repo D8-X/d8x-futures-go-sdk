@@ -1,6 +1,10 @@
 package d8x_futures
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/D8-X/d8x-futures-go-sdk/utils"
+)
 
 // CalculateTriangulation calculates the triangulated price and reports whether any
 // of the price-feeds has a closed market, given a triangulation path and price data
@@ -31,7 +35,7 @@ func CalculateTriangulation(triang Triangulation, pxData PriceFeedData) (float64
 
 // Triangulate finds the shortest triangulation path for symbol (e.g. BTC-USDC) using
 // all price sources in pxConfig. Returns an empty array if no triangulation found.
-func Triangulate(symbol string, pxConfig PriceFeedConfig) Triangulation {
+func Triangulate(symbol string, pxConfig utils.PriceFeedConfig) Triangulation {
 	var feedSymBase []string
 	var feedSymQuote []string
 	// extract all base and quote currencies
