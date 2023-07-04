@@ -152,6 +152,7 @@ func TestPaymentSignature(t *testing.T) {
 	}
 	var wallet Wallet
 	err = wallet.NewWallet(privateKey, config.ChainId, nil)
+	fmt.Printf("\nwallet addr %s\n", wallet.Address.String())
 	if err != nil {
 		panic("error creating wallet")
 	}
@@ -177,4 +178,15 @@ func TestPaymentSignature(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	fmt.Print(dgst, sig)
+	sigB, err := BytesFromHexString(sig)
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	addr, err := RecoverPaymentSignatureAddr(sigB, multiPayCtrct, ps, config.ChainId)
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	fmt.Printf("\nrecovered address %s", addr.String())
+	fmt.Printf("\nbroker address %s", wallet.Address.String())
+	fmt.Printf("\nexecutor address %s", ps.Executor.String())
 }
