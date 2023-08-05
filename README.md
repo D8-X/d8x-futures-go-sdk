@@ -9,6 +9,6 @@ Generate the ABI for the network it should compile to:
 
 `abigen --abi abi/LimitOrderBookFactory.json --pkg d8x_futures --type LimitOrderBookFactory --out LimitOrderBookFactory.go`
 
-Remove duplicated structs
+`go build` -> Remove duplicated structs
 
 https://www.digitalocean.com/community/tutorials/how-to-use-a-private-go-module-in-your-own-project
