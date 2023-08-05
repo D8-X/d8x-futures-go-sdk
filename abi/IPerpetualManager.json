@@ -183,9 +183,9 @@
         "inputs": [
             {
                 "indexed": true,
-                "internalType": "uint64",
+                "internalType": "uint8",
                 "name": "poolId",
-                "type": "uint64"
+                "type": "uint8"
             },
             {
                 "indexed": true,
@@ -270,9 +270,9 @@
         "inputs": [
             {
                 "indexed": true,
-                "internalType": "uint64",
+                "internalType": "uint8",
                 "name": "poolId",
-                "type": "uint64"
+                "type": "uint8"
             },
             {
                 "indexed": true,
@@ -301,9 +301,9 @@
         "inputs": [
             {
                 "indexed": true,
-                "internalType": "uint64",
+                "internalType": "uint8",
                 "name": "poolId",
-                "type": "uint64"
+                "type": "uint8"
             },
             {
                 "indexed": true,
@@ -770,6 +770,19 @@
                 "internalType": "uint24",
                 "name": "perpetualId",
                 "type": "uint24"
+            }
+        ],
+        "name": "SettlementComplete",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint24",
+                "name": "perpetualId",
+                "type": "uint24"
             },
             {
                 "indexed": true,
@@ -882,7 +895,7 @@
                     },
                     {
                         "internalType": "address",
-                        "name": "referrerAddr",
+                        "name": "executorAddr",
                         "type": "address"
                     },
                     {
@@ -1044,7 +1057,7 @@
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "referrer",
+                "name": "executor",
                 "type": "address"
             },
             {
@@ -1054,7 +1067,7 @@
                 "type": "int128"
             }
         ],
-        "name": "TransferFeeToReferrer",
+        "name": "TransferFeeToexecutor",
         "type": "event"
     },
     {
@@ -1111,6 +1124,31 @@
             }
         ],
         "name": "UpdateBrokerAddedCash",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint8",
+                "name": "poolId",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "int128",
+                "name": "fDeltaAmountCC",
+                "type": "int128"
+            },
+            {
+                "indexed": false,
+                "internalType": "int128",
+                "name": "fNewFundCash",
+                "type": "int128"
+            }
+        ],
+        "name": "UpdateBrokerFundCash",
         "type": "event"
     },
     {
@@ -1393,24 +1431,6 @@
             }
         ],
         "name": "adjustSettlementPrice",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint8",
-                "name": "_poolId",
-                "type": "uint8"
-            },
-            {
-                "internalType": "uint32",
-                "name": "_iLots",
-                "type": "uint32"
-            }
-        ],
-        "name": "brokerDepositToDefaultFund",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1767,7 +1787,7 @@
                     },
                     {
                         "internalType": "address",
-                        "name": "referrerAddr",
+                        "name": "executorAddr",
                         "type": "address"
                     },
                     {
@@ -1951,6 +1971,24 @@
     {
         "inputs": [
             {
+                "internalType": "uint8",
+                "name": "_poolId",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint32",
+                "name": "_iLots",
+                "type": "uint32"
+            }
+        ],
+        "name": "depositBrokerLots",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint24",
                 "name": "_iPerpetualId",
                 "type": "uint24"
@@ -2009,7 +2047,7 @@
                     },
                     {
                         "internalType": "address",
-                        "name": "referrerAddr",
+                        "name": "executorAddr",
                         "type": "address"
                     },
                     {
@@ -2118,7 +2156,7 @@
                     },
                     {
                         "internalType": "address",
-                        "name": "referrerAddr",
+                        "name": "executorAddr",
                         "type": "address"
                     },
                     {
@@ -2209,7 +2247,7 @@
                     },
                     {
                         "internalType": "address",
-                        "name": "referrerAddr",
+                        "name": "executorAddr",
                         "type": "address"
                     },
                     {
@@ -2599,6 +2637,11 @@
                 "internalType": "int128",
                 "name": "_fS3",
                 "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fS2",
+                "type": "int128"
             }
         ],
         "name": "getDepositAmountForLvgPosition",
@@ -2813,9 +2856,9 @@
                         "type": "uint64"
                     },
                     {
-                        "internalType": "int32",
+                        "internalType": "int128",
                         "name": "fRedemptionRate",
-                        "type": "int32"
+                        "type": "int128"
                     },
                     {
                         "internalType": "address",
@@ -2861,6 +2904,11 @@
                         "internalType": "uint128",
                         "name": "totalSupplyShareToken",
                         "type": "uint128"
+                    },
+                    {
+                        "internalType": "int128",
+                        "name": "fBrokerFundCashCC",
+                        "type": "int128"
                     }
                 ],
                 "internalType": "struct PerpStorage.LiquidityPoolData",
@@ -2929,9 +2977,9 @@
                         "type": "uint64"
                     },
                     {
-                        "internalType": "int32",
+                        "internalType": "int128",
                         "name": "fRedemptionRate",
-                        "type": "int32"
+                        "type": "int128"
                     },
                     {
                         "internalType": "address",
@@ -2977,6 +3025,11 @@
                         "internalType": "uint128",
                         "name": "totalSupplyShareToken",
                         "type": "uint128"
+                    },
+                    {
+                        "internalType": "int128",
+                        "name": "fBrokerFundCashCC",
+                        "type": "int128"
                     }
                 ],
                 "internalType": "struct PerpStorage.LiquidityPoolData[]",
@@ -3936,6 +3989,35 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "uint24",
+                "name": "_perpetualId",
+                "type": "uint24"
+            },
+            {
+                "internalType": "uint256",
+                "name": "start",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "count",
+                "type": "uint256"
+            }
+        ],
+        "name": "getSettleableAccounts",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [],
         "name": "getShareTokenFactory",
         "outputs": [
@@ -4541,7 +4623,7 @@
                     },
                     {
                         "internalType": "address",
-                        "name": "referrerAddr",
+                        "name": "executorAddr",
                         "type": "address"
                     },
                     {
@@ -4732,7 +4814,7 @@
                     },
                     {
                         "internalType": "address",
-                        "name": "referrerAddr",
+                        "name": "executorAddr",
                         "type": "address"
                     },
                     {
@@ -4792,55 +4874,6 @@
         "name": "reduceMarginCollateral",
         "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "int128",
-                "name": "_fDeltaPos",
-                "type": "int128"
-            },
-            {
-                "internalType": "int128",
-                "name": "_fTreasuryFeeRate",
-                "type": "int128"
-            },
-            {
-                "internalType": "int128",
-                "name": "_fPnLPartRate",
-                "type": "int128"
-            },
-            {
-                "internalType": "int128",
-                "name": "_fReferralRebate",
-                "type": "int128"
-            },
-            {
-                "internalType": "address",
-                "name": "_referrerAddr",
-                "type": "address"
-            }
-        ],
-        "name": "relativeFeeToCCAmount",
-        "outputs": [
-            {
-                "internalType": "int128",
-                "name": "",
-                "type": "int128"
-            },
-            {
-                "internalType": "int128",
-                "name": "",
-                "type": "int128"
-            },
-            {
-                "internalType": "int128",
-                "name": "",
-                "type": "int128"
-            }
-        ],
-        "stateMutability": "pure",
         "type": "function"
     },
     {
@@ -5367,7 +5400,7 @@
                     },
                     {
                         "internalType": "address",
-                        "name": "referrerAddr",
+                        "name": "executorAddr",
                         "type": "address"
                     },
                     {

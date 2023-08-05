@@ -20,10 +20,40 @@
                 "internalType": "uint16",
                 "name": "_postingFeeTbps",
                 "type": "uint16"
+            },
+            {
+                "internalType": "uint32",
+                "name": "_callbackGasLimit",
+                "type": "uint32"
             }
         ],
         "stateMutability": "nonpayable",
         "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "callbackTarget",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "success",
+                "type": "bool"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint32",
+                "name": "gasLimit",
+                "type": "uint32"
+            }
+        ],
+        "name": "Callback",
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -126,7 +156,7 @@
                     },
                     {
                         "internalType": "address",
-                        "name": "referrerAddr",
+                        "name": "executorAddr",
                         "type": "address"
                     },
                     {
@@ -244,6 +274,38 @@
         "inputs": [
             {
                 "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "name": "callbackFunctions",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "callbackGasLimit",
+        "outputs": [
+            {
+                "internalType": "uint32",
+                "name": "",
+                "type": "uint32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
                 "name": "_digest",
                 "type": "bytes32"
             },
@@ -301,7 +363,7 @@
             },
             {
                 "internalType": "address",
-                "name": "_referrerAddr",
+                "name": "_executorAddr",
                 "type": "address"
             },
             {
@@ -329,7 +391,7 @@
             },
             {
                 "internalType": "address",
-                "name": "_referrerAddr",
+                "name": "_executorAddr",
                 "type": "address"
             },
             {
@@ -458,6 +520,11 @@
                         "internalType": "bytes",
                         "name": "brokerSignature",
                         "type": "bytes"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "callbackTarget",
+                        "type": "address"
                     }
                 ],
                 "internalType": "struct IClientOrder.ClientOrder[]",
@@ -719,7 +786,7 @@
             },
             {
                 "internalType": "address",
-                "name": "referrerAddr",
+                "name": "executorAddr",
                 "type": "address"
             },
             {
@@ -877,6 +944,11 @@
                         "internalType": "bytes",
                         "name": "brokerSignature",
                         "type": "bytes"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "callbackTarget",
+                        "type": "address"
                     }
                 ],
                 "internalType": "struct IClientOrder.ClientOrder[]",
@@ -965,6 +1037,11 @@
                         "internalType": "bytes",
                         "name": "brokerSignature",
                         "type": "bytes"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "callbackTarget",
+                        "type": "address"
                     }
                 ],
                 "internalType": "struct IClientOrder.ClientOrder",
@@ -1055,6 +1132,11 @@
                         "internalType": "bytes",
                         "name": "brokerSignature",
                         "type": "bytes"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "callbackTarget",
+                        "type": "address"
                     }
                 ],
                 "internalType": "struct IClientOrder.ClientOrder[]",
@@ -1100,6 +1182,19 @@
             }
         ],
         "name": "removeExecutor",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "_gasLimit",
+                "type": "uint32"
+            }
+        ],
+        "name": "setCallbackGasLimit",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
