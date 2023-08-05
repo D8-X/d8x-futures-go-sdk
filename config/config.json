@@ -4,8 +4,18 @@
       "priceFeedNetwork": "testnet",
       "chainId": 80001,
       "version": 8,
-      "proxyAddr": "0x947A868705Ef30419b4E961d862Aeb88DA2f220E",
+      "proxyAddr": "0xCdd7C9e07689d1B3D558A714fAa5Cc4B6bA654bD",
       "nodeURL": "https://polygon-mumbai.blockpi.network/v1/rpc/public",
+      "priceFeedConfigNetwork": "testnet",
+      "postOrderGasLimit": 3000000
+    },
+    {
+      "name": "zktestnet",
+      "priceFeedNetwork": "testnet",
+      "chainId": 1442,
+      "version": 8,
+      "proxyAddr": "0xCdd7C9e07689d1B3D558A714fAa5Cc4B6bA654bD",
+      "nodeURL": "https://rpc.public.zkevm-test.net",
       "priceFeedConfigNetwork": "testnet",
       "postOrderGasLimit": 3000000
     }
