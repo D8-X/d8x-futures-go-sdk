@@ -142,13 +142,14 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, config utils.Config, nest
 			}
 		}
 		// pool currency
-		switch perpetuals[0].CollateralCurrencyType {
+		j := len(perpetuals) - 1
+		switch perpetuals[j].CollateralCurrencyType {
 		case QUOTE:
-			pools[i].PoolMarginSymbol = strings.Split(perpetuals[0].S2Symbol, "-")[1]
+			pools[i].PoolMarginSymbol = strings.Split(perpetuals[j].S2Symbol, "-")[1]
 		case BASE:
-			pools[i].PoolMarginSymbol = strings.Split(perpetuals[0].S2Symbol, "-")[0]
+			pools[i].PoolMarginSymbol = strings.Split(perpetuals[j].S2Symbol, "-")[0]
 		default:
-			pools[i].PoolMarginSymbol = strings.Split(perpetuals[0].S3Symbol, "-")[0]
+			pools[i].PoolMarginSymbol = strings.Split(perpetuals[j].S3Symbol, "-")[0]
 		}
 		// amend mapping perpetual symbol -> perpetual Id
 		for _, perpStatic := range perpetuals {
@@ -215,7 +216,7 @@ func initPriceFeeds(pxConfig utils.PriceFeedConfig, symbolSet utils.Set) Triangu
 }
 
 func getterDataToPerpetualStaticInfo(pIn IPerpetualGetterPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {
-	var poolId int32 = int32(pIn.Id.Int64()) - (int32(pIn.Id.Int64())/1000)*1000
+	var poolId int32 = int32(pIn.Id.Int64()) / 100000
 	base := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
 	quote := ContractSymbolToSymbol(pIn.S2QuoteCCY, symMap)
 	base3 := ContractSymbolToSymbol(pIn.S3BaseCCY, symMap)
