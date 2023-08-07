@@ -190,3 +190,54 @@ func TestPaymentSignature(t *testing.T) {
 	fmt.Printf("\nbroker address %s", wallet.Address.String())
 	fmt.Printf("\nexecutor address %s", ps.Executor.String())
 }
+
+func TestSignOrder(t *testing.T) {
+	chainId := 80001
+	perpId := 10001
+	// Generate a new private key
+	privateKey, err := crypto.GenerateKey()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	// Derive the Ethereum address from the private key
+	addr := crypto.PubkeyToAddress(privateKey.PublicKey)
+	var wallet Wallet
+	pk := fmt.Sprintf("%x", privateKey.D)
+	err = wallet.NewWallet(pk, int64(chainId), nil)
+	proxyAddr := "0xCdd7C9e07689d1B3D558A714fAa5Cc4B6bA654bD"
+	fmt.Printf("\nwallet addr %s\n", wallet.Address.String())
+	if err != nil {
+		panic("error creating wallet")
+	}
+
+	digest, sig, err := CreateOrderBrokerSignature(
+		common.HexToAddress(proxyAddr), int64(chainId), wallet, int32(perpId), uint32(4000),
+		"0x9d5aaB428e98678d0E645ea4AeBd25f744341a05", 1691249493)
+	if err != nil {
+		t.Errorf("signing order: %v", err)
+	}
+	// now encode again
+	sigBytes, err := BytesFromHexString(sig)
+	if err != nil {
+		t.Errorf("decoding signature: %v", err)
+	}
+	digBytes, err := BytesFromHexString(digest)
+	if err != nil {
+		t.Errorf("decoding digest: %v", err)
+	}
+	fmt.Println("digest = ")
+	addrRecovered, err := RecoverEvmAddress(digBytes, sigBytes)
+	if err != nil {
+		t.Errorf("recovering address: %v", err)
+	} else {
+		t.Logf("recovered address")
+		t.Logf(addrRecovered.String())
+	}
+	t.Log("recovered addr = ", addrRecovered.String())
+	t.Log("signer    addr = ", addr.String())
+	if addrRecovered.String() == addr.String() {
+		t.Logf("recovered address correct")
+	} else {
+		t.Errorf("recovering address incorrect")
+	}
+}
