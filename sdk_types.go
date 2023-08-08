@@ -226,7 +226,13 @@ type PaySummary struct {
 	MultiPayCtrct common.Address `json:"multiPayCtrct"`
 }
 
-func (ps *PaySummary) UnmarshalJSON(data []byte) error {
+// Type provided to query payment signature from broker
+type BrokerPaySignatureReq struct {
+	Payment           PaySummary `json:"payment"`
+	ExecutorSignature string     `json:"signature"`
+}
+
+func (ps *BrokerPaySignatureReq) UnmarshalJSON(data []byte) error {
 	// Define an auxiliary struct with TotalAmount as string to handle conversion
 	type PaySummaryAux struct {
 		Payer         string `json:"payer"`
@@ -238,26 +244,29 @@ func (ps *PaySummary) UnmarshalJSON(data []byte) error {
 		ChainId       int64  `json:"chainId"`
 		MultiPayCtrct string `json:"multiPayCtrct"`
 	}
-
-	var aux PaySummaryAux
+	type BrokerPaySignatureReqAux struct {
+		Payment           PaySummaryAux `json:"payment"`
+		ExecutorSignature string        `json:"signature"`
+	}
+	var aux BrokerPaySignatureReqAux
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
 
-	ps.Payer = common.HexToAddress(aux.Payer)
-	ps.Executor = common.HexToAddress(aux.Executor)
-	ps.Token = common.HexToAddress(aux.Token)
-	ps.Timestamp = aux.Timestamp
-	ps.Id = aux.Id
-	ps.ChainId = aux.ChainId
-	ps.MultiPayCtrct = common.HexToAddress(aux.MultiPayCtrct)
+	ps.Payment.Payer = common.HexToAddress(aux.Payment.Payer)
+	ps.Payment.Executor = common.HexToAddress(aux.Payment.Executor)
+	ps.Payment.Token = common.HexToAddress(aux.Payment.Token)
+	ps.Payment.Timestamp = aux.Payment.Timestamp
+	ps.Payment.Id = aux.Payment.Id
+	ps.Payment.ChainId = aux.Payment.ChainId
+	ps.Payment.MultiPayCtrct = common.HexToAddress(aux.Payment.MultiPayCtrct)
 
 	// Convert TotalAmount string to *big.Int
-	ps.TotalAmount = new(big.Int)
-	_, success := ps.TotalAmount.SetString(aux.TotalAmount, 10)
+	ps.Payment.TotalAmount = new(big.Int)
+	_, success := ps.Payment.TotalAmount.SetString(aux.Payment.TotalAmount, 10)
 	if !success {
 		return fmt.Errorf("failed to convert TotalAmount to big.Int")
 	}
-
+	ps.ExecutorSignature = aux.ExecutorSignature
 	return nil
 }
