@@ -1,6 +1,8 @@
 package d8x_futures
 
 import (
+	"encoding/json"
+	"fmt"
 	"math/big"
 
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
@@ -222,4 +224,40 @@ type PaySummary struct {
 	TotalAmount   *big.Int       `json:"totalAmount"`
 	ChainId       int64          `json:"chainId"`
 	MultiPayCtrct common.Address `json:"multiPayCtrct"`
+}
+
+func (ps *PaySummary) UnmarshalJSON(data []byte) error {
+	// Define an auxiliary struct with TotalAmount as string to handle conversion
+	type PaySummaryAux struct {
+		Payer         string `json:"payer"`
+		Executor      string `json:"executor"`
+		Token         string `json:"token"`
+		Timestamp     uint32 `json:"timestamp"`
+		Id            uint32 `json:"id"`
+		TotalAmount   string `json:"totalAmount"`
+		ChainId       int64  `json:"chainId"`
+		MultiPayCtrct string `json:"multiPayCtrct"`
+	}
+
+	var aux PaySummaryAux
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	ps.Payer = common.HexToAddress(aux.Payer)
+	ps.Executor = common.HexToAddress(aux.Executor)
+	ps.Token = common.HexToAddress(aux.Token)
+	ps.Timestamp = aux.Timestamp
+	ps.Id = aux.Id
+	ps.ChainId = aux.ChainId
+	ps.MultiPayCtrct = common.HexToAddress(aux.MultiPayCtrct)
+
+	// Convert TotalAmount string to *big.Int
+	ps.TotalAmount = new(big.Int)
+	_, success := ps.TotalAmount.SetString(aux.TotalAmount, 10)
+	if !success {
+		return fmt.Errorf("failed to convert TotalAmount to big.Int")
+	}
+
+	return nil
 }
