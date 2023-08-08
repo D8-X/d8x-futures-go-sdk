@@ -214,10 +214,12 @@ type PositionRisk struct {
 // struct to be submitted by front-end provider
 // to get broker signature
 type PaySummary struct {
-	Payer       common.Address `json:"payer"`
-	Executor    common.Address `json:"executor"`
-	Token       common.Address `json:"token"`
-	Timestamp   uint32         `json:"timestamp"`
-	Id          uint32         `json:"id"`
-	TotalAmount *big.Int       `json:"totalAmount"`
+	Payer         common.Address `json:"payer"`
+	Executor      common.Address `json:"executor"`
+	Token         common.Address `json:"token"`
+	Timestamp     uint32         `json:"timestamp"`
+	Id            uint32         `json:"id"`
+	TotalAmount   *big.Int       `json:"totalAmount"`
+	ChainId       int64          `json:"chainId"`
+	MultiPayCtrct common.Address `json:"multiPayCtrct"`
 }
