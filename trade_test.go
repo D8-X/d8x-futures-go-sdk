@@ -1,9 +1,10 @@
 package d8x_futures
 
 import (
+	"crypto/ecdsa"
 	"fmt"
+	"log"
 	"math/big"
-	"os"
 	"testing"
 	"time"
 
@@ -75,9 +76,9 @@ func TestOrderHash(t *testing.T) {
 }
 
 func TestPostOrder(t *testing.T) {
-	privateKey, isPkDefined := os.LookupEnv("PK")
-	if !isPkDefined {
-		panic("no private key defined")
+	_, execPk, err := generateKey()
+	if err != nil {
+		log.Fatal(err)
 	}
 	config, err := utils.LoadConfig("testnet")
 	if err != nil {
@@ -85,7 +86,7 @@ func TestPostOrder(t *testing.T) {
 	}
 	conn := CreateBlockChainConnector(config)
 	var wallet Wallet
-	wallet.NewWallet(privateKey, conn.ChainId, conn.Rpc)
+	wallet.NewWallet(fmt.Sprintf("%x", execPk.D), conn.ChainId, conn.Rpc)
 	var xInfo StaticExchangeInfo
 	xInfo.Load("./tmpXchInfo.json")
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
@@ -113,9 +114,9 @@ func TestPostOrder(t *testing.T) {
 }
 
 func TestBrokerSignature(t *testing.T) {
-	privateKey, isPkDefined := os.LookupEnv("PK")
-	if !isPkDefined {
-		panic("no private key defined")
+	_, execPk, err := generateKey()
+	if err != nil {
+		log.Fatal(err)
 	}
 	config, err := utils.LoadConfig("testnet")
 	if err != nil {
@@ -125,7 +126,7 @@ func TestBrokerSignature(t *testing.T) {
 	xInfo.Load("./tmpXchInfo.json")
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	var wallet Wallet
-	err = wallet.NewWallet(privateKey, config.ChainId, nil)
+	err = wallet.NewWallet(fmt.Sprintf("%x", execPk.D), config.ChainId, nil)
 	if err != nil {
 		panic("error creating wallet")
 	}
@@ -142,16 +143,16 @@ func TestBrokerSignature(t *testing.T) {
 }
 
 func TestPaymentSignature(t *testing.T) {
-	privateKey, isPkDefined := os.LookupEnv("PK")
-	if !isPkDefined {
-		panic("no private key defined")
+	_, execPk, err := generateKey()
+	if err != nil {
+		log.Fatal(err)
 	}
 	config, err := utils.LoadConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 	var wallet Wallet
-	err = wallet.NewWallet(privateKey, config.ChainId, nil)
+	err = wallet.NewWallet(fmt.Sprintf("%x", execPk.D), config.ChainId, nil)
 	fmt.Printf("\nwallet addr %s\n", wallet.Address.String())
 	if err != nil {
 		panic("error creating wallet")
@@ -172,8 +173,9 @@ func TestPaymentSignature(t *testing.T) {
 	ps.Timestamp = uint32(timestamp)
 	ps.Token = tokenAddr
 	ps.TotalAmount = &totalAmount
-
-	dgst, sig, err := CreatePaymentBrokerSignature(multiPayCtrct, ps, config.ChainId, wallet)
+	ps.MultiPayCtrct = multiPayCtrct
+	ps.ChainId = config.ChainId
+	dgst, sig, err := CreatePaymentBrokerSignature(ps, wallet)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -182,7 +184,7 @@ func TestPaymentSignature(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	addr, err := RecoverPaymentSignatureAddr(sigB, multiPayCtrct, ps, config.ChainId)
+	addr, err := RecoverPaymentSignatureAddr(sigB, ps)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -240,4 +242,16 @@ func TestSignOrder(t *testing.T) {
 	} else {
 		t.Errorf("recovering address incorrect")
 	}
+}
+
+func generateKey() (common.Address, *ecdsa.PrivateKey, error) {
+	// Generate a new private key
+	privateKey, err := crypto.GenerateKey()
+	if err != nil {
+		log.Fatal(err)
+		return common.Address{}, nil, err
+	}
+	// Derive the Ethereum address from the private key
+	addr := crypto.PubkeyToAddress(privateKey.PublicKey)
+	return addr, privateKey, err
 }

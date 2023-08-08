@@ -50,8 +50,8 @@ func CreateOrderBrokerSignature(proxyAddr common.Address, chainId int64, brokerW
 	return dgstStr, sigStr, nil
 }
 
-func CreatePaymentBrokerSignature(multiPayCtrct common.Address, ps PaySummary, chainId int64, brokerWallet Wallet) (string, string, error) {
-	digestBytes32, err := createPaymentBrokerDigest(multiPayCtrct, chainId, ps)
+func CreatePaymentBrokerSignature(ps PaySummary, brokerWallet Wallet) (string, string, error) {
+	digestBytes32, err := createPaymentBrokerDigest(ps)
 	if err != nil {
 		return "", "", err
 	}
@@ -70,8 +70,8 @@ func CreatePaymentBrokerSignature(multiPayCtrct common.Address, ps PaySummary, c
 // RecoverPaymentSignatureAddr recovers the address that created the signature of PaySummary data for
 // the given chainId and multiPayContract address.
 // The function returns the recovered address or an error
-func RecoverPaymentSignatureAddr(sig []byte, multiPayCtrct common.Address, ps PaySummary, chainId int64) (common.Address, error) {
-	digestBytes32, err := createPaymentBrokerDigest(multiPayCtrct, chainId, ps)
+func RecoverPaymentSignatureAddr(sig []byte, ps PaySummary) (common.Address, error) {
+	digestBytes32, err := createPaymentBrokerDigest(ps)
 	if err != nil {
 		return common.Address{}, err
 	}
@@ -145,8 +145,8 @@ func createOrderBrokerDigest(proxyAddr common.Address, chainId int64, iPerpetual
 	return digestBytes32, nil
 }
 
-func createPaymentBrokerDigest(multiPayCtrct common.Address, chainId int64, ps PaySummary) ([32]byte, error) {
-	domainSeparatorHashBytes32 := getDomainHash("Multipay", int64(chainId), multiPayCtrct.String())
+func createPaymentBrokerDigest(ps PaySummary) ([32]byte, error) {
+	domainSeparatorHashBytes32 := getDomainHash("Multipay", ps.ChainId, ps.MultiPayCtrct.String())
 	typeHash := Keccak256FromString("PaySummary(address payer,address executor,address token,uint32 timestamp,uint32 id,uint256 totalAmount)")
 	types := []string{"bytes32", "address", "address", "address", "uint32", "uint32", "uint256"}
 	values := []interface{}{typeHash, ps.Payer, ps.Executor, ps.Token, ps.Timestamp, ps.Id, ps.TotalAmount}
