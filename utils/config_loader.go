@@ -3,8 +3,8 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -35,13 +35,13 @@ type PriceFeedId struct {
 }
 
 type PriceFeedEndpoint struct {
-	Type        string `json:"type"`
-	EndpointUrl string `json:"endpoint"`
+	Type        string   `json:"type"`
+	EndpointUrl []string `json:"endpoints"`
 }
 
 func LoadPriceFeedConfig(configNetwork string) (PriceFeedConfig, error) {
 	// Read the JSON file
-	data, err := ioutil.ReadFile("config/priceFeedConfig.json")
+	data, err := os.ReadFile("config/priceFeedConfig.json")
 	if err != nil {
 		log.Fatal("Error reading JSON file:", err)
 		return PriceFeedConfig{}, err
@@ -63,7 +63,7 @@ func LoadPriceFeedConfig(configNetwork string) (PriceFeedConfig, error) {
 
 func LoadConfig(configName string) (Config, error) {
 	// Read the JSON file
-	data, err := ioutil.ReadFile("config/config.json")
+	data, err := os.ReadFile("config/config.json")
 	if err != nil {
 		log.Fatal("Error reading JSON file:", err)
 		return Config{}, err

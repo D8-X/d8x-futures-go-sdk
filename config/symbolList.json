@@ -9,5 +9,9 @@
   "GBP": "GBP",
   "CHF": "CHF",
   "EUR": "EUR",
-  "JPY": "JPY"
+  "JPY": "JPY",
+  "stTH": "stETH",
+  "stER": "stEUR",
+  "agER": "agER",
+  "LUSD": "LUSD"
 }
