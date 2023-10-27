@@ -20,12 +20,13 @@ import (
 func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, postingWallet Wallet, traderSig []byte, order Order, trader common.Address) (string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	scOrder := order.ToChainType(xInfo, trader)
-
+	scOrders := []IClientOrderClientOrder{scOrder}
+	tsigs := [][]byte{traderSig}
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(conn.PostOrderGasLimit))
 	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-	tx, err := ob.PostOrder(postingWallet.Auth, scOrder, traderSig)
+	tx, err := ob.PostOrders(postingWallet.Auth, scOrders, tsigs)
 	if err != nil {
 		fmt.Println(err)
 		return "", err

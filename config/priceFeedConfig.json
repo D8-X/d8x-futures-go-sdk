@@ -55,10 +55,21 @@
         "id": "0x20a938f54b68f1f2ef18ea0328f6dd0747f8ea11486d22b021e83a900be89776",
         "type": "pyth",
         "origin": "FX.USD/JPY"
+      },
+      {
+        "symbol": "stETH-USD",
+        "id": "0xb7abd25a76ddaffdf847224f03198ccb92723f90b2429cf33f0eecb96e352a86",
+        "type": "pyth",
+        "origin": "Crypto.STETH/USD"
+      },
+      {
+        "symbol": "agEUR-USD",
+        "id": "0x1c06615b7f8c0373adb47d341a825125c3c8db4c3861f2f0d89404038a0428b7",
+        "type": "pyth",
+        "origin": "Crypto.AGEUR/USD"
       }
     ],
-    "threshold_market_closed_sec": 15,
-    "endpoints": [{ "type": "pyth", "endpoint": "https://xc-testnet.pyth.network/api" }]
+    "endpoints": [{ "type": "pyth", "endpoints": ["https://hermes-beta.pyth.network/api"] }]
   },
   {
     "network": "mainnet",
@@ -94,13 +105,36 @@
         "origin": "FX.USD/CHF"
       },
       {
+        "symbol": "EUR-USD",
+        "id": "0xa995d00bb36a63cef7fd2c287dc105fc8f3d93779f062f09551b0af3e81ec30b",
+        "type": "pyth",
+        "origin": "FX.EUR/USD"
+      },
+      {
+        "symbol": "GBP-USD",
+        "id": "0x84c2dde9633d93d1bcad84e7dc41c9d56578b7ec52fabedc1f335d673df0a7c1",
+        "type": "pyth",
+        "origin": "FX.GBP/USD"
+      },
+      {
         "symbol": "XAU-USD",
         "id": "0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee34bb2",
         "type": "pyth",
         "origin": "Metal.XAU/USD"
+      },
+      {
+        "symbol": "stETH-USD",
+        "id": "0x846ae1bdb6300b817cee5fdee2a6da192775030db5615b94a465f53bd40850b5",
+        "type": "pyth",
+        "origin": "Crypto.STETH/USD"
+      },
+      {
+        "symbol": "agEUR-USD",
+        "id": "0x3b670a7aa22cf0dc3b76b42dc2e26a85bac35eafc5a5ae2defd6d98201b1b997",
+        "type": "pyth",
+        "origin": "Crypto.AGEUR/USD"
       }
     ],
-    "threshold_market_closed_sec": 15,
-    "endpoints": [{ "type": "pyth", "endpoint": "https://xc-mainnet.pyth.network/api" }]
+    "endpoints": [{ "type": "pyth", "endpoints": ["https://hermes.pyth.network/api"] }]
   }
 ]

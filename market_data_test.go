@@ -15,14 +15,14 @@ func TestFetchPricesFromAPI(t *testing.T) {
 	}
 	priceIds := []string{"0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
 		"0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"}
-	data := fetchPricesFromAPI(priceIds, pxConfig)
+	data, _ := fetchPricesFromAPI(priceIds, pxConfig, 0)
 	fmt.Println(data)
 }
 
 func TestFetchPricesForPerpetual(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	pxBundle := FetchPricesForPerpetual(info, "BTC-USD-MATIC")
+	pxBundle, _ := FetchPricesForPerpetual(info, "BTC-USD-MATIC", 0)
 	fmt.Println(pxBundle)
 }
 
@@ -35,7 +35,7 @@ func TestGetPositionRisk(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(config)
-	pRisk, err := GetPositionRisk(info, conn, (*common.Address)(&traderAddr), "ETH-USD-MATIC")
+	pRisk, err := GetPositionRisk(info, conn, (*common.Address)(&traderAddr), "ETH-USD-MATIC", 0)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -51,7 +51,7 @@ func TestQueryPerpetualState(t *testing.T) {
 	}
 	conn := CreateBlockChainConnector(config)
 	perpIds := []int32{100001, 100002}
-	perpState, err := QueryPerpetualState(conn, info, perpIds)
+	perpState, err := QueryPerpetualState(conn, info, perpIds, 0)
 	if err != nil {
 		t.Logf(err.Error())
 	}
