@@ -364,6 +364,7 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, endPtNo
 	}
 	// loop through price id's, find its endpoints and prepare the query
 	for i, id := range priceIds {
+		id = strings.TrimPrefix(id, "0x")
 		for _, c := range config.PriceFeedIds {
 			if c.Id == "0x"+id {
 				queries[c.Type] += "ids[]=" + id + "&"
