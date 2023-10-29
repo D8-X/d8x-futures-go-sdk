@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -130,10 +131,11 @@ var (
 type BlockChainConnector struct {
 	Rpc               *ethclient.Client
 	ChainId           int64
-	PerpetualManager  *IPerpetualManager
+	PerpetualManager  *contracts.IPerpetualManager
 	SymbolMapping     *map[string]string //chain-symbol (MATC) to long format (MATIC)
 	PriceFeedNetwork  string             //testnet or mainnet
 	PostOrderGasLimit int64              //gas limit for posting orders
+	PriceFeedConfig   utils.PriceFeedConfig
 }
 
 type ExchangeInfo struct {

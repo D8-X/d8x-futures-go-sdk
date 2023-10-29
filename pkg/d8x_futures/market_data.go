@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -182,7 +183,7 @@ func QueryOpenOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol 
 
 	from := 0
 	count := 15
-	clientOrders := []IClientOrderClientOrder{}
+	clientOrders := []contracts.IClientOrderClientOrder{}
 	zeroAddr := common.Address{}
 outerLoop:
 	for {
@@ -211,7 +212,7 @@ outerLoop:
 	orders := make([]Order, len(clientOrders))
 	for i, d := range digests {
 		strDigests[i] = "0x" + common.Bytes2Hex(d[:])
-		orders[i] = clientOrders[i].FromChainType(xInfo)
+		orders[i] = FromChainType(&clientOrders[i], xInfo)
 	}
 	if err != nil {
 		return []Order{}, []string{}, err

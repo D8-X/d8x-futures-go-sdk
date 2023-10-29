@@ -80,11 +80,11 @@ func TestPostOrder(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	config, err := utils.LoadConfig("testnet")
+	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(config)
+	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
 	var wallet Wallet
 	wallet.NewWallet(fmt.Sprintf("%x", execPk.D), conn.ChainId, conn.Rpc)
 	var xInfo StaticExchangeInfo
@@ -118,7 +118,7 @@ func TestBrokerSignature(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	config, err := utils.LoadConfig("testnet")
+	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -147,7 +147,7 @@ func TestPaymentSignature(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	config, err := utils.LoadConfig("testnet")
+	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}

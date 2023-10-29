@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-type Config struct {
+type ChainConfig struct {
 	Name                   string         `json:"name"`
 	PriceFeedNetwork       string         `json:"priceFeedNetwork"`
 	ChainId                int64          `json:"chainId"`
@@ -39,9 +39,12 @@ type PriceFeedEndpoint struct {
 	EndpointUrl []string `json:"endpoints"`
 }
 
-func LoadPriceFeedConfig(configNetwork string) (PriceFeedConfig, error) {
+// LoadPriceFeedConfig loads the price feed config file cfFilePath into struct PriceFeedConfig
+// for the network called configNetwork
+// for example LoadPriceFeedConfig("config/priceFeedConfig.json", "testnet")
+func LoadPriceFeedConfig(cfFilePath string, configNetwork string) (PriceFeedConfig, error) {
 	// Read the JSON file
-	data, err := os.ReadFile("config/priceFeedConfig.json")
+	data, err := os.ReadFile(cfFilePath)
 	if err != nil {
 		log.Fatal("Error reading JSON file:", err)
 		return PriceFeedConfig{}, err
@@ -61,24 +64,26 @@ func LoadPriceFeedConfig(configNetwork string) (PriceFeedConfig, error) {
 	return PriceFeedConfig{}, errors.New("config not found")
 }
 
-func LoadConfig(configName string) (Config, error) {
+// LoadChainConfig loads the chain-config from cfFilePath (e.g. "config/config.json") into ChainConfig struct
+// for network configName
+func LoadChainConfig(cfFilePath string, configName string) (ChainConfig, error) {
 	// Read the JSON file
-	data, err := os.ReadFile("config/config.json")
+	data, err := os.ReadFile(cfFilePath)
 	if err != nil {
 		log.Fatal("Error reading JSON file:", err)
-		return Config{}, err
+		return ChainConfig{}, err
 	}
-	var configuration []Config
+	var configuration []ChainConfig
 	// Unmarshal the JSON data into the Configuration struct
 	err = json.Unmarshal(data, &configuration)
 	if err != nil {
 		log.Fatal("Error decoding JSON:", err)
-		return Config{}, err
+		return ChainConfig{}, err
 	}
 	for i := 0; i < len(configuration); i++ {
 		if configuration[i].Name == configName {
 			return configuration[i], nil
 		}
 	}
-	return Config{}, errors.New("config not found")
+	return ChainConfig{}, errors.New("config not found")
 }

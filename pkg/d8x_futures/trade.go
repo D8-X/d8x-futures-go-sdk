@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -20,7 +21,7 @@ import (
 func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, postingWallet Wallet, traderSig []byte, order Order, trader common.Address) (string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	scOrder := order.ToChainType(xInfo, trader)
-	scOrders := []IClientOrderClientOrder{scOrder}
+	scOrders := []contracts.IClientOrderClientOrder{scOrder}
 	tsigs := [][]byte{traderSig}
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
@@ -185,7 +186,7 @@ func getDomainHash(name string, chainId int64, contractAddr string) [32]byte {
 	return DomainSeparatorHashBytes32
 }
 
-func CreateOrderDigest(order IClientOrderClientOrder, chainId int, isNewOrder bool, proxyAddress string) (string, error) {
+func CreateOrderDigest(order contracts.IClientOrderClientOrder, chainId int, isNewOrder bool, proxyAddress string) (string, error) {
 	DomainSeparatorHashBytes32 := getDomainHash("Perpetual Trade Manager", int64(chainId), proxyAddress)
 	tradeOrderTypeHash := Keccak256FromString("Order(uint24 iPerpetualId,uint16 brokerFeeTbps,address traderAddr,address brokerAddr,int128 fAmount,int128 fLimitPrice,int128 fTriggerPrice,uint32 iDeadline,uint32 flags,uint16 leverageTDR,uint32 executionTimestamp)")
 	types := []string{"bytes32",

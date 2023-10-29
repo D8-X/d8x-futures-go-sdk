@@ -8,11 +8,11 @@ import (
 )
 
 func TestQueryNestedPerpetualInfo(t *testing.T) {
-	config, err := utils.LoadConfig("testnet")
+	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(config)
+	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
 	p := QueryNestedPerpetualInfo(conn)
 	fmt.Println(p.PerpetualIds)
 }
@@ -27,11 +27,12 @@ func TestReadSymbolList(t *testing.T) {
 }
 
 func TestQueryPoolStaticInfo(t *testing.T) {
-	config, err := utils.LoadConfig("testnet")
+	config, err := utils.LoadChainConfig("config/chainConfig", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(config)
+
+	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
 	nest := QueryNestedPerpetualInfo(conn)
 	info := QueryExchangeStaticInfo(conn, config, nest)
 	fmt.Println(info)
@@ -54,7 +55,7 @@ func TestPythNToFloat64(t *testing.T) {
 }
 
 func TestTriangulate(t *testing.T) {
-	pxConfig, err := utils.LoadPriceFeedConfig("testnet")
+	pxConfig, err := utils.LoadPriceFeedConfig("config/priceFeedConfig.json", "testnet")
 	if err != nil {
 		panic(err)
 	}
