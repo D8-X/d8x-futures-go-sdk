@@ -2,6 +2,7 @@ package d8x_futures
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -301,7 +302,7 @@ func CalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, positio
 func FetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, epNo int) (PerpetualPriceInfo, error) {
 	j := GetPerpetualStaticInfoIdxFromId(exchangeInfo, id)
 	if j == -1 {
-		panic("symbol does not exist in static perpetual info")
+		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
 	return fetchPricesForPerpetual(exchangeInfo, j, epNo)
 }
@@ -313,7 +314,7 @@ func FetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string, epN
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo, symbol)
 	if j == -1 {
-		panic("symbol does not exist in static perpetual info")
+		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
 	return fetchPricesForPerpetual(exchangeInfo, j, epNo)
 }
