@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
@@ -52,28 +53,28 @@ func CreateRPC(nodeURL string) (*ethclient.Client, error) {
 	return rpc, nil
 }
 
-func CreateBlockChainConnector(cfPxFilePath string, config utils.ChainConfig) BlockChainConnector {
-	rpc, err := CreateRPC(config.NodeURL)
+func CreateBlockChainConnector(cfPxFilePath string, chConf utils.ChainConfig) BlockChainConnector {
+	rpc, err := CreateRPC(chConf.NodeURL)
 	if err != nil {
 		panic(err)
 	}
-	proxy := CreatePerpetualManagerInstance(rpc, config.ProxyAddr)
-	symbolMap, err := readSymbolList()
+	proxy := CreatePerpetualManagerInstance(rpc, chConf.ProxyAddr)
+	symbolMap, err := config.GetSymbolList()
 	if err != nil {
 		panic(err)
 	}
-	priceFeedNetwork := config.PriceFeedNetwork
-	pxConfig, err := utils.LoadPriceFeedConfig(cfPxFilePath, config.PriceFeedNetwork)
+	priceFeedNetwork := chConf.PriceFeedNetwork
+	pxConfig, err := utils.LoadPriceFeedConfig(cfPxFilePath, chConf.PriceFeedNetwork)
 	if err != nil {
 		panic(err)
 	}
 	var b = BlockChainConnector{
 		Rpc:               rpc,
-		ChainId:           config.ChainId,
+		ChainId:           chConf.ChainId,
 		PerpetualManager:  proxy,
-		SymbolMapping:     symbolMap,
+		SymbolMapping:     &symbolMap,
 		PriceFeedNetwork:  priceFeedNetwork,
-		PostOrderGasLimit: config.PostOrderGasLimit,
+		PostOrderGasLimit: chConf.PostOrderGasLimit,
 		PriceFeedConfig:   pxConfig,
 	}
 
@@ -258,23 +259,6 @@ func ContractSymbolToSymbol(cSym [4]byte, symMap *map[string]string) string {
 		return ""
 	}
 	return (*symMap)[sym]
-}
-
-// readSymbolList reads the mapping from contract symbol to symbol
-func readSymbolList() (*map[string]string, error) {
-	jsonData, err := ioutil.ReadFile("config/symbolList.json")
-	if err != nil {
-		return nil, err
-	}
-	// Define a map to store the data
-	data := make(map[string]string)
-
-	// Unmarshal the JSON data into the map
-	err = json.Unmarshal(jsonData, &data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
 }
 
 func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Address) contracts.IClientOrderClientOrder {

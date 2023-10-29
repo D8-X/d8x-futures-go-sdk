@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 )
 
@@ -18,21 +19,21 @@ func TestQueryNestedPerpetualInfo(t *testing.T) {
 }
 
 func TestReadSymbolList(t *testing.T) {
-	symMap, err := readSymbolList()
+	symMap, err := config.GetSymbolList()
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	fmt.Println((*symMap)["MATC"])
+	fmt.Println((symMap)["MATC"])
 
 }
 
 func TestQueryPoolStaticInfo(t *testing.T) {
-	config, err := utils.LoadChainConfig("config/chainConfig", "testnet")
+	config, err := utils.LoadChainConfig("../../config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 
-	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
+	conn := CreateBlockChainConnector("../../config/priceFeedConfig.json", config)
 	nest := QueryNestedPerpetualInfo(conn)
 	info := QueryExchangeStaticInfo(conn, config, nest)
 	fmt.Println(info)

@@ -1,0 +1,22 @@
+[
+    {
+      "name": "testnet",
+      "priceFeedNetwork": "testnet",
+      "chainId": 1442,
+      "version": 8,
+      "proxyAddr": "0x6568FFB59E8BC993B216F132908Ff5231fffb231",
+      "nodeURL": "https://rpc.public.zkevm-test.net",
+      "priceFeedConfigNetwork": "testnet",
+      "postOrderGasLimit": 3000000
+    },
+    {
+      "name": "zkevm",
+      "priceFeedNetwork": "zkmainnet",
+      "chainId": 1101,
+      "version": 8,
+      "proxyAddr": "0x6568FFB59E8BC993B216F132908Ff5231fffb231",
+      "nodeURL": "https://zkevm-rpc.com",
+      "priceFeedConfigNetwork": "testnet",
+      "postOrderGasLimit": 3000000
+    }
+]
