@@ -9,7 +9,7 @@ import (
 )
 
 func TestFetchPricesFromAPI(t *testing.T) {
-	pxConfig, err := utils.LoadPriceFeedConfig("config/priceFeedConfig.json", "testnet")
+	pxConfig, err := utils.LoadPriceFeedConfig("../../config/priceFeedConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -30,12 +30,12 @@ func TestGetPositionRisk(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
 	traderAddr := common.HexToAddress("***REMOVED***")
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	config, err := utils.LoadChainConfig("../../config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 
-	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
+	conn := CreateBlockChainConnector("../../config/priceFeedConfig.json", config)
 	pRisk, err := GetPositionRisk(info, conn, (*common.Address)(&traderAddr), "ETH-USD-MATIC", 0)
 	if err != nil {
 		t.Logf(err.Error())
@@ -46,11 +46,11 @@ func TestGetPositionRisk(t *testing.T) {
 func TestQueryPerpetualState(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	config, err := utils.LoadChainConfig("../../config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
+	conn := CreateBlockChainConnector("../../config/priceFeedConfig.json", config)
 	perpIds := []int32{100001, 100002}
 	perpState, err := QueryPerpetualState(conn, info, perpIds, 0)
 	if err != nil {
@@ -62,11 +62,11 @@ func TestQueryPerpetualState(t *testing.T) {
 func TestQueryPoolStates(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	config, err := utils.LoadChainConfig("../../config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
+	conn := CreateBlockChainConnector("../../config/priceFeedConfig.json", config)
 	poolStates, err := QueryPoolStates(conn, info)
 	if err != nil {
 		t.Logf(err.Error())
@@ -85,12 +85,12 @@ func TestQueryPoolStates(t *testing.T) {
 func TestQueryOpenOrders(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	config, err := utils.LoadChainConfig("../../config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 	traderAddr := common.HexToAddress("***REMOVED***")
-	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
+	conn := CreateBlockChainConnector("../../config/priceFeedConfig.json", config)
 	orders, digests, err := QueryOpenOrders(conn, info, "MATIC-USD-MATIC", traderAddr)
 	if err != nil {
 		t.Logf(err.Error())
@@ -110,12 +110,12 @@ func TestQueryOpenOrders(t *testing.T) {
 func TestQueryTraderVolume(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	config, err := utils.LoadChainConfig("../../config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 	traderAddr := common.HexToAddress("***REMOVED***")
-	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
+	conn := CreateBlockChainConnector("../../config/priceFeedConfig.json", config)
 	volume, err := QueryTraderVolume(conn, info, traderAddr, 1)
 	if err != nil {
 		t.Logf(err.Error())
@@ -126,13 +126,13 @@ func TestQueryTraderVolume(t *testing.T) {
 func TestQueryExchangeFeeTbpsForTrader(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	config, err := utils.LoadChainConfig("../../config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 	traderAddr := common.HexToAddress("***REMOVED***")
 	brokerAddr := common.Address{}
-	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
+	conn := CreateBlockChainConnector("../../config/priceFeedConfig.json", config)
 	fee, err := QueryExchangeFeeTbpsForTrader(conn, info, 1, traderAddr, brokerAddr)
 	if err != nil {
 		t.Logf(err.Error())
@@ -143,11 +143,11 @@ func TestQueryExchangeFeeTbpsForTrader(t *testing.T) {
 func TestQueryMaxTradeAmount(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	config, err := utils.LoadChainConfig("../../config/chainConfig.json", "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
+	conn := CreateBlockChainConnector("../../config/priceFeedConfig.json", config)
 	trade, err := QueryMaxTradeAmount(conn, info, 0.01, "ETH-USD-MATIC", true)
 	if err != nil {
 		t.Logf(err.Error())
