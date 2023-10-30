@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/D8-X/d8x-futures-go-sdk/utils"
+	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )
@@ -80,11 +80,15 @@ func TestPostOrder(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	chConfig, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
+	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(pxConf, chConfig)
 	var wallet Wallet
 	wallet.NewWallet(fmt.Sprintf("%x", execPk.D), conn.ChainId, conn.Rpc)
 	var xInfo StaticExchangeInfo
@@ -118,7 +122,7 @@ func TestBrokerSignature(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	chConfig, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -126,7 +130,7 @@ func TestBrokerSignature(t *testing.T) {
 	xInfo.Load("./tmpXchInfo.json")
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	var wallet Wallet
-	err = wallet.NewWallet(fmt.Sprintf("%x", execPk.D), config.ChainId, nil)
+	err = wallet.NewWallet(fmt.Sprintf("%x", execPk.D), chConfig.ChainId, nil)
 	if err != nil {
 		panic("error creating wallet")
 	}
@@ -147,12 +151,12 @@ func TestPaymentSignature(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	chConfig, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 	var wallet Wallet
-	err = wallet.NewWallet(fmt.Sprintf("%x", execPk.D), config.ChainId, nil)
+	err = wallet.NewWallet(fmt.Sprintf("%x", execPk.D), chConfig.ChainId, nil)
 	fmt.Printf("\nwallet addr %s\n", wallet.Address.String())
 	if err != nil {
 		panic("error creating wallet")
@@ -174,7 +178,7 @@ func TestPaymentSignature(t *testing.T) {
 	ps.Token = tokenAddr
 	ps.TotalAmount = &totalAmount
 	ps.MultiPayCtrct = multiPayCtrct
-	ps.ChainId = config.ChainId
+	ps.ChainId = chConfig.ChainId
 	dgst, sig, err := CreatePaymentBrokerSignature(ps, wallet)
 	if err != nil {
 		t.Logf(err.Error())

@@ -9,11 +9,15 @@ import (
 )
 
 func TestQueryNestedPerpetualInfo(t *testing.T) {
-	config, err := utils.LoadChainConfig("config/chainConfig.json", "testnet")
+	chConf, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector("config/priceFeedConfig.json", config)
+	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(pxConf, chConf)
 	p := QueryNestedPerpetualInfo(conn)
 	fmt.Println(p.PerpetualIds)
 }
@@ -28,14 +32,17 @@ func TestReadSymbolList(t *testing.T) {
 }
 
 func TestQueryPoolStaticInfo(t *testing.T) {
-	config, err := utils.LoadChainConfig("../../config/chainConfig.json", "testnet")
+	chConf, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-
-	conn := CreateBlockChainConnector("../../config/priceFeedConfig.json", config)
+	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(pxConf, chConf)
 	nest := QueryNestedPerpetualInfo(conn)
-	info := QueryExchangeStaticInfo(conn, config, nest)
+	info := QueryExchangeStaticInfo(conn, chConf, nest)
 	fmt.Println(info)
 	info.Store("./tmpXchInfo.json")
 }
@@ -56,15 +63,15 @@ func TestPythNToFloat64(t *testing.T) {
 }
 
 func TestTriangulate(t *testing.T) {
-	pxConfig, err := utils.LoadPriceFeedConfig("config/priceFeedConfig.json", "testnet")
+	pxConf, err := config.GetDefaultPriceConfig("testnet")
 	if err != nil {
-		panic(err)
+		t.Logf(err.Error())
 	}
-	triangs := Triangulate("CHF-USDC", pxConfig)
+	triangs := Triangulate("CHF-USDC", pxConf)
 	fmt.Println("Triangulate")
 	fmt.Println(triangs)
 
 	// test an impossible path
-	triangs2 := Triangulate("CHF-DOGE", pxConfig)
+	triangs2 := Triangulate("CHF-DOGE", pxConf)
 	fmt.Println(triangs2)
 }
