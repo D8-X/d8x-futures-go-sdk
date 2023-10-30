@@ -77,22 +77,40 @@ func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.Chai
 	return b
 }
 
-func QueryNestedPerpetualInfo(conn BlockChainConnector) NestedPerpetualIds {
+func QueryNestedPerpetualInfo(conn BlockChainConnector) (NestedPerpetualIds, error) {
 
-	const idxFrom = 1
-	const idxTo = 20
-	//([][]*big.Int, []common.Address, []common.Address, common.Address, error)
-	nestedPerpetualIds, poolShareTokenAddr, poolMarginTokenAddr, oracleFactory, err := conn.PerpetualManager.GetPoolStaticInfo(nil, idxFrom, idxTo)
-	if err != nil {
-		panic(err)
+	var idxFrom uint8 = 1
+	const queryLen uint8 = 5
+	var lenReceived = queryLen
+	var nestedPerpetualIds [][]*big.Int
+	var poolShareTokenAddr []common.Address
+	var poolMarginTokenAddr []common.Address
+	var oracleFactory common.Address
+	for {
+		//([][]*big.Int, []common.Address, []common.Address, common.Address, error)
+		idxTo := idxFrom + queryLen - 1
+		p0, p1, p2, orcfac, err := conn.PerpetualManager.GetPoolStaticInfo(nil, idxFrom, idxTo)
+		if err != nil {
+			return NestedPerpetualIds{}, err
+		}
+		lenReceived = uint8(len(p1))
+		nestedPerpetualIds = append(nestedPerpetualIds, p0...)
+		poolShareTokenAddr = append(poolShareTokenAddr, p1...)
+		poolMarginTokenAddr = append(poolMarginTokenAddr, p2...)
+		oracleFactory = orcfac
+		if lenReceived < queryLen {
+			break
+		}
+		idxFrom = idxFrom + lenReceived
 	}
+
 	var p = NestedPerpetualIds{
 		PerpetualIds:        nestedPerpetualIds,
 		PoolShareTokenAddr:  poolShareTokenAddr,
 		PoolMarginTokenAddr: poolMarginTokenAddr,
 		OracleFactoryAddr:   oracleFactory,
 	}
-	return p
+	return p, nil
 }
 
 // GetPerpetualStaticInfoIdxFromSymbol returns the idx of the perpetual within StaticExchangeInfo,
