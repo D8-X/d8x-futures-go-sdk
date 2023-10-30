@@ -75,3 +75,21 @@ func LoadChainConfig(data []byte, configName string) (ChainConfig, error) {
 	}
 	return ChainConfig{}, errors.New("config not found")
 }
+
+// LoadChainConfig loads the chain-config from data into ChainConfig struct
+// for network configName
+func LoadChainConfigNames(data []byte) ([]string, error) {
+
+	var configuration []ChainConfig
+	// Unmarshal the JSON data into the Configuration struct
+	err := json.Unmarshal(data, &configuration)
+	if err != nil {
+		log.Fatal("Error decoding JSON:", err)
+		return nil, err
+	}
+	var ret []string
+	for i := 0; i < len(configuration); i++ {
+		ret = append(ret, configuration[i].Name)
+	}
+	return ret, nil
+}

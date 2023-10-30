@@ -31,6 +31,20 @@ func GetSymbolList() (map[string]string, error) {
 	return data, nil
 }
 
+func GetDefaultChainConfigNames() ([]string, error) {
+	// Read the JSON file
+	fs, err := EmbededConfigs.Open("embedded/chainConfig.json")
+	if err != nil {
+		log.Fatal("Error reading JSON file:", err)
+		return nil, err
+	}
+	data, err := io.ReadAll(fs)
+	if err != nil {
+		return nil, err
+	}
+	return utils.LoadChainConfigNames(data)
+}
+
 func GetDefaultChainConfig(configName string) (utils.ChainConfig, error) {
 	// Read the JSON file
 	fs, err := EmbededConfigs.Open("embedded/chainConfig.json")

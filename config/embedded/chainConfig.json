@@ -11,7 +11,7 @@
     },
     {
       "name": "zkevm",
-      "priceFeedNetwork": "zkevm",
+      "priceFeedNetwork": "mainnet",
       "chainId": 1101,
       "version": 8,
       "proxyAddr": "0xaB7794EcD2c8e9Decc6B577864b40eBf9204720f",
