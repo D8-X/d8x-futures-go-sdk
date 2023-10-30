@@ -18,7 +18,10 @@ func TestQueryNestedPerpetualInfo(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
-	p := QueryNestedPerpetualInfo(conn)
+	p, err := QueryNestedPerpetualInfo(conn)
+	if err != nil {
+		t.Logf(err.Error())
+	}
 	fmt.Println(p.PerpetualIds)
 }
 
@@ -41,7 +44,10 @@ func TestQueryPoolStaticInfo(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
-	nest := QueryNestedPerpetualInfo(conn)
+	nest, err := QueryNestedPerpetualInfo(conn)
+	if err != nil {
+		t.Logf(err.Error())
+	}
 	info := QueryExchangeStaticInfo(conn, chConf, nest)
 	fmt.Println(info)
 	info.Store("./tmpXchInfo.json")
