@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"os"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -39,19 +38,13 @@ type PriceFeedEndpoint struct {
 	EndpointUrl []string `json:"endpoints"`
 }
 
-// LoadPriceFeedConfig loads the price feed config file cfFilePath into struct PriceFeedConfig
-// for the network called configNetwork
+// LoadPriceFeedConfig loads the price feed config file
+// data into struct PriceFeedConfig for the network called configNetwork
 // for example LoadPriceFeedConfig("config/priceFeedConfig.json", "testnet")
-func LoadPriceFeedConfig(cfFilePath string, configNetwork string) (PriceFeedConfig, error) {
-	// Read the JSON file
-	data, err := os.ReadFile(cfFilePath)
-	if err != nil {
-		log.Fatal("Error reading JSON file:", err)
-		return PriceFeedConfig{}, err
-	}
+func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, error) {
 	var configuration []PriceFeedConfig
 	// Unmarshal the JSON data into the Configuration struct
-	err = json.Unmarshal(data, &configuration)
+	err := json.Unmarshal(data, &configuration)
 	if err != nil {
 		log.Fatal("Error decoding JSON:", err)
 		return PriceFeedConfig{}, err
@@ -64,18 +57,13 @@ func LoadPriceFeedConfig(cfFilePath string, configNetwork string) (PriceFeedConf
 	return PriceFeedConfig{}, errors.New("config not found")
 }
 
-// LoadChainConfig loads the chain-config from cfFilePath (e.g. "config/config.json") into ChainConfig struct
+// LoadChainConfig loads the chain-config from data into ChainConfig struct
 // for network configName
-func LoadChainConfig(cfFilePath string, configName string) (ChainConfig, error) {
-	// Read the JSON file
-	data, err := os.ReadFile(cfFilePath)
-	if err != nil {
-		log.Fatal("Error reading JSON file:", err)
-		return ChainConfig{}, err
-	}
+func LoadChainConfig(data []byte, configName string) (ChainConfig, error) {
+
 	var configuration []ChainConfig
 	// Unmarshal the JSON data into the Configuration struct
-	err = json.Unmarshal(data, &configuration)
+	err := json.Unmarshal(data, &configuration)
 	if err != nil {
 		log.Fatal("Error decoding JSON:", err)
 		return ChainConfig{}, err

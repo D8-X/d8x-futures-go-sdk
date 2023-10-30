@@ -53,7 +53,7 @@ func CreateRPC(nodeURL string) (*ethclient.Client, error) {
 	return rpc, nil
 }
 
-func CreateBlockChainConnector(cfPxFilePath string, chConf utils.ChainConfig) BlockChainConnector {
+func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.ChainConfig) BlockChainConnector {
 	rpc, err := CreateRPC(chConf.NodeURL)
 	if err != nil {
 		panic(err)
@@ -64,10 +64,6 @@ func CreateBlockChainConnector(cfPxFilePath string, chConf utils.ChainConfig) Bl
 		panic(err)
 	}
 	priceFeedNetwork := chConf.PriceFeedNetwork
-	pxConfig, err := utils.LoadPriceFeedConfig(cfPxFilePath, chConf.PriceFeedNetwork)
-	if err != nil {
-		panic(err)
-	}
 	var b = BlockChainConnector{
 		Rpc:               rpc,
 		ChainId:           chConf.ChainId,
