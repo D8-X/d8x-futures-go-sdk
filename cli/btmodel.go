@@ -18,6 +18,7 @@ type Model struct {
 	PriceConfig         utils.PriceFeedConfig
 	BlockChainConnector d8x_futures.BlockChainConnector
 	XchInfo             d8x_futures.StaticExchangeInfo
+	PoolState           []d8x_futures.PoolState
 	chainConfigNames    []string
 	choices             []ScreenChoices
 	selectedNetworkName string
@@ -189,20 +190,30 @@ func (m *Model) actionScreen01() error {
 		return err
 	}
 	m.XchInfo = d8x_futures.QueryExchangeStaticInfo(conn, chConf, nest)
-	m.poolTable = createPoolTable(m.XchInfo)
+	m.PoolState, err = d8x_futures.QueryPoolStates(conn, m.XchInfo)
+	if err != nil {
+		return err
+	}
+	m.poolTable = createPoolTable(m.XchInfo, m.PoolState)
+
 	return nil
 }
 
-func createPoolTable(info d8x_futures.StaticExchangeInfo) table.Model {
+func createPoolTable(info d8x_futures.StaticExchangeInfo, poolSt []d8x_futures.PoolState) table.Model {
 	columns := []table.Column{
 		{Title: "Id", Width: 4},
 		{Title: "Coll.Tkn", Width: 8},
 		{Title: "#Perps", Width: 6},
+		{Title: "Vault $Coll", Width: 15},
+		{Title: "DF $Coll", Width: 15},
 	}
+
 	var rows []table.Row
 	for k := 0; k < len(info.Pools); k++ {
 		p := info.Pools[k]
 		id := strconv.Itoa(int(p.PoolId))
+		vaultCash := fmt.Sprintf("%.1f", poolSt[k].PnlParticipantCashCC)
+		dfCash := fmt.Sprintf("%.1f", poolSt[k].DefaultFundCashCC)
 		count := 0
 		for j := 0; j < len(info.Perpetuals); j++ {
 			if info.Perpetuals[j].PoolId == p.PoolId {
@@ -211,7 +222,7 @@ func createPoolTable(info d8x_futures.StaticExchangeInfo) table.Model {
 		}
 		noPerp := strconv.Itoa(count)
 		rows = append(rows, table.Row{
-			id, p.PoolMarginSymbol, noPerp,
+			id, p.PoolMarginSymbol, noPerp, vaultCash, dfCash,
 		})
 	}
 	t := table.New(
