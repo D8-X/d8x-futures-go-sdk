@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"math/big"
+	"os"
 	"strings"
 
 	"github.com/D8-X/d8x-futures-go-sdk/config"
@@ -200,7 +201,7 @@ func (s *StaticExchangeInfo) Store(filename string) error {
 		return err
 	}
 	// Saving JSON to a file
-	err = ioutil.WriteFile(filename, jsonData, 0644)
+	err = os.WriteFile(filename, jsonData, 0644)
 	if err != nil {
 		return err
 	}
