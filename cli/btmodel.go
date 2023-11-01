@@ -29,9 +29,11 @@ type Model struct {
 	screen              int
 	poolTable           table.Model
 	perpTable           table.Model
+	posTable            table.Model
 	perpState           d8x_futures.PerpetualState
 	traderInput         textinput.Model
 	traderAddr          common.Address
+	PositionRisk        d8x_futures.PositionRisk
 }
 
 const LAST_PAGE int = 4
@@ -213,7 +215,8 @@ func (m *Model) perpView() string {
 	screen := "[" + strconv.Itoa(m.screen) + "] "
 	p := strconv.Itoa(int(m.selectedPoolId))
 	return topBarStatus(screen+"Connected to "+m.selectedNetworkName+" - Pool "+p) + "\n" +
-		baseStyle.Render(m.perpTable.View()) + "\n" + bottomBarStatus(3)
+		baseStyle.Render(m.perpTable.View()) + "\n" +
+		bottomBarStatus(3)
 }
 
 func (m *Model) perpDetailsView() string {
@@ -248,6 +251,7 @@ func (m *Model) perpDetailsView() string {
 	fnd := style.Render(fmt.Sprintf("Funding Rate (bps)\n%.2f", m.perpState.CurrentFundingRateBps*10000))
 	oi := style.Render(fmt.Sprintf("Open Interest\n%.4f", m.perpState.OpenInterestBC))
 	s += lipgloss.JoinHorizontal(lipgloss.Top, mid, mark, idx, fnd, oi)
+	s += "\n\n" + baseStyle.Render(m.posTable.View()) + "\n"
 	s += "\n" + bottomBarStatus(4)
 	return s
 }
@@ -331,8 +335,65 @@ func (m *Model) actionScreen34() error {
 	if err != nil {
 		return err
 	}
+	sym := m.XchInfo.PerpetualIdToSymbol[m.selectedPerpId]
+	err = m.setPositionRisk(sym)
+	if err != nil {
+		return err
+	}
 	m.perpState = s[0]
+	m.posTable = createPositionTable(m.PositionRisk)
 	return nil
+}
+
+func (m *Model) setPositionRisk(symbol string) error {
+	pRisk, err := d8x_futures.GetPositionRisk(m.XchInfo, m.BlockChainConnector, &m.traderAddr, symbol, 0)
+	if err != nil {
+		return err
+	}
+	m.PositionRisk = pRisk
+	return nil
+}
+
+func createPositionTable(pos d8x_futures.PositionRisk) table.Model {
+	columns := []table.Column{
+		{Title: "Size", Width: 8},
+		{Title: "EntryPx", Width: 8},
+		{Title: "LiqPx", Width: 6},
+		//{Title: "Margin", Width: 15},
+		{Title: "Leverage", Width: 15},
+		{Title: "Unr.P&L", Width: 15},
+	}
+	var rows []table.Row
+	size := pos.PositionNotionalBaseCCY
+	if pos.Side != d8x_futures.SIDE_BUY {
+		size = size * -1
+	}
+
+	rows = append(rows, table.Row{
+		fmt.Sprintf("%.4f", size),
+		fmt.Sprintf("%.4f", pos.EntryPrice),
+		fmt.Sprintf("%.4f", pos.LiquidationPrice[0]),
+		fmt.Sprintf("%.2f", pos.Leverage),
+		fmt.Sprintf("%.4f", pos.UnrealizedPnlQuoteCCY),
+	})
+	t := table.New(
+		table.WithColumns(columns),
+		table.WithRows(rows),
+		table.WithFocused(true),
+		table.WithHeight(7),
+	)
+	s := table.DefaultStyles()
+	s.Header = s.Header.
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		BorderBottom(true).
+		Bold(false)
+	s.Selected = s.Selected.
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
+	t.SetStyles(s)
+	return t
 }
 
 func createPoolTable(info d8x_futures.StaticExchangeInfo, poolSt []d8x_futures.PoolState) table.Model {
