@@ -9,8 +9,10 @@ import (
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/d8x_futures"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Model struct {
@@ -28,19 +30,25 @@ type Model struct {
 	poolTable           table.Model
 	perpTable           table.Model
 	perpState           d8x_futures.PerpetualState
+	traderInput         textinput.Model
+	traderAddr          common.Address
 }
 
-const LAST_PAGE int = 3
+const LAST_PAGE int = 4
+
+var (
+	focusedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	cursorStyle  = focusedStyle.Copy()
+	baseStyle    = lipgloss.NewStyle().
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240"))
+)
 
 type ScreenChoices struct {
 	chooseOptions []string
 	choiceName    string
 	cursor        int
 }
-
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("240"))
 
 func initialModel() Model {
 	names, err := config.GetDefaultChainConfigNames()
@@ -53,7 +61,12 @@ func initialModel() Model {
 		choices:          make([]ScreenChoices, 2),
 	}
 	m.choices[0].chooseOptions = names
-
+	// input for key/address
+	m.traderInput = textinput.New()
+	m.traderInput.Cursor.Style = cursorStyle
+	m.traderInput.CharLimit = 66
+	m.traderInput.Placeholder = "0xCaFe..."
+	m.traderInput.Focus()
 	return m
 }
 
@@ -63,6 +76,8 @@ func (m Model) Init() tea.Cmd {
 
 // https://github.com/charmbracelet/bubbletea/blob/master/examples/views/main.go
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd = nil
+
 	switch msg := msg.(type) {
 
 	// Is it a key press?
@@ -77,30 +92,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// The "up" and "k" keys move the cursor up
 		case "up", "k":
-			if m.screen == 0 {
-				if m.choices[m.screen].cursor > 0 {
-					m.choices[m.screen].cursor--
+			if m.screen == 1 {
+				if m.choices[0].cursor > 0 {
+					m.choices[0].cursor--
 				}
 				break
 			}
-			if m.screen == 1 {
+			if m.screen == 2 {
 				m.poolTable.MoveUp(1)
 			}
-			if m.screen == 2 {
+			if m.screen == 3 {
 				m.perpTable.MoveUp(1)
 			}
 
 		// The "down" and space " " keys move the cursor down
 		case "down", " ":
-			if m.screen == 0 {
-				if m.choices[m.screen].cursor < len(m.choices[m.screen].chooseOptions)-1 {
-					m.choices[m.screen].cursor++
+			if m.screen == 1 {
+				if m.choices[0].cursor < len(m.choices[0].chooseOptions)-1 {
+					m.choices[0].cursor++
 				}
 			}
-			if m.screen == 1 {
+			if m.screen == 2 {
 				m.poolTable.MoveDown(1)
 			}
-			if m.screen == 2 {
+			if m.screen == 3 {
 				m.perpTable.MoveDown(1)
 			}
 		// Spacebar (a literal space) toggle
@@ -108,20 +123,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "left":
 			m.screen -= 1
 			m.screen = max(m.screen, 0)
-		case "right":
+		case "right", "enter":
 			m.screen += 1
 			m.screen = min(m.screen, LAST_PAGE)
 			if m.screen == 1 {
-				err := m.actionScreen01()
-				if err != nil {
-					m.screen--
-					fmt.Println("An error occurred: " + err.Error())
-				}
+				hexStr := m.traderInput.Value()
+				m.traderAddr = common.HexToAddress(hexStr)
 				break
 			}
 			if m.screen == 2 {
-				// pool choice
-				m.selectedPoolId = int32(m.poolTable.Cursor() + 1)
 				err := m.actionScreen12()
 				if err != nil {
 					m.screen--
@@ -130,8 +140,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				break
 			}
 			if m.screen == 3 {
-				m.selectedPerpId = m.selectedPoolId*100000 + int32(m.perpTable.Cursor())
+				// pool choice
+				m.selectedPoolId = int32(m.poolTable.Cursor() + 1)
 				err := m.actionScreen23()
+				if err != nil {
+					m.screen--
+					fmt.Println("An error occurred: " + err.Error())
+				}
+				break
+			}
+			if m.screen == 4 {
+				m.selectedPerpId = m.selectedPoolId*100000 + int32(m.perpTable.Cursor())
+				err := m.actionScreen34()
 				if err != nil {
 					m.screen--
 					fmt.Println("An error occurred: " + err.Error())
@@ -140,38 +160,60 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	}
-
+	if m.screen == 0 {
+		m.traderInput, cmd = m.traderInput.Update(msg)
+	}
 	// Return the updated model to the Bubble Tea runtime for processing.
 	// Note that we're not returning a command.
-	return m, nil
+	return m, cmd
 }
 
 func (m Model) View() string {
 	s := ""
 	switch m.screen {
 	case 0:
-		s += m.selectNetworkView()
+		s += m.setTraderView()
 	case 1:
-		s += m.poolView()
+		s += m.selectNetworkView()
 	case 2:
-		s += m.perpView()
+		s += m.poolView()
 	case 3:
+		s += m.perpView()
+	case 4:
 		s += m.perpDetailsView()
 	}
+	return s
+}
+
+func (m Model) setTraderView() string {
+	s := topBarStatus("[0] Set trader address or private key") + "\n\n"
+	s = s + m.traderInput.View()
+	s = s + "\n" + bottomBarStatus(0)
+	return s
+}
+
+func (m Model) selectNetworkView() string {
+	// The header
+	s := topBarStatus("[1] Select network")
+
+	s = s + "\n\n" + m.displayChoiceMenu()
+	s = s + bottomBarStatus(1)
+
+	// Send the UI for rendering
 	return s
 }
 
 func (m *Model) poolView() string {
 	screen := "[" + strconv.Itoa(m.screen) + "] "
 	return topBarStatus(screen+"Connected to "+m.selectedNetworkName) + "\n" +
-		baseStyle.Render(m.poolTable.View()) + "\n" + bottomBarStatus(1)
+		baseStyle.Render(m.poolTable.View()) + "\n" + bottomBarStatus(2)
 }
 
 func (m *Model) perpView() string {
 	screen := "[" + strconv.Itoa(m.screen) + "] "
 	p := strconv.Itoa(int(m.selectedPoolId))
 	return topBarStatus(screen+"Connected to "+m.selectedNetworkName+" - Pool "+p) + "\n" +
-		baseStyle.Render(m.perpTable.View()) + "\n" + bottomBarStatus(2)
+		baseStyle.Render(m.perpTable.View()) + "\n" + bottomBarStatus(3)
 }
 
 func (m *Model) perpDetailsView() string {
@@ -180,7 +222,7 @@ func (m *Model) perpDetailsView() string {
 	sym := m.XchInfo.PerpetualIdToSymbol[m.selectedPerpId]
 	perp := " Perp " + strconv.Itoa(int(m.selectedPerpId)) + " " + sym
 
-	s := topBarStatus(screen+"Connected to "+m.selectedNetworkName+pool) + "\n\n"
+	s := topBarStatus(screen+"Connected to "+m.selectedNetworkName+pool+" "+m.traderAddr.Hex()) + "\n\n"
 	var styleA = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("229")).
 		Background(lipgloss.Color("63"))
@@ -206,7 +248,7 @@ func (m *Model) perpDetailsView() string {
 	fnd := style.Render(fmt.Sprintf("Funding Rate (bps)\n%.2f", m.perpState.CurrentFundingRateBps*10000))
 	oi := style.Render(fmt.Sprintf("Open Interest\n%.4f", m.perpState.OpenInterestBC))
 	s += lipgloss.JoinHorizontal(lipgloss.Top, mid, mark, idx, fnd, oi)
-	s += "\n" + bottomBarStatus(3)
+	s += "\n" + bottomBarStatus(4)
 	return s
 }
 
@@ -230,24 +272,14 @@ func bottomBarStatus(pageNo int) string {
 	return s
 }
 
-func (m Model) selectNetworkView() string {
-	// The header
-	s := topBarStatus("Select the network")
-	s = s + "\n\n" + m.displayChoiceMenu()
-	s = s + bottomBarStatus(0)
-
-	// Send the UI for rendering
-	return s
-}
-
 func (m Model) displayChoiceMenu() string {
 	var s string
 	// Iterate over our choices
-	for i, choice := range m.choices[m.screen].chooseOptions {
+	for i, choice := range m.choices[0].chooseOptions {
 
 		// Is the cursor pointing at this choice?
 		cursor := " " // no cursor
-		if m.choices[m.screen].cursor == i {
+		if m.choices[0].cursor == i {
 			cursor = ">" // cursor!
 		}
 
@@ -257,10 +289,10 @@ func (m Model) displayChoiceMenu() string {
 	return s
 }
 
-func (m *Model) actionScreen01() error {
+func (m *Model) actionScreen12() error {
 	// load selected chainconfig
-	idx := m.choices[m.screen-1].cursor
-	network := m.choices[m.screen-1].chooseOptions[idx]
+	idx := m.choices[0].cursor
+	network := m.choices[0].chooseOptions[idx]
 	m.selectedNetworkName = network
 	fmt.Print("selecting network " + network)
 	chConf, err := config.GetDefaultChainConfig(network)
@@ -288,12 +320,12 @@ func (m *Model) actionScreen01() error {
 	return nil
 }
 
-func (m *Model) actionScreen12() error {
+func (m *Model) actionScreen23() error {
 	m.perpTable = createPerpTable(m.XchInfo, m.selectedPoolId)
 	return nil
 }
 
-func (m *Model) actionScreen23() error {
+func (m *Model) actionScreen34() error {
 	ids := []int32{m.selectedPerpId}
 	s, err := d8x_futures.QueryPerpetualState(m.BlockChainConnector, m.XchInfo, ids, 0)
 	if err != nil {
