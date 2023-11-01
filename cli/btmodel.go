@@ -22,8 +22,12 @@ type Model struct {
 	chainConfigNames    []string
 	choices             []ScreenChoices
 	selectedNetworkName string
+	selectedPoolId      int32
+	selectedPerpId      int32
 	screen              int
 	poolTable           table.Model
+	perpTable           table.Model
+	perpState           d8x_futures.PerpetualState
 }
 
 type ScreenChoices struct {
@@ -80,6 +84,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.screen == 1 {
 				m.poolTable.MoveUp(1)
 			}
+			if m.screen == 2 {
+				m.perpTable.MoveUp(1)
+			}
 
 		// The "down" and "j" keys move the cursor down
 		case "down", "j":
@@ -91,21 +98,45 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.screen == 1 {
 				m.poolTable.MoveDown(1)
 			}
+			if m.screen == 2 {
+				m.perpTable.MoveDown(1)
+			}
 		// Spacebar (a literal space) toggle
 		// the selected state for the item that the cursor is pointing at.
 		case " ":
 			m.choices[m.screen].selected = m.choices[m.screen].cursor
+		case "left":
+			m.screen -= 1
+			m.screen = max(m.screen, 0)
 		case "enter":
 			m.screen += 1
-			m.screen = max(m.screen, 1)
-			f, _ := tea.LogToFile("debug.log", "screen="+strconv.Itoa(m.screen))
-			defer f.Close()
+			m.screen = min(m.screen, 3)
 			if m.screen == 1 {
 				err := m.actionScreen01()
 				if err != nil {
 					m.screen--
 					fmt.Println("An error occurred: " + err.Error())
 				}
+				break
+			}
+			if m.screen == 2 {
+				// pool choice
+				m.selectedPoolId = int32(m.poolTable.Cursor() + 1)
+				err := m.actionScreen12()
+				if err != nil {
+					m.screen--
+					fmt.Println("An error occurred: " + err.Error())
+				}
+				break
+			}
+			if m.screen == 3 {
+				m.selectedPerpId = m.selectedPoolId*100000 + int32(m.perpTable.Cursor())
+				err := m.actionScreen23()
+				if err != nil {
+					m.screen--
+					fmt.Println("An error occurred: " + err.Error())
+				}
+				break
 			}
 		}
 	}
@@ -121,14 +152,61 @@ func (m Model) View() string {
 	case 0:
 		s += m.selectNetworkView()
 	case 1:
-		s += m.initialView()
+		s += m.poolView()
+	case 2:
+		s += m.perpView()
+	case 3:
+		s += m.perpDetailsView()
 	}
 	return s
 }
 
-func (m *Model) initialView() string {
-	return "Connected to " + m.selectedNetworkName + "\n" +
+func (m *Model) poolView() string {
+	screen := "[" + strconv.Itoa(m.screen) + "] "
+	return topBarStatus(screen+"Connected to "+m.selectedNetworkName) + "\n" +
 		baseStyle.Render(m.poolTable.View()) + "\n"
+}
+
+func (m *Model) perpView() string {
+	screen := "[" + strconv.Itoa(m.screen) + "] "
+	p := strconv.Itoa(int(m.selectedPoolId))
+	return topBarStatus(screen+"Connected to "+m.selectedNetworkName+" - Pool "+p) + "\n" +
+		baseStyle.Render(m.perpTable.View()) + "\n"
+}
+
+func (m *Model) perpDetailsView() string {
+	screen := "[" + strconv.Itoa(m.screen) + "] "
+	pool := " Pool " + strconv.Itoa(int(m.selectedPoolId))
+	sym := m.XchInfo.PerpetualIdToSymbol[m.selectedPerpId]
+	perp := " Perp " + strconv.Itoa(int(m.selectedPerpId)) + " " + sym
+
+	s := topBarStatus(screen+"Connected to "+m.selectedNetworkName+pool+perp) + "\n\n"
+	var styleA = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("63"))
+	var styleB = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("201")).
+		Inherit(styleA)
+	var mkt string
+	if m.perpState.IsMarketClosed {
+		mkt = styleB.Render("market closed")
+	} else {
+		mkt = styleA.Render("market open")
+	}
+	s += mkt + "\n"
+
+	s += fmt.Sprintf("\nIndex Price : %.4f", m.perpState.IndexPrice)
+	s += fmt.Sprintf("\nMark  Price : %.4f", m.perpState.MarkPrice)
+	s += fmt.Sprintf("\nMid   Price : %.4f", m.perpState.MidPrice)
+	s += fmt.Sprintf("\nFunding Rate (bps): %.4f", m.perpState.CurrentFundingRateBps)
+	s += fmt.Sprintf("\nOpen Interest: %.4f", m.perpState.OpenInterestBC)
+
+	return s
+}
+
+func topBarStatus(txt string) string {
+	style := lipgloss.NewStyle().Bold(true).Background(lipgloss.AdaptiveColor{Light: "63", Dark: "228"})
+	return style.Render(txt)
 }
 
 func (m Model) selectNetworkView() string {
@@ -169,9 +247,6 @@ func (m *Model) actionScreen01() error {
 	// load selected chainconfig
 	idx := m.choices[m.screen-1].selected
 	network := m.choices[m.screen-1].chooseOptions[idx]
-	log := fmt.Sprintf("screen no %d, network='%s' options=%s", m.screen, network, m.choices[m.screen-1].chooseOptions[idx])
-	f, err := tea.LogToFile("debug.log", log)
-	defer f.Close()
 	m.selectedNetworkName = network
 	fmt.Print("selecting network " + network)
 	chConf, err := config.GetDefaultChainConfig(network)
@@ -196,6 +271,21 @@ func (m *Model) actionScreen01() error {
 	}
 	m.poolTable = createPoolTable(m.XchInfo, m.PoolState)
 
+	return nil
+}
+
+func (m *Model) actionScreen12() error {
+	m.perpTable = createPerpTable(m.XchInfo, m.selectedPoolId)
+	return nil
+}
+
+func (m *Model) actionScreen23() error {
+	ids := []int32{m.selectedPerpId}
+	s, err := d8x_futures.QueryPerpetualState(m.BlockChainConnector, m.XchInfo, ids, 0)
+	if err != nil {
+		return err
+	}
+	m.perpState = s[0]
 	return nil
 }
 
@@ -229,6 +319,47 @@ func createPoolTable(info d8x_futures.StaticExchangeInfo, poolSt []d8x_futures.P
 		table.WithColumns(columns),
 		table.WithRows(rows),
 		table.WithFocused(true),
+		table.WithHeight(7),
+	)
+	s := table.DefaultStyles()
+	s.Header = s.Header.
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		BorderBottom(true).
+		Bold(false)
+	s.Selected = s.Selected.
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
+	t.SetStyles(s)
+	return t
+}
+
+func createPerpTable(info d8x_futures.StaticExchangeInfo, poolId int32) table.Model {
+	columns := []table.Column{
+		{Title: "Id", Width: 10},
+		{Title: "Symbol", Width: 20},
+		{Title: "MaxLvg", Width: 6},
+		{Title: "LotSize", Width: 8},
+	}
+	var rows []table.Row
+	for k := 0; k < len(info.Perpetuals); k++ {
+		p := info.Perpetuals[k]
+		if info.Perpetuals[k].PoolId != poolId {
+			continue
+		}
+		id := strconv.Itoa(int(p.Id))
+		sym := info.PerpetualIdToSymbol[p.Id]
+		lot := fmt.Sprintf("%.4f", p.LotSizeBC)
+		lvg := fmt.Sprintf("%.0f", 1/p.InitialMarginRate)
+		rows = append(rows, table.Row{
+			id, sym, lvg, lot,
+		})
+	}
+	t := table.New(
+		table.WithColumns(columns),
+		table.WithRows(rows),
+		table.WithFocused(false),
 		table.WithHeight(7),
 	)
 	s := table.DefaultStyles()
