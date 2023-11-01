@@ -194,12 +194,18 @@ func (m *Model) perpDetailsView() string {
 		mkt = styleA.Render("market open")
 	}
 	s += mkt + "\n"
+	const width = 78
 
-	s += fmt.Sprintf("\nIndex Price : %.4f", m.perpState.IndexPrice)
-	s += fmt.Sprintf("\nMark  Price : %.4f", m.perpState.MarkPrice)
-	s += fmt.Sprintf("\nMid   Price : %.4f", m.perpState.MidPrice)
-	s += fmt.Sprintf("\nFunding Rate (bps): %.2f", m.perpState.CurrentFundingRateBps*10000)
-	s += fmt.Sprintf("\nOpen Interest: %.4f", m.perpState.OpenInterestBC)
+	var style = lipgloss.NewStyle().
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("63"))
+
+	b := fmt.Sprintf("Index Price : %.4f", m.perpState.IndexPrice)
+	b += fmt.Sprintf("\nMark  Price : %.4f", m.perpState.MarkPrice)
+	b += fmt.Sprintf("\nMid   Price : %.4f", m.perpState.MidPrice)
+	b += fmt.Sprintf("\nFunding Rate (bps): %.2f", m.perpState.CurrentFundingRateBps*10000)
+	b += fmt.Sprintf("\nOpen Interest: %.4f", m.perpState.OpenInterestBC)
+	s += style.Render(b)
 	s += "\n" + bottomBarStatus(3)
 	return s
 }
@@ -226,9 +232,10 @@ func bottomBarStatus(pageNo int) string {
 
 func (m Model) selectNetworkView() string {
 	// The header
-	s := "Which Network?\n\n"
-	s = s + m.displayChoiceMenu()
+	s := topBarStatus("Select the network")
+	s = s + "\n\n" + m.displayChoiceMenu()
 	s = s + bottomBarStatus(0)
+
 	// Send the UI for rendering
 	return s
 }
