@@ -30,11 +30,12 @@ type Model struct {
 	perpState           d8x_futures.PerpetualState
 }
 
+const LAST_PAGE int = 3
+
 type ScreenChoices struct {
 	chooseOptions []string
 	choiceName    string
 	cursor        int
-	selected      int
 }
 
 var baseStyle = lipgloss.NewStyle().
@@ -52,6 +53,7 @@ func initialModel() Model {
 		choices:          make([]ScreenChoices, 2),
 	}
 	m.choices[0].chooseOptions = names
+
 	return m
 }
 
@@ -88,8 +90,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.perpTable.MoveUp(1)
 			}
 
-		// The "down" and "j" keys move the cursor down
-		case "down", "j":
+		// The "down" and space " " keys move the cursor down
+		case "down", " ":
 			if m.screen == 0 {
 				if m.choices[m.screen].cursor < len(m.choices[m.screen].chooseOptions)-1 {
 					m.choices[m.screen].cursor++
@@ -103,14 +105,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		// Spacebar (a literal space) toggle
 		// the selected state for the item that the cursor is pointing at.
-		case " ":
-			m.choices[m.screen].selected = m.choices[m.screen].cursor
 		case "left":
 			m.screen -= 1
 			m.screen = max(m.screen, 0)
-		case "enter":
+		case "right":
 			m.screen += 1
-			m.screen = min(m.screen, 3)
+			m.screen = min(m.screen, LAST_PAGE)
 			if m.screen == 1 {
 				err := m.actionScreen01()
 				if err != nil {
@@ -164,14 +164,14 @@ func (m Model) View() string {
 func (m *Model) poolView() string {
 	screen := "[" + strconv.Itoa(m.screen) + "] "
 	return topBarStatus(screen+"Connected to "+m.selectedNetworkName) + "\n" +
-		baseStyle.Render(m.poolTable.View()) + "\n"
+		baseStyle.Render(m.poolTable.View()) + "\n" + bottomBarStatus(1)
 }
 
 func (m *Model) perpView() string {
 	screen := "[" + strconv.Itoa(m.screen) + "] "
 	p := strconv.Itoa(int(m.selectedPoolId))
 	return topBarStatus(screen+"Connected to "+m.selectedNetworkName+" - Pool "+p) + "\n" +
-		baseStyle.Render(m.perpTable.View()) + "\n"
+		baseStyle.Render(m.perpTable.View()) + "\n" + bottomBarStatus(2)
 }
 
 func (m *Model) perpDetailsView() string {
@@ -198,9 +198,9 @@ func (m *Model) perpDetailsView() string {
 	s += fmt.Sprintf("\nIndex Price : %.4f", m.perpState.IndexPrice)
 	s += fmt.Sprintf("\nMark  Price : %.4f", m.perpState.MarkPrice)
 	s += fmt.Sprintf("\nMid   Price : %.4f", m.perpState.MidPrice)
-	s += fmt.Sprintf("\nFunding Rate (bps): %.4f", m.perpState.CurrentFundingRateBps)
+	s += fmt.Sprintf("\nFunding Rate (bps): %.2f", m.perpState.CurrentFundingRateBps*10000)
 	s += fmt.Sprintf("\nOpen Interest: %.4f", m.perpState.OpenInterestBC)
-
+	s += "\n" + bottomBarStatus(3)
 	return s
 }
 
@@ -209,10 +209,26 @@ func topBarStatus(txt string) string {
 	return style.Render(txt)
 }
 
+func bottomBarStatus(pageNo int) string {
+	activeDot := lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "235", Dark: "252"}).Render("•")
+	inactiveDot := lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "250", Dark: "238"}).Render("•")
+	var s string = "\n"
+	for k := 0; k <= LAST_PAGE; k++ {
+		if k == pageNo {
+			s = s + activeDot
+		} else {
+			s = s + inactiveDot
+		}
+	}
+	s = s + "\n\n←/→ page | ↓/↑/space: select | ctrl-c/q: quit\n"
+	return s
+}
+
 func (m Model) selectNetworkView() string {
 	// The header
 	s := "Which Network?\n\n"
 	s = s + m.displayChoiceMenu()
+	s = s + bottomBarStatus(0)
 	// Send the UI for rendering
 	return s
 }
@@ -228,24 +244,15 @@ func (m Model) displayChoiceMenu() string {
 			cursor = ">" // cursor!
 		}
 
-		// Is this choice selected?
-		checked := " " // not selected
-		if i == m.choices[m.screen].selected {
-			checked = "x" // selected!
-		}
-
 		// Render the row
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+		s += fmt.Sprintf("%s %s\n", cursor, choice)
 	}
-
-	// The footer
-	s += "\nPress q to quit.\n"
 	return s
 }
 
 func (m *Model) actionScreen01() error {
 	// load selected chainconfig
-	idx := m.choices[m.screen-1].selected
+	idx := m.choices[m.screen-1].cursor
 	network := m.choices[m.screen-1].chooseOptions[idx]
 	m.selectedNetworkName = network
 	fmt.Print("selecting network " + network)
