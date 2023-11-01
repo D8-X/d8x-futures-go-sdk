@@ -180,18 +180,18 @@ func (m *Model) perpDetailsView() string {
 	sym := m.XchInfo.PerpetualIdToSymbol[m.selectedPerpId]
 	perp := " Perp " + strconv.Itoa(int(m.selectedPerpId)) + " " + sym
 
-	s := topBarStatus(screen+"Connected to "+m.selectedNetworkName+pool+perp) + "\n\n"
+	s := topBarStatus(screen+"Connected to "+m.selectedNetworkName+pool) + "\n\n"
 	var styleA = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("229")).
 		Background(lipgloss.Color("63"))
 	var styleB = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("201")).
 		Inherit(styleA)
-	var mkt string
+	var mkt string = perp + " "
 	if m.perpState.IsMarketClosed {
-		mkt = styleB.Render("market closed")
+		mkt = styleB.Render(mkt + "market closed")
 	} else {
-		mkt = styleA.Render("market open")
+		mkt = styleA.Render(mkt + "market open")
 	}
 	s += mkt + "\n"
 	const width = 78
@@ -200,12 +200,12 @@ func (m *Model) perpDetailsView() string {
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderForeground(lipgloss.Color("63"))
 
-	b := fmt.Sprintf("Index Price : %.4f", m.perpState.IndexPrice)
-	b += fmt.Sprintf("\nMark  Price : %.4f", m.perpState.MarkPrice)
-	b += fmt.Sprintf("\nMid   Price : %.4f", m.perpState.MidPrice)
-	b += fmt.Sprintf("\nFunding Rate (bps): %.2f", m.perpState.CurrentFundingRateBps*10000)
-	b += fmt.Sprintf("\nOpen Interest: %.4f", m.perpState.OpenInterestBC)
-	s += style.Render(b)
+	idx := style.Render(fmt.Sprintf("Index Price\n%.4f", m.perpState.IndexPrice))
+	mark := style.Render(fmt.Sprintf("Mark Price\n%.4f", m.perpState.MarkPrice))
+	mid := style.Render(fmt.Sprintf("Mid Price\n%.4f", m.perpState.MidPrice))
+	fnd := style.Render(fmt.Sprintf("Funding Rate (bps)\n%.2f", m.perpState.CurrentFundingRateBps*10000))
+	oi := style.Render(fmt.Sprintf("Open Interest\n%.4f", m.perpState.OpenInterestBC))
+	s += lipgloss.JoinHorizontal(lipgloss.Top, mid, mark, idx, fnd, oi)
 	s += "\n" + bottomBarStatus(3)
 	return s
 }
