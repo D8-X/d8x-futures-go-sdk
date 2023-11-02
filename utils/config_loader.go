@@ -3,13 +3,12 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 
 	"github.com/ethereum/go-ethereum/common"
 )
 
-type Config struct {
+type ChainConfig struct {
 	Name                   string         `json:"name"`
 	PriceFeedNetwork       string         `json:"priceFeedNetwork"`
 	ChainId                int64          `json:"chainId"`
@@ -35,20 +34,17 @@ type PriceFeedId struct {
 }
 
 type PriceFeedEndpoint struct {
-	Type        string `json:"type"`
-	EndpointUrl string `json:"endpoint"`
+	Type        string   `json:"type"`
+	EndpointUrl []string `json:"endpoints"`
 }
 
-func LoadPriceFeedConfig(configNetwork string) (PriceFeedConfig, error) {
-	// Read the JSON file
-	data, err := ioutil.ReadFile("config/priceFeedConfig.json")
-	if err != nil {
-		log.Fatal("Error reading JSON file:", err)
-		return PriceFeedConfig{}, err
-	}
+// LoadPriceFeedConfig loads the price feed config file
+// data into struct PriceFeedConfig for the network called configNetwork
+// for example LoadPriceFeedConfig("config/priceFeedConfig.json", "testnet")
+func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, error) {
 	var configuration []PriceFeedConfig
 	// Unmarshal the JSON data into the Configuration struct
-	err = json.Unmarshal(data, &configuration)
+	err := json.Unmarshal(data, &configuration)
 	if err != nil {
 		log.Fatal("Error decoding JSON:", err)
 		return PriceFeedConfig{}, err
@@ -61,24 +57,39 @@ func LoadPriceFeedConfig(configNetwork string) (PriceFeedConfig, error) {
 	return PriceFeedConfig{}, errors.New("config not found")
 }
 
-func LoadConfig(configName string) (Config, error) {
-	// Read the JSON file
-	data, err := ioutil.ReadFile("config/config.json")
-	if err != nil {
-		log.Fatal("Error reading JSON file:", err)
-		return Config{}, err
-	}
-	var configuration []Config
+// LoadChainConfig loads the chain-config from data into ChainConfig struct
+// for network configName
+func LoadChainConfig(data []byte, configName string) (ChainConfig, error) {
+
+	var configuration []ChainConfig
 	// Unmarshal the JSON data into the Configuration struct
-	err = json.Unmarshal(data, &configuration)
+	err := json.Unmarshal(data, &configuration)
 	if err != nil {
 		log.Fatal("Error decoding JSON:", err)
-		return Config{}, err
+		return ChainConfig{}, err
 	}
 	for i := 0; i < len(configuration); i++ {
 		if configuration[i].Name == configName {
 			return configuration[i], nil
 		}
 	}
-	return Config{}, errors.New("config not found")
+	return ChainConfig{}, errors.New("config not found")
+}
+
+// LoadChainConfig loads the chain-config from data into ChainConfig struct
+// for network configName
+func LoadChainConfigNames(data []byte) ([]string, error) {
+
+	var configuration []ChainConfig
+	// Unmarshal the JSON data into the Configuration struct
+	err := json.Unmarshal(data, &configuration)
+	if err != nil {
+		log.Fatal("Error decoding JSON:", err)
+		return nil, err
+	}
+	var ret []string
+	for i := 0; i < len(configuration); i++ {
+		ret = append(ret, configuration[i].Name)
+	}
+	return ret, nil
 }
