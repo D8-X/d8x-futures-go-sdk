@@ -8,8 +8,11 @@ import (
 	"log"
 	"math"
 	"math/big"
+	"os"
 	"strings"
 
+	"github.com/D8-X/d8x-futures-go-sdk/config"
+	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -19,24 +22,24 @@ import (
 //
 // It takes an rpc and proxyAddr as argument
 // It returns an instance IPerpetualManager of the proxy contract.
-func CreatePerpetualManagerInstance(rpc *ethclient.Client, proxyAddr common.Address) *IPerpetualManager {
-	proxy, err := NewIPerpetualManager(proxyAddr, rpc)
+func CreatePerpetualManagerInstance(rpc *ethclient.Client, proxyAddr common.Address) *contracts.IPerpetualManager {
+	proxy, err := contracts.NewIPerpetualManager(proxyAddr, rpc)
 	if err != nil {
 		log.Fatalf("Failed to instantiate Proxy contract: %v", err)
 	}
 	return proxy
 }
 
-func CreateLimitOrderBookFactoryInstance(rpc *ethclient.Client, factoryAddr common.Address) *LimitOrderBookFactory {
-	loFactory, err := NewLimitOrderBookFactory(factoryAddr, rpc)
+func CreateLimitOrderBookFactoryInstance(rpc *ethclient.Client, factoryAddr common.Address) *contracts.LimitOrderBookFactory {
+	loFactory, err := contracts.NewLimitOrderBookFactory(factoryAddr, rpc)
 	if err != nil {
 		log.Fatalf("Failed to instantiate LimitOrderBookFactory contract: %v", err)
 	}
 	return loFactory
 }
 
-func CreateLimitOrderBookInstance(rpc *ethclient.Client, lobAddr common.Address) *LimitOrderBook {
-	lob, err := NewLimitOrderBook(lobAddr, rpc)
+func CreateLimitOrderBookInstance(rpc *ethclient.Client, lobAddr common.Address) *contracts.LimitOrderBook {
+	lob, err := contracts.NewLimitOrderBook(lobAddr, rpc)
 	if err != nil {
 		log.Fatalf("Failed to instantiate LOB contract: %v", err)
 	}
@@ -51,46 +54,64 @@ func CreateRPC(nodeURL string) (*ethclient.Client, error) {
 	return rpc, nil
 }
 
-func CreateBlockChainConnector(config utils.Config) BlockChainConnector {
-	rpc, err := CreateRPC(config.NodeURL)
+func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.ChainConfig) BlockChainConnector {
+	rpc, err := CreateRPC(chConf.NodeURL)
 	if err != nil {
 		panic(err)
 	}
-	proxy := CreatePerpetualManagerInstance(rpc, config.ProxyAddr)
-	symbolMap, err := readSymbolList()
+	proxy := CreatePerpetualManagerInstance(rpc, chConf.ProxyAddr)
+	symbolMap, err := config.GetSymbolList()
 	if err != nil {
 		panic(err)
 	}
-	priceFeedNetwork := config.PriceFeedNetwork
-
+	priceFeedNetwork := chConf.PriceFeedNetwork
 	var b = BlockChainConnector{
 		Rpc:               rpc,
-		ChainId:           config.ChainId,
+		ChainId:           chConf.ChainId,
 		PerpetualManager:  proxy,
-		SymbolMapping:     symbolMap,
+		SymbolMapping:     &symbolMap,
 		PriceFeedNetwork:  priceFeedNetwork,
-		PostOrderGasLimit: config.PostOrderGasLimit,
+		PostOrderGasLimit: chConf.PostOrderGasLimit,
+		PriceFeedConfig:   pxConfig,
 	}
 
 	return b
 }
 
-func QueryNestedPerpetualInfo(conn BlockChainConnector) NestedPerpetualIds {
+func QueryNestedPerpetualInfo(conn BlockChainConnector) (NestedPerpetualIds, error) {
 
-	const idxFrom = 1
-	const idxTo = 20
-	//([][]*big.Int, []common.Address, []common.Address, common.Address, error)
-	nestedPerpetualIds, poolShareTokenAddr, poolMarginTokenAddr, oracleFactory, err := conn.PerpetualManager.GetPoolStaticInfo(nil, idxFrom, idxTo)
-	if err != nil {
-		panic(err)
+	var idxFrom uint8 = 1
+	const queryLen uint8 = 5
+	var lenReceived = queryLen
+	var nestedPerpetualIds [][]*big.Int
+	var poolShareTokenAddr []common.Address
+	var poolMarginTokenAddr []common.Address
+	var oracleFactory common.Address
+	for {
+		//([][]*big.Int, []common.Address, []common.Address, common.Address, error)
+		idxTo := idxFrom + queryLen - 1
+		p0, p1, p2, orcfac, err := conn.PerpetualManager.GetPoolStaticInfo(nil, idxFrom, idxTo)
+		if err != nil {
+			return NestedPerpetualIds{}, err
+		}
+		lenReceived = uint8(len(p1))
+		nestedPerpetualIds = append(nestedPerpetualIds, p0...)
+		poolShareTokenAddr = append(poolShareTokenAddr, p1...)
+		poolMarginTokenAddr = append(poolMarginTokenAddr, p2...)
+		oracleFactory = orcfac
+		if lenReceived < queryLen {
+			break
+		}
+		idxFrom = idxFrom + lenReceived
 	}
+
 	var p = NestedPerpetualIds{
 		PerpetualIds:        nestedPerpetualIds,
 		PoolShareTokenAddr:  poolShareTokenAddr,
 		PoolMarginTokenAddr: poolMarginTokenAddr,
 		OracleFactoryAddr:   oracleFactory,
 	}
-	return p
+	return p, nil
 }
 
 // GetPerpetualStaticInfoIdxFromSymbol returns the idx of the perpetual within StaticExchangeInfo,
@@ -111,7 +132,7 @@ func GetPerpetualStaticInfoIdxFromId(exchangeInfo StaticExchangeInfo, perpId int
 	return -1
 }
 
-func QueryExchangeStaticInfo(conn BlockChainConnector, config utils.Config, nest NestedPerpetualIds) StaticExchangeInfo {
+func QueryExchangeStaticInfo(conn BlockChainConnector, config utils.ChainConfig, nest NestedPerpetualIds) StaticExchangeInfo {
 	symbolsSet := make(utils.Set)
 
 	perpIds := nest.PerpetualIds
@@ -151,18 +172,17 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, config utils.Config, nest
 		default:
 			pools[i].PoolMarginSymbol = strings.Split(perpetuals[j].S3Symbol, "-")[0]
 		}
-		// amend mapping perpetual symbol -> perpetual Id
-		for _, perpStatic := range perpetuals {
-			perpSymbol := perpStatic.S2Symbol + "-" + pools[i].PoolMarginSymbol
-			perpetualSymbolToId[perpSymbol] = perpStatic.Id
-			perpetualIdToSymbol[perpStatic.Id] = perpSymbol
-		}
+
 	}
-	pxConfig, err := utils.LoadPriceFeedConfig(conn.PriceFeedNetwork)
-	if err != nil {
-		panic(err)
+	// amend mapping perpetual symbol -> perpetual Id
+	for _, perpStatic := range perpetuals {
+		poolId := perpStatic.Id / 100000
+		perpSymbol := perpStatic.S2Symbol + "-" + pools[poolId-1].PoolMarginSymbol
+		perpetualSymbolToId[perpSymbol] = perpStatic.Id
+		perpetualIdToSymbol[perpStatic.Id] = perpSymbol
 	}
-	triangulations := initPriceFeeds(pxConfig, symbolsSet)
+
+	triangulations := initPriceFeeds(conn.PriceFeedConfig, symbolsSet)
 	xInfo := StaticExchangeInfo{
 		Pools:                  pools,
 		Perpetuals:             perpetuals,
@@ -170,7 +190,7 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, config utils.Config, nest
 		PerpetualIdToSymbol:    perpetualIdToSymbol,
 		OracleFactoryAddr:      nest.OracleFactoryAddr,
 		ProxyAddr:              config.ProxyAddr,
-		PriceFeedInfo:          pxConfig,
+		PriceFeedInfo:          conn.PriceFeedConfig,
 		IdxPriceTriangulations: triangulations,
 	}
 	return xInfo
@@ -183,7 +203,7 @@ func (s *StaticExchangeInfo) Store(filename string) error {
 		return err
 	}
 	// Saving JSON to a file
-	err = ioutil.WriteFile(filename, jsonData, 0644)
+	err = os.WriteFile(filename, jsonData, 0644)
 	if err != nil {
 		return err
 	}
@@ -215,7 +235,7 @@ func initPriceFeeds(pxConfig utils.PriceFeedConfig, symbolSet utils.Set) Triangu
 	return triangulations
 }
 
-func getterDataToPerpetualStaticInfo(pIn IPerpetualGetterPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {
+func getterDataToPerpetualStaticInfo(pIn contracts.IPerpetualGetterPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {
 	var poolId int32 = int32(pIn.Id.Int64()) / 100000
 	base := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
 	quote := ContractSymbolToSymbol(pIn.S2QuoteCCY, symMap)
@@ -258,24 +278,7 @@ func ContractSymbolToSymbol(cSym [4]byte, symMap *map[string]string) string {
 	return (*symMap)[sym]
 }
 
-// readSymbolList reads the mapping from contract symbol to symbol
-func readSymbolList() (*map[string]string, error) {
-	jsonData, err := ioutil.ReadFile("config/symbolList.json")
-	if err != nil {
-		return nil, err
-	}
-	// Define a map to store the data
-	data := make(map[string]string)
-
-	// Unmarshal the JSON data into the map
-	err = json.Unmarshal(jsonData, &data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Address) IClientOrderClientOrder {
+func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Address) contracts.IClientOrderClientOrder {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	if order.LimitPrice == 0 && order.Side == SIDE_BUY {
 		order.LimitPrice = math.MaxFloat64
@@ -298,7 +301,7 @@ func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Addr
 		flags = flags | MASK_STOP_ORDER
 		flags = flags | MASK_MARKET_ORDER
 	}
-	cOrder := IClientOrderClientOrder{
+	cOrder := contracts.IClientOrderClientOrder{
 		IPerpetualId:       big.NewInt(int64(xInfo.Perpetuals[j].Id)),
 		FLimitPrice:        utils.Float64ToABDK(order.LimitPrice),
 		LeverageTDR:        uint16(100 * order.Leverage),
@@ -318,7 +321,7 @@ func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Addr
 	return cOrder
 }
 
-func (scOrder *IClientOrderClientOrder) FromChainType(xInfo StaticExchangeInfo) Order {
+func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo StaticExchangeInfo) Order {
 	perpId := int32(scOrder.IPerpetualId.Int64())
 	var side string
 	if scOrder.FAmount.Sign() > 0 {
