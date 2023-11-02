@@ -483,6 +483,25 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "address",
+                "name": "trader",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "delegate",
+                "type": "address"
+            }
+        ],
+        "name": "SetDelegate",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": true,
                 "internalType": "uint24",
                 "name": "perpetualId",
@@ -1438,62 +1457,6 @@
     {
         "inputs": [
             {
-                "components": [
-                    {
-                        "internalType": "int128",
-                        "name": "fLockedValue1",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fPoolM1",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fPoolM2",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fPoolM3",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fAMM_K2",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fCurrentTraderExposureEMA",
-                        "type": "int128"
-                    }
-                ],
-                "internalType": "struct AMMPerpLogic.AMMVariables",
-                "name": "_ammVars",
-                "type": "tuple"
-            },
-            {
-                "internalType": "int128",
-                "name": "_fTradeAmount",
-                "type": "int128"
-            }
-        ],
-        "name": "calculateBoundedSlippage",
-        "outputs": [
-            {
-                "internalType": "int128",
-                "name": "",
-                "type": "int128"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "int128[2]",
                 "name": "_fK2AMM",
                 "type": "int128[2]"
@@ -1946,6 +1909,11 @@
                 "internalType": "uint24",
                 "name": "_iPerpetualId",
                 "type": "uint24"
+            },
+            {
+                "internalType": "address",
+                "name": "_traderAddr",
+                "type": "address"
             },
             {
                 "internalType": "int128",
@@ -3199,6 +3167,25 @@
                 "type": "uint24"
             }
         ],
+        "name": "getOracleUpdateTime",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint24",
+                "name": "_perpetualId",
+                "type": "uint24"
+            }
+        ],
         "name": "getOrderBookAddress",
         "outputs": [
             {
@@ -4413,6 +4400,30 @@
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "_trader",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_delegate",
+                "type": "address"
+            }
+        ],
+        "name": "isDelegate",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "bytes4",
                 "name": "_baseCurrency",
                 "type": "bytes4"
@@ -4877,6 +4888,13 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "removeDelegate",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint8",
@@ -4947,6 +4965,19 @@
             }
         ],
         "name": "setBrokerVolumeTiers",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "delegate",
+                "type": "address"
+            }
+        ],
+        "name": "setDelegate",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -5560,12 +5591,7 @@
         "inputs": [
             {
                 "internalType": "uint24",
-                "name": "_iPerpetualId0",
-                "type": "uint24"
-            },
-            {
-                "internalType": "uint24",
-                "name": "_iPerpetualId1",
+                "name": "_iPerpetualId",
                 "type": "uint24"
             }
         ],
@@ -5578,12 +5604,7 @@
         "inputs": [
             {
                 "internalType": "uint24",
-                "name": "_iPerpetualId0",
-                "type": "uint24"
-            },
-            {
-                "internalType": "uint24",
-                "name": "_iPerpetualId1",
+                "name": "_iPerpetualId",
                 "type": "uint24"
             }
         ],
@@ -5713,6 +5734,11 @@
                 "type": "uint24"
             },
             {
+                "internalType": "address",
+                "name": "_traderAddr",
+                "type": "address"
+            },
+            {
                 "internalType": "int128",
                 "name": "_fAmount",
                 "type": "int128"
@@ -5739,6 +5765,11 @@
                 "internalType": "uint24",
                 "name": "_iPerpetualId",
                 "type": "uint24"
+            },
+            {
+                "internalType": "address",
+                "name": "_traderAddr",
+                "type": "address"
             },
             {
                 "internalType": "bytes[]",
