@@ -172,12 +172,14 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, config utils.ChainConfig,
 		default:
 			pools[i].PoolMarginSymbol = strings.Split(perpetuals[j].S3Symbol, "-")[0]
 		}
-		// amend mapping perpetual symbol -> perpetual Id
-		for _, perpStatic := range perpetuals {
-			perpSymbol := perpStatic.S2Symbol + "-" + pools[i].PoolMarginSymbol
-			perpetualSymbolToId[perpSymbol] = perpStatic.Id
-			perpetualIdToSymbol[perpStatic.Id] = perpSymbol
-		}
+
+	}
+	// amend mapping perpetual symbol -> perpetual Id
+	for _, perpStatic := range perpetuals {
+		poolId := perpStatic.Id / 100000
+		perpSymbol := perpStatic.S2Symbol + "-" + pools[poolId-1].PoolMarginSymbol
+		perpetualSymbolToId[perpSymbol] = perpStatic.Id
+		perpetualIdToSymbol[perpStatic.Id] = perpSymbol
 	}
 
 	triangulations := initPriceFeeds(conn.PriceFeedConfig, symbolsSet)
