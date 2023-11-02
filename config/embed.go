@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"os"
 
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 )
@@ -45,6 +46,14 @@ func GetDefaultChainConfigNames() ([]string, error) {
 	return utils.LoadChainConfigNames(data)
 }
 
+func GetCustomChainConfig(filePath, configName string) (utils.ChainConfig, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return utils.ChainConfig{}, err
+	}
+	return utils.LoadChainConfig(data, configName)
+}
+
 func GetDefaultChainConfig(configName string) (utils.ChainConfig, error) {
 	// Read the JSON file
 	fs, err := EmbededConfigs.Open("embedded/chainConfig.json")
@@ -57,6 +66,14 @@ func GetDefaultChainConfig(configName string) (utils.ChainConfig, error) {
 		return utils.ChainConfig{}, err
 	}
 	return utils.LoadChainConfig(data, configName)
+}
+
+func GetCustomPriceConfig(filePath, configNetwork string) (utils.PriceFeedConfig, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return utils.PriceFeedConfig{}, err
+	}
+	return utils.LoadPriceFeedConfig(data, configNetwork)
 }
 
 func GetDefaultPriceConfig(configNetwork string) (utils.PriceFeedConfig, error) {
