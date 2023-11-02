@@ -41,21 +41,25 @@ type Model struct {
 
 const LAST_PAGE int = 4
 const (
-	purple    = lipgloss.Color("99")
-	gray      = lipgloss.Color("245")
-	lightGray = lipgloss.Color("241")
+	orange        = lipgloss.Color("#FCA43C")
+	blue          = lipgloss.Color("#2786E4")
+	blueHighlight = lipgloss.Color("#2353C8")
+	red           = lipgloss.Color("#CC5150")
+	green         = lipgloss.Color("#06BC42")
+	gray          = lipgloss.Color("#CDCDCD")
+	lightGray     = lipgloss.Color("#E6E6E6")
 )
 
 var re = lipgloss.NewRenderer(os.Stdout)
 var (
-	focusedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	focusedStyle = lipgloss.NewStyle().Foreground(blueHighlight)
 	cursorStyle  = focusedStyle.Copy()
 	baseStyle    = lipgloss.NewStyle().
 			BorderStyle(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("240"))
+			BorderForeground(blue)
 
 	// HeaderStyle is the lipgloss style used for the table headers.
-	HeaderStyle = re.NewStyle().Foreground(purple).Bold(true).Align(lipgloss.Center)
+	HeaderStyle = re.NewStyle().Foreground(orange).Bold(true).Align(lipgloss.Center)
 	// CellStyle is the base lipgloss style used for the table rows.
 	CellStyle = re.NewStyle().Padding(0, 1).Width(14)
 	// OddRowStyle is the lipgloss style used for odd-numbered table rows.
@@ -63,7 +67,7 @@ var (
 	// EvenRowStyle is the lipgloss style used for even-numbered table rows.
 	EvenRowStyle = CellStyle.Copy().Foreground(lightGray)
 	// BorderStyle is the lipgloss style used for the table border.
-	BorderStyle = lipgloss.NewStyle().Foreground(purple)
+	BorderStyle = lipgloss.NewStyle().Foreground(orange)
 )
 
 type ScreenChoices struct {
@@ -93,7 +97,7 @@ func initialModel() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return nil
+	return tea.EnterAltScreen
 }
 
 // https://github.com/charmbracelet/bubbletea/blob/master/examples/views/main.go
@@ -208,7 +212,7 @@ func (m Model) View() string {
 }
 
 func (m Model) setTraderView() string {
-	s := topBarStatus("[0] Set trader address or private key") + "\n\n"
+	s := topBarStatus("[0] Set trader address") + "\n\n"
 	s = s + m.traderInput.View()
 	s = s + "\n" + bottomBarStatus(0)
 	return s
@@ -247,11 +251,11 @@ func (m *Model) perpDetailsView() string {
 
 	s := topBarStatus(screen+"Connected to "+m.selectedNetworkName+pool+" "+m.traderAddr.Hex()) + "\n\n"
 	var styleA = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("63"))
+		Foreground(lipgloss.Color("#0A0A0A")).
+		Background(green)
 	var styleB = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("201")).
-		Inherit(styleA)
+		Foreground(lipgloss.Color("#0A0A0A")).
+		Background(red)
 	var mkt string = perp + " "
 	if m.perpState.IsMarketClosed {
 		mkt = styleB.Render(mkt + "market closed")
@@ -263,7 +267,7 @@ func (m *Model) perpDetailsView() string {
 
 	var style = lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("63"))
+		BorderForeground(blue)
 
 	idx := style.Render(fmt.Sprintf("Index Price\n%.4f", m.perpState.IndexPrice))
 	mark := style.Render(fmt.Sprintf("Mark Price\n%.4f", m.perpState.MarkPrice))
@@ -271,7 +275,7 @@ func (m *Model) perpDetailsView() string {
 	fnd := style.Render(fmt.Sprintf("Funding Rate (bps)\n%.2f", m.perpState.CurrentFundingRateBps*10000))
 	oi := style.Render(fmt.Sprintf("Open Interest\n%.4f", m.perpState.OpenInterestBC))
 	s += lipgloss.JoinHorizontal(lipgloss.Top, mid, mark, idx, fnd, oi)
-	s += "\n\n" + styleA.Render("Position of address "+m.traderAddr.Hex()[0:8]+"...")
+	s += "\n\n" + " Open Position"
 	s += "\n" + m.posTableStr + "\n"
 
 	s += "\n" + bottomBarStatus(4)
@@ -279,7 +283,7 @@ func (m *Model) perpDetailsView() string {
 }
 
 func topBarStatus(txt string) string {
-	style := lipgloss.NewStyle().Bold(true).Background(lipgloss.AdaptiveColor{Light: "63", Dark: "228"})
+	style := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#0A0A0A")).Background(orange)
 	return style.Render(txt)
 }
 
@@ -300,17 +304,23 @@ func bottomBarStatus(pageNo int) string {
 
 func (m Model) displayChoiceMenu() string {
 	var s string
+	activeStyle := lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "235", Dark: "252"})
+	inactiveStyle := lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "250", Dark: "238"})
 	// Iterate over our choices
 	for i, choice := range m.choices[0].chooseOptions {
 
 		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
+		cursor := "⚪" // not selected
+		var choiceStr string
 		if m.choices[0].cursor == i {
-			cursor = ">" // cursor!
+			cursor = lipgloss.NewStyle().Foreground(blue).Render("⚫") // selected!
+			choiceStr = activeStyle.Render(choice)
+		} else {
+			choiceStr = inactiveStyle.Render(choice)
 		}
 
 		// Render the row
-		s += fmt.Sprintf("%s %s\n", cursor, choice)
+		s += fmt.Sprintf("%s %s\n", cursor, choiceStr)
 	}
 	return s
 }
@@ -379,7 +389,7 @@ func (m *Model) setPositionRisk(symbol string) error {
 func createPositionTable(pos d8x_futures.PositionRisk) string {
 
 	size := pos.PositionNotionalBaseCCY
-	if pos.Side != d8x_futures.SIDE_BUY {
+	if size != 0 && pos.Side != d8x_futures.SIDE_BUY {
 		size = size * -1
 	}
 	syms := strings.Split(pos.Symbol, "-")
@@ -397,7 +407,7 @@ func createPositionTable(pos d8x_futures.PositionRisk) string {
 
 	t := lgtable.New().
 		Border(lipgloss.NormalBorder()).
-		BorderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("99"))).
+		BorderStyle(lipgloss.NewStyle().Foreground(blue)).
 		StyleFunc(func(row, col int) lipgloss.Style {
 			switch {
 			case row == 0:
@@ -453,7 +463,7 @@ func createPoolTable(info d8x_futures.StaticExchangeInfo, poolSt []d8x_futures.P
 		Bold(false)
 	s.Selected = s.Selected.
 		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
+		Background(orange).
 		Bold(false)
 	t.SetStyles(s)
 	return t
@@ -494,7 +504,7 @@ func createPerpTable(info d8x_futures.StaticExchangeInfo, poolId int32) table.Mo
 		Bold(false)
 	s.Selected = s.Selected.
 		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
+		Background(orange).
 		Bold(false)
 	t.SetStyles(s)
 	return t
