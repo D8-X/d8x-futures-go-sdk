@@ -4,36 +4,51 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 )
 
 func TestQueryNestedPerpetualInfo(t *testing.T) {
-	config, err := utils.LoadConfig("testnet")
+	chConf, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(config)
-	p := QueryNestedPerpetualInfo(conn)
+	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(pxConf, chConf)
+	p, err := QueryNestedPerpetualInfo(conn)
+	if err != nil {
+		t.Logf(err.Error())
+	}
 	fmt.Println(p.PerpetualIds)
 }
 
 func TestReadSymbolList(t *testing.T) {
-	symMap, err := readSymbolList()
+	symMap, err := config.GetSymbolList()
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	fmt.Println((*symMap)["MATC"])
+	fmt.Println((symMap)["MATC"])
 
 }
 
 func TestQueryPoolStaticInfo(t *testing.T) {
-	config, err := utils.LoadConfig("testnet")
+	chConf, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(config)
-	nest := QueryNestedPerpetualInfo(conn)
-	info := QueryExchangeStaticInfo(conn, config, nest)
+	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	conn := CreateBlockChainConnector(pxConf, chConf)
+	nest, err := QueryNestedPerpetualInfo(conn)
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	info := QueryExchangeStaticInfo(conn, chConf, nest)
 	fmt.Println(info)
 	info.Store("./tmpXchInfo.json")
 }
@@ -54,15 +69,15 @@ func TestPythNToFloat64(t *testing.T) {
 }
 
 func TestTriangulate(t *testing.T) {
-	pxConfig, err := utils.LoadPriceFeedConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig("testnet")
 	if err != nil {
-		panic(err)
+		t.Logf(err.Error())
 	}
-	triangs := Triangulate("CHF-USDC", pxConfig)
+	triangs := Triangulate("CHF-USDC", pxConf)
 	fmt.Println("Triangulate")
 	fmt.Println(triangs)
 
 	// test an impossible path
-	triangs2 := Triangulate("CHF-DOGE", pxConfig)
+	triangs2 := Triangulate("CHF-DOGE", pxConf)
 	fmt.Println(triangs2)
 }

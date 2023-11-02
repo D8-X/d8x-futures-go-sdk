@@ -2,6 +2,7 @@ package d8x_futures
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -10,12 +11,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 )
 
-func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderAddr *common.Address, symbol string) (PositionRisk, error) {
-	priceData := FetchPricesForPerpetual(xInfo, symbol)
+func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderAddr *common.Address, symbol string, epNo int) (PositionRisk, error) {
+	priceData, err := FetchPricesForPerpetual(xInfo, symbol, epNo)
+	if err != nil {
+		return PositionRisk{}, err
+	}
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
 		panic("symbol does not exist in static perpetual info")
@@ -94,8 +99,8 @@ func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderA
 }
 
 // QueryPerpetualState collects PerpetualState by calling the off-chain prices and
-// blockchain queries
-func QueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, perpetualIds []int32) ([]PerpetualState, error) {
+// blockchain queries. epNo is the endpoint number to choose (see priceFeedConfig)
+func QueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, perpetualIds []int32, epNo int) ([]PerpetualState, error) {
 	bigIntSlice := make([]*big.Int, len(perpetualIds))
 	for i, id := range perpetualIds {
 		bigIntSlice[i] = big.NewInt(int64(id))
@@ -109,7 +114,10 @@ func QueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, per
 	pxInfo := make([]*big.Int, len(perpetualIds)*2)
 	pxInfoFloat := make([]float64, len(perpetualIds)*2)
 	for i := range perpetualIds {
-		p := FetchPricesForPerpetualId(xInfo, perpetualIds[i])
+		p, err := FetchPricesForPerpetualId(xInfo, perpetualIds[i], epNo)
+		if err != nil {
+			return nil, err
+		}
 		pxInfoFloat[i*2] = p.S2Price
 		pxInfoFloat[i*2+1] = p.S3Price
 		pxInfo[i*2] = utils.Float64ToABDK(p.S2Price)
@@ -176,7 +184,7 @@ func QueryOpenOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol 
 
 	from := 0
 	count := 15
-	clientOrders := []IClientOrderClientOrder{}
+	clientOrders := []contracts.IClientOrderClientOrder{}
 	zeroAddr := common.Address{}
 outerLoop:
 	for {
@@ -205,7 +213,7 @@ outerLoop:
 	orders := make([]Order, len(clientOrders))
 	for i, d := range digests {
 		strDigests[i] = "0x" + common.Bytes2Hex(d[:])
-		orders[i] = clientOrders[i].FromChainType(xInfo)
+		orders[i] = FromChainType(&clientOrders[i], xInfo)
 	}
 	if err != nil {
 		return []Order{}, []string{}, err
@@ -291,29 +299,34 @@ func CalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, positio
 	}
 }
 
-func FetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32) PerpetualPriceInfo {
+func FetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, epNo int) (PerpetualPriceInfo, error) {
 	j := GetPerpetualStaticInfoIdxFromId(exchangeInfo, id)
 	if j == -1 {
-		panic("symbol does not exist in static perpetual info")
+		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
-	return fetchPricesForPerpetual(exchangeInfo, j)
+	return fetchPricesForPerpetual(exchangeInfo, j, epNo)
 }
 
 // FetchPricesForPerpetual queries the REST-endpoints of the oracles and calculates S2,S3
 // index prices, also returns the price-feed-data required for blockchain submission and
-// information whether the market is closed or not.
-func FetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string) PerpetualPriceInfo {
+// information whether the market is closed or not. epNo is the endpoint number from the config.
+func FetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string, epNo int) (PerpetualPriceInfo, error) {
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo, symbol)
 	if j == -1 {
-		panic("symbol does not exist in static perpetual info")
+		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
-	return fetchPricesForPerpetual(exchangeInfo, j)
+	return fetchPricesForPerpetual(exchangeInfo, j, epNo)
 }
 
-func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int) PerpetualPriceInfo {
+// fetchPricesForPerpetual gets prices from the VAA-endpoint, perpetual number j
+// and endpoint number epNo
+func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int, epNo int) (PerpetualPriceInfo, error) {
 	// get underlying data from rest-api
-	feedData := fetchPricesFromAPI(exchangeInfo.Perpetuals[j].PriceIds, exchangeInfo.PriceFeedInfo)
+	feedData, err := fetchPricesFromAPI(exchangeInfo.Perpetuals[j].PriceIds, exchangeInfo.PriceFeedInfo, epNo)
+	if err != nil {
+		return PerpetualPriceInfo{}, err
+	}
 	// triangulate fetched prices to obtain index prices
 	triang := exchangeInfo.IdxPriceTriangulations[exchangeInfo.Perpetuals[j].S2Symbol]
 	pxS2, isMarketClosedS2 := CalculateTriangulation(triang, feedData)
@@ -331,14 +344,14 @@ func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int) PerpetualPr
 		IsMarketClosedS3: isMarketClosedS3,
 		PriceFeed:        feedData,
 	}
-	return priceInfo
+	return priceInfo, nil
 }
 
 // fetchPricesFromAPI gets the prices for the given priceIds from the
 // configured REST-API. The PriceFeedConfig is needed to extract the
 // correct endpoint per feed, and store what symbol (e.g. BTC-USD) the
-// price feed covers.
-func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig) PriceFeedData {
+// price feed covers. endPtNo is the endpoint number in the config
+func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, endPtNo int) (PriceFeedData, error) {
 	pxData := PriceFeedData{
 		Symbols:        make([]string, len(priceIds)),
 		PriceIds:       priceIds,
@@ -348,10 +361,11 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig) PriceFe
 	}
 	queries := make(map[string]string)
 	for _, el := range config.EndPoints {
-		queries[el.Type] = el.EndpointUrl + "/latest_price_feeds?target_chain=default&"
+		queries[el.Type] = el.EndpointUrl[endPtNo] + "/latest_price_feeds?target_chain=default&"
 	}
 	// loop through price id's, find its endpoints and prepare the query
 	for i, id := range priceIds {
+		id = strings.TrimPrefix(id, "0x")
 		for _, c := range config.PriceFeedIds {
 			if c.Id == "0x"+id {
 				queries[c.Type] += "ids[]=" + id + "&"
@@ -366,21 +380,21 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig) PriceFe
 		response, err := http.Get(q)
 		if err != nil {
 			fmt.Println("Error sending fetchPricesFromAPI request:", err)
-			continue
+			return PriceFeedData{}, err
 		}
 		defer response.Body.Close()
 
 		body, err := io.ReadAll(response.Body)
 		if err != nil {
 			fmt.Println("Error reading response body:", err)
-			continue
+			return PriceFeedData{}, err
 		}
 
 		var data []ResponsePythLatestPriceFeed
 		err = json.Unmarshal(body, &data)
 		if err != nil {
 			fmt.Println("Error decoding JSON:", err)
-			continue
+			return PriceFeedData{}, err
 		}
 		// process data
 		for _, d := range data {
@@ -395,5 +409,5 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig) PriceFe
 			}
 		}
 	}
-	return pxData
+	return pxData, nil
 }

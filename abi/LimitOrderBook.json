@@ -27,7 +27,7 @@
                 "type": "uint32"
             }
         ],
-        "stateMutability": "nonpayable",
+        "stateMutability": "payable",
         "type": "constructor"
     },
     {
@@ -205,7 +205,7 @@
         ],
         "name": "addExecutor",
         "outputs": [],
-        "stateMutability": "nonpayable",
+        "stateMutability": "payable",
         "type": "function"
     },
     {
@@ -352,34 +352,6 @@
             }
         ],
         "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "_digest",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "address",
-                "name": "_executorAddr",
-                "type": "address"
-            },
-            {
-                "internalType": "bytes[]",
-                "name": "_updateData",
-                "type": "bytes[]"
-            },
-            {
-                "internalType": "uint64[]",
-                "name": "_publishTimes",
-                "type": "uint64[]"
-            }
-        ],
-        "name": "executeOrder",
-        "outputs": [],
-        "stateMutability": "payable",
         "type": "function"
     },
     {
@@ -543,30 +515,11 @@
                 "type": "bytes32"
             }
         ],
-        "name": "getSignature",
-        "outputs": [
-            {
-                "internalType": "bytes",
-                "name": "signature",
-                "type": "bytes"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "digest",
-                "type": "bytes32"
-            }
-        ],
         "name": "getTrader",
         "outputs": [
             {
                 "internalType": "address",
-                "name": "trader",
+                "name": "",
                 "type": "address"
             }
         ],
@@ -669,19 +622,6 @@
             }
         ],
         "name": "numberOfDigestsOfTrader",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "numberOfOrderBookDigests",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -1044,101 +984,6 @@
                         "type": "address"
                     }
                 ],
-                "internalType": "struct IClientOrder.ClientOrder",
-                "name": "_order",
-                "type": "tuple"
-            },
-            {
-                "internalType": "bytes",
-                "name": "_signature",
-                "type": "bytes"
-            }
-        ],
-        "name": "postOrder",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "components": [
-                    {
-                        "internalType": "uint24",
-                        "name": "iPerpetualId",
-                        "type": "uint24"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fLimitPrice",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "uint16",
-                        "name": "leverageTDR",
-                        "type": "uint16"
-                    },
-                    {
-                        "internalType": "uint32",
-                        "name": "executionTimestamp",
-                        "type": "uint32"
-                    },
-                    {
-                        "internalType": "uint32",
-                        "name": "flags",
-                        "type": "uint32"
-                    },
-                    {
-                        "internalType": "uint32",
-                        "name": "iDeadline",
-                        "type": "uint32"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "brokerAddr",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fTriggerPrice",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fAmount",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "parentChildDigest1",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "traderAddr",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "parentChildDigest2",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "uint16",
-                        "name": "brokerFeeTbps",
-                        "type": "uint16"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "brokerSignature",
-                        "type": "bytes"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "callbackTarget",
-                        "type": "address"
-                    }
-                ],
                 "internalType": "struct IClientOrder.ClientOrder[]",
                 "name": "_orders",
                 "type": "tuple[]"
@@ -1183,7 +1028,7 @@
         ],
         "name": "removeExecutor",
         "outputs": [],
-        "stateMutability": "nonpayable",
+        "stateMutability": "payable",
         "type": "function"
     },
     {
@@ -1196,7 +1041,7 @@
         ],
         "name": "setCallbackGasLimit",
         "outputs": [],
-        "stateMutability": "nonpayable",
+        "stateMutability": "payable",
         "type": "function"
     }
 ]
