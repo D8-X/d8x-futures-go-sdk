@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/d8x_futures"
@@ -381,13 +382,17 @@ func createPositionTable(pos d8x_futures.PositionRisk) string {
 	if pos.Side != d8x_futures.SIDE_BUY {
 		size = size * -1
 	}
-
+	syms := strings.Split(pos.Symbol, "-")
+	//margin := (size*(pos.MarkPrice-pos.EntryPrice)+pos.UnrealizedPnlQuoteCCY)*
+	//	1/pos.CollToQuoteConversion + pos.CollateralCC
+	margin := pos.CollateralCC
 	rows := [][]string{
-		{"Size", fmt.Sprintf("%.4f", size)},
-		{"Entry Price", fmt.Sprintf("%.4f", pos.EntryPrice)},
-		{"Liq. Price", fmt.Sprintf("%.4f", pos.LiquidationPrice[0])},
-		{"Leverage", fmt.Sprintf("%.2f", pos.Leverage)},
-		{"Unreal.P&L", fmt.Sprintf("%.4f", pos.UnrealizedPnlQuoteCCY)},
+		{"Size", fmt.Sprintf("%.4f", size), syms[0]},
+		{"Entry Price", fmt.Sprintf("%.4f", pos.EntryPrice), syms[1]},
+		{"Liq. Price", fmt.Sprintf("%.4f", pos.LiquidationPrice[0]), syms[1]},
+		{"Margin", fmt.Sprintf("%.4f", margin), syms[2]},
+		{"Leverage", fmt.Sprintf("%.2f", pos.Leverage), "-"},
+		{"Unreal.P&L", fmt.Sprintf("%.4f", pos.UnrealizedPnlQuoteCCY), syms[1]},
 	}
 
 	t := lgtable.New().
@@ -403,7 +408,7 @@ func createPositionTable(pos d8x_futures.PositionRisk) string {
 				return OddRowStyle
 			}
 		}).
-		Headers("Attribute", "Value").
+		Headers("Attribute", "Value", "Unit").
 		Rows(rows...)
 	return fmt.Sprintln(t)
 }
