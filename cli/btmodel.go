@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/D8-X/d8x-futures-go-sdk/config"
@@ -12,6 +13,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	lgtable "github.com/charmbracelet/lipgloss/table"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -29,7 +31,7 @@ type Model struct {
 	screen              int
 	poolTable           table.Model
 	perpTable           table.Model
-	posTable            table.Model
+	posTableStr         string
 	perpState           d8x_futures.PerpetualState
 	traderInput         textinput.Model
 	traderAddr          common.Address
@@ -37,13 +39,30 @@ type Model struct {
 }
 
 const LAST_PAGE int = 4
+const (
+	purple    = lipgloss.Color("99")
+	gray      = lipgloss.Color("245")
+	lightGray = lipgloss.Color("241")
+)
 
+var re = lipgloss.NewRenderer(os.Stdout)
 var (
 	focusedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	cursorStyle  = focusedStyle.Copy()
 	baseStyle    = lipgloss.NewStyle().
 			BorderStyle(lipgloss.NormalBorder()).
 			BorderForeground(lipgloss.Color("240"))
+
+	// HeaderStyle is the lipgloss style used for the table headers.
+	HeaderStyle = re.NewStyle().Foreground(purple).Bold(true).Align(lipgloss.Center)
+	// CellStyle is the base lipgloss style used for the table rows.
+	CellStyle = re.NewStyle().Padding(0, 1).Width(14)
+	// OddRowStyle is the lipgloss style used for odd-numbered table rows.
+	OddRowStyle = CellStyle.Copy().Foreground(gray)
+	// EvenRowStyle is the lipgloss style used for even-numbered table rows.
+	EvenRowStyle = CellStyle.Copy().Foreground(lightGray)
+	// BorderStyle is the lipgloss style used for the table border.
+	BorderStyle = lipgloss.NewStyle().Foreground(purple)
 )
 
 type ScreenChoices struct {
@@ -251,7 +270,9 @@ func (m *Model) perpDetailsView() string {
 	fnd := style.Render(fmt.Sprintf("Funding Rate (bps)\n%.2f", m.perpState.CurrentFundingRateBps*10000))
 	oi := style.Render(fmt.Sprintf("Open Interest\n%.4f", m.perpState.OpenInterestBC))
 	s += lipgloss.JoinHorizontal(lipgloss.Top, mid, mark, idx, fnd, oi)
-	s += "\n\n" + baseStyle.Render(m.posTable.View()) + "\n"
+	s += "\n\n" + styleA.Render("Position of address "+m.traderAddr.Hex()[0:8]+"...")
+	s += "\n" + m.posTableStr + "\n"
+
 	s += "\n" + bottomBarStatus(4)
 	return s
 }
@@ -341,7 +362,7 @@ func (m *Model) actionScreen34() error {
 		return err
 	}
 	m.perpState = s[0]
-	m.posTable = createPositionTable(m.PositionRisk)
+	m.posTableStr = createPositionTable(m.PositionRisk)
 	return nil
 }
 
@@ -354,46 +375,37 @@ func (m *Model) setPositionRisk(symbol string) error {
 	return nil
 }
 
-func createPositionTable(pos d8x_futures.PositionRisk) table.Model {
-	columns := []table.Column{
-		{Title: "Size", Width: 8},
-		{Title: "EntryPx", Width: 8},
-		{Title: "LiqPx", Width: 6},
-		//{Title: "Margin", Width: 15},
-		{Title: "Leverage", Width: 15},
-		{Title: "Unr.P&L", Width: 15},
-	}
-	var rows []table.Row
+func createPositionTable(pos d8x_futures.PositionRisk) string {
+
 	size := pos.PositionNotionalBaseCCY
 	if pos.Side != d8x_futures.SIDE_BUY {
 		size = size * -1
 	}
 
-	rows = append(rows, table.Row{
-		fmt.Sprintf("%.4f", size),
-		fmt.Sprintf("%.4f", pos.EntryPrice),
-		fmt.Sprintf("%.4f", pos.LiquidationPrice[0]),
-		fmt.Sprintf("%.2f", pos.Leverage),
-		fmt.Sprintf("%.4f", pos.UnrealizedPnlQuoteCCY),
-	})
-	t := table.New(
-		table.WithColumns(columns),
-		table.WithRows(rows),
-		table.WithFocused(true),
-		table.WithHeight(7),
-	)
-	s := table.DefaultStyles()
-	s.Header = s.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240")).
-		BorderBottom(true).
-		Bold(false)
-	s.Selected = s.Selected.
-		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
-		Bold(false)
-	t.SetStyles(s)
-	return t
+	rows := [][]string{
+		{"Size", fmt.Sprintf("%.4f", size)},
+		{"Entry Price", fmt.Sprintf("%.4f", pos.EntryPrice)},
+		{"Liq. Price", fmt.Sprintf("%.4f", pos.LiquidationPrice[0])},
+		{"Leverage", fmt.Sprintf("%.2f", pos.Leverage)},
+		{"Unreal.P&L", fmt.Sprintf("%.4f", pos.UnrealizedPnlQuoteCCY)},
+	}
+
+	t := lgtable.New().
+		Border(lipgloss.NormalBorder()).
+		BorderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("99"))).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			switch {
+			case row == 0:
+				return HeaderStyle
+			case row%2 == 0:
+				return EvenRowStyle
+			default:
+				return OddRowStyle
+			}
+		}).
+		Headers("Attribute", "Value").
+		Rows(rows...)
+	return fmt.Sprintln(t)
 }
 
 func createPoolTable(info d8x_futures.StaticExchangeInfo, poolSt []d8x_futures.PoolState) table.Model {
