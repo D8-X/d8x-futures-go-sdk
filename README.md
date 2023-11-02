@@ -11,4 +11,3 @@ Generate the ABI for the network it should compile to:
 
 `go build` -> Remove duplicated structs
 
-https://www.digitalocean.com/community/tutorials/how-to-use-a-private-go-module-in-your-own-project
