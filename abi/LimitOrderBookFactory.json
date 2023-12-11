@@ -140,25 +140,6 @@
         "inputs": [
             {
                 "internalType": "uint24",
-                "name": "_iPerpetualId",
-                "type": "uint24"
-            }
-        ],
-        "name": "getOrderBookAddress",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint24",
                 "name": "",
                 "type": "uint24"
             }
