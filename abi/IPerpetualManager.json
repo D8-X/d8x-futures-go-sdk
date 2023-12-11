@@ -1888,6 +1888,19 @@
     {
         "inputs": [
             {
+                "internalType": "uint24",
+                "name": "_perpetualId",
+                "type": "uint24"
+            }
+        ],
+        "name": "deactivatePerp",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint8",
                 "name": "_iPoolIdx",
                 "type": "uint8"
@@ -4506,30 +4519,6 @@
         "inputs": [
             {
                 "internalType": "uint24",
-                "name": "_perpetualId",
-                "type": "uint24"
-            },
-            {
-                "internalType": "address",
-                "name": "_traderAddress",
-                "type": "address"
-            }
-        ],
-        "name": "isTraderMaintenanceMarginSafe",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint24",
                 "name": "_perpetualIndex",
                 "type": "uint24"
             },
@@ -5606,6 +5595,11 @@
                 "internalType": "uint24",
                 "name": "_iPerpetualId",
                 "type": "uint24"
+            },
+            {
+                "internalType": "bool",
+                "name": "_revertIfClosed",
+                "type": "bool"
             }
         ],
         "name": "updateFundingAndPricesBefore",
