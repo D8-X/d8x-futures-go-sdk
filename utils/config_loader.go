@@ -9,21 +9,19 @@ import (
 )
 
 type ChainConfig struct {
-	Name                   string         `json:"name"`
-	PriceFeedNetwork       string         `json:"priceFeedNetwork"`
-	ChainId                int64          `json:"chainId"`
-	Version                int32          `json:"version"`
-	ProxyAddr              common.Address `json:"proxyAddr"`
-	NodeURL                string         `json:"nodeURL"`
-	PriceFeedConfigNetwork string         `json:"priceFeedConfigNetwork"`
-	PostOrderGasLimit      int64          `json:"postOrderGasLimit"`
+	Name               string         `json:"name"`
+	PriceFeedNetwork   string         `json:"priceFeedNetwork"`
+	PriceFeedEndpoints []string       `json:"priceFeedEndpoints"`
+	ChainId            int64          `json:"chainId"`
+	ProxyAddr          common.Address `json:"proxyAddr"`
+	NodeURL            string         `json:"nodeURL"`
+	PostOrderGasLimit  int64          `json:"postOrderGasLimit"`
 }
 
 type PriceFeedConfig struct {
-	Network                  string              `json:"network"`
-	PriceFeedIds             []PriceFeedId       `json:"ids"`
-	EndPoints                []PriceFeedEndpoint `json:"endpoints"`
-	ThresholdMarketClosedSec int32               `json:"threshold_market_closed_sec"`
+	Network                  string        `json:"network"`
+	PriceFeedIds             []PriceFeedId `json:"ids"`
+	ThresholdMarketClosedSec int32         `json:"threshold_market_closed_sec"`
 }
 
 type PriceFeedId struct {
@@ -31,11 +29,6 @@ type PriceFeedId struct {
 	Id     string `json:"id"`
 	Type   string `json:"type"`
 	Origin string `json:"origin"`
-}
-
-type PriceFeedEndpoint struct {
-	Type        string   `json:"type"`
-	EndpointUrl []string `json:"endpoints"`
 }
 
 // LoadPriceFeedConfig loads the price feed config file
