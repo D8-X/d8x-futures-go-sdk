@@ -133,7 +133,7 @@ type BlockChainConnector struct {
 	ChainId           int64
 	PerpetualManager  *contracts.IPerpetualManager
 	SymbolMapping     *map[string]string //chain-symbol (MATC) to long format (MATIC)
-	PriceFeedNetwork  string             //testnet or mainnet
+	PriceFeedNetwork  string             //PythEVMBeta or PythEVMStable
 	PostOrderGasLimit int64              //gas limit for posting orders
 	PriceFeedConfig   utils.PriceFeedConfig
 }

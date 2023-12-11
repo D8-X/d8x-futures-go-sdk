@@ -16,8 +16,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderAddr *common.Address, symbol string, epNo int) (PositionRisk, error) {
-	priceData, err := FetchPricesForPerpetual(xInfo, symbol, epNo)
+func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderAddr *common.Address, symbol string, endpoint string) (PositionRisk, error) {
+	priceData, err := FetchPricesForPerpetual(xInfo, symbol, endpoint)
 	if err != nil {
 		return PositionRisk{}, err
 	}
@@ -99,8 +99,8 @@ func GetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderA
 }
 
 // QueryPerpetualState collects PerpetualState by calling the off-chain prices and
-// blockchain queries. epNo is the endpoint number to choose (see priceFeedConfig)
-func QueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, perpetualIds []int32, epNo int) ([]PerpetualState, error) {
+// blockchain queries. endpoint is the address to get prices from
+func QueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, perpetualIds []int32, endpoint string) ([]PerpetualState, error) {
 	bigIntSlice := make([]*big.Int, len(perpetualIds))
 	for i, id := range perpetualIds {
 		bigIntSlice[i] = big.NewInt(int64(id))
@@ -114,7 +114,7 @@ func QueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, per
 	pxInfo := make([]*big.Int, len(perpetualIds)*2)
 	pxInfoFloat := make([]float64, len(perpetualIds)*2)
 	for i := range perpetualIds {
-		p, err := FetchPricesForPerpetualId(xInfo, perpetualIds[i], epNo)
+		p, err := FetchPricesForPerpetualId(xInfo, perpetualIds[i], endpoint)
 		if err != nil {
 			return nil, err
 		}
@@ -299,31 +299,31 @@ func CalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, positio
 	}
 }
 
-func FetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, epNo int) (PerpetualPriceInfo, error) {
+func FetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, endpoint string) (PerpetualPriceInfo, error) {
 	j := GetPerpetualStaticInfoIdxFromId(exchangeInfo, id)
 	if j == -1 {
 		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
-	return fetchPricesForPerpetual(exchangeInfo, j, epNo)
+	return fetchPricesForPerpetual(exchangeInfo, j, endpoint)
 }
 
 // FetchPricesForPerpetual queries the REST-endpoints of the oracles and calculates S2,S3
 // index prices, also returns the price-feed-data required for blockchain submission and
-// information whether the market is closed or not. epNo is the endpoint number from the config.
-func FetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string, epNo int) (PerpetualPriceInfo, error) {
+// information whether the market is closed or not. endpoint is the endpoint that provides pyth prices.
+func FetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string, endpoint string) (PerpetualPriceInfo, error) {
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo, symbol)
 	if j == -1 {
 		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
-	return fetchPricesForPerpetual(exchangeInfo, j, epNo)
+	return fetchPricesForPerpetual(exchangeInfo, j, endpoint)
 }
 
 // fetchPricesForPerpetual gets prices from the VAA-endpoint, perpetual number j
 // and endpoint number epNo
-func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int, epNo int) (PerpetualPriceInfo, error) {
+func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int, endpoint string) (PerpetualPriceInfo, error) {
 	// get underlying data from rest-api
-	feedData, err := fetchPricesFromAPI(exchangeInfo.Perpetuals[j].PriceIds, exchangeInfo.PriceFeedInfo, epNo)
+	feedData, err := fetchPricesFromAPI(exchangeInfo.Perpetuals[j].PriceIds, exchangeInfo.PriceFeedInfo, endpoint)
 	if err != nil {
 		return PerpetualPriceInfo{}, err
 	}
@@ -351,7 +351,7 @@ func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int, epNo int) (
 // configured REST-API. The PriceFeedConfig is needed to extract the
 // correct endpoint per feed, and store what symbol (e.g. BTC-USD) the
 // price feed covers. endPtNo is the endpoint number in the config
-func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, endPtNo int) (PriceFeedData, error) {
+func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFeedEndpoint string) (PriceFeedData, error) {
 	pxData := PriceFeedData{
 		Symbols:        make([]string, len(priceIds)),
 		PriceIds:       priceIds,
@@ -359,16 +359,13 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, endPtNo
 		IsMarketClosed: make([]bool, len(priceIds)),
 		Vaas:           make([]string, len(priceIds)),
 	}
-	queries := make(map[string]string)
-	for _, el := range config.EndPoints {
-		queries[el.Type] = el.EndpointUrl[endPtNo] + "/latest_price_feeds?target_chain=default&"
-	}
+	query := priceFeedEndpoint + "/latest_price_feeds?target_chain=default&"
 	// loop through price id's, find its endpoints and prepare the query
 	for i, id := range priceIds {
 		id = strings.TrimPrefix(id, "0x")
 		for _, c := range config.PriceFeedIds {
 			if c.Id == "0x"+id {
-				queries[c.Type] += "ids[]=" + id + "&"
+				query += "ids[]=" + id + "&"
 				pxData.Symbols[i] = c.Symbol
 				break
 			}
@@ -376,36 +373,34 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, endPtNo
 	}
 	timestampNow := time.Now().Unix()
 	// REST query (#queries == number of endpoints for feeds)
-	for _, q := range queries {
-		response, err := http.Get(q)
-		if err != nil {
-			fmt.Println("Error sending fetchPricesFromAPI request:", err)
-			return PriceFeedData{}, err
-		}
-		defer response.Body.Close()
+	response, err := http.Get(query)
+	if err != nil {
+		fmt.Println("Error sending fetchPricesFromAPI request:", err)
+		return PriceFeedData{}, err
+	}
+	defer response.Body.Close()
 
-		body, err := io.ReadAll(response.Body)
-		if err != nil {
-			fmt.Println("Error reading response body:", err)
-			return PriceFeedData{}, err
-		}
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return PriceFeedData{}, err
+	}
 
-		var data []ResponsePythLatestPriceFeed
-		err = json.Unmarshal(body, &data)
-		if err != nil {
-			fmt.Println("Error decoding JSON:", err)
-			return PriceFeedData{}, err
-		}
-		// process data
-		for _, d := range data {
-			//find idx of d.Id
-			for i, id := range priceIds {
-				if id == d.Id {
-					pxData.Prices[i] = utils.PythNToFloat64(d.Price.Price, d.Price.Expo)
-					pxData.IsMarketClosed[i] = timestampNow-int64(d.Price.PublishTime) > int64(config.ThresholdMarketClosedSec)
-					pxData.Vaas[i] = d.Vaa
-					break
-				}
+	var data []ResponsePythLatestPriceFeed
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		return PriceFeedData{}, err
+	}
+	// process data
+	for _, d := range data {
+		//find idx of d.Id
+		for i, id := range priceIds {
+			if id == d.Id {
+				pxData.Prices[i] = utils.PythNToFloat64(d.Price.Price, d.Price.Expo)
+				pxData.IsMarketClosed[i] = timestampNow-int64(d.Price.PublishTime) > int64(config.ThresholdMarketClosedSec)
+				pxData.Vaas[i] = d.Vaa
+				break
 			}
 		}
 	}
