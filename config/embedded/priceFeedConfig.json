@@ -1,6 +1,6 @@
 [
   {
-    "network": "testnet",
+    "network": "PythEVMBeta",
     "ids": [
       {
         "symbol": "BTC-USD",
@@ -68,11 +68,10 @@
         "type": "pyth",
         "origin": "Crypto.AGEUR/USD"
       }
-    ],
-    "endpoints": [{ "type": "pyth", "endpoints": ["https://hermes-beta.pyth.network/api"] }]
+    ]
   },
   {
-    "network": "mainnet",
+    "network": "PythEVMStable",
     "ids": [
       {
         "symbol": "USDC-USD",
@@ -134,7 +133,6 @@
         "type": "pyth",
         "origin": "Crypto.AGEUR/USD"
       }
-    ],
-    "endpoints": [{ "type": "pyth", "endpoints": ["https://hermes.pyth.network/api"] }]
+    ]
   }
 ]
