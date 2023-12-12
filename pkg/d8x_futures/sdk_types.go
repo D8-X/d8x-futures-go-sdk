@@ -196,8 +196,8 @@ type Order struct {
 	Leverage            float64
 	Deadline            uint32
 	ExecutionTimestamp  uint32
-	parentChildOrderId1 [32]byte
-	parentChildOrderId2 [32]byte
+	ParentChildOrderId1 [32]byte
+	ParentChildOrderId2 [32]byte
 }
 
 type PositionRisk struct {
