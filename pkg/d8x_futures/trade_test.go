@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"os"
 	"testing"
 	"time"
 
@@ -115,6 +116,18 @@ func TestPostOrder(t *testing.T) {
 	}
 	txHash, _ := PostOrder(conn, xInfo, wallet, []byte{}, order, traderAddr)
 	fmt.Println("Tx hash = ", txHash)
+}
+
+func TestPostOrder2(t *testing.T) {
+	pk := os.Getenv("PK")
+	if pk == "" {
+		t.Logf("Provide privatekey as environment variable PK")
+		t.Fail()
+		return
+	}
+	var sdk Sdk
+	sdk.New(pk, "testnet", "", "")
+
 }
 
 func TestBrokerSignature(t *testing.T) {

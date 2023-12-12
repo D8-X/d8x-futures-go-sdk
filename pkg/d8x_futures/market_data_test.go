@@ -19,10 +19,76 @@ func TestFetchPricesFromAPI(t *testing.T) {
 	fmt.Println(data)
 }
 
+func TestSdkRO(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	trader := common.HexToAddress("***REMOVED***")
+	broker := common.HexToAddress("0xB0CBeeC370Af6ca2ed541F6a2264bc95b991F6E1")
+	pr, err := sdkRo.GetPositionRisk("BTC-USD-MATIC", trader)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println(pr)
+	}
+	perpState, err := sdkRo.QueryPerpetualState([]int32{100000, 100001, 200002})
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println(perpState)
+	}
+	poolState, err := sdkRo.QueryPoolStates()
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println(poolState)
+	}
+	oo, dgsts, err := sdkRo.QueryOpenOrders("BTC-USD-MATIC", trader) //([]Order, []string, error)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println(oo)
+		fmt.Println(dgsts)
+	}
+	status, err := sdkRo.QueryOrderStatus("BTC-USD-MATIC", trader, "") // (string, error)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		t.Log(status)
+	}
+	m, err := sdkRo.QueryMaxTradeAmount("BTC-USD-MATIC", 0, true) // (float64, error) {
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		t.Log(m)
+	}
+	vol, err := sdkRo.QueryTraderVolume(1, trader) //(float64, error) {
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println(vol)
+	}
+	fee, err := sdkRo.QueryExchangeFeeTbpsForTrader(1, trader, broker) // (uint16, error) {
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println(fee)
+	}
+	minpos, err := sdkRo.GetMinimalPositionSize("BTC-USD-MATIC") //(float64, error)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println(minpos)
+	}
+
+}
+
 func TestFetchPricesForPerpetual(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	pxBundle, _ := FetchPricesForPerpetual(info, "BTC-USD-MATIC", "https://hermes-beta.pyth.network/api")
+	pxBundle, _ := RawFetchPricesForPerpetual(info, "BTC-USD-MATIC", "https://hermes-beta.pyth.network/api")
 	fmt.Println(pxBundle)
 }
 
@@ -39,7 +105,7 @@ func TestGetPositionRisk(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
-	pRisk, err := GetPositionRisk(info, conn, (*common.Address)(&traderAddr), "ETH-USD-MATIC", "https://hermes-beta.pyth.network/api")
+	pRisk, err := RawGetPositionRisk(info, conn, (*common.Address)(&traderAddr), "ETH-USD-MATIC", "https://hermes-beta.pyth.network/api")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -59,7 +125,7 @@ func TestQueryPerpetualState(t *testing.T) {
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
 	perpIds := []int32{100001, 100002}
-	perpState, err := QueryPerpetualState(conn, info, perpIds, "https://hermes-beta.pyth.network/api")
+	perpState, err := RawQueryPerpetualState(conn, info, perpIds, "https://hermes-beta.pyth.network/api")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -78,7 +144,7 @@ func TestQueryPoolStates(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
-	poolStates, err := QueryPoolStates(conn, info)
+	poolStates, err := RawQueryPoolStates(conn, info)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -107,7 +173,7 @@ func TestQueryOpenOrders(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
-	orders, digests, err := QueryOpenOrders(conn, info, "MATIC-USD-MATIC", traderAddr)
+	orders, digests, err := RawQueryOpenOrders(conn, info, "MATIC-USD-MATIC", traderAddr)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -119,7 +185,7 @@ func TestQueryOpenOrders(t *testing.T) {
 		return
 	}
 	d := digests[0]
-	status, err := QueryOrderStatus(conn, info, traderAddr, d, "MATIC-USD-MATIC")
+	status, err := RawQueryOrderStatus(conn, info, traderAddr, d, "MATIC-USD-MATIC")
 	fmt.Println("order status: ", status)
 }
 
@@ -136,7 +202,7 @@ func TestQueryTraderVolume(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
-	volume, err := QueryTraderVolume(conn, info, traderAddr, 1)
+	volume, err := RawQueryTraderVolume(conn, info, traderAddr, 1)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -157,7 +223,7 @@ func TestQueryExchangeFeeTbpsForTrader(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
-	fee, err := QueryExchangeFeeTbpsForTrader(conn, info, 1, traderAddr, brokerAddr)
+	fee, err := RawQueryExchangeFeeTbpsForTrader(conn, info, 1, traderAddr, brokerAddr)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -176,7 +242,7 @@ func TestQueryMaxTradeAmount(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
-	trade, err := QueryMaxTradeAmount(conn, info, 0.01, "ETH-USD-MATIC", true)
+	trade, err := RawQueryMaxTradeAmount(conn, info, 0.01, "ETH-USD-MATIC", true)
 	if err != nil {
 		t.Logf(err.Error())
 	}
