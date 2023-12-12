@@ -3,13 +3,29 @@ package d8x_futures
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"math/big"
+	"strings"
 
+	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
+
+// SdkRO is the read-only type
+type SdkRO struct {
+	Info        StaticExchangeInfo
+	Conn        BlockChainConnector
+	ChainConfig utils.ChainConfig
+}
+
+// Sdk is the read-write type
+type Sdk struct {
+	SdkRO
+	Wallet Wallet
+}
 
 type NestedPerpetualIds struct {
 	PerpetualIds        [][]*big.Int
@@ -270,5 +286,53 @@ func (ps *BrokerPaySignatureReq) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("failed to convert TotalAmount to big.Int")
 	}
 	ps.ExecutorSignature = aux.ExecutorSignature
+	return nil
+}
+
+// New creates a new read-only SDK instance
+// endpoints contain an rpc endpoint and a pyth Endpoint in this order
+// use New("network", "", "pythendpoint") to provide a pyth endpoint
+// but no RPC
+func (sdkRo *SdkRO) New(networkName string, endpoints ...string) error {
+	chConf, err := config.GetDefaultChainConfig(networkName)
+	if err != nil {
+		return err
+	}
+	// Use the first endpoint if provided
+	if len(endpoints) > 0 && endpoints[0] != "" {
+		chConf.NodeURL = endpoints[0]
+	}
+
+	// Use the second endpoint if provided
+	if len(endpoints) > 1 && endpoints[1] != "" {
+		chConf.PriceFeedEndpoints = []string{endpoints[1]}
+	}
+	if len(endpoints) > 2 {
+		slog.Info("SdkRO.New: only 2 endpoints are used")
+	}
+	pxConf, err := config.GetDefaultPriceConfig(chConf.PriceFeedNetwork)
+	if err != nil {
+		return err
+	}
+	conn := CreateBlockChainConnector(pxConf, chConf)
+	nest, err := QueryNestedPerpetualInfo(conn)
+	if err != nil {
+		return err
+	}
+	sdkRo.Conn = conn
+	sdkRo.Info = QueryExchangeStaticInfo(conn, chConf, nest)
+	sdkRo.ChainConfig = chConf
+	return nil
+}
+
+// New creates a new read/write Sdk instance
+// networkname according to chainConfig; rpcEndpoint and pythEndpoint can be ""
+func (sdk *Sdk) New(privateKey, networkName, rpcEndpoint, pythEndpoint string) error {
+	privateKey, _ = strings.CutPrefix(privateKey, "0x")
+	sdk.SdkRO.New(networkName, rpcEndpoint, pythEndpoint)
+	err := sdk.Wallet.NewWallet(privateKey, sdk.ChainConfig.ChainId, sdk.Conn.Rpc)
+	if err != nil {
+		return err
+	}
 	return nil
 }
