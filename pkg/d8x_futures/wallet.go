@@ -36,8 +36,9 @@ func (w *Wallet) NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.C
 	}
 	w.Address = crypto.PubkeyToAddress(*publicKeyECDSA)
 	w.PrivateKey = privateKey
-
-	w.Auth = bind.NewKeyedTransactor(privateKey)
+	var chainIdBI big.Int
+	chainIdBI.SetInt64(chainId)
+	w.Auth, _ = bind.NewKeyedTransactorWithChainID(privateKey, &chainIdBI)
 	signerFn := func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 		chainID := big.NewInt(chainId)
 		return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)

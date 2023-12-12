@@ -9,20 +9,20 @@ import (
 )
 
 func TestFetchPricesFromAPI(t *testing.T) {
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 	priceIds := []string{"0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
 		"0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"}
-	data, _ := fetchPricesFromAPI(priceIds, pxConf, 0)
+	data, _ := fetchPricesFromAPI(priceIds, pxConf, "https://hermes-beta.pyth.network/api")
 	fmt.Println(data)
 }
 
 func TestFetchPricesForPerpetual(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	pxBundle, _ := FetchPricesForPerpetual(info, "BTC-USD-MATIC", 0)
+	pxBundle, _ := FetchPricesForPerpetual(info, "BTC-USD-MATIC", "https://hermes-beta.pyth.network/api")
 	fmt.Println(pxBundle)
 }
 
@@ -34,12 +34,12 @@ func TestGetPositionRisk(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
-	pRisk, err := GetPositionRisk(info, conn, (*common.Address)(&traderAddr), "ETH-USD-MATIC", 0)
+	pRisk, err := GetPositionRisk(info, conn, (*common.Address)(&traderAddr), "ETH-USD-MATIC", "https://hermes-beta.pyth.network/api")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -53,13 +53,13 @@ func TestQueryPerpetualState(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConf)
 	perpIds := []int32{100001, 100002}
-	perpState, err := QueryPerpetualState(conn, info, perpIds, 0)
+	perpState, err := QueryPerpetualState(conn, info, perpIds, "https://hermes-beta.pyth.network/api")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -73,7 +73,7 @@ func TestQueryPoolStates(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -102,7 +102,7 @@ func TestQueryOpenOrders(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	traderAddr := common.HexToAddress("***REMOVED***")
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -131,7 +131,7 @@ func TestQueryTraderVolume(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	traderAddr := common.HexToAddress("***REMOVED***")
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -152,7 +152,7 @@ func TestQueryExchangeFeeTbpsForTrader(t *testing.T) {
 	}
 	traderAddr := common.HexToAddress("***REMOVED***")
 	brokerAddr := common.Address{}
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -171,7 +171,7 @@ func TestQueryMaxTradeAmount(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {
 		t.Logf(err.Error())
 	}
