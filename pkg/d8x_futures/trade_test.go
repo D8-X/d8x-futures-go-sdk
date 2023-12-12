@@ -60,8 +60,8 @@ func TestOrderHash(t *testing.T) {
 		Leverage:            5,
 		Deadline:            1684863656,
 		ExecutionTimestamp:  1684263656,
-		parentChildOrderId1: emptyArray,
-		parentChildOrderId2: emptyArray,
+		ParentChildOrderId1: emptyArray,
+		ParentChildOrderId2: emptyArray,
 	}
 	scOrder := order.ToChainType(info, traderAddr)
 	dgst, err := CreateOrderDigest(scOrder, 80001, true, info.ProxyAddr.String())
@@ -84,7 +84,7 @@ func TestPostOrder(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig(chConfig.PriceFeedNetwork)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -110,8 +110,8 @@ func TestPostOrder(t *testing.T) {
 		Leverage:            5,
 		Deadline:            1684863656,
 		ExecutionTimestamp:  1684263656,
-		parentChildOrderId1: emptyArray,
-		parentChildOrderId2: emptyArray,
+		ParentChildOrderId1: emptyArray,
+		ParentChildOrderId2: emptyArray,
 	}
 	txHash, _ := PostOrder(conn, xInfo, wallet, []byte{}, order, traderAddr)
 	fmt.Println("Tx hash = ", txHash)

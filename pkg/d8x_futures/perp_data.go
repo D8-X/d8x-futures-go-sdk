@@ -312,8 +312,8 @@ func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Addr
 		FTriggerPrice:      utils.Float64ToABDK(order.TriggerPrice),
 		FAmount:            utils.Float64ToABDK(order.Quantity),
 		BrokerSignature:    order.BrokerSignature,
-		ParentChildDigest1: order.parentChildOrderId1,
-		ParentChildDigest2: order.parentChildOrderId2,
+		ParentChildDigest1: order.ParentChildOrderId1,
+		ParentChildDigest2: order.ParentChildOrderId2,
 		TraderAddr:         traderAddr,
 		BrokerFeeTbps:      uint16(order.BrokerFeeTbps),
 	}
@@ -365,8 +365,8 @@ func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo StaticExcha
 		Leverage:            float64(scOrder.LeverageTDR) / 100,
 		Deadline:            scOrder.IDeadline,
 		ExecutionTimestamp:  scOrder.ExecutionTimestamp,
-		parentChildOrderId1: scOrder.ParentChildDigest1,
-		parentChildOrderId2: scOrder.ParentChildDigest2,
+		ParentChildOrderId1: scOrder.ParentChildDigest1,
+		ParentChildOrderId2: scOrder.ParentChildDigest2,
 	}
 	return order
 }
