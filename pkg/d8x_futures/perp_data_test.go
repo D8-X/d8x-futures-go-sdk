@@ -13,7 +13,7 @@ func TestQueryNestedPerpetualInfo(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig(chConf.PriceFeedNetwork)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -39,7 +39,7 @@ func TestQueryPoolStaticInfo(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig(chConf.PriceFeedNetwork)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -48,7 +48,7 @@ func TestQueryPoolStaticInfo(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	info := QueryExchangeStaticInfo(conn, chConf, nest)
+	info := QueryExchangeStaticInfo(&conn, &chConf, &nest)
 	fmt.Println(info)
 	info.Store("./tmpXchInfo.json")
 }
@@ -69,15 +69,15 @@ func TestPythNToFloat64(t *testing.T) {
 }
 
 func TestTriangulate(t *testing.T) {
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig("PythEVMStable")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	triangs := Triangulate("CHF-USDC", pxConf)
+	triangs := Triangulate("CHF-USDC", &pxConf)
 	fmt.Println("Triangulate")
 	fmt.Println(triangs)
 
 	// test an impossible path
-	triangs2 := Triangulate("CHF-DOGE", pxConf)
+	triangs2 := Triangulate("CHF-DOGE", &pxConf)
 	fmt.Println(triangs2)
 }

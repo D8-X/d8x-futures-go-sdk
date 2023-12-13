@@ -18,7 +18,6 @@ type Wallet struct {
 	PrivateKey *ecdsa.PrivateKey
 	Address    common.Address
 	Auth       *bind.TransactOpts
-	Rpc        *ethclient.Client
 }
 
 // NewWallet constructs a new wallet. RPC can be nil in which case the nonce will not be
@@ -48,7 +47,6 @@ func (w *Wallet) NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.C
 	w.Auth.Value = big.NewInt(0)
 	w.Auth.GasLimit = uint64(300000)
 
-	w.Rpc = rpc
 	if rpc != nil {
 		// query current values
 		w.Auth.GasPrice, err = GetGasPrice(rpc)
@@ -77,7 +75,7 @@ func (w *Wallet) SetValue(val int64) {
 }
 
 func (w *Wallet) UpdateNonce(rpc *ethclient.Client) {
-	n, err := GetNonce(w.Rpc, w.Address)
+	n, err := GetNonce(rpc, w.Address)
 	if err != nil {
 		log.Fatal("RPC could not determine gas price")
 	}

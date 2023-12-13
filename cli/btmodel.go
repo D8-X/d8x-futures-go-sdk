@@ -346,8 +346,8 @@ func (m *Model) actionScreen12() error {
 	if err != nil {
 		return err
 	}
-	m.XchInfo = d8x_futures.QueryExchangeStaticInfo(conn, chConf, nest)
-	m.PoolState, err = d8x_futures.QueryPoolStates(conn, m.XchInfo)
+	m.XchInfo = d8x_futures.QueryExchangeStaticInfo(&conn, &chConf, &nest)
+	m.PoolState, err = d8x_futures.RawQueryPoolStates(conn, m.XchInfo)
 	if err != nil {
 		return err
 	}
@@ -363,7 +363,7 @@ func (m *Model) actionScreen23() error {
 
 func (m *Model) actionScreen34() error {
 	ids := []int32{m.selectedPerpId}
-	s, err := d8x_futures.QueryPerpetualState(m.BlockChainConnector, m.XchInfo, ids, m.ChainConfig.PriceFeedEndpoints[0])
+	s, err := d8x_futures.RawQueryPerpetualState(m.BlockChainConnector, m.XchInfo, ids, m.ChainConfig.PriceFeedEndpoints[0])
 	if err != nil {
 		return err
 	}
@@ -378,7 +378,7 @@ func (m *Model) actionScreen34() error {
 }
 
 func (m *Model) setPositionRisk(symbol string) error {
-	pRisk, err := d8x_futures.GetPositionRisk(m.XchInfo, m.BlockChainConnector, &m.traderAddr, symbol, m.ChainConfig.PriceFeedEndpoints[0])
+	pRisk, err := d8x_futures.RawGetPositionRisk(m.XchInfo, m.BlockChainConnector, &m.traderAddr, symbol, m.ChainConfig.PriceFeedEndpoints[0])
 	if err != nil {
 		return err
 	}

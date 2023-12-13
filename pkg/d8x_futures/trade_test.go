@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"os"
 	"testing"
 	"time"
 
@@ -12,6 +13,39 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )
+
+func TestTradingFunc(t *testing.T) {
+	var sdk Sdk
+	//pk := os.Getenv("PK")
+	pk := "***REMOVED***"
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	err := sdk.New(pk, "testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	order := NewOrder("ETH-USD-MATIC", SIDE_BUY, ORDER_TYPE_MARKET, 0.1, 10, nil, nil, nil, nil, nil, nil, nil, nil)
+	orderId, err := sdk.PostOrder(order)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println("order id =", orderId)
+	}
+	status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallet.Address, orderId)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println("order status =", status)
+	}
+	pr, err := sdk.GetPositionRisk("ETH-USD-MATIC", sdk.Wallet.Address)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println("position risk =", pr)
+	}
+}
 
 func TestABI(t *testing.T) {
 	types := []string{"uint256", "address", "int128", "bytes32"}
@@ -60,10 +94,10 @@ func TestOrderHash(t *testing.T) {
 		Leverage:            5,
 		Deadline:            1684863656,
 		ExecutionTimestamp:  1684263656,
-		parentChildOrderId1: emptyArray,
-		parentChildOrderId2: emptyArray,
+		ParentChildOrderId1: emptyArray,
+		ParentChildOrderId2: emptyArray,
 	}
-	scOrder := order.ToChainType(info, traderAddr)
+	scOrder := order.ToChainType(&info, traderAddr)
 	dgst, err := CreateOrderDigest(scOrder, 80001, true, info.ProxyAddr.String())
 	if err != nil {
 		panic(err)
@@ -84,7 +118,7 @@ func TestPostOrder(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig("testnet")
+	pxConf, err := config.GetDefaultPriceConfig(chConfig.PriceFeedNetwork)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -110,11 +144,23 @@ func TestPostOrder(t *testing.T) {
 		Leverage:            5,
 		Deadline:            1684863656,
 		ExecutionTimestamp:  1684263656,
-		parentChildOrderId1: emptyArray,
-		parentChildOrderId2: emptyArray,
+		ParentChildOrderId1: emptyArray,
+		ParentChildOrderId2: emptyArray,
 	}
-	txHash, _ := PostOrder(conn, xInfo, wallet, []byte{}, order, traderAddr)
+	txHash, _ := RawPostOrder(&conn, &xInfo, wallet, []byte{}, &order, traderAddr)
 	fmt.Println("Tx hash = ", txHash)
+}
+
+func TestPostOrder2(t *testing.T) {
+	pk := os.Getenv("PK")
+	if pk == "" {
+		t.Logf("Provide privatekey as environment variable PK")
+		t.Fail()
+		return
+	}
+	var sdk Sdk
+	sdk.New(pk, "testnet", "", "")
+
 }
 
 func TestBrokerSignature(t *testing.T) {
@@ -135,7 +181,7 @@ func TestBrokerSignature(t *testing.T) {
 		panic("error creating wallet")
 	}
 	const brokerFeeTbps = 110
-	dgst, sig, _ := CreateOrderBrokerSignature(xInfo.ProxyAddr, 80001, wallet, 10001, brokerFeeTbps, traderAddr.String(), 1684863656)
+	dgst, sig, _ := RawCreateOrderBrokerSignature(xInfo.ProxyAddr, 80001, wallet, 10001, brokerFeeTbps, traderAddr.String(), 1684863656)
 	fmt.Print(dgst, sig)
 	/* result depend on proxy address
 	if dgst != "dead408cb2d42f86476ab484b39e37a354f3cdcbdddb16422af74425324e8755" {
@@ -179,7 +225,7 @@ func TestPaymentSignature(t *testing.T) {
 	ps.TotalAmount = &totalAmount
 	ps.MultiPayCtrct = multiPayCtrct
 	ps.ChainId = chConfig.ChainId
-	dgst, sig, err := CreatePaymentBrokerSignature(ps, wallet)
+	dgst, sig, err := RawCreatePaymentBrokerSignature(&ps, wallet)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -188,7 +234,7 @@ func TestPaymentSignature(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	addr, err := RecoverPaymentSignatureAddr(sigB, ps)
+	addr, err := RecoverPaymentSignatureAddr(sigB, &ps)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -216,7 +262,7 @@ func TestSignOrder(t *testing.T) {
 		panic("error creating wallet")
 	}
 
-	digest, sig, err := CreateOrderBrokerSignature(
+	digest, sig, err := RawCreateOrderBrokerSignature(
 		common.HexToAddress(proxyAddr), int64(chainId), wallet, int32(perpId), uint32(4000),
 		"***REMOVED***", 1691249493)
 	if err != nil {
