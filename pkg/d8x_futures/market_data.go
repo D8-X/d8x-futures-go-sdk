@@ -49,7 +49,7 @@ func (sdkRo *SdkRO) QueryExchangeFeeTbpsForTrader(poolId int32, traderAddr commo
 }
 
 func (sdkRo *SdkRO) GetMinimalPositionSize(symbol string) (float64, error) {
-	j := GetPerpetualStaticInfoIdxFromSymbol(sdkRo.Info, symbol)
+	j := GetPerpetualStaticInfoIdxFromSymbol(&sdkRo.Info, symbol)
 	if j == -1 {
 		return 0, errors.New("GetMinimalPositionSize: no perpetual " + symbol)
 	}
@@ -70,7 +70,7 @@ func RawGetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, trad
 	if err != nil {
 		return PositionRisk{}, err
 	}
-	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
 		panic("symbol does not exist in static perpetual info")
 	}
@@ -225,7 +225,7 @@ func RawQueryPoolStates(conn BlockChainConnector, xInfo StaticExchangeInfo) ([]P
 }
 
 func RawQueryOpenOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string, traderAddr common.Address) ([]Order, []string, error) {
-	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
 		return []Order{}, []string{}, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
@@ -262,7 +262,7 @@ outerLoop:
 	orders := make([]Order, len(clientOrders))
 	for i, d := range digests {
 		strDigests[i] = "0x" + common.Bytes2Hex(d[:])
-		orders[i] = FromChainType(&clientOrders[i], xInfo)
+		orders[i] = FromChainType(&clientOrders[i], &xInfo)
 	}
 	if err != nil {
 		return []Order{}, []string{}, err
@@ -271,7 +271,7 @@ outerLoop:
 }
 
 func RawQueryOrderStatus(conn BlockChainConnector, xInfo StaticExchangeInfo, traderAddr common.Address, orderDigest string, symbol string) (string, error) {
-	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
 		return "", fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
@@ -299,7 +299,7 @@ func RawQueryOrderStatus(conn BlockChainConnector, xInfo StaticExchangeInfo, tra
 }
 
 func RawQueryMaxTradeAmount(conn BlockChainConnector, xInfo StaticExchangeInfo, currentPositionNotional float64, symbol string, isBuy bool) (float64, error) {
-	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
 		return 0, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
@@ -345,7 +345,7 @@ func RawCalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, posi
 }
 
 func RawFetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, endpoint string) (PerpetualPriceInfo, error) {
-	j := GetPerpetualStaticInfoIdxFromId(exchangeInfo, id)
+	j := GetPerpetualStaticInfoIdxFromId(&exchangeInfo, id)
 	if j == -1 {
 		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
@@ -357,7 +357,7 @@ func RawFetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, end
 // information whether the market is closed or not. endpoint is the endpoint that provides pyth prices.
 func RawFetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string, endpoint string) (PerpetualPriceInfo, error) {
 
-	j := GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo, symbol)
+	j := GetPerpetualStaticInfoIdxFromSymbol(&exchangeInfo, symbol)
 	if j == -1 {
 		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}

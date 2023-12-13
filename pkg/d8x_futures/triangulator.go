@@ -35,7 +35,7 @@ func CalculateTriangulation(triang Triangulation, pxData PriceFeedData) (float64
 
 // Triangulate finds the shortest triangulation path for symbol (e.g. BTC-USDC) using
 // all price sources in pxConfig. Returns an empty array if no triangulation found.
-func Triangulate(symbol string, pxConfig utils.PriceFeedConfig) Triangulation {
+func Triangulate(symbol string, pxConfig *utils.PriceFeedConfig) Triangulation {
 	var feedSymBase []string
 	var feedSymQuote []string
 	// extract all base and quote currencies

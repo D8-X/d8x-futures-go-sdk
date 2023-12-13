@@ -346,7 +346,7 @@ func (m *Model) actionScreen12() error {
 	if err != nil {
 		return err
 	}
-	m.XchInfo = d8x_futures.QueryExchangeStaticInfo(conn, chConf, nest)
+	m.XchInfo = d8x_futures.QueryExchangeStaticInfo(&conn, &chConf, &nest)
 	m.PoolState, err = d8x_futures.RawQueryPoolStates(conn, m.XchInfo)
 	if err != nil {
 		return err
