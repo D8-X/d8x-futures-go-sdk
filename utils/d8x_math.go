@@ -14,6 +14,12 @@ const (
 	DECIMALS_18 = 1e18
 )
 
+func Max64x64() *big.Int {
+	MAX_64x64 := new(big.Int)
+	MAX_64x64.Exp(big.NewInt(2), big.NewInt(127), nil)
+	MAX_64x64.Sub(MAX_64x64, big.NewInt(1))
+	return MAX_64x64
+}
 func I32ToFloat64(x int32) float64 {
 	return float64(x) / (math.Pow(2, 29))
 }

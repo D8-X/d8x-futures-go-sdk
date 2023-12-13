@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"math"
 	"math/big"
@@ -116,14 +115,14 @@ func QueryNestedPerpetualInfo(conn BlockChainConnector) (NestedPerpetualIds, err
 
 // GetPerpetualStaticInfoIdxFromSymbol returns the idx of the perpetual within StaticExchangeInfo,
 // given the perpetual symbol (e.g., MATIC-USD-USDC). Returns -1 if not found.
-func GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo StaticExchangeInfo, symbol string) int {
+func GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo *StaticExchangeInfo, symbol string) int {
 	perpId := exchangeInfo.PerpetualSymbolToId[symbol]
 	return GetPerpetualStaticInfoIdxFromId(exchangeInfo, perpId)
 }
 
 // GetPerpetualStaticInfoIdxFromId returns the idx of the perpetual within StaticExchangeInfo,
 // given the perpetual id (e.g., 10001). Returns -1 if not found.
-func GetPerpetualStaticInfoIdxFromId(exchangeInfo StaticExchangeInfo, perpId int32) int {
+func GetPerpetualStaticInfoIdxFromId(exchangeInfo *StaticExchangeInfo, perpId int32) int {
 	for i, p := range exchangeInfo.Perpetuals {
 		if p.Id == perpId {
 			return i
@@ -132,7 +131,7 @@ func GetPerpetualStaticInfoIdxFromId(exchangeInfo StaticExchangeInfo, perpId int
 	return -1
 }
 
-func QueryExchangeStaticInfo(conn BlockChainConnector, config utils.ChainConfig, nest NestedPerpetualIds) StaticExchangeInfo {
+func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfig, nest *NestedPerpetualIds) StaticExchangeInfo {
 	symbolsSet := make(utils.Set)
 
 	perpIds := nest.PerpetualIds
@@ -155,7 +154,7 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, config utils.ChainConfig,
 		}
 
 		for _, perpStatic := range perpGetterStaticInfos {
-			info := getterDataToPerpetualStaticInfo(perpStatic, conn.SymbolMapping)
+			info := getterDataToPerpetualStaticInfo(&perpStatic, conn.SymbolMapping)
 			perpetuals = append(perpetuals, info)
 			symbolsSet.Add(info.S2Symbol)
 			if info.S3Symbol != "" {
@@ -182,7 +181,7 @@ func QueryExchangeStaticInfo(conn BlockChainConnector, config utils.ChainConfig,
 		perpetualIdToSymbol[perpStatic.Id] = perpSymbol
 	}
 
-	triangulations := initPriceFeeds(conn.PriceFeedConfig, symbolsSet)
+	triangulations := initPriceFeeds(&conn.PriceFeedConfig, symbolsSet)
 	xInfo := StaticExchangeInfo{
 		Pools:                  pools,
 		Perpetuals:             perpetuals,
@@ -214,7 +213,7 @@ func (s *StaticExchangeInfo) Store(filename string) error {
 // the Store function.
 func (s *StaticExchangeInfo) Load(filename string) error {
 	// Reading JSON from file
-	jsonData, err := ioutil.ReadFile(filename)
+	jsonData, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
@@ -227,7 +226,7 @@ func (s *StaticExchangeInfo) Load(filename string) error {
 }
 
 // initPriceFeeds determines the triangulation for each symbol in symbolSet
-func initPriceFeeds(pxConfig utils.PriceFeedConfig, symbolSet utils.Set) Triangulations {
+func initPriceFeeds(pxConfig *utils.PriceFeedConfig, symbolSet utils.Set) Triangulations {
 	triangulations := make(Triangulations)
 	for sym := range symbolSet {
 		triangulations[sym] = Triangulate(sym, pxConfig)
@@ -235,7 +234,7 @@ func initPriceFeeds(pxConfig utils.PriceFeedConfig, symbolSet utils.Set) Triangu
 	return triangulations
 }
 
-func getterDataToPerpetualStaticInfo(pIn contracts.IPerpetualGetterPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {
+func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualGetterPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {
 	var poolId int32 = int32(pIn.Id.Int64()) / 100000
 	base := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
 	quote := ContractSymbolToSymbol(pIn.S2QuoteCCY, symMap)
@@ -278,10 +277,13 @@ func ContractSymbolToSymbol(cSym [4]byte, symMap *map[string]string) string {
 	return (*symMap)[sym]
 }
 
-func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Address) contracts.IClientOrderClientOrder {
+func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Address) contracts.IClientOrderClientOrder {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
+	var limitPx *big.Int
 	if order.LimitPrice == 0 && order.Side == SIDE_BUY {
-		order.LimitPrice = math.MaxFloat64
+		limitPx = utils.Max64x64()
+	} else {
+		limitPx = utils.Float64ToABDK(order.LimitPrice)
 	}
 	var flags uint32 = 0
 	if order.ReduceOnly {
@@ -303,7 +305,7 @@ func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Addr
 	}
 	cOrder := contracts.IClientOrderClientOrder{
 		IPerpetualId:       big.NewInt(int64(xInfo.Perpetuals[j].Id)),
-		FLimitPrice:        utils.Float64ToABDK(order.LimitPrice),
+		FLimitPrice:        limitPx,
 		LeverageTDR:        uint16(100 * order.Leverage),
 		ExecutionTimestamp: uint32(order.ExecutionTimestamp),
 		Flags:              flags,
@@ -321,7 +323,7 @@ func (order *Order) ToChainType(xInfo StaticExchangeInfo, traderAddr common.Addr
 	return cOrder
 }
 
-func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo StaticExchangeInfo) Order {
+func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo *StaticExchangeInfo) Order {
 	perpId := int32(scOrder.IPerpetualId.Int64())
 	var side string
 	if scOrder.FAmount.Sign() > 0 {
@@ -370,13 +372,3 @@ func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo StaticExcha
 	}
 	return order
 }
-
-/*
-	FLockedInValueQC             *big.Int
-	FCashCC                      *big.Int
-	FPositionBC                  *big.Int
-	FUnitAccumulatedFundingStart *big.Int
-	ILastOpenTimestamp           uint64
-	FeeTbps                      uint16
-	BrokerFeeTbps                uint16
-	PositionId                   [16]byte*/

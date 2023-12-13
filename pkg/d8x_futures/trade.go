@@ -15,10 +15,23 @@ import (
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
+func (sdk *Sdk) PostOrder(order *Order) (string, error) {
+	return RawPostOrder(&sdk.Conn, &sdk.Info, sdk.Wallet, []byte{}, order, sdk.Wallet.Address)
+}
+
+func (sdk *Sdk) CreateOrderBrokerSignature(iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
+	return RawCreateOrderBrokerSignature(sdk.ChainConfig.ProxyAddr,
+		sdk.ChainConfig.ChainId, sdk.Wallet, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
+}
+
+func (sdk *Sdk) CreatePaymentBrokerSignature(ps *PaySummary) (string, string, error) {
+	return RawCreatePaymentBrokerSignature(ps, sdk.Wallet)
+}
+
 // PostOrder posts an order to the correct limit order book. It needs the private key for the wallet
 // paying the gas fees. If the trader-address is not the address corresponding to the postingWallet, the func
 // also needs signature from the trader
-func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, postingWallet Wallet, traderSig []byte, order Order, trader common.Address) (string, error) {
+func RawPostOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingWallet Wallet, traderSig []byte, order *Order, trader common.Address) (string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	scOrder := order.ToChainType(xInfo, trader)
 	scOrders := []contracts.IClientOrderClientOrder{scOrder}
@@ -35,7 +48,7 @@ func PostOrder(conn BlockChainConnector, xInfo StaticExchangeInfo, postingWallet
 	return tx.Hash().Hex(), nil
 }
 
-func CreateOrderBrokerSignature(proxyAddr common.Address, chainId int64, brokerWallet Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
+func RawCreateOrderBrokerSignature(proxyAddr common.Address, chainId int64, brokerWallet Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
 	digestBytes32, err := createOrderBrokerDigest(proxyAddr, chainId, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
 	if err != nil {
 		return "", "", err
@@ -52,7 +65,7 @@ func CreateOrderBrokerSignature(proxyAddr common.Address, chainId int64, brokerW
 	return dgstStr, sigStr, nil
 }
 
-func CreatePaymentBrokerSignature(ps PaySummary, brokerWallet Wallet) (string, string, error) {
+func RawCreatePaymentBrokerSignature(ps *PaySummary, brokerWallet Wallet) (string, string, error) {
 	digestBytes32, err := createPaymentBrokerDigest(ps)
 	if err != nil {
 		return "", "", err
@@ -72,7 +85,7 @@ func CreatePaymentBrokerSignature(ps PaySummary, brokerWallet Wallet) (string, s
 // RecoverPaymentSignatureAddr recovers the address that created the signature of PaySummary data for
 // the given chainId and multiPayContract address.
 // The function returns the recovered address or an error
-func RecoverPaymentSignatureAddr(sig []byte, ps PaySummary) (common.Address, error) {
+func RecoverPaymentSignatureAddr(sig []byte, ps *PaySummary) (common.Address, error) {
 	digestBytes32, err := createPaymentBrokerDigest(ps)
 	if err != nil {
 		return common.Address{}, err
@@ -147,7 +160,7 @@ func createOrderBrokerDigest(proxyAddr common.Address, chainId int64, iPerpetual
 	return digestBytes32, nil
 }
 
-func createPaymentBrokerDigest(ps PaySummary) ([32]byte, error) {
+func createPaymentBrokerDigest(ps *PaySummary) ([32]byte, error) {
 	domainSeparatorHashBytes32 := getDomainHash("Multipay", ps.ChainId, ps.MultiPayCtrct.String())
 	typeHash := Keccak256FromString("PaySummary(address payer,address executor,address token,uint32 timestamp,uint32 id,uint256 totalAmount)")
 	types := []string{"bytes32", "address", "address", "address", "uint32", "uint32", "uint256"}
