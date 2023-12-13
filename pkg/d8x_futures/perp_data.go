@@ -8,6 +8,7 @@ import (
 	"math"
 	"math/big"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/D8-X/d8x-futures-go-sdk/config"
@@ -170,6 +171,14 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 			pools[i].PoolMarginSymbol = strings.Split(perpetuals[j].S2Symbol, "-")[0]
 		default:
 			pools[i].PoolMarginSymbol = strings.Split(perpetuals[j].S3Symbol, "-")[0]
+		}
+		// if we already have a margin symbol with the same name, we rename it using the pool id
+		poolId := i + 1
+		for k := 0; k < i; k++ {
+			if pools[k].PoolMarginSymbol == pools[i].PoolMarginSymbol {
+				pools[i].PoolMarginSymbol = pools[i].PoolMarginSymbol + strconv.Itoa(poolId)
+				break
+			}
 		}
 
 	}
