@@ -21,7 +21,7 @@ func TestFetchPricesFromAPI(t *testing.T) {
 
 func TestSdkRO(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("testnet")
+	err := sdkRo.New("zkevm")
 	if err != nil {
 		t.Logf(err.Error())
 	}
