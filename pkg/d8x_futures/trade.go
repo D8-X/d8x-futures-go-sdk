@@ -3,14 +3,18 @@ package d8x_futures
 import (
 	"crypto/ecdsa"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"math/big"
+	"strconv"
 	"strings"
 
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
+	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
@@ -26,6 +30,31 @@ func (sdk *Sdk) CreateOrderBrokerSignature(iPerpetualId int32, brokerFeeTbps uin
 
 func (sdk *Sdk) CreatePaymentBrokerSignature(ps *PaySummary) (string, string, error) {
 	return RawCreatePaymentBrokerSignature(ps, sdk.Wallet)
+}
+
+// ApproveTknSpending approves the manager to spend the wallet's margin tokens for the given
+// pool (via symbol), if amount = nil, max approval. Symbol is a perpetual, but approval
+// is for pool.
+func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int) (*types.Transaction, error) {
+	tknAddr, err := RawGetMarginTknAddr(&sdk.Info, symbol)
+	if err != nil {
+		return nil, err
+	}
+	erc20Instance, err := contracts.NewErc20(tknAddr, sdk.Conn.Rpc)
+	if err != nil {
+		return nil, errors.New("ApproveTknSpending: creating instance of token " + tknAddr.String())
+	}
+	var amt *big.Int
+	if amount == nil {
+		amt = utils.MaxUint256()
+	} else {
+		amt = amount
+	}
+	approvalTx, err := erc20Instance.Approve(sdk.Wallet.Auth, sdk.Info.ProxyAddr, amt)
+	if err != nil {
+		return nil, errors.New("Error approving token for chain " + strconv.Itoa(int(sdk.Conn.ChainId)) + ": " + err.Error())
+	}
+	return approvalTx, nil
 }
 
 // PostOrder posts an order to the correct limit order book. It needs the private key for the wallet

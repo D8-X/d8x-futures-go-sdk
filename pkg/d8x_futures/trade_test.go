@@ -16,8 +16,7 @@ import (
 
 func TestTradingFunc(t *testing.T) {
 	var sdk Sdk
-	//pk := os.Getenv("PK")
-	pk := "1742142e17e715b58bcd44eaad84ecfc69959b8521fc507bc3acc2e333909995"
+	pk := os.Getenv("PK")
 	if pk == "" {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
@@ -25,6 +24,12 @@ func TestTradingFunc(t *testing.T) {
 	err := sdk.New(pk, "testnet")
 	if err != nil {
 		t.Logf(err.Error())
+	}
+	tx, err := sdk.ApproveTknSpending("ETH-USD-MATIC", nil)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println("tx hash=", tx.Hash())
 	}
 	order := NewOrder("ETH-USD-MATIC", SIDE_BUY, ORDER_TYPE_MARKET, 0.1, 10, nil, nil, nil, nil, nil, nil, nil, nil)
 	orderId, err := sdk.PostOrder(order)
