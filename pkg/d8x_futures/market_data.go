@@ -65,6 +65,30 @@ func (sdkRo *SdkRO) FetchPricesForPerpetual(symbol string, endpoint string) (Per
 	return RawFetchPricesForPerpetual(sdkRo.Info, symbol, sdkRo.ChainConfig.PriceFeedEndpoints[0])
 }
 
+func (sdkRo *SdkRO) GetMarginTokenBalance(symbol string, traderAddr common.Address) (float64, error) {
+	tknAddr, err := RawGetMarginTknAddr(&sdkRo.Info, symbol)
+	if err != nil {
+		return 0, err
+	}
+	erc20Instance, err := contracts.NewErc20(tknAddr, sdkRo.Conn.Rpc)
+	if err != nil {
+		return 0, errors.New("GetMarginTokenBalance: creating instance of token " + tknAddr.String())
+	}
+	n, err := erc20Instance.Decimals(nil)
+	b, err := erc20Instance.BalanceOf(nil, traderAddr)
+	bal := utils.DecNToFloat(b, n)
+	return bal, nil
+}
+
+func RawGetMarginTknAddr(xInfo *StaticExchangeInfo, symbol string) (common.Address, error) {
+	id := xInfo.PerpetualSymbolToId[symbol]
+	poolId := id / 100000
+	if id < 1 {
+		return common.Address{}, errors.New("RawGetMarginTknAddr: no perpetual " + symbol)
+	}
+	return (xInfo.Pools[poolId-1].PoolMarginTokenAddr), nil
+}
+
 func RawGetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderAddr *common.Address, symbol string, endpoint string) (PositionRisk, error) {
 	priceData, err := RawFetchPricesForPerpetual(xInfo, symbol, endpoint)
 	if err != nil {
