@@ -24,3 +24,5 @@ go.work
 tmpXchInfo.json
 
 __debug_*
+
+.env
