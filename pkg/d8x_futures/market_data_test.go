@@ -21,17 +21,23 @@ func TestFetchPricesFromAPI(t *testing.T) {
 
 func TestSdkRO(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("zkevm")
+	err := sdkRo.New("testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	trader := common.HexToAddress("***REMOVED***")
+	trader := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	broker := common.HexToAddress("0xB0CBeeC370Af6ca2ed541F6a2264bc95b991F6E1")
-	pr, err := sdkRo.GetPositionRisk("BTC-USD-MATIC", trader)
+	pr, err := sdkRo.GetPositionRisk("BTC-USDC-USDC", trader)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
 		fmt.Println(pr)
+	}
+	bal, err := sdkRo.GetMarginTokenBalance("BTC-USDC-USDC", trader)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println("balance of margin token=", bal)
 	}
 	perpState, err := sdkRo.QueryPerpetualState([]int32{100000, 100001, 200002})
 	if err != nil {
@@ -95,7 +101,7 @@ func TestFetchPricesForPerpetual(t *testing.T) {
 func TestGetPositionRisk(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	traderAddr := common.HexToAddress("***REMOVED***")
+	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	chConf, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
 		t.Logf(err.Error())
@@ -167,7 +173,7 @@ func TestQueryOpenOrders(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	traderAddr := common.HexToAddress("***REMOVED***")
+	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {
 		t.Logf(err.Error())
@@ -196,7 +202,7 @@ func TestQueryTraderVolume(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	traderAddr := common.HexToAddress("***REMOVED***")
+	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {
 		t.Logf(err.Error())
@@ -216,7 +222,7 @@ func TestQueryExchangeFeeTbpsForTrader(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	traderAddr := common.HexToAddress("***REMOVED***")
+	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	brokerAddr := common.Address{}
 	pxConf, err := config.GetDefaultPriceConfig("PythEVMBeta")
 	if err != nil {

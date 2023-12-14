@@ -20,6 +20,14 @@ func Max64x64() *big.Int {
 	MAX_64x64.Sub(MAX_64x64, big.NewInt(1))
 	return MAX_64x64
 }
+
+func MaxUint256() *big.Int {
+	maxUint256 := new(big.Int)
+	maxUint256.Exp(big.NewInt(2), big.NewInt(256), nil)
+	maxUint256.Sub(maxUint256, big.NewInt(1))
+	return maxUint256
+}
+
 func I32ToFloat64(x int32) float64 {
 	return float64(x) / (math.Pow(2, 29))
 }
@@ -31,6 +39,16 @@ func Sign(x float64) float64 {
 		return 1
 	}
 	return 0
+}
+
+func DecNToFloat(decN *big.Int, n uint8) float64 {
+	y := new(big.Float).SetInt(decN)
+	N := new(big.Int).SetUint64(uint64(n))
+	pow := new(big.Int).Exp(big.NewInt(10), N, nil)
+	q := new(big.Float).SetInt(pow)
+	z := new(big.Float).Quo(y, q)
+	f, _ := z.Float64()
+	return f
 }
 
 func Float64ToABDK(x float64) *big.Int {
