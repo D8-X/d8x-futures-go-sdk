@@ -15,7 +15,7 @@ to use a custom Pyth-Hermes server  `sdkRo.New("testnet", "", "https://https://h
 
 The most relevant functions for the read-only SDK are as follows, ignoring the error return value for simplicity:
 ```
-trader := common.HexToAddress("***REMOVED***")
+trader := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 broker := common.HexToAddress("0xB0CBeeC370Af6ca2ed541F6a2264bc95b991F6E1")
 pr, err := sdkRo.GetPositionRisk("BTC-USD-MATIC", trader)
 perpState, err := sdkRo.QueryPerpetualState([]int32{100000, 100001, 200002})

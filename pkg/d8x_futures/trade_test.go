@@ -16,8 +16,7 @@ import (
 
 func TestTradingFunc(t *testing.T) {
 	var sdk Sdk
-	//pk := os.Getenv("PK")
-	pk := "***REMOVED***"
+	pk := os.Getenv("PK")
 	if pk == "" {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
@@ -25,6 +24,12 @@ func TestTradingFunc(t *testing.T) {
 	err := sdk.New(pk, "testnet")
 	if err != nil {
 		t.Logf(err.Error())
+	}
+	tx, err := sdk.ApproveTknSpending("ETH-USD-MATIC", nil)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println("tx hash=", tx.Hash())
 	}
 	order := NewOrder("ETH-USD-MATIC", SIDE_BUY, ORDER_TYPE_MARKET, 0.1, 10, nil, nil, nil, nil, nil, nil, nil, nil)
 	orderId, err := sdk.PostOrder(order)
@@ -56,7 +61,7 @@ func TestABI(t *testing.T) {
 	//copy(hashArray[:], hash)
 	values := []interface{}{
 		big.NewInt(123),
-		common.HexToAddress("***REMOVED***"),
+		common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05"),
 		big.NewInt(-1211),
 		domainHash,
 	}
@@ -77,7 +82,7 @@ func TestABI(t *testing.T) {
 func TestOrderHash(t *testing.T) {
 	var info StaticExchangeInfo
 	info.Load("./tmpXchInfo.json")
-	traderAddr := common.HexToAddress("***REMOVED***")
+	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	var emptyArray [32]byte
 	order := Order{
 		Symbol:              "ETH-USD-MATIC",
@@ -127,7 +132,7 @@ func TestPostOrder(t *testing.T) {
 	wallet.NewWallet(fmt.Sprintf("%x", execPk.D), conn.ChainId, conn.Rpc)
 	var xInfo StaticExchangeInfo
 	xInfo.Load("./tmpXchInfo.json")
-	traderAddr := common.HexToAddress("***REMOVED***")
+	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	var emptyArray [32]byte
 	order := Order{
 		Symbol:              "ETH-USD-MATIC",
@@ -174,7 +179,7 @@ func TestBrokerSignature(t *testing.T) {
 	}
 	var xInfo StaticExchangeInfo
 	xInfo.Load("./tmpXchInfo.json")
-	traderAddr := common.HexToAddress("***REMOVED***")
+	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	var wallet Wallet
 	err = wallet.NewWallet(fmt.Sprintf("%x", execPk.D), chConfig.ChainId, nil)
 	if err != nil {
@@ -264,7 +269,7 @@ func TestSignOrder(t *testing.T) {
 
 	digest, sig, err := RawCreateOrderBrokerSignature(
 		common.HexToAddress(proxyAddr), int64(chainId), wallet, int32(perpId), uint32(4000),
-		"***REMOVED***", 1691249493)
+		"0x9d5aaB428e98678d0E645ea4AeBd25f744341a05", 1691249493)
 	if err != nil {
 		t.Errorf("signing order: %v", err)
 	}
