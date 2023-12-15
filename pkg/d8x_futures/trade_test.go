@@ -25,18 +25,28 @@ func TestTradingFunc(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
+
 	tx, err := sdk.ApproveTknSpending("ETH-USD-MATIC", nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
 		fmt.Println("tx hash=", tx.Hash())
 	}
-	order := NewOrder("ETH-USD-MATIC", SIDE_BUY, ORDER_TYPE_MARKET, 0.1, 10, nil, nil, nil, nil, nil, nil, nil, nil)
-	orderId, err := sdk.PostOrder(order)
+
+	order := NewOrder("ETH-USD-MATIC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
+	orderId, _, err := sdk.PostOrder(order)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
 		fmt.Println("order id =", orderId)
+	}
+
+	orders, ids, err := sdk.QueryOpenOrders("ETH-USD-MATIC", sdk.Wallet.Address)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println("order ids =", ids)
+		fmt.Println("orders =", orders)
 	}
 	status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallet.Address, orderId)
 	if err != nil {
@@ -85,30 +95,36 @@ func TestOrderHash(t *testing.T) {
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	var emptyArray [32]byte
 	order := Order{
-		Symbol:              "ETH-USD-MATIC",
+		Symbol:              "BTC-USD-MATIC",
 		Side:                SIDE_BUY,
 		Type:                ORDER_TYPE_MARKET,
-		Quantity:            15,
+		Quantity:            0.16,
 		ReduceOnly:          false,
-		LimitPrice:          0,
+		LimitPrice:          100,
 		TriggerPrice:        0,
 		KeepPositionLvg:     false,
 		BrokerFeeTbps:       0,
 		BrokerAddr:          common.Address{},
 		BrokerSignature:     []byte{},
-		Leverage:            5,
-		Deadline:            1684863656,
-		ExecutionTimestamp:  1684263656,
+		Leverage:            2,
+		Deadline:            1702584746,
+		ExecutionTimestamp:  1702504746,
 		ParentChildOrderId1: emptyArray,
 		ParentChildOrderId2: emptyArray,
 	}
 	scOrder := order.ToChainType(&info, traderAddr)
-	dgst, err := CreateOrderDigest(scOrder, 80001, true, info.ProxyAddr.String())
+	// override
+	lim, _ := new(big.Int).SetString("640000000000000000", 16)
+	scOrder.FLimitPrice = lim
+	q, _ := new(big.Int).SetString("28f5c28f5c28f5f9", 16)
+	scOrder.FAmount = q
+
+	dgst, err := CreateOrderDigest(scOrder, 1442, true, info.ProxyAddr.String())
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(dgst)
-	if dgst != "901568a48eee260beff786742991585412be01a5fbef7934b679c7980499c9d8" {
+	if dgst != "625da4b5a8ccc7a093e88b5908b3019b3272c30058bc17d420e1b0e2a60ce0f5" {
 		panic("wrong dgst result")
 	}
 
@@ -128,8 +144,10 @@ func TestPostOrder(t *testing.T) {
 		t.Logf(err.Error())
 	}
 	conn := CreateBlockChainConnector(pxConf, chConfig)
-	var wallet Wallet
-	wallet.NewWallet(fmt.Sprintf("%x", execPk.D), conn.ChainId, conn.Rpc)
+	wallet, err := NewWallet(fmt.Sprintf("%x", execPk.D), conn.ChainId, conn.Rpc)
+	if err != nil {
+		t.Logf(err.Error())
+	}
 	var xInfo StaticExchangeInfo
 	xInfo.Load("./tmpXchInfo.json")
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
@@ -152,7 +170,7 @@ func TestPostOrder(t *testing.T) {
 		ParentChildOrderId1: emptyArray,
 		ParentChildOrderId2: emptyArray,
 	}
-	txHash, _ := RawPostOrder(&conn, &xInfo, wallet, []byte{}, &order, traderAddr)
+	_, txHash, _ := RawPostOrder(&conn, &xInfo, wallet, []byte{}, &order, traderAddr)
 	fmt.Println("Tx hash = ", txHash)
 }
 
@@ -180,8 +198,7 @@ func TestBrokerSignature(t *testing.T) {
 	var xInfo StaticExchangeInfo
 	xInfo.Load("./tmpXchInfo.json")
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
-	var wallet Wallet
-	err = wallet.NewWallet(fmt.Sprintf("%x", execPk.D), chConfig.ChainId, nil)
+	wallet, err := NewWallet(fmt.Sprintf("%x", execPk.D), chConfig.ChainId, nil)
 	if err != nil {
 		panic("error creating wallet")
 	}
@@ -206,8 +223,7 @@ func TestPaymentSignature(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	var wallet Wallet
-	err = wallet.NewWallet(fmt.Sprintf("%x", execPk.D), chConfig.ChainId, nil)
+	wallet, err := NewWallet(fmt.Sprintf("%x", execPk.D), chConfig.ChainId, nil)
 	fmt.Printf("\nwallet addr %s\n", wallet.Address.String())
 	if err != nil {
 		panic("error creating wallet")
@@ -258,9 +274,8 @@ func TestSignOrder(t *testing.T) {
 	}
 	// Derive the Ethereum address from the private key
 	addr := crypto.PubkeyToAddress(privateKey.PublicKey)
-	var wallet Wallet
 	pk := fmt.Sprintf("%x", privateKey.D)
-	err = wallet.NewWallet(pk, int64(chainId), nil)
+	wallet, err := NewWallet(pk, int64(chainId), nil)
 	proxyAddr := "0xCdd7C9e07689d1B3D558A714fAa5Cc4B6bA654bD"
 	fmt.Printf("\nwallet addr %s\n", wallet.Address.String())
 	if err != nil {

@@ -2,8 +2,10 @@ package d8x_futures
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"math/big"
 	"strings"
 	"time"
@@ -25,7 +27,7 @@ type SdkRO struct {
 // Sdk is the read-write type
 type Sdk struct {
 	SdkRO
-	Wallet Wallet
+	Wallet *Wallet
 }
 
 type NestedPerpetualIds struct {
@@ -251,65 +253,66 @@ type BrokerPaySignatureReq struct {
 	ExecutorSignature string     `json:"signature"`
 }
 
+type OrderOptions struct {
+	LimitPrice          float64
+	TriggerPrice        float64
+	ReduceOnly          bool
+	KeepPositionLvg     bool
+	Deadline            uint32
+	ExecutionTs         uint32
+	parentChildOrderId1 *[32]byte
+	parentChildOrderId2 *[32]byte
+}
+
 // NewOrder creates a new order allowing for minimal specification (function accepts nil for pointers)
-func NewOrder(symbol, side, orderType string, quantity float64, leverage float64, limitPrice, triggerPrice *float64, reduceOnly, keepPositionLvg *bool, deadline *uint32, executionTimestamp *uint32, parentChildOrderId1, parentChildOrderId2 *[32]byte) *Order {
+func NewOrder(symbol, side, orderType string, quantity float64, leverage float64, options *OrderOptions) *Order {
 	if side != SIDE_BUY && side != SIDE_SELL {
 		slog.Error("side must be either " + SIDE_BUY + " or " + SIDE_SELL + " but was " + side)
 		return nil
 	}
-	var lp, tp float64 = 0, 0
-	if limitPrice != nil {
-		lp = *limitPrice
+	if options == nil {
+		var op OrderOptions
+		options = &op
 	}
-	if triggerPrice != nil {
-		tp = *triggerPrice
-	}
-	var redOnly, kpl bool = false, false
-	if reduceOnly != nil {
-		redOnly = *reduceOnly
+	if options.LimitPrice == 0 && side == SIDE_BUY {
+		// set limit to a large number
+		// if buy market order
+		options.LimitPrice = math.MaxFloat64
 	}
 
-	if keepPositionLvg != nil {
-		kpl = *keepPositionLvg
-	}
 	ts := time.Now().Unix()
-	var dl, execTs uint32
-	if deadline == nil {
+	if options.Deadline == 0 {
 		// set to 30*6 days deadline
-		dl = uint32(ts + 86_400*30*6)
-	} else {
-		dl = *deadline
+		options.Deadline = uint32(ts + 86_400*30*6)
 	}
-	if executionTimestamp == nil {
+	if options.ExecutionTs == 0 {
 		// set to immediate execution
-		execTs = uint32(ts) - 5
-	} else {
-		execTs = *executionTimestamp
+		options.ExecutionTs = uint32(ts) - 5
 	}
-	var pcoId1, pcoId2 = &[32]byte{}, &[32]byte{}
-	if parentChildOrderId1 != nil {
-		pcoId1 = parentChildOrderId1
+	var pcoId = &[32]byte{}
+	if options.parentChildOrderId1 == nil {
+		options.parentChildOrderId1 = pcoId
 	}
-	if parentChildOrderId2 != nil {
-		pcoId2 = parentChildOrderId2
+	if options.parentChildOrderId2 == nil {
+		options.parentChildOrderId2 = pcoId
 	}
 	order := &Order{
 		Symbol:              symbol,
 		Side:                side,
 		Type:                orderType,
 		Quantity:            quantity,
-		ReduceOnly:          redOnly,
-		LimitPrice:          lp,
-		TriggerPrice:        tp,
-		KeepPositionLvg:     kpl,
+		ReduceOnly:          options.ReduceOnly,
+		LimitPrice:          options.LimitPrice,
+		TriggerPrice:        options.TriggerPrice,
+		KeepPositionLvg:     options.KeepPositionLvg,
 		BrokerFeeTbps:       0,
 		BrokerAddr:          common.Address{},
 		BrokerSignature:     []byte{},
 		Leverage:            leverage,
-		Deadline:            dl,
-		ExecutionTimestamp:  execTs,
-		ParentChildOrderId1: *pcoId1,
-		ParentChildOrderId2: *pcoId2,
+		Deadline:            options.Deadline,
+		ExecutionTimestamp:  options.ExecutionTs,
+		ParentChildOrderId1: *options.parentChildOrderId1,
+		ParentChildOrderId2: *options.parentChildOrderId1,
 	}
 	return order
 }
@@ -394,9 +397,14 @@ func (sdkRo *SdkRO) New(networkName string, endpoints ...string) error {
 func (sdk *Sdk) New(privateKey, networkName string, endpoints ...string) error {
 	privateKey, _ = strings.CutPrefix(privateKey, "0x")
 	sdk.SdkRO.New(networkName, endpoints...)
-	err := sdk.Wallet.NewWallet(privateKey, sdk.ChainConfig.ChainId, sdk.Conn.Rpc)
+	if sdk.Conn.Rpc == nil {
+		return errors.New("sdk.Conn.Rpc=nil; required")
+	}
+
+	w, err := NewWallet(privateKey, sdk.ChainConfig.ChainId, sdk.Conn.Rpc)
 	if err != nil {
 		return err
 	}
+	sdk.Wallet = w
 	return nil
 }

@@ -59,11 +59,11 @@ func Float64ToABDK(x float64) *big.Int {
 	//fmt.Println(y.Float64())
 	one64x64 := new(big.Int)
 	one64x64.SetString(ONE_64x64, 10)
-	y.Mul(y, new(big.Float).SetInt(one64x64))
+	y64 := new(big.Float).Mul(y, new(big.Float).SetInt(one64x64))
 	// convert to Int
 	intVal := new(big.Int)
-	//fmt.Println(y)
-	y.Int(intVal)
+	//fmt.Println(y64)
+	y64.Int(intVal)
 	//fmt.Println(intVal)
 	return intVal
 }
