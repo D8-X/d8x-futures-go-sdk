@@ -33,7 +33,7 @@ func TestTradingFunc(t *testing.T) {
 		fmt.Println("tx hash=", tx.Hash())
 	}
 
-	order := NewOrder("ETH-USD-MATIC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
+	order := NewOrder("BTC-USDC-USDC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
 	orderId, _, err := sdk.PostOrder(order)
 	if err != nil {
 		t.Logf(err.Error())

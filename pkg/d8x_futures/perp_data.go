@@ -312,6 +312,11 @@ func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Add
 		flags = flags | MASK_STOP_ORDER
 		flags = flags | MASK_MARKET_ORDER
 	}
+	var sgn float64 = 1
+	if order.Side == SIDE_SELL {
+		sgn = -1
+	}
+	amount := utils.Float64ToABDK(sgn * math.Abs(order.Quantity))
 	cOrder := contracts.IClientOrderClientOrder{
 		IPerpetualId:       big.NewInt(int64(xInfo.Perpetuals[j].Id)),
 		FLimitPrice:        limitPx,
@@ -321,7 +326,7 @@ func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Add
 		IDeadline:          order.Deadline,
 		BrokerAddr:         order.BrokerAddr,
 		FTriggerPrice:      utils.Float64ToABDK(order.TriggerPrice),
-		FAmount:            utils.Float64ToABDK(order.Quantity),
+		FAmount:            amount,
 		BrokerSignature:    order.BrokerSignature,
 		ParentChildDigest1: order.ParentChildOrderId1,
 		ParentChildDigest2: order.ParentChildOrderId2,
