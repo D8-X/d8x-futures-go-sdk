@@ -63,7 +63,8 @@ func TestSdkRO(t *testing.T) {
 		fmt.Println(oo)
 		fmt.Println(dgsts)
 	}
-	status, err := sdkRo.QueryOrderStatus("BTC-USD-MATIC", trader, "") // (string, error)
+	id := "258ae021f8743b903d8bde405dba7cc7a74d977ce956db8cb6c2c308976ceb89"
+	status, err := sdkRo.QueryOrderStatus("BTC-USDC-USDC", trader, id) // (string, error)
 	if err != nil {
 		fmt.Println(err.Error())
 	} else {
