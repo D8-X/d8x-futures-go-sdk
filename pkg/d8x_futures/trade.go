@@ -19,7 +19,9 @@ import (
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
-func (sdk *Sdk) PostOrder(order *Order) (string, error) {
+// PostOrder posts an order to the corresponding limit order book.
+// Returns orderId, tx hash, error
+func (sdk *Sdk) PostOrder(order *Order) (string, string, error) {
 	return RawPostOrder(&sdk.Conn, &sdk.Info, sdk.Wallet, []byte{}, order, sdk.Wallet.Address)
 }
 
@@ -50,6 +52,7 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int) (*types.Trans
 	} else {
 		amt = amount
 	}
+	sdk.Wallet.UpdateNonce(sdk.Conn.Rpc)
 	approvalTx, err := erc20Instance.Approve(sdk.Wallet.Auth, sdk.Info.ProxyAddr, amt)
 	if err != nil {
 		return nil, errors.New("Error approving token for chain " + strconv.Itoa(int(sdk.Conn.ChainId)) + ": " + err.Error())
@@ -57,10 +60,12 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int) (*types.Trans
 	return approvalTx, nil
 }
 
-// PostOrder posts an order to the correct limit order book. It needs the private key for the wallet
+// RawPostOrder posts an order to the correct limit order book.
+// Returns orderId, tx hash, error
+// It needs the private key for the wallet
 // paying the gas fees. If the trader-address is not the address corresponding to the postingWallet, the func
 // also needs signature from the trader
-func RawPostOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingWallet Wallet, traderSig []byte, order *Order, trader common.Address) (string, error) {
+func RawPostOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingWallet *Wallet, traderSig []byte, order *Order, trader common.Address) (string, string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	scOrder := order.ToChainType(xInfo, trader)
 	scOrders := []contracts.IClientOrderClientOrder{scOrder}
@@ -69,15 +74,21 @@ func RawPostOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingW
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(conn.PostOrderGasLimit))
 	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	postingWallet.UpdateNonce(conn.Rpc)
+	dgst, err := CreateOrderDigest(scOrder, int(conn.ChainId), true, xInfo.ProxyAddr.Hex())
+	if err != nil {
+		return "", "", err
+	}
+	id := CreateOrderId(dgst)
 	tx, err := ob.PostOrders(postingWallet.Auth, scOrders, tsigs)
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return "", "", err
 	}
-	return tx.Hash().Hex(), nil
+	return id, tx.Hash().Hex(), nil
 }
 
-func RawCreateOrderBrokerSignature(proxyAddr common.Address, chainId int64, brokerWallet Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
+func RawCreateOrderBrokerSignature(proxyAddr common.Address, chainId int64, brokerWallet *Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
 	digestBytes32, err := createOrderBrokerDigest(proxyAddr, chainId, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
 	if err != nil {
 		return "", "", err
@@ -94,7 +105,7 @@ func RawCreateOrderBrokerSignature(proxyAddr common.Address, chainId int64, brok
 	return dgstStr, sigStr, nil
 }
 
-func RawCreatePaymentBrokerSignature(ps *PaySummary, brokerWallet Wallet) (string, string, error) {
+func RawCreatePaymentBrokerSignature(ps *PaySummary, brokerWallet *Wallet) (string, string, error) {
 	digestBytes32, err := createPaymentBrokerDigest(ps)
 	if err != nil {
 		return "", "", err
@@ -257,7 +268,10 @@ func CreateOrderDigest(order contracts.IClientOrderClientOrder, chainId int, isN
 		order.LeverageTDR,
 		order.ExecutionTimestamp,
 	}
-	structHash, _ := AbiEncodeBytes32(types, values...)
+	structHash, err := AbiEncodeBytes32(types, values...)
+	if err != nil {
+		return "", err
+	}
 	dH2 := solsha3.SoliditySHA3(structHash)
 	var StructHashBytes32 [32]byte
 	copy(StructHashBytes32[:], dH2)
@@ -271,6 +285,16 @@ func CreateOrderDigest(order contracts.IClientOrderClientOrder, chainId int, isN
 	copy(digestBytes32[:], h)
 	dgstStr := common.Bytes2Hex(digestBytes32[:])
 	return dgstStr, nil
+}
+
+func CreateOrderId(orderDigest string) string {
+	bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderDigest, "0x"))
+	var orderDigest32 [32]byte
+	copy(orderDigest32[:], bytesDigest)
+	// create ethers-style message with prefix "\x19Ethereum Signed Message:\n"
+	s, _ := accounts.TextAndHash(orderDigest32[:])
+	idStr := common.Bytes2Hex(s)
+	return idStr
 }
 
 func AbiEncodeBytes32(types []string, values ...interface{}) ([]byte, error) {

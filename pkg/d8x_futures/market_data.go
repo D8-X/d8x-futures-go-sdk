@@ -8,6 +8,7 @@ import (
 	"math"
 	"math/big"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -432,29 +433,34 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFe
 	// loop through price id's, find its endpoints and prepare the query
 	for i, id := range priceIds {
 		id = strings.TrimPrefix(id, "0x")
+		pxData.Symbols[i] = "not in config"
+		query += "ids[]=" + id + "&"
 		for _, c := range config.PriceFeedIds {
 			if c.Id == "0x"+id {
-				query += "ids[]=" + id + "&"
 				pxData.Symbols[i] = c.Symbol
 				break
 			}
 		}
 	}
+	query = strings.TrimSuffix(query, "&")
 	timestampNow := time.Now().Unix()
 	// REST query (#queries == number of endpoints for feeds)
 	response, err := http.Get(query)
 	if err != nil {
-		fmt.Println("Error sending fetchPricesFromAPI request:", err)
+		err := errors.New("Error sending fetchPricesFromAPI request:" + err.Error())
 		return PriceFeedData{}, err
 	}
 	defer response.Body.Close()
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
+		err := errors.New("Error reading response body:" + err.Error())
 		return PriceFeedData{}, err
 	}
-
+	if response.StatusCode != 200 {
+		err := errors.New("Error fetchPricesFromAPI status " + strconv.Itoa(response.StatusCode) + " " + string(body[:]))
+		return PriceFeedData{}, err
+	}
 	var data []ResponsePythLatestPriceFeed
 	err = json.Unmarshal(body, &data)
 	if err != nil {
