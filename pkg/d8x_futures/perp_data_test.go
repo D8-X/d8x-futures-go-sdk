@@ -68,6 +68,13 @@ func TestPythNToFloat64(t *testing.T) {
 	fmt.Println("v=", v)
 }
 
+func TestABDKToFloat64(t *testing.T) {
+	num := -1.370863664871871
+	v := utils.Float64ToABDK(num)
+	//25265520445871489912
+	fmt.Println("v=", v)
+}
+
 func TestTriangulate(t *testing.T) {
 	pxConf, err := config.GetDefaultPriceConfig("PythEVMStable")
 	if err != nil {
