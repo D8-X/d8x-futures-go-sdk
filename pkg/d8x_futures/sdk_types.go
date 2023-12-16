@@ -181,7 +181,8 @@ type PriceFeedData struct {
 	PriceIds       []string
 	Prices         []float64
 	IsMarketClosed []bool
-	Vaas           []string
+	Vaas           [][]byte
+	PublishTimes   []uint64
 }
 
 type ResponsePythLatestPriceFeed struct {

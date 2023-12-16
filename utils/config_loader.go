@@ -16,12 +16,14 @@ type ChainConfig struct {
 	ProxyAddr          common.Address `json:"proxyAddr"`
 	NodeURL            string         `json:"nodeURL"`
 	PostOrderGasLimit  int64          `json:"postOrderGasLimit"`
+	PriceUpdateFeeGwei int64          `json:"priceUpdateFeeGwei"`
 }
 
 type PriceFeedConfig struct {
 	Network                  string        `json:"network"`
 	PriceFeedIds             []PriceFeedId `json:"ids"`
 	ThresholdMarketClosedSec int32         `json:"threshold_market_closed_sec"`
+	PriceUpdateFeeGwei       int64
 }
 
 type PriceFeedId struct {

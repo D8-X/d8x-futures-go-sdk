@@ -6,7 +6,8 @@
       "chainId": 1442,
       "proxyAddr": "0x0e23619704556945B1C7CB550Dee6D428f7d2E2B",
       "nodeURL": "https://rpc.public.zkevm-test.net",
-      "postOrderGasLimit": 3000000
+      "postOrderGasLimit": 3000000,
+      "priceUpdateFeeGwei": 1
     },
     {
       "name": "zkevm",
@@ -15,7 +16,8 @@
       "chainId": 1101,
       "proxyAddr": "0xaB7794EcD2c8e9Decc6B577864b40eBf9204720f",
       "nodeURL": "https://zkevm-rpc.com",
-      "postOrderGasLimit": 3000000
+      "postOrderGasLimit": 3000000,
+      "priceUpdateFeeGwei": 1
     },
     {
       "name": "x1Testnet",
@@ -24,6 +26,7 @@
       "chainId": 195,
       "proxyAddr": "0x70212F1E2eB66C82990312FA5AB3f851706fD1E1",
       "nodeURL": "https://testrpc.x1.tech",
-      "postOrderGasLimit": 3000000
+      "postOrderGasLimit": 3000000,
+      "priceUpdateFeeGwei": 1
     }
 ]
