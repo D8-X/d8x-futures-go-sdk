@@ -26,7 +26,14 @@ func TestTradingFunc(t *testing.T) {
 		t.Logf(err.Error())
 	}
 
-	tx, err := sdk.ApproveTknSpending("ETH-USD-MATIC", nil)
+	tx, err := sdk.AddCollateral("ETH-USD-MATIC", 100)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println("tx hash adding collateral=", tx.Hash())
+	}
+
+	tx, err = sdk.ApproveTknSpending("ETH-USD-MATIC", nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {

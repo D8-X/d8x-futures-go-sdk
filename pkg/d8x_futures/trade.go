@@ -34,6 +34,10 @@ func (sdk *Sdk) CreatePaymentBrokerSignature(ps *PaySummary) (string, string, er
 	return RawCreatePaymentBrokerSignature(ps, sdk.Wallet)
 }
 
+func (sdk *Sdk) AddCollateral(symbol string, amountCC float64) (*types.Transaction, error) {
+	return RawAddCollateral(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallet, symbol, amountCC)
+}
+
 // ApproveTknSpending approves the manager to spend the wallet's margin tokens for the given
 // pool (via symbol), if amount = nil, max approval. Symbol is a perpetual, but approval
 // is for pool.
@@ -86,6 +90,47 @@ func RawPostOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingW
 		return "", "", err
 	}
 	return id, tx.Hash().Hex(), nil
+}
+
+// RawAddCollateral adds (amountCC>0) or removes (amountCC<0) collateral to/from the margin account of the given perpetual
+func RawAddCollateral(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint string, postingWallet *Wallet, symbol string, amountCC float64) (*types.Transaction, error) {
+	if amountCC == 0 {
+		return nil, errors.New("RawAddCollateral: amount 0")
+	}
+
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	id := int64(xInfo.Perpetuals[j].Id)
+	amount := utils.Float64ToABDK(amountCC)
+	perpCtrct := CreatePerpetualManagerInstance(conn.Rpc, xInfo.ProxyAddr)
+	postingWallet.UpdateNonce(conn.Rpc)
+	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	if err != nil {
+		return nil, errors.New("RawAddCollateral: failed fetching oracle prices " + err.Error())
+	}
+	var tx *types.Transaction
+	v := postingWallet.Auth.Value
+	defer func() { postingWallet.Auth.Value = v }()
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	postingWallet.Auth.Value = big.NewInt(val)
+
+	g := postingWallet.Auth.GasLimit
+	defer postingWallet.SetGasLimit(g)
+	postingWallet.SetGasLimit(uint64(15_000_000))
+
+	if amountCC > 0 {
+		tx, err = perpCtrct.Deposit(postingWallet.Auth, big.NewInt(id),
+			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+		if err != nil {
+			return nil, errors.New("RawAddCollateral:" + err.Error())
+		}
+	} else {
+		tx, err = perpCtrct.Withdraw(postingWallet.Auth, big.NewInt(id),
+			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+		if err != nil {
+			return nil, errors.New("RawAddCollateral:" + err.Error())
+		}
+	}
+	return tx, nil
 }
 
 func RawCreateOrderBrokerSignature(proxyAddr common.Address, chainId int64, brokerWallet *Wallet, iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {

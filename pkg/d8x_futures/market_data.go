@@ -1,6 +1,7 @@
 package d8x_futures
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -390,7 +391,7 @@ func RawFetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string, 
 }
 
 // fetchPricesForPerpetual gets prices from the VAA-endpoint, perpetual number j
-// and endpoint number epNo
+// and endpoint number epNo. j is the index of the perpetual in StaticExchangeInfo
 func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int, endpoint string) (PerpetualPriceInfo, error) {
 	// get underlying data from rest-api
 	feedData, err := fetchPricesFromAPI(exchangeInfo.Perpetuals[j].PriceIds, exchangeInfo.PriceFeedInfo, endpoint)
@@ -427,16 +428,18 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFe
 		PriceIds:       priceIds,
 		Prices:         make([]float64, len(priceIds)),
 		IsMarketClosed: make([]bool, len(priceIds)),
-		Vaas:           make([]string, len(priceIds)),
+		Vaas:           make([][]byte, len(priceIds)),
+		PublishTimes:   make([]uint64, len(priceIds)),
 	}
-	query := priceFeedEndpoint + "/latest_price_feeds?target_chain=default&"
+	// binary=true <- include VAA
+	query := priceFeedEndpoint + "/latest_price_feeds?binary=true&"
 	// loop through price id's, find its endpoints and prepare the query
 	for i, id := range priceIds {
-		id = strings.TrimPrefix(id, "0x")
+		priceIds[i] = strings.TrimPrefix(id, "0x")
 		pxData.Symbols[i] = "not in config"
-		query += "ids[]=" + id + "&"
+		query += "ids[]=" + priceIds[i] + "&"
 		for _, c := range config.PriceFeedIds {
-			if c.Id == "0x"+id {
+			if c.Id == "0x"+priceIds[i] {
 				pxData.Symbols[i] = c.Symbol
 				break
 			}
@@ -464,7 +467,7 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFe
 	var data []ResponsePythLatestPriceFeed
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		fmt.Println("Error decoding JSON:", err)
+		err := errors.New("fetchPricesFromAPI:" + err.Error())
 		return PriceFeedData{}, err
 	}
 	// process data
@@ -474,7 +477,13 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFe
 			if id == d.Id {
 				pxData.Prices[i] = utils.PythNToFloat64(d.Price.Price, d.Price.Expo)
 				pxData.IsMarketClosed[i] = timestampNow-int64(d.Price.PublishTime) > int64(config.ThresholdMarketClosedSec)
-				pxData.Vaas[i] = d.Vaa
+				decodedVaaBytes, err := base64.StdEncoding.DecodeString(d.Vaa)
+				if err != nil {
+					err := errors.New("fetchPricesFromAPI decoding base64:" + err.Error())
+					return PriceFeedData{}, err
+				}
+				pxData.Vaas[i] = decodedVaaBytes
+				pxData.PublishTimes[i] = uint64(d.Price.PublishTime)
 				break
 			}
 		}

@@ -74,7 +74,7 @@ func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.Chai
 		PostOrderGasLimit: chConf.PostOrderGasLimit,
 		PriceFeedConfig:   pxConfig,
 	}
-
+	b.PriceFeedConfig.PriceUpdateFeeGwei = chConf.PriceUpdateFeeGwei
 	return b
 }
 
