@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 	"strconv"
 	"strings"
@@ -100,7 +101,7 @@ func RawAddCollateral(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pyth
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	id := int64(xInfo.Perpetuals[j].Id)
-	amount := utils.Float64ToABDK(amountCC)
+	amount := utils.Float64ToABDK(math.Abs(amountCC))
 	perpCtrct := CreatePerpetualManagerInstance(conn.Rpc, xInfo.ProxyAddr)
 	postingWallet.UpdateNonce(conn.Rpc)
 	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)

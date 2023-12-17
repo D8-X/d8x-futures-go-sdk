@@ -36,7 +36,7 @@ tx, err := sdk.ApproveTknSpending("ETH-USD-MATIC", nil)
 where `pk` is the private-key (string) of the wallet that is trading (or a broker depending on the functions used). Alternatively,
 RPC and Pyth-server can be added as for the read-only sdk: `sdk.New(pk, "testnet", "", "https://mypythendpoint.com/api")`. All functions of the read-only SDK can be executed also on the read-write sdk.
 
-Add or remove collateral:
+Add (amountCC positive) or remove (amountCC negative) collateral:
 ```
 err := sdk.AddCollateral(symbol string, amountCC float64) 
 ```
