@@ -26,7 +26,21 @@ func TestTradingFunc(t *testing.T) {
 		t.Logf(err.Error())
 	}
 
-	tx, err := sdk.AddCollateral("ETH-USD-MATIC", 100)
+	orders, ids, err := sdk.QueryOpenOrders("BTC-USDC-USDC", sdk.Wallet.Address)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println("order ids =", ids)
+		fmt.Println("orders =", orders)
+	}
+
+	tx, err := sdk.CancelOrder("BTC-USDC-USDC", ids[0])
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println("tx cancel order=", tx.Hash())
+	}
+	tx, err = sdk.AddCollateral("ETH-USD-MATIC", 100)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
@@ -47,14 +61,13 @@ func TestTradingFunc(t *testing.T) {
 	} else {
 		fmt.Println("order id =", orderId)
 	}
-
-	orders, ids, err := sdk.QueryOpenOrders("ETH-USD-MATIC", sdk.Wallet.Address)
+	tx, err = sdk.CancelOrder("BTC-USDC-USDC", orderId)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
-		fmt.Println("order ids =", ids)
-		fmt.Println("orders =", orders)
+		fmt.Println("tx cancel order=", tx.Hash())
 	}
+
 	status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallet.Address, orderId)
 	if err != nil {
 		t.Logf(err.Error())

@@ -39,6 +39,11 @@ func (sdk *Sdk) AddCollateral(symbol string, amountCC float64) (*types.Transacti
 	return RawAddCollateral(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallet, symbol, amountCC)
 }
 
+func (sdk *Sdk) CancelOrder(symbol string, orderId string) (*types.Transaction, error) {
+	return RawCancelOrder(&sdk.Conn, &sdk.Info,
+		sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallet, symbol, orderId)
+}
+
 // ApproveTknSpending approves the manager to spend the wallet's margin tokens for the given
 // pool (via symbol), if amount = nil, max approval. Symbol is a perpetual, but approval
 // is for pool.
@@ -91,6 +96,39 @@ func RawPostOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingW
 		return "", "", err
 	}
 	return id, tx.Hash().Hex(), nil
+}
+
+// RawCancelOrder cancels the existing order with the given id from the provided wallet
+func RawCancelOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo,
+	pythEndpoint string, postingWallet *Wallet, symbol string, orderId string) (*types.Transaction, error) {
+
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	// first get the corresponding order and sign
+	var dig [32]byte
+	bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderId, "0x"))
+	copy(dig[:], bytesDigest)
+
+	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	if err != nil {
+		return nil, errors.New("RawCancelOrder: failed fetching oracle prices " + err.Error())
+	}
+	var tx *types.Transaction
+	v := postingWallet.Auth.Value
+	defer func() { postingWallet.Auth.Value = v }()
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	postingWallet.Auth.Value = big.NewInt(val)
+
+	g := postingWallet.Auth.GasLimit
+	defer postingWallet.SetGasLimit(g)
+	postingWallet.SetGasLimit(uint64(15_000_000))
+
+	postingWallet.UpdateNonce(conn.Rpc)
+	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	tx, err = ob.CancelOrder(postingWallet.Auth, dig, []byte{}, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+	if err != nil {
+		return nil, errors.New("RawCancelOrder:" + err.Error())
+	}
+	return tx, nil
 }
 
 // RawAddCollateral adds (amountCC>0) or removes (amountCC<0) collateral to/from the margin account of the given perpetual
