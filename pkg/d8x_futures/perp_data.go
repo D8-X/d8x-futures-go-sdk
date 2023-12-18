@@ -289,7 +289,7 @@ func ContractSymbolToSymbol(cSym [4]byte, symMap *map[string]string) string {
 func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Address) contracts.IClientOrderClientOrder {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	var limitPx *big.Int
-	if order.LimitPrice == 0 && order.Side == SIDE_BUY {
+	if (order.LimitPrice == 0 || order.LimitPrice == math.MaxFloat64) && order.Side == SIDE_BUY {
 		limitPx = utils.Max64x64()
 	} else {
 		limitPx = utils.Float64ToABDK(order.LimitPrice)
