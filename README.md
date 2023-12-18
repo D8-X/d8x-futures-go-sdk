@@ -58,6 +58,12 @@ Example 4: Query position risk
 ```
 pr, err := sdk.GetPositionRisk("ETH-USD-MATIC", sdk.Wallet.Address)
 ```
+Example 5: Cancel order
+
+```
+tx, err := sdk.CancelOrder("BTC-USDC-USDC", id)
+```
+
 
 ### Dev
 Generate the ABI for the network it should compile to:
