@@ -73,10 +73,25 @@ func (w *Wallet) SetValue(val int64) {
 	w.Auth.Value = big.NewInt(val)
 }
 
+func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client) {
+	w.UpdateNonce(rpc)
+	w.UpdateGasPrice(rpc)
+}
+
+func (w *Wallet) UpdateGasPrice(rpc *ethclient.Client) {
+	g, err := GetGasPrice(rpc)
+	if err != nil {
+		log.Fatal("RPC could not determine gas price")
+		return
+	}
+	w.Auth.GasPrice = g
+}
+
 func (w *Wallet) UpdateNonce(rpc *ethclient.Client) {
 	n, err := GetNonce(rpc, w.Address)
 	if err != nil {
-		log.Fatal("RPC could not determine gas price")
+		log.Fatal("RPC could not determine nonce")
+		return
 	}
 	w.Auth.Nonce = big.NewInt(int64(n))
 }
