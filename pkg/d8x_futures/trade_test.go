@@ -33,14 +33,15 @@ func TestTradingFunc(t *testing.T) {
 		fmt.Println("order ids =", ids)
 		fmt.Println("orders =", orders)
 	}
-
-	tx, err := sdk.CancelOrder("BTC-USDC-USDC", ids[0])
-	if err != nil {
-		t.Logf(err.Error())
-	} else {
-		fmt.Println("tx cancel order=", tx.Hash())
+	if len(ids) > 0 {
+		tx, err := sdk.CancelOrder("BTC-USDC-USDC", ids[0])
+		if err != nil {
+			t.Logf(err.Error())
+		} else {
+			fmt.Println("tx cancel order=", tx.Hash())
+		}
 	}
-	tx, err = sdk.AddCollateral("ETH-USD-MATIC", 100)
+	tx, err := sdk.AddCollateral("ETH-USD-MATIC", 100)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {

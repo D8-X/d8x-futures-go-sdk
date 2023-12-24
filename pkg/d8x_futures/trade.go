@@ -62,7 +62,7 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int) (*types.Trans
 	} else {
 		amt = amount
 	}
-	sdk.Wallet.UpdateNonce(sdk.Conn.Rpc)
+	sdk.Wallet.UpdateNonceAndGasPx(sdk.Conn.Rpc)
 	approvalTx, err := erc20Instance.Approve(sdk.Wallet.Auth, sdk.Info.ProxyAddr, amt)
 	if err != nil {
 		return nil, errors.New("Error approving token for chain " + strconv.Itoa(int(sdk.Conn.ChainId)) + ": " + err.Error())
@@ -84,7 +84,7 @@ func RawPostOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingW
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(conn.PostOrderGasLimit))
 	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-	postingWallet.UpdateNonce(conn.Rpc)
+	postingWallet.UpdateNonceAndGasPx(conn.Rpc)
 	dgst, err := CreateOrderDigest(scOrder, int(conn.ChainId), true, xInfo.ProxyAddr.Hex())
 	if err != nil {
 		return "", "", err
@@ -122,7 +122,7 @@ func RawCancelOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo,
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(15_000_000))
 
-	postingWallet.UpdateNonce(conn.Rpc)
+	postingWallet.UpdateNonceAndGasPx(conn.Rpc)
 	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	tx, err = ob.CancelOrder(postingWallet.Auth, dig, []byte{}, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
 	if err != nil {
@@ -141,7 +141,7 @@ func RawAddCollateral(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pyth
 	id := int64(xInfo.Perpetuals[j].Id)
 	amount := utils.Float64ToABDK(math.Abs(amountCC))
 	perpCtrct := CreatePerpetualManagerInstance(conn.Rpc, xInfo.ProxyAddr)
-	postingWallet.UpdateNonce(conn.Rpc)
+	postingWallet.UpdateNonceAndGasPx(conn.Rpc)
 	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
 	if err != nil {
 		return nil, errors.New("RawAddCollateral: failed fetching oracle prices " + err.Error())
