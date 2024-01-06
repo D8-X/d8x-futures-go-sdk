@@ -141,7 +141,7 @@ func RawAddCollateral(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pyth
 	id := int64(xInfo.Perpetuals[j].Id)
 	amount := utils.Float64ToABDK(math.Abs(amountCC))
 	perpCtrct := CreatePerpetualManagerInstance(conn.Rpc, xInfo.ProxyAddr)
-	postingWallet.UpdateNonceAndGasPx(conn.Rpc)
+
 	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
 	if err != nil {
 		return nil, errors.New("RawAddCollateral: failed fetching oracle prices " + err.Error())
@@ -155,7 +155,7 @@ func RawAddCollateral(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pyth
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(15_000_000))
-
+	postingWallet.UpdateNonceAndGasPx(conn.Rpc)
 	if amountCC > 0 {
 		tx, err = perpCtrct.Deposit(postingWallet.Auth, big.NewInt(id),
 			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
