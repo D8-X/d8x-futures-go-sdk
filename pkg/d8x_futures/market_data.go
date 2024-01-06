@@ -142,7 +142,7 @@ func RawGetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, trad
 	var side string
 	if posBC == 0 {
 		side = SIDE_CLOSED
-	} else if lockedInValue < 0 {
+	} else if posBC < 0 {
 		side = SIDE_SELL
 	} else {
 		side = SIDE_BUY
