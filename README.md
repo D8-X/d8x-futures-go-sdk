@@ -21,6 +21,7 @@ pr, err := sdkRo.GetPositionRisk("BTC-USD-MATIC", trader)
 perpState, err := sdkRo.QueryPerpetualState([]int32{100000, 100001, 200002})
 poolState, err := sdkRo.QueryPoolStates()
 oo, dgsts, err := sdkRo.QueryOpenOrders("BTC-USD-MATIC", trader) //([]Order, []string, error)
+oo, dgsts, err := sdkRo.QueryAllOpenOrders("BTC-USDC-USDC") //([]Order, []string, error)
 status, err := sdkRo.QueryOrderStatus("BTC-USD-MATIC", trader, "") // (string, error)
 m, err := sdkRo.QueryMaxTradeAmount("BTC-USD-MATIC", 0, true) // (float64, error) {
 vol, err := sdkRo.QueryTraderVolume(1, trader) //(float64, error) {

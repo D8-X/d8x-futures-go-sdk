@@ -26,10 +26,18 @@ func TestFetchPricesFromAPI(t *testing.T) {
 
 func TestSdkRO(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("testnet")
+	err := sdkRo.New("x1Testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
+	oo, dgsts, err := sdkRo.QueryAllOpenOrders("BTC-USDC-USDC") //([]Order, []string, error)
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println(oo)
+		fmt.Println(dgsts)
+	}
+
 	trader := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	broker := common.HexToAddress("0xB0CBeeC370Af6ca2ed541F6a2264bc95b991F6E1")
 	pr, err := sdkRo.GetPositionRisk("BTC-USDC-USDC", trader)
@@ -56,7 +64,7 @@ func TestSdkRO(t *testing.T) {
 	} else {
 		fmt.Println(poolState)
 	}
-	oo, dgsts, err := sdkRo.QueryOpenOrders("BTC-USD-MATIC", trader) //([]Order, []string, error)
+	oo, dgsts, err = sdkRo.QueryOpenOrders("BTC-USD-MATIC", trader) //([]Order, []string, error)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
