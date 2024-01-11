@@ -266,10 +266,9 @@ func RawQueryAllOpenOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, s
 	orders := []Order{}
 	orderHashes := []string{}
 	zeroAddr := common.Address{}
-	var startAfter [32]byte
 outerLoop:
 	for {
-		currOrders, err := lob.PollLimitOrders(nil, startAfter, big.NewInt(int64(count)))
+		currOrders, err := lob.PollRange(nil, big.NewInt(int64(from)), big.NewInt(int64(count)))
 		if err != nil {
 			return []Order{}, []string{}, err
 		}
@@ -284,7 +283,7 @@ outerLoop:
 				orderHashes = append(orderHashes, strDigests)
 			}
 		}
-		startAfter = currOrders.OrderHashes[len(currOrders.Orders)-1]
+		from = from + count
 	}
 
 	return orders, orderHashes, nil
