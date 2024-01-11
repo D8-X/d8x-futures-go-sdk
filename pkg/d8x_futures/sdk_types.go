@@ -49,6 +49,7 @@ type StaticExchangeInfo struct {
 	PriceFeedInfo          utils.PriceFeedConfig
 	IdxPriceTriangulations Triangulations
 	OracleFactoryAddr      common.Address
+	PythAddr               common.Address
 	ProxyAddr              common.Address
 }
 

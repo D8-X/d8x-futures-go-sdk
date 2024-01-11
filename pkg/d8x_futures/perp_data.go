@@ -189,7 +189,14 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		perpetualSymbolToId[perpSymbol] = perpStatic.Id
 		perpetualIdToSymbol[perpStatic.Id] = perpSymbol
 	}
-
+	of, err := contracts.NewOracleFactory(nest.OracleFactoryAddr, conn.Rpc)
+	if err != nil {
+		panic(err)
+	}
+	pythAddr, err := of.Pyth(nil)
+	if err != nil {
+		panic(err)
+	}
 	triangulations := initPriceFeeds(&conn.PriceFeedConfig, symbolsSet)
 	xInfo := StaticExchangeInfo{
 		Pools:                  pools,
@@ -200,6 +207,7 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		ProxyAddr:              config.ProxyAddr,
 		PriceFeedInfo:          conn.PriceFeedConfig,
 		IdxPriceTriangulations: triangulations,
+		PythAddr:               pythAddr,
 	}
 	return xInfo
 }

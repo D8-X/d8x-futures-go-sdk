@@ -14,6 +14,47 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
+func TestSdkExec(t *testing.T) {
+	var sdk Sdk
+	pk := os.Getenv("PK")
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	err := sdk.New(pk, "x1Testnet")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	orders, ids, err := sdk.QueryAllOpenOrders("ETH-USDC-USDC")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	var mktOrderIds []string
+	for k, order := range orders {
+		if order.Type == ORDER_TYPE_MARKET {
+			mktOrderIds = append(mktOrderIds, ids[k])
+		}
+	}
+	if len(mktOrderIds) == 0 {
+		order := NewOrder("ETH-USDC-USDC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
+		orderId, _, err := sdk.PostOrder(order)
+		if err != nil {
+			t.Logf(err.Error())
+		}
+		fmt.Println("order id =", orderId)
+
+		mktOrderIds = append(mktOrderIds, orderId)
+	}
+	tx, err := sdk.ExecuteOrders("ETH-USDC-USDC", []string{mktOrderIds[0]})
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Println("tx = ", tx.Hash())
+}
+
 func TestTradingFunc(t *testing.T) {
 	var sdk Sdk
 	pk := os.Getenv("PK")

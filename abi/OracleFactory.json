@@ -1,0 +1,457 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_maxFeedTimeGapSec",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "_pythFeedAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_onDemandfeedAddress",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes4",
+                "name": "baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes4",
+                "name": "quoteCurrency",
+                "type": "bytes4"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "oracle",
+                "type": "address"
+            }
+        ],
+        "name": "OracleAdded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes4",
+                "name": "baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes4",
+                "name": "quoteCurrency",
+                "type": "bytes4"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "oracle",
+                "type": "address"
+            }
+        ],
+        "name": "OracleCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes4",
+                "name": "baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes4",
+                "name": "quoteCurrency",
+                "type": "bytes4"
+            },
+            {
+                "indexed": false,
+                "internalType": "address[]",
+                "name": "oracle",
+                "type": "address[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool[]",
+                "name": "isInverse",
+                "type": "bool[]"
+            }
+        ],
+        "name": "RouteAdded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes4",
+                "name": "baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes4",
+                "name": "quoteCurrency",
+                "type": "bytes4"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "oracle",
+                "type": "address"
+            }
+        ],
+        "name": "ShortRouteAdded",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_oracle",
+                "type": "address"
+            }
+        ],
+        "name": "addOracle",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "_baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "bytes4",
+                "name": "_quoteCurrency",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "address[]",
+                "name": "_oracles",
+                "type": "address[]"
+            },
+            {
+                "internalType": "bool[]",
+                "name": "_isInverse",
+                "type": "bool[]"
+            }
+        ],
+        "name": "addRoute",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "_baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "bytes4",
+                "name": "_quoteCurrency",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "uint16",
+                "name": "_tradingBreakMins",
+                "type": "uint16"
+            },
+            {
+                "internalType": "address",
+                "name": "_feedAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "_priceId",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_feedPeriod",
+                "type": "uint256"
+            }
+        ],
+        "name": "createOracle",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "_baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "bytes4",
+                "name": "_quoteCurrency",
+                "type": "bytes4"
+            }
+        ],
+        "name": "existsRoute",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "_baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "bytes4",
+                "name": "_quoteCurrency",
+                "type": "bytes4"
+            }
+        ],
+        "name": "getRoute",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "oracle",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isInverse",
+                        "type": "bool"
+                    }
+                ],
+                "internalType": "struct OracleFactory.OracleData[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4[2]",
+                "name": "_baseQuote",
+                "type": "bytes4[2]"
+            }
+        ],
+        "name": "getRouteIds",
+        "outputs": [
+            {
+                "internalType": "bytes32[]",
+                "name": "",
+                "type": "bytes32[]"
+            },
+            {
+                "internalType": "bool[]",
+                "name": "",
+                "type": "bool[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "_baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "bytes4",
+                "name": "_quoteCurrency",
+                "type": "bytes4"
+            }
+        ],
+        "name": "getSpotPrice",
+        "outputs": [
+            {
+                "internalType": "int128",
+                "name": "",
+                "type": "int128"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "_baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "bytes4",
+                "name": "_quoteCurrency",
+                "type": "bytes4"
+            }
+        ],
+        "name": "isRouteTerminated",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "onDemandFeed",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "pyth",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes[]",
+                "name": "_updateData",
+                "type": "bytes[]"
+            },
+            {
+                "internalType": "bytes32[]",
+                "name": "_priceIds",
+                "type": "bytes32[]"
+            },
+            {
+                "internalType": "uint64[]",
+                "name": "_publishTimes",
+                "type": "uint64[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_maxAcceptableFeedAge",
+                "type": "uint256"
+            }
+        ],
+        "name": "updatePriceFeeds",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    }
+]
