@@ -26,7 +26,9 @@ func TestSdkExec(t *testing.T) {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	orders, ids, err := sdk.QueryAllOpenOrders("ETH-USDC-USDC")
+	orderObj, err := sdk.QueryAllOpenOrders("ETH-USDC-USDC")
+	orders := orderObj.Orders
+	ids := orderObj.OrderHashes
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()

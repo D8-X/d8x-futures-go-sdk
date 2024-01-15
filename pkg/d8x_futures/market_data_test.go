@@ -24,13 +24,37 @@ func TestFetchPricesFromAPI(t *testing.T) {
 
 }
 
+func TestSdkROOrders(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("x1Testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	n, err := sdkRo.QueryNumOrders("BTC-USDC-USDC")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	fmt.Printf("There are %d open orders", n)
+	orders, err := sdkRo.QueryOpenOrderRange("BTC-USDC-USDC", 0, 10) //([]Order, []string, error)
+	oo := orders.Orders
+	dgsts := orders.OrderHashes
+	if err != nil {
+		t.Logf(err.Error())
+	} else {
+		fmt.Println(oo)
+		fmt.Println(dgsts)
+	}
+}
+
 func TestSdkRO(t *testing.T) {
 	var sdkRo SdkRO
 	err := sdkRo.New("x1Testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	oo, dgsts, err := sdkRo.QueryAllOpenOrders("BTC-USDC-USDC") //([]Order, []string, error)
+	orders, err := sdkRo.QueryAllOpenOrders("BTC-USDC-USDC") //([]Order, []string, error)
+	oo := orders.Orders
+	dgsts := orders.OrderHashes
 	if err != nil {
 		t.Logf(err.Error())
 	} else {

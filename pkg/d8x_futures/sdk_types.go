@@ -95,6 +95,12 @@ type PerpetualState struct {
 	IsMarketClosed        bool
 }
 
+type OpenOrders struct {
+	Orders      []Order
+	OrderHashes []string
+	SubmittedTs []uint32
+}
+
 type CollateralCCY int8
 
 const (

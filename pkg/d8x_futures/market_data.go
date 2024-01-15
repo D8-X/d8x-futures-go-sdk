@@ -34,8 +34,16 @@ func (sdkRo *SdkRO) QueryOpenOrders(symbol string, traderAddr common.Address) ([
 	return RawQueryOpenOrders(sdkRo.Conn, sdkRo.Info, symbol, traderAddr)
 }
 
-func (sdkRo *SdkRO) QueryAllOpenOrders(symbol string) ([]Order, []string, error) {
+func (sdkRo *SdkRO) QueryAllOpenOrders(symbol string) (*OpenOrders, error) {
 	return RawQueryAllOpenOrders(sdkRo.Conn, sdkRo.Info, symbol)
+}
+
+func (sdkRo *SdkRO) QueryNumOrders(symbol string) (int64, error) {
+	return RawQueryNumOrders(sdkRo.Conn, sdkRo.Info, symbol)
+}
+
+func (sdkRo *SdkRO) QueryOpenOrderRange(symbol string, from, to int) (*OpenOrders, error) {
+	return RawQueryOpenOrderRange(sdkRo.Conn, sdkRo.Info, symbol, from, to)
 }
 
 func (sdkRo *SdkRO) QueryOrderStatus(symbol string, traderAddr common.Address, orderDigest string) (string, error) {
@@ -254,23 +262,22 @@ func RawQueryPoolStates(conn BlockChainConnector, xInfo StaticExchangeInfo) ([]P
 	return poolStates, nil
 }
 
-func RawQueryAllOpenOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string) ([]Order, []string, error) {
+func RawQueryAllOpenOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string) (*OpenOrders, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
-		return []Order{}, []string{}, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
 	lob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 
 	from := 0
 	count := 500
-	orders := []Order{}
-	orderHashes := []string{}
+	var orders OpenOrders
 	zeroAddr := common.Address{}
 outerLoop:
 	for {
 		currOrders, err := lob.PollRange(nil, big.NewInt(int64(from)), big.NewInt(int64(count)))
 		if err != nil {
-			return []Order{}, []string{}, err
+			return nil, err
 		}
 		from = from + count
 		for k, corder := range currOrders.Orders {
@@ -278,15 +285,46 @@ outerLoop:
 				break outerLoop
 			} else {
 				order := FromChainType(&corder, &xInfo)
-				orders = append(orders, order)
+				orders.Orders = append(orders.Orders, order)
 				strDigests := "0x" + common.Bytes2Hex(currOrders.OrderHashes[k][:])
-				orderHashes = append(orderHashes, strDigests)
+				orders.OrderHashes = append(orders.OrderHashes, strDigests)
 			}
 		}
+		orders.SubmittedTs = currOrders.SubmittedTs
 		from = from + count
 	}
 
-	return orders, orderHashes, nil
+	return &orders, nil
+}
+
+func RawQueryNumOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string) (int64, error) {
+	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
+	if j == -1 {
+		return 0, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+	}
+	lob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	count, err := lob.OrderCount(nil)
+	if err != nil {
+		return 0, err
+	}
+	return count.Int64(), nil
+}
+
+func RawQueryOpenOrderRange(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string, from, to int) (*OpenOrders, error) {
+	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+	}
+	lob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	ooSc, err := lob.PollRange(nil, big.NewInt(int64(from)), big.NewInt(int64(to-from)))
+	var orders OpenOrders
+	for k, scOrder := range ooSc.Orders {
+		orders.Orders = append(orders.Orders, FromChainType(&scOrder, &xInfo))
+		strDigests := "0x" + common.Bytes2Hex(ooSc.OrderHashes[k][:])
+		orders.OrderHashes = append(orders.OrderHashes, strDigests)
+	}
+	orders.SubmittedTs = ooSc.SubmittedTs
+	return &orders, err
 }
 
 func RawQueryOpenOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string, traderAddr common.Address) ([]Order, []string, error) {
