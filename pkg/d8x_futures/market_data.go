@@ -1,7 +1,6 @@
 package d8x_futures
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -17,55 +16,92 @@ import (
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/forta-network/go-multicall"
 )
 
-func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address) (PositionRisk, error) {
-	return RawGetPositionRisk(sdkRo.Info, sdkRo.Conn, &traderAddr, symbol, sdkRo.ChainConfig.PriceFeedEndpoints[0])
+func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, optRpc *ethclient.Client) (PositionRisk, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawGetPositionRisk(sdkRo.Info, optRpc, &traderAddr, symbol, sdkRo.ChainConfig.PriceFeedEndpoints[0])
 }
 
-func (sdkRo *SdkRO) QueryPerpetualState(perpetualIds []int32) ([]PerpetualState, error) {
-	return RawQueryPerpetualState(sdkRo.Conn, sdkRo.Info, perpetualIds, sdkRo.ChainConfig.PriceFeedEndpoints[0])
+func (sdkRo *SdkRO) QueryPerpetualState(perpetualIds []int32, optRpc *ethclient.Client) ([]PerpetualState, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryPerpetualState(optRpc, sdkRo.Info, perpetualIds, sdkRo.ChainConfig.PriceFeedEndpoints[0])
 }
 
-func (sdkRo *SdkRO) QueryPoolStates() ([]PoolState, error) {
-	return RawQueryPoolStates(sdkRo.Conn, sdkRo.Info)
+func (sdkRo *SdkRO) QueryPoolStates(optRpc *ethclient.Client) ([]PoolState, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryPoolStates(optRpc, sdkRo.Info)
 }
 
-func (sdkRo *SdkRO) QueryPerpetualPrices(symbol string, tradeAmt []float64) ([]float64, error) {
-	return RawQueryPerpetualPriceTuple(&sdkRo.Conn, &sdkRo.Info, sdkRo.ChainConfig.NodeURL, sdkRo.ChainConfig.PriceFeedEndpoints[0], symbol, tradeAmt)
+func (sdkRo *SdkRO) QueryPerpetualPrices(symbol string, tradeAmt []float64, optRpc *ethclient.Client) ([]float64, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryPerpetualPriceTuple(optRpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoints[0], symbol, tradeAmt)
 }
 
-func (sdkRo *SdkRO) QueryOpenOrders(symbol string, traderAddr common.Address) ([]Order, []string, error) {
-	return RawQueryOpenOrders(sdkRo.Conn, sdkRo.Info, symbol, traderAddr)
+func (sdkRo *SdkRO) QueryOpenOrders(symbol string, traderAddr common.Address, optRpc *ethclient.Client) ([]Order, []string, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryOpenOrders(optRpc, sdkRo.Info, symbol, traderAddr)
 }
 
-func (sdkRo *SdkRO) QueryAllOpenOrders(symbol string) (*OpenOrders, error) {
-	return RawQueryAllOpenOrders(sdkRo.Conn, sdkRo.Info, symbol)
+func (sdkRo *SdkRO) QueryAllOpenOrders(symbol string, optRpc *ethclient.Client) (*OpenOrders, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryAllOpenOrders(optRpc, sdkRo.Info, symbol)
 }
 
-func (sdkRo *SdkRO) QueryNumOrders(symbol string) (int64, error) {
-	return RawQueryNumOrders(sdkRo.Conn, sdkRo.Info, symbol)
+func (sdkRo *SdkRO) QueryNumOrders(symbol string, optRpc *ethclient.Client) (int64, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryNumOrders(optRpc, sdkRo.Info, symbol)
 }
 
-func (sdkRo *SdkRO) QueryOpenOrderRange(symbol string, from, to int) (*OpenOrders, error) {
-	return RawQueryOpenOrderRange(sdkRo.Conn, sdkRo.Info, symbol, from, to)
+func (sdkRo *SdkRO) QueryOpenOrderRange(symbol string, from, to int, optRpc *ethclient.Client) (*OpenOrders, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryOpenOrderRange(optRpc, sdkRo.Info, symbol, from, to)
 }
 
-func (sdkRo *SdkRO) QueryOrderStatus(symbol string, traderAddr common.Address, orderDigest string) (string, error) {
-	return RawQueryOrderStatus(sdkRo.Conn, sdkRo.Info, traderAddr, orderDigest, symbol)
+func (sdkRo *SdkRO) QueryOrderStatus(symbol string, traderAddr common.Address, orderDigest string, optRpc *ethclient.Client) (string, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryOrderStatus(optRpc, sdkRo.Info, traderAddr, orderDigest, symbol)
 }
 
-func (sdkRo *SdkRO) QueryMaxTradeAmount(symbol string, currentPositionNotional float64, isBuy bool) (float64, error) {
-	return RawQueryMaxTradeAmount(sdkRo.Conn, sdkRo.Info, currentPositionNotional, symbol, isBuy)
+func (sdkRo *SdkRO) QueryMaxTradeAmount(symbol string, currentPositionNotional float64, isBuy bool, optRpc *ethclient.Client) (float64, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryMaxTradeAmount(optRpc, sdkRo.Info, currentPositionNotional, symbol, isBuy)
 }
 
-func (sdkRo *SdkRO) QueryTraderVolume(poolId int32, traderAddr common.Address) (float64, error) {
-	return RawQueryTraderVolume(sdkRo.Conn, sdkRo.Info, traderAddr, poolId)
+func (sdkRo *SdkRO) QueryTraderVolume(poolId int32, traderAddr common.Address, optRpc *ethclient.Client) (float64, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryTraderVolume(optRpc, sdkRo.Info, traderAddr, poolId)
 }
 
-func (sdkRo *SdkRO) QueryExchangeFeeTbpsForTrader(poolId int32, traderAddr common.Address, brokerAddr common.Address) (uint16, error) {
-	return RawQueryExchangeFeeTbpsForTrader(sdkRo.Conn, sdkRo.Info, poolId, traderAddr, brokerAddr)
+func (sdkRo *SdkRO) QueryExchangeFeeTbpsForTrader(poolId int32, traderAddr common.Address, brokerAddr common.Address, optRpc *ethclient.Client) (uint16, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryExchangeFeeTbpsForTrader(optRpc, sdkRo.Info, poolId, traderAddr, brokerAddr)
 }
 
 func (sdkRo *SdkRO) GetMinimalPositionSize(symbol string) (float64, error) {
@@ -109,7 +145,7 @@ func RawGetMarginTknAddr(xInfo *StaticExchangeInfo, symbol string) (common.Addre
 	return (xInfo.Pools[poolId-1].PoolMarginTokenAddr), nil
 }
 
-func RawGetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, traderAddr *common.Address, symbol string, endpoint string) (PositionRisk, error) {
+func RawGetPositionRisk(xInfo StaticExchangeInfo, rpc *ethclient.Client, traderAddr *common.Address, symbol string, endpoint string) (PositionRisk, error) {
 	priceData, err := RawFetchPricesForPerpetual(xInfo, symbol, endpoint)
 	if err != nil {
 		return PositionRisk{}, err
@@ -120,7 +156,9 @@ func RawGetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, trad
 	}
 	indexPrices := [2]*big.Int{utils.Float64ToABDK(priceData.S2Price), utils.Float64ToABDK(priceData.S3Price)}
 
-	traderState, err := conn.PerpetualManager.GetTraderState(
+	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+
+	traderState, err := proxy.GetTraderState(
 		nil,
 		new(big.Int).SetInt64(int64(xInfo.Perpetuals[j].Id)),
 		*traderAddr,
@@ -193,13 +231,15 @@ func RawGetPositionRisk(xInfo StaticExchangeInfo, conn BlockChainConnector, trad
 
 // QueryPerpetualState collects PerpetualState by calling the off-chain prices and
 // blockchain queries. endpoint is the address to get prices from
-func RawQueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, perpetualIds []int32, endpoint string) ([]PerpetualState, error) {
+func RawQueryPerpetualState(rpc *ethclient.Client, xInfo StaticExchangeInfo, perpetualIds []int32, endpoint string) ([]PerpetualState, error) {
 	bigIntSlice := make([]*big.Int, len(perpetualIds))
 	for i, id := range perpetualIds {
 		bigIntSlice[i] = big.NewInt(int64(id))
 	}
 	// perpetual data via blockchain
-	perps, err := conn.PerpetualManager.GetPerpetuals(nil, bigIntSlice)
+
+	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	perps, err := proxy.GetPerpetuals(nil, bigIntSlice)
 	if err != nil {
 		return []PerpetualState{}, err
 	}
@@ -217,7 +257,7 @@ func RawQueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, 
 		pxInfo[i*2+1] = utils.Float64ToABDK(p.S3Price)
 	}
 	// midprices via blockchain query
-	pxMid, err := conn.PerpetualManager.QueryMidPrices(nil, bigIntSlice, pxInfo)
+	pxMid, err := proxy.QueryMidPrices(nil, bigIntSlice, pxInfo)
 	if err != nil {
 		return []PerpetualState{}, err
 	}
@@ -238,19 +278,21 @@ func RawQueryPerpetualState(conn BlockChainConnector, xInfo StaticExchangeInfo, 
 
 // RawQueryPoolStates gathers the pool states of all pools by querying the blockchain in
 // chunks of 10 pools
-func RawQueryPoolStates(conn BlockChainConnector, xInfo StaticExchangeInfo) ([]PoolState, error) {
+func RawQueryPoolStates(rpc *ethclient.Client, xInfo StaticExchangeInfo) ([]PoolState, error) {
 	numPools := len(xInfo.Pools)
 	poolStates := make([]PoolState, numPools)
 	// we query a maximum of 10 pools at once
 	const MAXPOOLS = 10
 	iterations := (numPools + MAXPOOLS - 1) / MAXPOOLS
+	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
 	for i := 0; i < iterations; i++ {
 		from := i * MAXPOOLS
 		to := (i+1)*MAXPOOLS - 1
 		if to > numPools {
 			to = numPools
 		}
-		pools, err := conn.PerpetualManager.GetLiquidityPools(nil, uint8(from+1), uint8(to+1))
+
+		pools, err := proxy.GetLiquidityPools(nil, uint8(from+1), uint8(to+1))
 		if err != nil {
 			return []PoolState{}, nil
 		}
@@ -268,12 +310,12 @@ func RawQueryPoolStates(conn BlockChainConnector, xInfo StaticExchangeInfo) ([]P
 	return poolStates, nil
 }
 
-func RawQueryAllOpenOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string) (*OpenOrders, error) {
+func RawQueryAllOpenOrders(rpc *ethclient.Client, xInfo StaticExchangeInfo, symbol string) (*OpenOrders, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
 		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
-	lob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 
 	from := 0
 	count := 500
@@ -303,12 +345,12 @@ outerLoop:
 	return &orders, nil
 }
 
-func RawQueryNumOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string) (int64, error) {
+func RawQueryNumOrders(rpc *ethclient.Client, xInfo StaticExchangeInfo, symbol string) (int64, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
 		return 0, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
-	lob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	count, err := lob.OrderCount(nil)
 	if err != nil {
 		return 0, err
@@ -316,12 +358,12 @@ func RawQueryNumOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbo
 	return count.Int64(), nil
 }
 
-func RawQueryOpenOrderRange(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string, from, to int) (*OpenOrders, error) {
+func RawQueryOpenOrderRange(rpc *ethclient.Client, xInfo StaticExchangeInfo, symbol string, from, to int) (*OpenOrders, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
 		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
-	lob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	ooSc, err := lob.PollRange(nil, big.NewInt(int64(from)), big.NewInt(int64(to-from)))
 	var orders OpenOrders
 	for k, scOrder := range ooSc.Orders {
@@ -333,12 +375,12 @@ func RawQueryOpenOrderRange(conn BlockChainConnector, xInfo StaticExchangeInfo, 
 	return &orders, err
 }
 
-func RawQueryOpenOrders(conn BlockChainConnector, xInfo StaticExchangeInfo, symbol string, traderAddr common.Address) ([]Order, []string, error) {
+func RawQueryOpenOrders(rpc *ethclient.Client, xInfo StaticExchangeInfo, symbol string, traderAddr common.Address) ([]Order, []string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
 		return []Order{}, []string{}, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
-	lob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 
 	from := 0
 	count := 15
@@ -379,12 +421,12 @@ outerLoop:
 	return orders, strDigests, nil
 }
 
-func RawQueryOrderStatus(conn BlockChainConnector, xInfo StaticExchangeInfo, traderAddr common.Address, orderDigest string, symbol string) (string, error) {
+func RawQueryOrderStatus(rpc *ethclient.Client, xInfo StaticExchangeInfo, traderAddr common.Address, orderDigest string, symbol string) (string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
 		return "", fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
-	lob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	// convert digest string to bytes 32
 	bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderDigest, "0x"))
 	var orderDigest32 [32]byte
@@ -407,7 +449,7 @@ func RawQueryOrderStatus(conn BlockChainConnector, xInfo StaticExchangeInfo, tra
 	return statusStr, nil
 }
 
-func RawQueryPerpetualPriceTuple(conn *BlockChainConnector, xInfo *StaticExchangeInfo, nodeURL, pythEndpoint, symbol string, tradeAmt []float64) ([]float64, error) {
+func RawQueryPerpetualPriceTuple(client *ethclient.Client, xInfo *StaticExchangeInfo, pythEndpoint, symbol string, tradeAmt []float64) ([]float64, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
 		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
@@ -419,7 +461,7 @@ func RawQueryPerpetualPriceTuple(conn *BlockChainConnector, xInfo *StaticExchang
 	}
 	pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxFeed.S2Price), utils.Float64ToABDK(pxFeed.S3Price)}
 
-	caller, err := multicall.Dial(context.Background(), nodeURL)
+	caller, err := multicall.New(client)
 	if err != nil {
 		return nil, err
 	}
@@ -477,12 +519,12 @@ func RawQueryPerpetualPriceTuple(conn *BlockChainConnector, xInfo *StaticExchang
 	return prices, nil
 }
 
-func RawGetPerpetualData(conn BlockChainConnector, xInfo *StaticExchangeInfo, symbol string) (*contracts.PerpStoragePerpetualData, error) {
+func RawGetPerpetualData(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbol string) (*contracts.PerpStoragePerpetualData, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
 		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
-	proxy := CreatePerpetualManagerInstance(conn.Rpc, xInfo.ProxyAddr)
+	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
 	perpData, err := proxy.GetPerpetual(nil, big.NewInt(int64(xInfo.Perpetuals[j].Id)))
 	if err != nil {
 		return nil, err
@@ -490,29 +532,32 @@ func RawGetPerpetualData(conn BlockChainConnector, xInfo *StaticExchangeInfo, sy
 	return &perpData, nil
 }
 
-func RawQueryMaxTradeAmount(conn BlockChainConnector, xInfo StaticExchangeInfo, currentPositionNotional float64, symbol string, isBuy bool) (float64, error) {
+func RawQueryMaxTradeAmount(rpc *ethclient.Client, xInfo StaticExchangeInfo, currentPositionNotional float64, symbol string, isBuy bool) (float64, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
 		return 0, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
 	p := utils.Float64ToABDK(currentPositionNotional)
-	t, err := conn.PerpetualManager.GetMaxSignedOpenTradeSizeForPos(nil, big.NewInt(int64(xInfo.Perpetuals[j].Id)), p, isBuy)
+	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	t, err := proxy.GetMaxSignedOpenTradeSizeForPos(nil, big.NewInt(int64(xInfo.Perpetuals[j].Id)), p, isBuy)
 	if err != nil {
 		return 0, err
 	}
 	return utils.ABDKToFloat64(t), nil
 }
 
-func RawQueryTraderVolume(conn BlockChainConnector, xInfo StaticExchangeInfo, traderAddr common.Address, poolId int32) (float64, error) {
-	vol, err := conn.PerpetualManager.GetCurrentTraderVolume(nil, uint8(poolId), traderAddr)
+func RawQueryTraderVolume(rpc *ethclient.Client, xInfo StaticExchangeInfo, traderAddr common.Address, poolId int32) (float64, error) {
+	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	vol, err := proxy.GetCurrentTraderVolume(nil, uint8(poolId), traderAddr)
 	if err != nil {
 		return 0, err
 	}
 	return utils.ABDKToFloat64(vol), nil
 }
 
-func RawQueryExchangeFeeTbpsForTrader(conn BlockChainConnector, xInfo StaticExchangeInfo, poolId int32, traderAddr common.Address, brokerAddr common.Address) (uint16, error) {
-	feeTbps, err := conn.PerpetualManager.QueryExchangeFee(nil, uint8(poolId), traderAddr, brokerAddr)
+func RawQueryExchangeFeeTbpsForTrader(rpc *ethclient.Client, xInfo StaticExchangeInfo, poolId int32, traderAddr common.Address, brokerAddr common.Address) (uint16, error) {
+	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	feeTbps, err := proxy.QueryExchangeFee(nil, uint8(poolId), traderAddr, brokerAddr)
 	if err != nil {
 		return 0, err
 	}

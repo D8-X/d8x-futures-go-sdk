@@ -26,7 +26,7 @@ func TestSdkExec(t *testing.T) {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	orderObj, err := sdk.QueryAllOpenOrders("ETH-USDC-USDC")
+	orderObj, err := sdk.QueryAllOpenOrders("ETH-USDC-USDC", nil)
 	orders := orderObj.Orders
 	ids := orderObj.OrderHashes
 	if err != nil {
@@ -69,7 +69,7 @@ func TestTradingFunc(t *testing.T) {
 		t.Logf(err.Error())
 	}
 
-	orders, ids, err := sdk.QueryOpenOrders("BTC-USDC-USDC", sdk.Wallet.Address)
+	orders, ids, err := sdk.QueryOpenOrders("BTC-USDC-USDC", sdk.Wallet.Address, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
@@ -112,13 +112,13 @@ func TestTradingFunc(t *testing.T) {
 		fmt.Println("tx cancel order=", tx.Hash())
 	}
 
-	status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallet.Address, orderId)
+	status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallet.Address, orderId, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
 		fmt.Println("order status =", status)
 	}
-	pr, err := sdk.GetPositionRisk("ETH-USD-MATIC", sdk.Wallet.Address)
+	pr, err := sdk.GetPositionRisk("ETH-USD-MATIC", sdk.Wallet.Address, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
