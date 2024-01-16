@@ -3,8 +3,10 @@ package d8x_futures
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/D8-X/d8x-futures-go-sdk/config"
+	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -22,6 +24,45 @@ func TestFetchPricesFromAPI(t *testing.T) {
 	data, err = fetchPricesFromAPI(priceIdsWrong, pxConf, "https://hermes-beta.pyth.network/api")
 	fmt.Println(err.Error())
 
+}
+
+func TestGetPerpetualData(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("x1Testnet")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	startTime := time.Now()
+	d, err := RawGetPerpetualData(sdkRo.Conn, &sdkRo.Info, "BTC-USDC-USDC")
+	endTime := time.Now()
+	elapsedTime := endTime.Sub(startTime)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	f := utils.ABDKToFloat64(d.FCurrentFundingRate)
+	fmt.Printf("current funding rate = %f\n", f)
+	fmt.Printf("Time taken: %s\n", elapsedTime)
+}
+
+func TestPerpetualPrice(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("x1Testnet")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	startTime := time.Now()
+	px, err := sdkRo.QueryPerpetualPrice("BTC-USDC-USDC", 0.01)
+	endTime := time.Now()
+	elapsedTime := endTime.Sub(startTime)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Printf("price = %f\n", px)
+	fmt.Printf("Time taken: %s\n", elapsedTime)
 }
 
 func TestSdkROOrders(t *testing.T) {
