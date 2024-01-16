@@ -32,8 +32,8 @@ func (sdkRo *SdkRO) QueryPoolStates() ([]PoolState, error) {
 	return RawQueryPoolStates(sdkRo.Conn, sdkRo.Info)
 }
 
-func (sdkRo *SdkRO) QueryPerpetualPrice(symbol string, tradeAmt float64) (float64, error) {
-	return RawQueryPerpetualPrice(sdkRo.Conn, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoints[0], symbol, tradeAmt)
+func (sdkRo *SdkRO) QueryPerpetualPrices(symbol string, tradeAmt []float64) ([]float64, error) {
+	return RawQueryPerpetualPriceTuple(&sdkRo.Conn, &sdkRo.Info, sdkRo.ChainConfig.NodeURL, sdkRo.ChainConfig.PriceFeedEndpoints[0], symbol, tradeAmt)
 }
 
 func (sdkRo *SdkRO) QueryOpenOrders(symbol string, traderAddr common.Address) ([]Order, []string, error) {
@@ -405,22 +405,6 @@ func RawQueryOrderStatus(conn BlockChainConnector, xInfo StaticExchangeInfo, tra
 		statusStr = ORDER_STATUS_UNKNOWN
 	}
 	return statusStr, nil
-}
-
-func RawQueryPerpetualPrice(conn BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint, symbol string, tradeAmt float64) (float64, error) {
-	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
-	if j == -1 {
-		return 0, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
-	}
-	amtAbdk := utils.Float64ToABDK(tradeAmt)
-	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
-	if err != nil {
-		return 0, errors.New("RawAddCollateral: failed fetching oracle prices " + err.Error())
-	}
-	pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxFeed.S2Price), utils.Float64ToABDK(pxFeed.S3Price)}
-	proxy := CreatePerpetualManagerInstance(conn.Rpc, xInfo.ProxyAddr)
-	priceAbdk, err := proxy.QueryPerpetualPrice(nil, big.NewInt(int64(xInfo.Perpetuals[j].Id)), amtAbdk, pricesAbdk)
-	return utils.ABDKToFloat64(priceAbdk), nil
 }
 
 func RawQueryPerpetualPriceTuple(conn *BlockChainConnector, xInfo *StaticExchangeInfo, nodeURL, pythEndpoint, symbol string, tradeAmt []float64) ([]float64, error) {
