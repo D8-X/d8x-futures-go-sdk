@@ -19,12 +19,14 @@ trader := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 broker := common.HexToAddress("0xB0CBeeC370Af6ca2ed541F6a2264bc95b991F6E1")
 pr, err := sdkRo.GetPositionRisk("BTC-USD-MATIC", trader)
 perpState, err := sdkRo.QueryPerpetualState([]int32{100000, 100001, 200002})
-poolState, err := sdkRo.QueryPoolStates()
-oo, dgsts, err := sdkRo.QueryOpenOrders("BTC-USD-MATIC", trader) //([]Order, []string, error)
-status, err := sdkRo.QueryOrderStatus("BTC-USD-MATIC", trader, "") // (string, error)
-m, err := sdkRo.QueryMaxTradeAmount("BTC-USD-MATIC", 0, true) // (float64, error) {
-vol, err := sdkRo.QueryTraderVolume(1, trader) //(float64, error) {
-fee, err := sdkRo.QueryExchangeFeeTbpsForTrader(1, trader, broker) // (uint16, error) {
+px, err := sdkRo.QueryPerpetualPrices("BTC-USDC-USDC", []float{0.01}, nil)
+poolState, err := sdkRo.QueryPoolStates(nil)
+oo, dgsts, err := sdkRo.QueryOpenOrders("BTC-USD-MATIC", trader, nil) //([]Order, []string, error)
+oo, dgsts, err := sdkRo.QueryAllOpenOrders("BTC-USDC-USDC", nil) //([]Order, []string, error)
+status, err := sdkRo.QueryOrderStatus("BTC-USD-MATIC", trader, "", nil) // (string, error)
+m, err := sdkRo.QueryMaxTradeAmount("BTC-USD-MATIC", 0, true, nil) // (float64, error)
+vol, err := sdkRo.QueryTraderVolume(1, trader, nil) //(float64, error)
+fee, err := sdkRo.QueryExchangeFeeTbpsForTrader(1, trader, broker, nil) // (uint16, error)
 minpos, err := sdkRo.GetMinimalPositionSize("BTC-USD-MATIC") //(float64, error)
 ```
 # Read-Write
@@ -63,7 +65,11 @@ Example 5: Cancel order
 ```
 tx, err := sdk.CancelOrder("BTC-USDC-USDC", id)
 ```
+Example 6: Execute order
 
+```
+tx, err := sdk.ExecuteOrders("ETH-USDC-USDC", orderIds)
+```
 
 ### Dev
 Generate the ABI for the network it should compile to:
@@ -72,6 +78,10 @@ Generate the ABI for the network it should compile to:
 `abigen --abi abi/LimitOrderBook.json --pkg contracts --type LimitOrderBook --out LimitOrderBook.go`
 
 `abigen --abi abi/LimitOrderBookFactory.json --pkg contracts --type LimitOrderBookFactory --out LimitOrderBookFactory.go`
+
+`abigen --abi abi/IPyth.json --pkg contracts --type IPyth --out IPyth.go`
+
+`abigen --abi abi/OracleFactory.json --pkg contracts --type OracleFactory --out OracleFactory.go`
 
 `go build` -> Remove duplicated structs
 

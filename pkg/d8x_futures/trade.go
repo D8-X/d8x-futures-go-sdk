@@ -44,6 +44,10 @@ func (sdk *Sdk) CancelOrder(symbol string, orderId string) (*types.Transaction, 
 		sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallet, symbol, orderId)
 }
 
+func (sdk *Sdk) ExecuteOrders(symbol string, orderIds []string) (*types.Transaction, error) {
+	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.ChainConfig.SplitExecutionTx, sdk.Wallet, symbol, orderIds)
+}
+
 // ApproveTknSpending approves the manager to spend the wallet's margin tokens for the given
 // pool (via symbol), if amount = nil, max approval. Symbol is a perpetual, but approval
 // is for pool.
@@ -129,6 +133,65 @@ func RawCancelOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo,
 		return nil, errors.New("RawCancelOrder:" + err.Error())
 	}
 	return tx, nil
+}
+
+func RawExecuteOrders(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint string, splitTx bool, postingWallet *Wallet, symbol string, orderIds []string) (*types.Transaction, error) {
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	if err != nil {
+		return nil, errors.New("RawExecuteOrder: failed fetching oracle prices " + err.Error())
+	}
+	var digests [][32]byte
+	for _, orderId := range orderIds {
+		var dig [32]byte
+		bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderId, "0x"))
+		copy(dig[:], bytesDigest)
+		digests = append(digests, dig)
+	}
+	if splitTx {
+		_, err = RawUpdatePythPriceFeeds(conn, xInfo, postingWallet, &pxFeed)
+		if err != nil {
+			return nil, errors.New("Unable to update price feeds:" + err.Error())
+		}
+
+	} else {
+		v := postingWallet.Auth.Value
+		defer func() { postingWallet.Auth.Value = v }()
+		val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+		postingWallet.Auth.Value = big.NewInt(val)
+	}
+	g := postingWallet.Auth.GasLimit
+	defer postingWallet.SetGasLimit(g)
+	postingWallet.SetGasLimit(uint64(2_000_000))
+	postingWallet.UpdateNonceAndGasPx(conn.Rpc)
+	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	if splitTx {
+		return ob.ExecuteOrders(postingWallet.Auth, digests, postingWallet.Address, [][]byte{}, []uint64{})
+	}
+	return ob.ExecuteOrders(postingWallet.Auth, digests, postingWallet.Address, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+}
+
+func RawUpdatePythPriceFeeds(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingWallet *Wallet, pxFeed *PerpetualPriceInfo) (*types.Transaction, error) {
+	pyth, err := contracts.NewIPyth(xInfo.PythAddr, conn.Rpc)
+	if err != nil {
+		return nil, errors.New("Unable to update price feeds:" + err.Error())
+	}
+	ids := make([][32]byte, 0, len(pxFeed.PriceFeed.PriceIds))
+	for _, id := range pxFeed.PriceFeed.PriceIds {
+		var idB [32]byte
+		copy(idB[:], []byte(id))
+		ids = append(ids, idB)
+	}
+	v := postingWallet.Auth.Value
+	defer func() { postingWallet.Auth.Value = v }()
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	postingWallet.Auth.Value = big.NewInt(val)
+	g := postingWallet.Auth.GasLimit
+	defer postingWallet.SetGasLimit(g)
+	postingWallet.SetGasLimit(uint64(1_000_000))
+
+	postingWallet.UpdateNonceAndGasPx(conn.Rpc)
+	return pyth.UpdatePriceFeedsIfNecessary(postingWallet.Auth, pxFeed.PriceFeed.Vaas, ids, pxFeed.PriceFeed.PublishTimes)
 }
 
 // RawAddCollateral adds (amountCC>0) or removes (amountCC<0) collateral to/from the margin account of the given perpetual

@@ -198,6 +198,25 @@
     {
         "inputs": [
             {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "name": "actvDigestPos",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address",
                 "name": "_executor",
                 "type": "address"
@@ -582,25 +601,6 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
-        "name": "nextOrderHash",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
         "inputs": [],
         "name": "numberOfAllDigests",
         "outputs": [
@@ -801,9 +801,9 @@
     {
         "inputs": [
             {
-                "internalType": "bytes32",
-                "name": "_startAfter",
-                "type": "bytes32"
+                "internalType": "uint256",
+                "name": "_from",
+                "type": "uint256"
             },
             {
                 "internalType": "uint256",
@@ -811,7 +811,7 @@
                 "type": "uint256"
             }
         ],
-        "name": "pollLimitOrders",
+        "name": "pollRange",
         "outputs": [
             {
                 "components": [
@@ -899,6 +899,11 @@
                 "internalType": "bytes32[]",
                 "name": "orderHashes",
                 "type": "bytes32[]"
+            },
+            {
+                "internalType": "uint32[]",
+                "name": "submittedTs",
+                "type": "uint32[]"
             }
         ],
         "stateMutability": "view",
@@ -997,25 +1002,6 @@
         "name": "postOrders",
         "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
-        "name": "prevOrderHash",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
-        "stateMutability": "view",
         "type": "function"
     },
     {

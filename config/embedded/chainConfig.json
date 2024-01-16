@@ -7,7 +7,8 @@
       "proxyAddr": "0x0e23619704556945B1C7CB550Dee6D428f7d2E2B",
       "nodeURL": "https://rpc.public.zkevm-test.net",
       "postOrderGasLimit": 3000000,
-      "priceUpdateFeeGwei": 1
+      "priceUpdateFeeGwei": 1,
+      "splitExecutionTx": true
     },
     {
       "name": "zkevm",
@@ -17,7 +18,8 @@
       "proxyAddr": "0xaB7794EcD2c8e9Decc6B577864b40eBf9204720f",
       "nodeURL": "https://zkevm-rpc.com",
       "postOrderGasLimit": 3000000,
-      "priceUpdateFeeGwei": 1
+      "priceUpdateFeeGwei": 1,
+      "splitExecutionTx": true
     },
     {
       "name": "x1Testnet",
@@ -27,6 +29,7 @@
       "proxyAddr": "0x70212F1E2eB66C82990312FA5AB3f851706fD1E1",
       "nodeURL": "https://testrpc.x1.tech",
       "postOrderGasLimit": 3000000,
-      "priceUpdateFeeGwei": 1
+      "priceUpdateFeeGwei": 1,
+      "splitExecutionTx": false
     }
 ]

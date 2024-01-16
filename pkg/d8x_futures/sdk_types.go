@@ -49,6 +49,7 @@ type StaticExchangeInfo struct {
 	PriceFeedInfo          utils.PriceFeedConfig
 	IdxPriceTriangulations Triangulations
 	OracleFactoryAddr      common.Address
+	PythAddr               common.Address
 	ProxyAddr              common.Address
 }
 
@@ -92,6 +93,12 @@ type PerpetualState struct {
 	CurrentFundingRateBps float64
 	OpenInterestBC        float64
 	IsMarketClosed        bool
+}
+
+type OpenOrders struct {
+	Orders      []Order
+	OrderHashes []string
+	SubmittedTs []uint32
 }
 
 type CollateralCCY int8
