@@ -65,6 +65,27 @@ func TestPerpetualPrice(t *testing.T) {
 	fmt.Printf("Time taken: %s\n", elapsedTime)
 }
 
+func TestPerpetualPriceTuple(t *testing.T) {
+
+	var sdkRo SdkRO
+	err := sdkRo.New("x1Testnet")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	startTime := time.Now()
+	tradeAmt := []float64{-0.01, 0, 0.01, 0.05}
+	px, err := RawQueryPerpetualPriceTuple(&sdkRo.Conn, &sdkRo.Info, "https://testrpc.x1.tech", sdkRo.ChainConfig.PriceFeedEndpoints[0], "BTC-USDC-USDC", tradeAmt)
+	endTime := time.Now()
+	elapsedTime := endTime.Sub(startTime)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Printf("prices = [%f, %f, %f,%f]\n", px[0], px[1], px[2], px[3])
+	fmt.Printf("Time taken: %s\n", elapsedTime)
+}
+
 func TestSdkROOrders(t *testing.T) {
 	var sdkRo SdkRO
 	err := sdkRo.New("x1Testnet")

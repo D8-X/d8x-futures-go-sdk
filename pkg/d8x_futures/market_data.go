@@ -1,6 +1,7 @@
 package d8x_futures
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -16,6 +17,7 @@ import (
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/forta-network/go-multicall"
 )
 
 func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address) (PositionRisk, error) {
@@ -419,6 +421,76 @@ func RawQueryPerpetualPrice(conn BlockChainConnector, xInfo *StaticExchangeInfo,
 	proxy := CreatePerpetualManagerInstance(conn.Rpc, xInfo.ProxyAddr)
 	priceAbdk, err := proxy.QueryPerpetualPrice(nil, big.NewInt(int64(xInfo.Perpetuals[j].Id)), amtAbdk, pricesAbdk)
 	return utils.ABDKToFloat64(priceAbdk), nil
+}
+
+func RawQueryPerpetualPriceTuple(conn *BlockChainConnector, xInfo *StaticExchangeInfo, nodeURL, pythEndpoint, symbol string, tradeAmt []float64) ([]float64, error) {
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+	}
+	perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
+	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	if err != nil {
+		return nil, errors.New("RawAddCollateral: failed fetching oracle prices " + err.Error())
+	}
+	pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxFeed.S2Price), utils.Float64ToABDK(pxFeed.S3Price)}
+
+	caller, err := multicall.Dial(context.Background(), nodeURL)
+	if err != nil {
+		return nil, err
+	}
+	type priceOutput struct {
+		PriceAbdk *big.Int
+	}
+	pxabi := `[{
+        "inputs": [
+            {
+                "internalType": "uint24",
+                "name": "_iPerpetualId",
+                "type": "uint24"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fTradeAmountBC",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128[2]",
+                "name": "_fIndexPrice",
+                "type": "int128[2]"
+            }
+        ],
+        "name": "queryPerpetualPrice",
+        "outputs": [
+            {
+                "internalType": "int128",
+                "name": "",
+                "type": "int128"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }]`
+	contract, err := multicall.NewContract(pxabi, xInfo.ProxyAddr.Hex())
+	if err != nil {
+		return nil, err
+	}
+	calls := make([]*multicall.Call, 0, len(tradeAmt))
+	for _, amt := range tradeAmt {
+		taAbdk := utils.Float64ToABDK(amt)
+		c := contract.NewCall(new(priceOutput), "queryPerpetualPrice", perpId, taAbdk, pricesAbdk)
+		calls = append(calls, c)
+	}
+	res, err := caller.Call(nil, calls...)
+	if err != nil {
+		return nil, err
+	}
+	prices := make([]float64, 0, len(tradeAmt))
+	for _, call := range res {
+		px := utils.ABDKToFloat64(call.Outputs.(*priceOutput).PriceAbdk)
+		prices = append(prices, px)
+	}
+	return prices, nil
 }
 
 func RawGetPerpetualData(conn BlockChainConnector, xInfo *StaticExchangeInfo, symbol string) (*contracts.PerpStoragePerpetualData, error) {
