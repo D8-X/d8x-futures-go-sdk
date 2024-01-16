@@ -24,9 +24,9 @@ poolState, err := sdkRo.QueryPoolStates(nil)
 oo, dgsts, err := sdkRo.QueryOpenOrders("BTC-USD-MATIC", trader, nil) //([]Order, []string, error)
 oo, dgsts, err := sdkRo.QueryAllOpenOrders("BTC-USDC-USDC", nil) //([]Order, []string, error)
 status, err := sdkRo.QueryOrderStatus("BTC-USD-MATIC", trader, "", nil) // (string, error)
-m, err := sdkRo.QueryMaxTradeAmount("BTC-USD-MATIC", 0, true, nil) // (float64, error) {
-vol, err := sdkRo.QueryTraderVolume(1, trader, nil) //(float64, error) {
-fee, err := sdkRo.QueryExchangeFeeTbpsForTrader(1, trader, broker, nil) // (uint16, error) {
+m, err := sdkRo.QueryMaxTradeAmount("BTC-USD-MATIC", 0, true, nil) // (float64, error)
+vol, err := sdkRo.QueryTraderVolume(1, trader, nil) //(float64, error)
+fee, err := sdkRo.QueryExchangeFeeTbpsForTrader(1, trader, broker, nil) // (uint16, error)
 minpos, err := sdkRo.GetMinimalPositionSize("BTC-USD-MATIC") //(float64, error)
 ```
 # Read-Write

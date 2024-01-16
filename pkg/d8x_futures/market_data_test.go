@@ -8,6 +8,7 @@ import (
 	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 func TestFetchPricesFromAPI(t *testing.T) {
@@ -86,26 +87,52 @@ func TestPerpetualPriceTuple(t *testing.T) {
 	fmt.Printf("Time taken: %s\n", elapsedTime)
 }
 
+func getOrders(sdkRo SdkRO, nodeURL string, from, to int, resultChan chan<- *OpenOrders) {
+	rpc, _ := ethclient.Dial(nodeURL)
+	orders, err := sdkRo.QueryOpenOrderRange("BTC-USDC-USDC", from, to, rpc) //([]Order, []string, error)
+	if err != nil {
+		resultChan <- nil
+	} else {
+		resultChan <- orders
+	}
+}
+
 func TestSdkROOrders(t *testing.T) {
 	var sdkRo SdkRO
 	err := sdkRo.New("x1Testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
+	startTime := time.Now()
 	n, err := sdkRo.QueryNumOrders("BTC-USDC-USDC", nil)
+	endTime := time.Now()
+	fmt.Printf("Num orders in %s seconds\n", endTime.Sub(startTime))
 	if err != nil {
 		t.Logf(err.Error())
 	}
 	fmt.Printf("There are %d open orders", n)
-	orders, err := sdkRo.QueryOpenOrderRange("BTC-USDC-USDC", 0, 10, nil) //([]Order, []string, error)
-	oo := orders.Orders
-	dgsts := orders.OrderHashes
-	if err != nil {
-		t.Logf(err.Error())
-	} else {
-		fmt.Println(oo)
-		fmt.Println(dgsts)
+	startTime = time.Now()
+	rpc := []string{"https://x1-testnet.blockpi.network/v1/rpc/public",
+		"https://testrpc.x1.tech",
+		"https://x1testrpc.okx.com"}
+	orderChan := make(chan *OpenOrders, len(rpc))
+	num := int(n) / len(rpc)
+	for i := 0; i < len(rpc); i++ {
+		from := i * num
+		to := from + num
+		go getOrders(sdkRo, rpc[i], from, to, orderChan)
 	}
+	var orders = make([]*OpenOrders, 0, len(rpc))
+	totalOrders := 0
+	for i := 0; i < len(rpc); i++ {
+		res := <-orderChan
+		orders = append(orders, res)
+		totalOrders += len(res.OrderHashes)
+	}
+	close(orderChan)
+	endTime = time.Now()
+	fmt.Printf("Found %d orders\n", totalOrders)
+	fmt.Printf("in %s seconds\n", endTime.Sub(startTime))
 }
 
 func TestSdkRO(t *testing.T) {
