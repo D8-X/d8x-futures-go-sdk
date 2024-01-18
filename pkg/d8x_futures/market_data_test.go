@@ -133,6 +133,11 @@ func TestSdkROOrders(t *testing.T) {
 	endTime = time.Now()
 	fmt.Printf("Found %d orders\n", totalOrders)
 	fmt.Printf("in %s seconds\n", endTime.Sub(startTime))
+	k := orders[2].HashIndex[orders[2].OrderHashes[42]]
+	if k != 42 {
+		t.Logf("hash index test failed")
+		t.Fail()
+	}
 }
 
 func TestSdkRO(t *testing.T) {
