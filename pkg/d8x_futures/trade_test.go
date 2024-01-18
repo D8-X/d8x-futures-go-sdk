@@ -49,7 +49,7 @@ func TestSdkExec(t *testing.T) {
 
 		mktOrderIds = append(mktOrderIds, orderId)
 	}
-	tx, err := sdk.ExecuteOrders("ETH-USDC-USDC", []string{mktOrderIds[0]})
+	tx, err := sdk.ExecuteOrders("ETH-USDC-USDC", []string{mktOrderIds[0]}, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()

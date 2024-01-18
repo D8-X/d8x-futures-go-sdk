@@ -68,7 +68,7 @@ tx, err := sdk.CancelOrder("BTC-USDC-USDC", id)
 Example 6: Execute order
 
 ```
-tx, err := sdk.ExecuteOrders("ETH-USDC-USDC", orderIds)
+tx, err := sdk.ExecuteOrders("ETH-USDC-USDC", orderIds, nil)
 ```
 
 ### Dev
