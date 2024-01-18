@@ -320,6 +320,7 @@ func RawQueryAllOpenOrders(rpc *ethclient.Client, xInfo StaticExchangeInfo, symb
 	from := 0
 	count := 500
 	var orders OpenOrders
+	orders.HashIndex = make(map[string]int)
 	zeroAddr := common.Address{}
 outerLoop:
 	for {
@@ -335,6 +336,7 @@ outerLoop:
 				order := FromChainType(&corder, &xInfo)
 				orders.Orders = append(orders.Orders, order)
 				strDigests := "0x" + common.Bytes2Hex(currOrders.OrderHashes[k][:])
+				orders.HashIndex[strDigests] = k
 				orders.OrderHashes = append(orders.OrderHashes, strDigests)
 			}
 		}
@@ -366,9 +368,11 @@ func RawQueryOpenOrderRange(rpc *ethclient.Client, xInfo StaticExchangeInfo, sym
 	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	ooSc, err := lob.PollRange(nil, big.NewInt(int64(from)), big.NewInt(int64(to-from)))
 	var orders OpenOrders
+	orders.HashIndex = make(map[string]int)
 	for k, scOrder := range ooSc.Orders {
 		orders.Orders = append(orders.Orders, FromChainType(&scOrder, &xInfo))
 		strDigests := "0x" + common.Bytes2Hex(ooSc.OrderHashes[k][:])
+		orders.HashIndex[strDigests] = k
 		orders.OrderHashes = append(orders.OrderHashes, strDigests)
 	}
 	orders.SubmittedTs = ooSc.SubmittedTs

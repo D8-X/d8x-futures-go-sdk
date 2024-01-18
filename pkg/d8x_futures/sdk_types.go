@@ -99,6 +99,7 @@ type OpenOrders struct {
 	Orders      []Order
 	OrderHashes []string
 	SubmittedTs []uint32
+	HashIndex   map[string]int // Map to store OrderHash indices
 }
 
 type CollateralCCY int8
