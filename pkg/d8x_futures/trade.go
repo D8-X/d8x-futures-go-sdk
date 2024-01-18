@@ -22,9 +22,9 @@ import (
 )
 
 type OptsExecuteOrderOverrides struct {
-	rpc            *ethclient.Client
-	splitExecution bool
-	gasLimit       int
+	Rpc            *ethclient.Client
+	SplitExecution bool
+	GasLimit       int
 }
 
 // PostOrder posts an order to the corresponding limit order book.
@@ -53,7 +53,7 @@ func (sdk *Sdk) CancelOrder(symbol string, orderId string) (*types.Transaction, 
 
 func (sdk *Sdk) ExecuteOrders(symbol string, orderIds []string, opts *OptsExecuteOrderOverrides) (*types.Transaction, error) {
 	if opts == nil {
-		o := OptsExecuteOrderOverrides{rpc: nil, splitExecution: sdk.ChainConfig.SplitExecutionTx, gasLimit: 0}
+		o := OptsExecuteOrderOverrides{Rpc: nil, SplitExecution: sdk.ChainConfig.SplitExecutionTx, GasLimit: 0}
 		opts = &o
 	}
 	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallet, symbol, orderIds, opts)
@@ -147,11 +147,10 @@ func RawCancelOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo,
 }
 
 // RawExecuteOrders executes order
-// Note that the opts.RPC is not exclusively used if opts.splitExecution==true
 func RawExecuteOrders(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint string, postingWallet *Wallet, symbol string, orderIds []string, opts *OptsExecuteOrderOverrides) (*types.Transaction, error) {
 	rpc := conn.Rpc
-	if opts != nil && opts.rpc != nil {
-		rpc = opts.rpc
+	if opts != nil && opts.Rpc != nil {
+		rpc = opts.Rpc
 	}
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
@@ -165,7 +164,7 @@ func RawExecuteOrders(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pyth
 		copy(dig[:], bytesDigest)
 		digests = append(digests, dig)
 	}
-	if opts != nil && opts.splitExecution {
+	if opts != nil && opts.SplitExecution {
 		_, err = RawUpdatePythPriceFeeds(conn.PriceFeedConfig.PriceUpdateFeeGwei, rpc, xInfo, postingWallet, &pxFeed)
 		if err != nil {
 			return nil, errors.New("Unable to update price feeds:" + err.Error())
@@ -180,14 +179,14 @@ func RawExecuteOrders(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pyth
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	limit := 2_000_000 + 1_000_000*(len(digests)-1)
-	if opts != nil && opts.gasLimit > 0 {
-		limit = opts.gasLimit
+	if opts != nil && opts.GasLimit > 0 {
+		limit = opts.GasLimit
 	}
 	postingWallet.SetGasLimit(uint64(limit))
 
 	postingWallet.UpdateNonceAndGasPx(rpc)
 	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-	if opts.splitExecution {
+	if opts.SplitExecution {
 		return ob.ExecuteOrders(postingWallet.Auth, digests, postingWallet.Address, [][]byte{}, []uint64{})
 	}
 	return ob.ExecuteOrders(postingWallet.Auth, digests, postingWallet.Address, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
