@@ -391,6 +391,7 @@ func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo *StaticExch
 		ExecutionTimestamp:  scOrder.ExecutionTimestamp,
 		ParentChildOrderId1: scOrder.ParentChildDigest1,
 		ParentChildOrderId2: scOrder.ParentChildDigest2,
+		OptTraderAddr:       scOrder.TraderAddr,
 	}
 	return order
 }

@@ -138,6 +138,7 @@ func TestSdkROOrders(t *testing.T) {
 		t.Logf("hash index test failed")
 		t.Fail()
 	}
+	fmt.Print(orders[0].Orders[0].OptTraderAddr)
 }
 
 func TestSdkRO(t *testing.T) {
