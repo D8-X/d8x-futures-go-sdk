@@ -226,6 +226,7 @@ type Order struct {
 	ExecutionTimestamp  uint32
 	ParentChildOrderId1 [32]byte
 	ParentChildOrderId2 [32]byte
+	OptTraderAddr       common.Address // populated when querying orders from on chain, otherwise optional
 }
 
 type PositionRisk struct {
