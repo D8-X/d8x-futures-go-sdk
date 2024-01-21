@@ -21,53 +21,101 @@ import (
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
+type OptsOverrides struct {
+	Rpc       *ethclient.Client
+	WalletIdx int
+}
 type OptsExecuteOrderOverrides struct {
 	Rpc            *ethclient.Client
+	WalletIdx      int
 	SplitExecution bool
 	GasLimit       int
 }
 
 // PostOrder posts an order to the corresponding limit order book.
 // Returns orderId, tx hash, error
-func (sdk *Sdk) PostOrder(order *Order) (string, string, error) {
-	return RawPostOrder(&sdk.Conn, &sdk.Info, sdk.Wallet, []byte{}, order, sdk.Wallet.Address)
+func (sdk *Sdk) PostOrder(order *Order, overrides *OptsOverrides) (string, string, error) {
+	var w *Wallet
+	var rpc *ethclient.Client
+	if overrides == nil {
+		w = sdk.Wallets[0]
+		rpc = sdk.Conn.Rpc
+	} else {
+		w = sdk.Wallets[overrides.WalletIdx]
+	}
+	if rpc == nil {
+		rpc = sdk.Conn.Rpc
+	}
+	return RawPostOrder(rpc, &sdk.Conn, &sdk.Info, w, []byte{}, order, w.Address)
 }
 
-func (sdk *Sdk) CreateOrderBrokerSignature(iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32) (string, string, error) {
+func (sdk *Sdk) CreateOrderBrokerSignature(iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32, optWalletIdx int) (string, string, error) {
+	w := sdk.Wallets[optWalletIdx]
 	return RawCreateOrderBrokerSignature(sdk.ChainConfig.ProxyAddr,
-		sdk.ChainConfig.ChainId, sdk.Wallet, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
+		sdk.ChainConfig.ChainId, w, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
 }
 
-func (sdk *Sdk) CreatePaymentBrokerSignature(ps *PaySummary) (string, string, error) {
-	return RawCreatePaymentBrokerSignature(ps, sdk.Wallet)
+func (sdk *Sdk) CreatePaymentBrokerSignature(ps *PaySummary, optWalletIdx int) (string, string, error) {
+	w := sdk.Wallets[optWalletIdx]
+	return RawCreatePaymentBrokerSignature(ps, w)
 }
 
-func (sdk *Sdk) AddCollateral(symbol string, amountCC float64) (*types.Transaction, error) {
-	return RawAddCollateral(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallet, symbol, amountCC)
+func (sdk *Sdk) AddCollateral(symbol string, amountCC float64, overrides *OptsOverrides) (*types.Transaction, error) {
+	var w *Wallet
+	var rpc *ethclient.Client
+	if overrides == nil {
+		w = sdk.Wallets[0]
+		rpc = sdk.Conn.Rpc
+	} else {
+		w = sdk.Wallets[overrides.WalletIdx]
+	}
+	if rpc == nil {
+		rpc = sdk.Conn.Rpc
+	}
+	return RawAddCollateral(rpc, &sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], w, symbol, amountCC)
 }
 
-func (sdk *Sdk) CancelOrder(symbol string, orderId string) (*types.Transaction, error) {
-	return RawCancelOrder(&sdk.Conn, &sdk.Info,
-		sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallet, symbol, orderId)
+func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverrides) (*types.Transaction, error) {
+	var w *Wallet
+	var rpc *ethclient.Client
+	if overrides == nil {
+		w = sdk.Wallets[0]
+		rpc = sdk.Conn.Rpc
+	} else {
+		w = sdk.Wallets[overrides.WalletIdx]
+	}
+	if rpc == nil {
+		rpc = sdk.Conn.Rpc
+	}
+	return RawCancelOrder(rpc, &sdk.Conn, &sdk.Info,
+		sdk.ChainConfig.PriceFeedEndpoints[0], w, symbol, orderId)
 }
 
 func (sdk *Sdk) ExecuteOrders(symbol string, orderIds []string, opts *OptsExecuteOrderOverrides) (*types.Transaction, error) {
 	if opts == nil {
-		o := OptsExecuteOrderOverrides{Rpc: nil, SplitExecution: sdk.ChainConfig.SplitExecutionTx, GasLimit: 0}
+		o := OptsExecuteOrderOverrides{Rpc: sdk.Conn.Rpc, WalletIdx: 0, SplitExecution: sdk.ChainConfig.SplitExecutionTx, GasLimit: 0}
 		opts = &o
 	}
-	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallet, symbol, orderIds, opts)
+	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallets[opts.WalletIdx], symbol, orderIds, opts)
 }
 
 // ApproveTknSpending approves the manager to spend the wallet's margin tokens for the given
 // pool (via symbol), if amount = nil, max approval. Symbol is a perpetual, but approval
 // is for pool.
-func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int) (*types.Transaction, error) {
+func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int, overrides *OptsOverrides) (*types.Transaction, error) {
 	tknAddr, err := RawGetMarginTknAddr(&sdk.Info, symbol)
 	if err != nil {
 		return nil, err
 	}
-	erc20Instance, err := contracts.NewErc20(tknAddr, sdk.Conn.Rpc)
+	rpc := sdk.Conn.Rpc
+	w := sdk.Wallets[0]
+	if overrides != nil {
+		if overrides.Rpc != nil {
+			rpc = overrides.Rpc
+		}
+		w = sdk.Wallets[overrides.WalletIdx]
+	}
+	erc20Instance, err := contracts.NewErc20(tknAddr, rpc)
 	if err != nil {
 		return nil, errors.New("ApproveTknSpending: creating instance of token " + tknAddr.String())
 	}
@@ -77,8 +125,8 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int) (*types.Trans
 	} else {
 		amt = amount
 	}
-	sdk.Wallet.UpdateNonceAndGasPx(sdk.Conn.Rpc)
-	approvalTx, err := erc20Instance.Approve(sdk.Wallet.Auth, sdk.Info.ProxyAddr, amt)
+	w.UpdateNonceAndGasPx(rpc)
+	approvalTx, err := erc20Instance.Approve(w.Auth, sdk.Info.ProxyAddr, amt)
 	if err != nil {
 		return nil, errors.New("Error approving token for chain " + strconv.Itoa(int(sdk.Conn.ChainId)) + ": " + err.Error())
 	}
@@ -90,7 +138,7 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int) (*types.Trans
 // It needs the private key for the wallet
 // paying the gas fees. If the trader-address is not the address corresponding to the postingWallet, the func
 // also needs signature from the trader
-func RawPostOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingWallet *Wallet, traderSig []byte, order *Order, trader common.Address) (string, string, error) {
+func RawPostOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingWallet *Wallet, traderSig []byte, order *Order, trader common.Address) (string, string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	scOrder := order.ToChainType(xInfo, trader)
 	scOrders := []contracts.IClientOrderClientOrder{scOrder}
@@ -98,8 +146,8 @@ func RawPostOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingW
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(conn.PostOrderGasLimit))
-	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-	postingWallet.UpdateNonceAndGasPx(conn.Rpc)
+	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	postingWallet.UpdateNonceAndGasPx(rpc)
 	dgst, err := CreateOrderDigest(scOrder, int(conn.ChainId), true, xInfo.ProxyAddr.Hex())
 	if err != nil {
 		return "", "", err
@@ -114,7 +162,7 @@ func RawPostOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingW
 }
 
 // RawCancelOrder cancels the existing order with the given id from the provided wallet
-func RawCancelOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo,
+func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *StaticExchangeInfo,
 	pythEndpoint string, postingWallet *Wallet, symbol string, orderId string) (*types.Transaction, error) {
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
@@ -137,8 +185,8 @@ func RawCancelOrder(conn *BlockChainConnector, xInfo *StaticExchangeInfo,
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(15_000_000))
 
-	postingWallet.UpdateNonceAndGasPx(conn.Rpc)
-	ob := CreateLimitOrderBookInstance(conn.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	postingWallet.UpdateNonceAndGasPx(rpc)
+	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	tx, err = ob.CancelOrder(postingWallet.Auth, dig, []byte{}, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
 	if err != nil {
 		return nil, errors.New("RawCancelOrder:" + err.Error())
@@ -216,7 +264,7 @@ func RawUpdatePythPriceFeeds(priceUpdateFeeGwei int64, rpc *ethclient.Client, xI
 }
 
 // RawAddCollateral adds (amountCC>0) or removes (amountCC<0) collateral to/from the margin account of the given perpetual
-func RawAddCollateral(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint string, postingWallet *Wallet, symbol string, amountCC float64) (*types.Transaction, error) {
+func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint string, postingWallet *Wallet, symbol string, amountCC float64) (*types.Transaction, error) {
 	if amountCC == 0 {
 		return nil, errors.New("RawAddCollateral: amount 0")
 	}
@@ -224,7 +272,7 @@ func RawAddCollateral(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pyth
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	id := int64(xInfo.Perpetuals[j].Id)
 	amount := utils.Float64ToABDK(math.Abs(amountCC))
-	perpCtrct := CreatePerpetualManagerInstance(conn.Rpc, xInfo.ProxyAddr)
+	perpCtrct := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
 
 	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
 	if err != nil {
@@ -239,7 +287,7 @@ func RawAddCollateral(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pyth
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(15_000_000))
-	postingWallet.UpdateNonceAndGasPx(conn.Rpc)
+	postingWallet.UpdateNonceAndGasPx(rpc)
 	if amountCC > 0 {
 		tx, err = perpCtrct.Deposit(postingWallet.Auth, big.NewInt(id),
 			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)

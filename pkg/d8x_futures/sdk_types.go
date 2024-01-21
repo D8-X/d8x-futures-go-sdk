@@ -27,7 +27,7 @@ type SdkRO struct {
 // Sdk is the read-write type
 type Sdk struct {
 	SdkRO
-	Wallet *Wallet
+	Wallets []*Wallet
 }
 
 type NestedPerpetualIds struct {
@@ -415,17 +415,22 @@ func (sdkRo *SdkRO) New(networkName string, endpoints ...string) error {
 
 // New creates a new read/write Sdk instance
 // networkname according to chainConfig; rpcEndpoint and pythEndpoint can be ""
-func (sdk *Sdk) New(privateKey, networkName string, endpoints ...string) error {
-	privateKey, _ = strings.CutPrefix(privateKey, "0x")
+func (sdk *Sdk) New(privateKeys []string, networkName string, endpoints ...string) error {
+
 	sdk.SdkRO.New(networkName, endpoints...)
 	if sdk.Conn.Rpc == nil {
 		return errors.New("sdk.Conn.Rpc=nil; required")
 	}
 
-	w, err := NewWallet(privateKey, sdk.ChainConfig.ChainId, sdk.Conn.Rpc)
-	if err != nil {
-		return err
+	sdk.Wallets = make([]*Wallet, 0, len(privateKeys))
+	for _, privateKey := range privateKeys {
+		privateKey, _ = strings.CutPrefix(privateKey, "0x")
+		w, err := NewWallet(privateKey, sdk.ChainConfig.ChainId, sdk.Conn.Rpc)
+		if err != nil {
+			return err
+		}
+		sdk.Wallets = append(sdk.Wallets, w)
 	}
-	sdk.Wallet = w
+
 	return nil
 }

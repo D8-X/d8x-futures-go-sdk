@@ -21,7 +21,7 @@ func TestSdkExec(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New(pk, "x1Testnet")
+	err := sdk.New([]string{pk}, "x1Testnet")
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -41,7 +41,7 @@ func TestSdkExec(t *testing.T) {
 	}
 	if len(mktOrderIds) == 0 {
 		order := NewOrder("ETH-USDC-USDC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
-		orderId, _, err := sdk.PostOrder(order)
+		orderId, _, err := sdk.PostOrder(order, nil)
 		if err != nil {
 			t.Logf(err.Error())
 		}
@@ -64,12 +64,12 @@ func TestTradingFunc(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New(pk, "testnet")
+	err := sdk.New([]string{pk}, "testnet")
 	if err != nil {
 		t.Logf(err.Error())
 	}
 
-	orders, ids, err := sdk.QueryOpenOrders("BTC-USDC-USDC", sdk.Wallet.Address, nil)
+	orders, ids, err := sdk.QueryOpenOrders("BTC-USDC-USDC", sdk.Wallets[0].Address, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
@@ -77,21 +77,21 @@ func TestTradingFunc(t *testing.T) {
 		fmt.Println("orders =", orders)
 	}
 	if len(ids) > 0 {
-		tx, err := sdk.CancelOrder("BTC-USDC-USDC", ids[0])
+		tx, err := sdk.CancelOrder("BTC-USDC-USDC", ids[0], nil)
 		if err != nil {
 			t.Logf(err.Error())
 		} else {
 			fmt.Println("tx cancel order=", tx.Hash())
 		}
 	}
-	tx, err := sdk.AddCollateral("ETH-USD-MATIC", 100)
+	tx, err := sdk.AddCollateral("ETH-USD-MATIC", 100, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
 		fmt.Println("tx hash adding collateral=", tx.Hash())
 	}
 
-	tx, err = sdk.ApproveTknSpending("ETH-USD-MATIC", nil)
+	tx, err = sdk.ApproveTknSpending("ETH-USD-MATIC", nil, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
@@ -99,26 +99,26 @@ func TestTradingFunc(t *testing.T) {
 	}
 
 	order := NewOrder("BTC-USDC-USDC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
-	orderId, _, err := sdk.PostOrder(order)
+	orderId, _, err := sdk.PostOrder(order, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
 		fmt.Println("order id =", orderId)
 	}
-	tx, err = sdk.CancelOrder("BTC-USDC-USDC", orderId)
+	tx, err = sdk.CancelOrder("BTC-USDC-USDC", orderId, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
 		fmt.Println("tx cancel order=", tx.Hash())
 	}
 
-	status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallet.Address, orderId, nil)
+	status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallets[0].Address, orderId, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
 		fmt.Println("order status =", status)
 	}
-	pr, err := sdk.GetPositionRisk("ETH-USD-MATIC", sdk.Wallet.Address, nil)
+	pr, err := sdk.GetPositionRisk("ETH-USD-MATIC", sdk.Wallets[0].Address, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
@@ -234,7 +234,7 @@ func TestPostOrder(t *testing.T) {
 		ParentChildOrderId1: emptyArray,
 		ParentChildOrderId2: emptyArray,
 	}
-	_, txHash, _ := RawPostOrder(&conn, &xInfo, wallet, []byte{}, &order, traderAddr)
+	_, txHash, _ := RawPostOrder(conn.Rpc, &conn, &xInfo, wallet, []byte{}, &order, traderAddr)
 	fmt.Println("Tx hash = ", txHash)
 }
 
@@ -246,7 +246,7 @@ func TestPostOrder2(t *testing.T) {
 		return
 	}
 	var sdk Sdk
-	sdk.New(pk, "testnet", "", "")
+	sdk.New([]string{pk}, "testnet", "", "")
 
 }
 

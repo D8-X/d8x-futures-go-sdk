@@ -51,20 +51,20 @@ order := NewOrder("ETH-USD-MATIC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderO
 
 Example 2: Post the order
 ```
-orderId, txHash, err := sdk.PostOrder(order)
+orderId, txHash, err := sdk.PostOrder(order, nil)
 ```
 Example 3: Query the order status
 ```
-status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallet.Address, orderId)
+status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallets[0].Address, orderId)
 ```
 Example 4: Query position risk
 ```
-pr, err := sdk.GetPositionRisk("ETH-USD-MATIC", sdk.Wallet.Address)
+pr, err := sdk.GetPositionRisk("ETH-USD-MATIC", sdk.Wallets[0].Address)
 ```
 Example 5: Cancel order
 
 ```
-tx, err := sdk.CancelOrder("BTC-USDC-USDC", id)
+tx, err := sdk.CancelOrder("BTC-USDC-USDC", id, nil)
 ```
 Example 6: Execute order
 
