@@ -20,6 +20,94 @@ import (
 	"github.com/forta-network/go-multicall"
 )
 
+const MARGIN_ACCOUNT_ABI = `[{
+	"inputs": [
+		{
+			"internalType": "uint24",
+			"name": "_perpetualId",
+			"type": "uint24"
+		},
+		{
+			"internalType": "address",
+			"name": "_traderAddress",
+			"type": "address"
+		}
+	],
+	"name": "getMarginAccount",
+	"outputs": [
+				{
+					"internalType": "int128",
+					"name": "fLockedInValueQC",
+					"type": "int128"
+				},
+				{
+					"internalType": "int128",
+					"name": "fCashCC",
+					"type": "int128"
+				},
+				{
+					"internalType": "int128",
+					"name": "fPositionBC",
+					"type": "int128"
+				},
+				{
+					"internalType": "int128",
+					"name": "fUnitAccumulatedFundingStart",
+					"type": "int128"
+				},
+				{
+					"internalType": "uint64",
+					"name": "iLastOpenTimestamp",
+					"type": "uint64"
+				},
+				{
+					"internalType": "uint16",
+					"name": "feeTbps",
+					"type": "uint16"
+				},
+				{
+					"internalType": "uint16",
+					"name": "brokerFeeTbps",
+					"type": "uint16"
+				},
+				{
+					"internalType": "bytes16",
+					"name": "positionId",
+					"type": "bytes16"
+				}],
+		"stateMutability": "view",
+		"type": "function"}]`
+
+const QUERY_PERP_PX_ABI = `[{
+			"inputs": [
+				{
+					"internalType": "uint24",
+					"name": "_iPerpetualId",
+					"type": "uint24"
+				},
+				{
+					"internalType": "int128",
+					"name": "_fTradeAmountBC",
+					"type": "int128"
+				},
+				{
+					"internalType": "int128[2]",
+					"name": "_fIndexPrice",
+					"type": "int128[2]"
+				}
+			],
+			"name": "queryPerpetualPrice",
+			"outputs": [
+				{
+					"internalType": "int128",
+					"name": "",
+					"type": "int128"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}]`
+
 func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, optRpc *ethclient.Client) (PositionRisk, error) {
 	if optRpc == nil {
 		optRpc = sdkRo.Conn.Rpc
@@ -88,6 +176,13 @@ func (sdkRo *SdkRO) QueryMaxTradeAmount(symbol string, currentPositionNotional f
 		optRpc = sdkRo.Conn.Rpc
 	}
 	return RawQueryMaxTradeAmount(optRpc, sdkRo.Info, currentPositionNotional, symbol, isBuy)
+}
+
+func (sdkRo *SdkRO) QueryMarginAccounts(symbol string, traderAddrs []common.Address, optRpc *ethclient.Client) ([]MarginAccount, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryMarginAccounts(optRpc, &sdkRo.Info, symbol, traderAddrs)
 }
 
 func (sdkRo *SdkRO) QueryTraderVolume(poolId int32, traderAddr common.Address, optRpc *ethclient.Client) (float64, error) {
@@ -472,36 +567,8 @@ func RawQueryPerpetualPriceTuple(client *ethclient.Client, xInfo *StaticExchange
 	type priceOutput struct {
 		PriceAbdk *big.Int
 	}
-	pxabi := `[{
-        "inputs": [
-            {
-                "internalType": "uint24",
-                "name": "_iPerpetualId",
-                "type": "uint24"
-            },
-            {
-                "internalType": "int128",
-                "name": "_fTradeAmountBC",
-                "type": "int128"
-            },
-            {
-                "internalType": "int128[2]",
-                "name": "_fIndexPrice",
-                "type": "int128[2]"
-            }
-        ],
-        "name": "queryPerpetualPrice",
-        "outputs": [
-            {
-                "internalType": "int128",
-                "name": "",
-                "type": "int128"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    }]`
-	contract, err := multicall.NewContract(pxabi, xInfo.ProxyAddr.Hex())
+
+	contract, err := multicall.NewContract(QUERY_PERP_PX_ABI, xInfo.ProxyAddr.Hex())
 	if err != nil {
 		return nil, err
 	}
@@ -521,6 +588,58 @@ func RawQueryPerpetualPriceTuple(client *ethclient.Client, xInfo *StaticExchange
 		prices = append(prices, px)
 	}
 	return prices, nil
+}
+
+func RawQueryMarginAccounts(client *ethclient.Client, xInfo *StaticExchangeInfo, symbol string, traders []common.Address) ([]MarginAccount, error) {
+	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+	}
+	perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
+	caller, err := multicall.New(client)
+	if err != nil {
+		return nil, err
+	}
+
+	type marginOutput struct {
+		FLockedInValueQC             *big.Int
+		FCashCC                      *big.Int
+		FPositionBC                  *big.Int
+		FUnitAccumulatedFundingStart *big.Int
+		ILastOpenTimestamp           uint64
+		FeeTbps                      uint16
+		BrokerFeeTbps                uint16
+		PositionId                   [16]byte
+	}
+	contract, err := multicall.NewContract(MARGIN_ACCOUNT_ABI, xInfo.ProxyAddr.Hex())
+	if err != nil {
+		return nil, err
+	}
+	calls := make([]*multicall.Call, 0, len(traders))
+
+	for _, t := range traders {
+		c := contract.NewCall(new(marginOutput), "getMarginAccount", perpId, t)
+		calls = append(calls, c)
+	}
+	res, err := caller.Call(nil, calls...)
+	if err != nil {
+		return nil, err
+	}
+	accounts := make([]MarginAccount, 0, len(traders))
+	for _, call := range res {
+		m := MarginAccount{
+			FLockedInValueQC:             utils.ABDKToFloat64(call.Outputs.(*marginOutput).FLockedInValueQC),
+			FCashCC:                      utils.ABDKToFloat64(call.Outputs.(*marginOutput).FCashCC),
+			FPositionBC:                  utils.ABDKToFloat64(call.Outputs.(*marginOutput).FPositionBC),
+			FUnitAccumulatedFundingStart: utils.ABDKToFloat64(call.Outputs.(*marginOutput).FUnitAccumulatedFundingStart),
+			iLastOpenTimestamp:           uint32((call.Outputs.(*marginOutput).ILastOpenTimestamp)),
+			FeeTbps:                      call.Outputs.(*marginOutput).FeeTbps,
+			BrokerFeeTbps:                call.Outputs.(*marginOutput).BrokerFeeTbps,
+			PositionId:                   string(call.Outputs.(*marginOutput).PositionId[:]),
+		}
+		accounts = append(accounts, m)
+	}
+	return accounts, nil
 }
 
 func RawGetPerpetualData(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbol string) (*contracts.PerpStoragePerpetualData, error) {
