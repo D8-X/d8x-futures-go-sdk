@@ -97,6 +97,30 @@ func getOrders(sdkRo SdkRO, nodeURL string, from, to int, resultChan chan<- *Ope
 	}
 }
 
+func TestMarginAccount(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("x1Testnet")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	addressStrings := []string{"0x727921fb1e9a9aD7A259526C940A0474eDc7c7FE", "0xFF9C956Cd9eB2D27011F79d6A70F62eE6562C4b6", "0xc4C3694DBdCC41475Ebb8d624ddC8acf66d2609d"}
+	var addresses []common.Address
+	for _, addrStr := range addressStrings {
+		address := common.HexToAddress(addrStr)
+		addresses = append(addresses, address)
+	}
+	m, err := RawQueryMarginAccounts(sdkRo.Conn.Rpc, &sdkRo.Info, "BTC-USDC-USDC", addresses)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	m2, err := sdkRo.QueryMarginAccounts("BTC-USDC-USDC", addresses, nil)
+	println(m[0].FPositionBC)
+	println(m2[0].FPositionBC)
+	println(m[1].FPositionBC)
+	println(m2[1].FPositionBC)
+}
+
 func TestSdkROOrders(t *testing.T) {
 	var sdkRo SdkRO
 	err := sdkRo.New("x1Testnet")
@@ -138,7 +162,9 @@ func TestSdkROOrders(t *testing.T) {
 		t.Logf("hash index test failed")
 		t.Fail()
 	}
-	fmt.Print(orders[0].Orders[0].OptTraderAddr)
+	fmt.Println(orders[0].Orders[0].OptTraderAddr.Hex())
+	fmt.Println(orders[0].Orders[1].OptTraderAddr.Hex())
+	fmt.Println(orders[0].Orders[2].OptTraderAddr.Hex())
 }
 
 func TestSdkRO(t *testing.T) {

@@ -244,6 +244,17 @@ type PositionRisk struct {
 	CollToQuoteConversion          float64
 }
 
+type MarginAccount struct {
+	FLockedInValueQC             float64
+	FCashCC                      float64
+	FPositionBC                  float64
+	FUnitAccumulatedFundingStart float64
+	iLastOpenTimestamp           uint32
+	FeeTbps                      uint16
+	BrokerFeeTbps                uint16
+	PositionId                   string
+}
+
 // struct to be submitted by front-end provider
 // to get broker signature
 type PaySummary struct {
