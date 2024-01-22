@@ -121,6 +121,20 @@ func GetPerpetualStaticInfoIdxFromSymbol(exchangeInfo *StaticExchangeInfo, symbo
 	return GetPerpetualStaticInfoIdxFromId(exchangeInfo, perpId)
 }
 
+// GetPoolStaticInfoIdxFromSymbol returns exchangeInfo.Pools[j] for the given symbol.
+// Either provide the perpetual symbol (BTC-USDC-USDC) or the pool symbol (USDC)
+func GetPoolStaticInfoIdxFromSymbol(exchangeInfo *StaticExchangeInfo, symbol string) int {
+	// in case the user provided a perpetual symbol, we extract the pool symbol
+	parts := strings.Split(symbol, "-")
+	symbol = parts[len(parts)-1]
+	for j := 0; j < len(exchangeInfo.Pools); j++ {
+		if symbol == exchangeInfo.Pools[j].PoolMarginSymbol {
+			return j
+		}
+	}
+	return -1
+}
+
 // GetPerpetualStaticInfoIdxFromId returns the idx of the perpetual within StaticExchangeInfo,
 // given the perpetual id (e.g., 10001). Returns -1 if not found.
 func GetPerpetualStaticInfoIdxFromId(exchangeInfo *StaticExchangeInfo, perpId int32) int {
