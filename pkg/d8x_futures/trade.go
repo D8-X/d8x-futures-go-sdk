@@ -100,8 +100,8 @@ func (sdk *Sdk) ExecuteOrders(symbol string, orderIds []string, opts *OptsExecut
 }
 
 // ApproveTknSpending approves the manager to spend the wallet's margin tokens for the given
-// pool (via symbol), if amount = nil, max approval. Symbol is a perpetual, but approval
-// is for pool.
+// pool (via symbol), if amount = nil, max approval. Symbol is a pool symbol like "USDC"
+// (or perpetual symbol like MATIC-USDC-USDC works too)
 func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int, overrides *OptsOverrides) (*types.Transaction, error) {
 	tknAddr, err := RawGetMarginTknAddr(&sdk.Info, symbol)
 	if err != nil {

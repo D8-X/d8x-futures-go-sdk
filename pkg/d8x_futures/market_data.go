@@ -232,11 +232,13 @@ func (sdkRo *SdkRO) GetMarginTokenBalance(symbol string, traderAddr common.Addre
 }
 
 func RawGetMarginTknAddr(xInfo *StaticExchangeInfo, symbol string) (common.Address, error) {
-	id := xInfo.PerpetualSymbolToId[symbol]
-	poolId := id / 100000
-	if id < 1 {
+	j := GetPoolStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
 		return common.Address{}, errors.New("RawGetMarginTknAddr: no perpetual " + symbol)
 	}
+	pool := xInfo.Pools[j]
+	poolId := pool.PoolId
+
 	return (xInfo.Pools[poolId-1].PoolMarginTokenAddr), nil
 }
 
