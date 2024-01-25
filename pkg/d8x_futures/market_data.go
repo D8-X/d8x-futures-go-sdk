@@ -216,12 +216,16 @@ func (sdkRo *SdkRO) FetchPricesForPerpetual(symbol string, endpoint string) (Per
 	return RawFetchPricesForPerpetual(sdkRo.Info, symbol, sdkRo.ChainConfig.PriceFeedEndpoints[0])
 }
 
-func (sdkRo *SdkRO) GetMarginTokenBalance(symbol string, traderAddr common.Address) (float64, error) {
+func (sdkRo *SdkRO) GetMarginTokenBalance(symbol string, traderAddr common.Address, optRpc *ethclient.Client) (float64, error) {
 	tknAddr, err := RawGetMarginTknAddr(&sdkRo.Info, symbol)
 	if err != nil {
 		return 0, err
 	}
-	erc20Instance, err := contracts.NewErc20(tknAddr, sdkRo.Conn.Rpc)
+	rpc := sdkRo.Conn.Rpc
+	if optRpc != nil {
+		rpc = optRpc
+	}
+	erc20Instance, err := contracts.NewErc20(tknAddr, rpc)
 	if err != nil {
 		return 0, errors.New("GetMarginTokenBalance: creating instance of token " + tknAddr.String())
 	}
