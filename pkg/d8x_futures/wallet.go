@@ -21,6 +21,7 @@ type Wallet struct {
 }
 
 // NewWallet constructs a new wallet. ChainId must be provided and privatekey must be of the form "abcdef012" (no 0x)
+// rpc can be nil
 func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wallet, error) {
 	var w Wallet
 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
@@ -45,8 +46,11 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 	w.Auth.Signer = signerFn
 	// set default values
 	w.Auth.Value = big.NewInt(0)
-	w.Auth.GasLimit = uint64(300000)
+	w.Auth.GasLimit = uint64(300_000)
 
+	if rpc == nil {
+		return &w, nil
+	}
 	// query current values
 	w.Auth.GasPrice, err = GetGasPrice(rpc)
 	if err != nil {
