@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -54,8 +55,35 @@ func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, er
 }
 
 // LoadChainConfig loads the chain-config from data into ChainConfig struct
-// for network configName
-func LoadChainConfig(data []byte, configName string) (ChainConfig, error) {
+// for the given network name or chain id
+func LoadChainConfig(data []byte, configNameOrChainId string) (ChainConfig, error) {
+
+	var configuration []ChainConfig
+	// Unmarshal the JSON data into the Configuration struct
+	err := json.Unmarshal(data, &configuration)
+	if err != nil {
+		log.Fatal("Error decoding JSON:", err)
+		return ChainConfig{}, err
+	}
+	chainId, err := strconv.Atoi(configNameOrChainId)
+	if err != nil {
+		// user provided a name not an id
+		chainId = -1
+	}
+	for i := 0; i < len(configuration); i++ {
+		if configuration[i].Name == configNameOrChainId {
+			return configuration[i], nil
+		}
+		if configuration[i].ChainId == int64(chainId) {
+			return configuration[i], nil
+		}
+	}
+	return ChainConfig{}, errors.New("config not found")
+}
+
+// LoadChainConfig loads the chain-config from data into ChainConfig struct
+// for network with chain id chainId
+func LoadChainConfigFromId(data []byte, chainId int64) (ChainConfig, error) {
 
 	var configuration []ChainConfig
 	// Unmarshal the JSON data into the Configuration struct
@@ -65,7 +93,7 @@ func LoadChainConfig(data []byte, configName string) (ChainConfig, error) {
 		return ChainConfig{}, err
 	}
 	for i := 0; i < len(configuration); i++ {
-		if configuration[i].Name == configName {
+		if configuration[i].ChainId == chainId {
 			return configuration[i], nil
 		}
 	}

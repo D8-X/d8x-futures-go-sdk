@@ -13,7 +13,7 @@ func TestQueryNestedPerpetualInfo(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig(chConf.PriceFeedNetwork)
+	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -39,7 +39,7 @@ func TestQueryPoolStaticInfo(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig(chConf.PriceFeedNetwork)
+	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -76,7 +76,7 @@ func TestABDKToFloat64(t *testing.T) {
 }
 
 func TestTriangulate(t *testing.T) {
-	pxConf, err := config.GetDefaultPriceConfig("PythEVMStable")
+	pxConf, err := config.GetDefaultPriceConfig(1442)
 	if err != nil {
 		t.Logf(err.Error())
 	}
