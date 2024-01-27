@@ -191,7 +191,7 @@ func TestSdkRO(t *testing.T) {
 	} else {
 		fmt.Println(pr)
 	}
-	bal, err := sdkRo.GetMarginTokenBalance("BTC-USDC-USDC", trader)
+	bal, err := sdkRo.GetMarginTokenBalance("BTC-USDC-USDC", trader, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
