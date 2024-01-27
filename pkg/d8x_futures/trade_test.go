@@ -203,7 +203,7 @@ func TestPostOrder(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	pxConf, err := config.GetDefaultPriceConfig(chConfig.PriceFeedNetwork)
+	pxConf, err := config.GetDefaultPriceConfig(chConfig.ChainId)
 	if err != nil {
 		t.Logf(err.Error())
 	}

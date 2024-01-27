@@ -381,8 +381,8 @@ func (ps *BrokerPaySignatureReq) UnmarshalJSON(data []byte) error {
 // endpoints contain an rpc endpoint and a pyth Endpoint in this order
 // use New("network", "", "pythendpoint") to provide a pyth endpoint
 // but no RPC
-func (sdkRo *SdkRO) New(networkName string, endpoints ...string) error {
-	chConf, err := config.GetDefaultChainConfig(networkName)
+func (sdkRo *SdkRO) New(networkNameOrId string, endpoints ...string) error {
+	chConf, err := config.GetDefaultChainConfig(networkNameOrId)
 	if err != nil {
 		return err
 	}
@@ -398,7 +398,7 @@ func (sdkRo *SdkRO) New(networkName string, endpoints ...string) error {
 	if len(endpoints) > 2 {
 		slog.Info("SdkRO.New: only 2 endpoints are used")
 	}
-	pxConf, err := config.GetDefaultPriceConfig(chConf.PriceFeedNetwork)
+	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
 		return err
 	}
@@ -414,7 +414,7 @@ func (sdkRo *SdkRO) New(networkName string, endpoints ...string) error {
 }
 
 // New creates a new read/write Sdk instance
-// networkname according to chainConfig; rpcEndpoint and pythEndpoint can be ""
+// networkname according to chainConfig or a chainId; rpcEndpoint and pythEndpoint can be ""
 func (sdk *Sdk) New(privateKeys []string, networkName string, endpoints ...string) error {
 
 	sdk.SdkRO.New(networkName, endpoints...)

@@ -68,15 +68,38 @@ func GetDefaultChainConfig(configName string) (utils.ChainConfig, error) {
 	return utils.LoadChainConfig(data, configName)
 }
 
-func GetCustomPriceConfig(filePath, configNetwork string) (utils.PriceFeedConfig, error) {
-	data, err := os.ReadFile(filePath)
+func GetDefaultChainConfigFromId(chainId int64) (utils.ChainConfig, error) {
+	// Read the JSON file
+	fs, err := EmbededConfigs.Open("embedded/chainConfig.json")
+	if err != nil {
+		log.Fatal("Error reading JSON file:", err)
+		return utils.ChainConfig{}, err
+	}
+	data, err := io.ReadAll(fs)
+	if err != nil {
+		return utils.ChainConfig{}, err
+	}
+	return utils.LoadChainConfigFromId(data, chainId)
+}
+
+func GetDefaultPriceConfig(chainId int64) (utils.PriceFeedConfig, error) {
+	fs, err := EmbededConfigs.Open("embedded/priceFeedConfig.json")
+	if err != nil {
+		log.Fatal("Error reading JSON file:", err)
+		return utils.PriceFeedConfig{}, err
+	}
+	data, err := io.ReadAll(fs)
 	if err != nil {
 		return utils.PriceFeedConfig{}, err
 	}
-	return utils.LoadPriceFeedConfig(data, configNetwork)
+	ch, err := GetDefaultChainConfigFromId(chainId)
+	if err != nil {
+		return utils.PriceFeedConfig{}, err
+	}
+	return utils.LoadPriceFeedConfig(data, ch.PriceFeedNetwork)
 }
 
-func GetDefaultPriceConfig(configNetwork string) (utils.PriceFeedConfig, error) {
+func GetDefaultPriceConfigByName(configNetwork string) (utils.PriceFeedConfig, error) {
 	fs, err := EmbededConfigs.Open("embedded/priceFeedConfig.json")
 	if err != nil {
 		log.Fatal("Error reading JSON file:", err)

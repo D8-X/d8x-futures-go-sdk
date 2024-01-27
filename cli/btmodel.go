@@ -336,7 +336,7 @@ func (m *Model) actionScreen12() error {
 		return errors.New("connection failed")
 	}
 	m.ChainConfig = chConf
-	pxConf, err := config.GetDefaultPriceConfig(m.ChainConfig.PriceFeedNetwork)
+	pxConf, err := config.GetDefaultPriceConfig(m.ChainConfig.ChainId)
 	if err != nil {
 		return errors.New("connection failed")
 	}
