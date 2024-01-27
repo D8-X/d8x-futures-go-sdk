@@ -98,3 +98,16 @@ func GetDefaultPriceConfig(chainId int64) (utils.PriceFeedConfig, error) {
 	}
 	return utils.LoadPriceFeedConfig(data, ch.PriceFeedNetwork)
 }
+
+func GetDefaultPriceConfigByName(configNetwork string) (utils.PriceFeedConfig, error) {
+	fs, err := EmbededConfigs.Open("embedded/priceFeedConfig.json")
+	if err != nil {
+		log.Fatal("Error reading JSON file:", err)
+		return utils.PriceFeedConfig{}, err
+	}
+	data, err := io.ReadAll(fs)
+	if err != nil {
+		return utils.PriceFeedConfig{}, err
+	}
+	return utils.LoadPriceFeedConfig(data, configNetwork)
+}
