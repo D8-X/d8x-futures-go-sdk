@@ -260,7 +260,7 @@ func (s *StaticExchangeInfo) Load(filename string) error {
 func initPriceFeeds(pxConfig *utils.PriceFeedConfig, symbolSet utils.Set) Triangulations {
 	triangulations := make(Triangulations)
 	for sym := range symbolSet {
-		triangulations[sym] = Triangulate(sym, pxConfig)
+		triangulations[sym] = Triangulate(sym, pxConfig.PriceFeedIds)
 	}
 	return triangulations
 }
