@@ -80,11 +80,11 @@ func TestTriangulate(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	triangs := Triangulate("CHF-USDC", &pxConf)
+	triangs := Triangulate("CHF-USDC", pxConf.PriceFeedIds)
 	fmt.Println("Triangulate")
 	fmt.Println(triangs)
 
 	// test an impossible path
-	triangs2 := Triangulate("CHF-DOGE", &pxConf)
+	triangs2 := Triangulate("CHF-DOGE", pxConf.PriceFeedIds)
 	fmt.Println(triangs2)
 }
