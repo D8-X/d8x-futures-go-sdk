@@ -38,11 +38,12 @@ func CalculateTriangulation(triang Triangulation, pxData PriceFeedData) (float64
 func Triangulate(symbol string, priceFeeds []utils.PriceFeedId) Triangulation {
 	var feedSymBase []string
 	var feedSymQuote []string
+	symbol = strings.ToUpper(symbol)
 	// extract all base and quote currencies
 	for _, feed := range priceFeeds {
 		syms := strings.Split(feed.Symbol, "-")
-		feedSymBase = append(feedSymBase, syms[0])
-		feedSymQuote = append(feedSymQuote, syms[1])
+		feedSymBase = append(feedSymBase, strings.ToUpper(syms[0]))
+		feedSymQuote = append(feedSymQuote, strings.ToUpper(syms[1]))
 	}
 	paths := findPath(append(feedSymBase, feedSymQuote...), append(feedSymQuote, feedSymBase...), symbol)
 	if len(paths) == 0 {
