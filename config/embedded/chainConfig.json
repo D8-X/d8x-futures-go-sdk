@@ -31,5 +31,27 @@
       "postOrderGasLimit": 3000000,
       "priceUpdateFeeGwei": 1,
       "splitExecutionTx": false
+    },
+    {
+      "name": "cardona",
+      "priceFeedNetwork": "PythEVMStable",
+      "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
+      "chainId": 2442,
+      "proxyAddr": "0x70212F1E2eB66C82990312FA5AB3f851706fD1E1",
+      "nodeURL": "https://rpc.cardona.zkevm-rpc.com",
+      "postOrderGasLimit": 3000000,
+      "priceUpdateFeeGwei": 1,
+      "splitExecutionTx": false
+    },
+    {
+      "name": "arbitrumSepolia",
+      "priceFeedNetwork": "PythEVMStable",
+      "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
+      "chainId": 421614,
+      "proxyAddr": "0x70212F1E2eB66C82990312FA5AB3f851706fD1E1",
+      "nodeURL": "https://sepolia-rollup.arbitrum.io/rpc",
+      "postOrderGasLimit": 3000000,
+      "priceUpdateFeeGwei": 1,
+      "splitExecutionTx": false
     }
 ]

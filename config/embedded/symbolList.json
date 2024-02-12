@@ -10,8 +10,8 @@
   "CHF": "CHF",
   "EUR": "EUR",
   "JPY": "JPY",
-  "stTH": "stETH",
-  "stER": "stEUR",
-  "agER": "agER",
+  "stTH": "STETH",
+  "stER": "STEUR",
+  "agER": "AGEUR",
   "LUSD": "LUSD"
 }
