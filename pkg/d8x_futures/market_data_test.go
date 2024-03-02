@@ -29,7 +29,7 @@ func TestFetchPricesFromAPI(t *testing.T) {
 
 func TestGetPerpetualData(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("195")
+	err := sdkRo.New("80085")
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()

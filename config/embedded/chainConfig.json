@@ -53,5 +53,16 @@
       "postOrderGasLimit": 3000000,
       "priceUpdateFeeGwei": 1,
       "splitExecutionTx": false
+    },
+    {
+      "name": "artio",
+      "priceFeedNetwork": "PythEVMStable",
+      "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
+      "chainId": 80085,
+      "proxyAddr": "0x70212F1E2eB66C82990312FA5AB3f851706fD1E1",
+      "nodeURL": "https://rpc.ankr.com/berachain_testnet",
+      "postOrderGasLimit": 3000000,
+      "priceUpdateFeeGwei": 1,
+      "splitExecutionTx": false
     }
 ]
