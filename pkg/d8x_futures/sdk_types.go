@@ -249,10 +249,6 @@ type MarginAccount struct {
 	FCashCC                      float64
 	FPositionBC                  float64
 	FUnitAccumulatedFundingStart float64
-	iLastOpenTimestamp           uint32
-	FeeTbps                      uint16
-	BrokerFeeTbps                uint16
-	PositionId                   string
 }
 
 // struct to be submitted by front-end provider

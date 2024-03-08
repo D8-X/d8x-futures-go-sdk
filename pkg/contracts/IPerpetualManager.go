@@ -48,8 +48,8 @@ type AMMPerpLogicMarketVariables struct {
 	FRho23        *big.Int
 }
 
-// IPerpetualGetterPerpetualStaticInfo is an auto generated low-level Go binding around an user-defined struct.
-type IPerpetualGetterPerpetualStaticInfo struct {
+// IPerpetualInfoPerpetualStaticInfo is an auto generated low-level Go binding around an user-defined struct.
+type IPerpetualInfoPerpetualStaticInfo struct {
 	Id                     *big.Int
 	LimitOrderBookAddr     common.Address
 	FInitialMarginRate     int32
@@ -120,61 +120,61 @@ type PerpStorageMarginAccount struct {
 	FCashCC                      *big.Int
 	FPositionBC                  *big.Int
 	FUnitAccumulatedFundingStart *big.Int
-	ILastOpenTimestamp           uint64
-	FeeTbps                      uint16
-	BrokerFeeTbps                uint16
-	PositionId                   [16]byte
+	Slot2                        uint64
+	Slot3                        uint16
+	Slot4                        uint16
+	Slot                         [16]byte
 }
 
 // PerpStoragePerpetualData is an auto generated low-level Go binding around an user-defined struct.
 type PerpStoragePerpetualData struct {
-	PoolId                              uint8
-	Id                                  *big.Int
-	FInitialMarginRate                  int32
-	FSigma2                             int32
-	ILastFundingTime                    uint32
-	ILastSettlementPriceUpdateTimestamp uint32
-	ILastPriceJumpTimestamp             uint32
-	FMaintenanceMarginRate              int32
-	State                               uint8
-	ECollateralCurrency                 uint8
-	MinimalSpreadTbps                   uint16
-	S2BaseCCY                           [4]byte
-	S2QuoteCCY                          [4]byte
-	IncentiveSpreadTbps                 uint16
-	JumpSpreadTbps                      uint16
-	S3BaseCCY                           [4]byte
-	S3QuoteCCY                          [4]byte
-	FSigma3                             int32
-	FRho23                              int32
-	LiquidationPenaltyRateTbps          uint16
-	CurrentMarkPremiumRate              PerpStoragePriceTimeData
-	PremiumRatesEMA                     *big.Int
-	FUnitAccumulatedFunding             *big.Int
-	FOpenInterest                       *big.Int
-	FTargetAMMFundSize                  *big.Int
-	FCurrentTraderExposureEMA           *big.Int
-	FCurrentFundingRate                 *big.Int
-	FLotSizeBC                          *big.Int
-	FReferralRebateCC                   *big.Int
-	FTargetDFSize                       *big.Int
-	FkStar                              *big.Int
-	FAMMTargetDD                        *big.Int
-	FAMMMinSizeCC                       *big.Int
-	FMinimalTraderExposureEMA           *big.Int
-	FMinimalAMMExposureEMA              *big.Int
-	FSettlementS3PriceData              *big.Int
-	FSettlementS2PriceData              *big.Int
-	FTotalMarginBalance                 *big.Int
-	FMarkPriceEMALambda                 int32
-	FFundingRateClamp                   int32
-	FMaximalTradeSizeBumpUp             int32
-	ILastTargetPoolSizeTime             uint32
-	FDFCoverNRate                       int32
-	FStressReturnS3                     [2]*big.Int
-	FDFLambda                           [2]*big.Int
-	FCurrentAMMExposureEMA              [2]*big.Int
-	FStressReturnS2                     [2]*big.Int
+	PoolId                     uint8
+	Id                         *big.Int
+	FInitialMarginRate         int32
+	FSigma2                    int32
+	ILastFundingTime           uint32
+	Slot0                      uint32
+	Slot1                      uint32
+	FMaintenanceMarginRate     int32
+	State                      uint8
+	ECollateralCurrency        uint8
+	MinimalSpreadTbps          uint16
+	S2BaseCCY                  [4]byte
+	S2QuoteCCY                 [4]byte
+	IncentiveSpreadTbps        uint16
+	Slot2                      uint16
+	S3BaseCCY                  [4]byte
+	S3QuoteCCY                 [4]byte
+	FSigma3                    int32
+	FRho23                     int32
+	LiquidationPenaltyRateTbps uint16
+	CurrentMarkPremiumRate     PerpStoragePriceTimeData
+	PremiumRatesEMA            *big.Int
+	FUnitAccumulatedFunding    *big.Int
+	FOpenInterest              *big.Int
+	FTargetAMMFundSize         *big.Int
+	FCurrentTraderExposureEMA  *big.Int
+	FCurrentFundingRate        *big.Int
+	FLotSizeBC                 *big.Int
+	FReferralRebateCC          *big.Int
+	FTargetDFSize              *big.Int
+	FkStar                     *big.Int
+	FAMMTargetDD               *big.Int
+	FAMMMinSizeCC              *big.Int
+	FMinimalTraderExposureEMA  *big.Int
+	FMinimalAMMExposureEMA     *big.Int
+	FSettlementS3PriceData     *big.Int
+	FSettlementS2PriceData     *big.Int
+	FTotalMarginBalance        *big.Int
+	FMarkPriceEMALambda        int32
+	FFundingRateClamp          int32
+	FMaximalTradeSizeBumpUp    int32
+	ILastTargetPoolSizeTime    uint32
+	FDFCoverNRate              int32
+	FStressReturnS3            [2]*big.Int
+	FDFLambda                  [2]*big.Int
+	FCurrentAMMExposureEMA     [2]*big.Int
+	FStressReturnS2            [2]*big.Int
 }
 
 // PerpStoragePriceTimeData is an auto generated low-level Go binding around an user-defined struct.
@@ -185,7 +185,7 @@ type PerpStoragePriceTimeData struct {
 
 // IPerpetualManagerMetaData contains all meta data concerning the IPerpetualManager contract.
 var IPerpetualManagerMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"numLots\",\"type\":\"uint32\"}],\"name\":\"BrokerLotsTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fVolume\",\"type\":\"int128\"}],\"name\":\"BrokerVolumeTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"}],\"name\":\"Clear\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"protocolFeeCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"participationFundFeeCC\",\"type\":\"int128\"}],\"name\":\"DistributeFees\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"liquidator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes16\",\"name\":\"positionId\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"amountLiquidatedBC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"liquidationPrice\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"newPositionSizeBC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fFeeCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fPnlCC\",\"type\":\"int128\"}],\"name\":\"Liquidate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shareAmount\",\"type\":\"uint256\"}],\"name\":\"LiquidityAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"id\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"marginTokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"shareTokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint16\",\"name\":\"iTargetPoolSizeUpdateTime\",\"type\":\"uint16\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fBrokerCollateralLotSize\",\"type\":\"int128\"}],\"name\":\"LiquidityPoolCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"pauseOn\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"}],\"name\":\"LiquidityProvisionPaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shareAmount\",\"type\":\"uint256\"}],\"name\":\"LiquidityRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shareAmount\",\"type\":\"uint256\"}],\"name\":\"LiquidityWithdrawalInitiated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"uint24\",\"name\":\"id\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128[7]\",\"name\":\"baseParams\",\"type\":\"int128[7]\"},{\"indexed\":false,\"internalType\":\"int128[5]\",\"name\":\"underlyingRiskParams\",\"type\":\"int128[5]\"},{\"indexed\":false,\"internalType\":\"int128[12]\",\"name\":\"defaultFundRiskParams\",\"type\":\"int128[12]\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"eCollateralCurrency\",\"type\":\"uint256\"}],\"name\":\"PerpetualCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"orderHash\",\"type\":\"bytes32\"}],\"name\":\"PerpetualLimitOrderCancelled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"_liqPoolID\",\"type\":\"uint8\"}],\"name\":\"RunLiquidityPool\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"delay\",\"type\":\"uint8\"}],\"name\":\"SetBlockDelay\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint32[]\",\"name\":\"designations\",\"type\":\"uint32[]\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"fees\",\"type\":\"uint16[]\"}],\"name\":\"SetBrokerDesignations\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tiers\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"SetBrokerTiers\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tiers\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"SetBrokerVolumeTiers\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"}],\"name\":\"SetClearedState\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"delegate\",\"type\":\"address\"}],\"name\":\"SetDelegate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fSettlementMarkPremiumRate\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fSettlementS2Price\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fSettlementS3Price\",\"type\":\"int128\"}],\"name\":\"SetEmergencyState\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"}],\"name\":\"SetNormalState\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"bytes4[2]\",\"name\":\"baseQuoteS2\",\"type\":\"bytes4[2]\"},{\"indexed\":false,\"internalType\":\"bytes4[2]\",\"name\":\"baseQuoteS3\",\"type\":\"bytes4[2]\"}],\"name\":\"SetOracles\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"value\",\"type\":\"int128\"}],\"name\":\"SetParameter\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"value1\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"value2\",\"type\":\"int128\"}],\"name\":\"SetParameterPair\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128[7]\",\"name\":\"baseParams\",\"type\":\"int128[7]\"}],\"name\":\"SetPerpetualBaseParameters\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128[5]\",\"name\":\"underlyingRiskParams\",\"type\":\"int128[5]\"},{\"indexed\":false,\"internalType\":\"int128[12]\",\"name\":\"defaultFundRiskParams\",\"type\":\"int128[12]\"}],\"name\":\"SetPerpetualRiskParameters\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"value\",\"type\":\"int128\"}],\"name\":\"SetPoolParameter\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tiers\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"SetTraderTiers\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tiers\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"SetTraderVolumeTiers\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"}],\"name\":\"SetUtilityToken\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int256\",\"name\":\"amount\",\"type\":\"int256\"}],\"name\":\"Settle\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"}],\"name\":\"SettleState\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"}],\"name\":\"SettlementComplete\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"amount\",\"type\":\"int128\"}],\"name\":\"TokensDeposited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"amount\",\"type\":\"int128\"}],\"name\":\"TokensWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes16\",\"name\":\"positionId\",\"type\":\"bytes16\"},{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"indexed\":false,\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"order\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"orderDigest\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"newPositionSizeBC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"price\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fFeeCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fPnlCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fB2C\",\"type\":\"int128\"}],\"name\":\"Trade\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldOBFactory\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newOBFactory\",\"type\":\"address\"}],\"name\":\"TransferAddressTo\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fEarnings\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"newDefaultFundSize\",\"type\":\"int128\"}],\"name\":\"TransferEarningsToTreasury\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"broker\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"feeCC\",\"type\":\"int128\"}],\"name\":\"TransferFeeToBroker\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"executor\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"referralRebate\",\"type\":\"int128\"}],\"name\":\"TransferFeeToexecutor\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"liquidityPoolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fTargetAMMFundSizeInPerpetual\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fTargetAMMFundSizeInPool\",\"type\":\"int128\"}],\"name\":\"UpdateAMMFundTargetSize\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"iLots\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"iNewBrokerLots\",\"type\":\"uint32\"}],\"name\":\"UpdateBrokerAddedCash\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fDeltaAmountCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fNewFundCash\",\"type\":\"int128\"}],\"name\":\"UpdateBrokerFundCash\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fDeltaAmountCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fNewFundCash\",\"type\":\"int128\"}],\"name\":\"UpdateDefaultFundCash\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"liquidityPoolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fDefaultFundCashCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fTargetDFSize\",\"type\":\"int128\"}],\"name\":\"UpdateDefaultFundTargetSize\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fFundingRate\",\"type\":\"int128\"}],\"name\":\"UpdateFundingRate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes16\",\"name\":\"positionId\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fPositionBC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fCashCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fLockedInValueQC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fFundingPaymentCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fOpenInterestBC\",\"type\":\"int128\"}],\"name\":\"UpdateMarginAccount\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fMidPricePremium\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fMarkPricePremium\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fSpotIndexPrice\",\"type\":\"int128\"}],\"name\":\"UpdateMarkPrice\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fDeltaAmountCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fNewFundCash\",\"type\":\"int128\"}],\"name\":\"UpdateParticipationFundCash\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fCurrentTraderExposureEMA\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fCurrentAMMExposureEMAShort\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fCurrentAMMExposureEMALong\",\"type\":\"int128\"}],\"name\":\"UpdateReprTradeSizes\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"unitAccumulativeFunding\",\"type\":\"int128\"}],\"name\":\"UpdateUnitAccumulatedFunding\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"activatePerpetual\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolIndex\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"addLiquidity\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"_fSettlementS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fSettlementS3\",\"type\":\"int128\"}],\"name\":\"adjustSettlementPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int128[2]\",\"name\":\"_fK2AMM\",\"type\":\"int128[2]\"},{\"internalType\":\"int128\",\"name\":\"_fk2Trader\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fCoverN\",\"type\":\"int128\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressRet2\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressRet3\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fIndexPrices\",\"type\":\"int128[2]\"},{\"internalType\":\"enumAMMPerpLogic.CollateralCurrency\",\"name\":\"_eCCY\",\"type\":\"uint8\"}],\"name\":\"calculateDefaultFundSize\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"int128\",\"name\":\"fLockedValue1\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM1\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMM_K2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentTraderExposureEMA\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.AMMVariables\",\"name\":\"_ammVars\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fIndexPriceS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fIndexPriceS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fRho23\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.MarketVariables\",\"name\":\"_mktVars\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"_fTradeAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fBidAskSpread\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fIncentiveSpread\",\"type\":\"int128\"}],\"name\":\"calculatePerpetualPrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"int128\",\"name\":\"fLockedValue1\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM1\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMM_K2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentTraderExposureEMA\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.AMMVariables\",\"name\":\"_ammVars\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fIndexPriceS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fIndexPriceS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fRho23\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.MarketVariables\",\"name\":\"_mktVars\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"_fTradeAmount\",\"type\":\"int128\"},{\"internalType\":\"bool\",\"name\":\"_withCDF\",\"type\":\"bool\"}],\"name\":\"calculateRiskNeutralPD\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"},{\"internalType\":\"uint16\",\"name\":\"_feeTbps\",\"type\":\"uint16\"}],\"name\":\"chargePostingFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"countActivePerpAccounts\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_marginTokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint16\",\"name\":\"_iTargetPoolSizeUpdateTime\",\"type\":\"uint16\"},{\"internalType\":\"int128\",\"name\":\"_fBrokerCollateralLotSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fCeilPnLShare\",\"type\":\"int128\"}],\"name\":\"createLiquidityPool\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolId\",\"type\":\"uint8\"},{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuoteS2\",\"type\":\"bytes4[2]\"},{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuoteS3\",\"type\":\"bytes4[2]\"},{\"internalType\":\"int128[7]\",\"name\":\"_baseParams\",\"type\":\"int128[7]\"},{\"internalType\":\"int128[5]\",\"name\":\"_underlyingRiskParams\",\"type\":\"int128[5]\"},{\"internalType\":\"int128[12]\",\"name\":\"_defaultFundRiskParams\",\"type\":\"int128[12]\"},{\"internalType\":\"uint256\",\"name\":\"_eCollateralCurrency\",\"type\":\"uint256\"}],\"name\":\"createPerpetual\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"deactivatePerp\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolIdx\",\"type\":\"uint8\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"}],\"name\":\"decreasePoolCash\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"deposit\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint32\",\"name\":\"_iLots\",\"type\":\"uint32\"}],\"name\":\"depositBrokerLots\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"_fDepositRequired\",\"type\":\"int128\"},{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"}],\"name\":\"depositMarginForOpeningTrade\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"}],\"name\":\"depositToDefaultFund\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"}],\"name\":\"determineExchangeFee\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"},{\"internalType\":\"bool\",\"name\":\"_hasOpened\",\"type\":\"bool\"}],\"name\":\"distributeFees\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_fDeltaPositionBC\",\"type\":\"int128\"}],\"name\":\"distributeFeesLiquidation\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"bytes32\",\"name\":\"_digest\",\"type\":\"bytes32\"}],\"name\":\"executeCancelOrder\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_lpAddr\",\"type\":\"address\"}],\"name\":\"executeLiquidityWithdrawal\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_fTraderPos\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fTradeAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fPrice\",\"type\":\"int128\"},{\"internalType\":\"bool\",\"name\":\"_isClose\",\"type\":\"bool\"}],\"name\":\"executeTrade\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAMMPerpLogic\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128[2]\",\"name\":\"_fIndexPrice\",\"type\":\"int128[2]\"}],\"name\":\"getAMMState\",\"outputs\":[{\"internalType\":\"int128[15]\",\"name\":\"\",\"type\":\"int128[15]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getActivePerpAccounts\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"uint256\",\"name\":\"_from\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_to\",\"type\":\"uint256\"}],\"name\":\"getActivePerpAccountsByChunks\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"}],\"name\":\"getBrokerDesignation\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"}],\"name\":\"getBrokerInducedFee\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"}],\"name\":\"getCollateralTokenAmountForPricing\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"}],\"name\":\"getCurrentBrokerVolume\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"}],\"name\":\"getCurrentTraderVolume\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int128\",\"name\":\"_fPosition0\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fBalance0\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fTradeAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fTargetLeverage\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fS2Mark\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fS2\",\"type\":\"int128\"}],\"name\":\"getDepositAmountForLvgPosition\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"_brokerDesignation\",\"type\":\"uint32\"}],\"name\":\"getFeeForBrokerDesignation\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"}],\"name\":\"getFeeForBrokerStake\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"}],\"name\":\"getFeeForBrokerVolume\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"}],\"name\":\"getFeeForTraderStake\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"}],\"name\":\"getFeeForTraderVolume\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"getLastPerpetualBaseToUSDConversion\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128[2]\",\"name\":\"_fIndexPrice\",\"type\":\"int128[2]\"}],\"name\":\"getLiquidatableAccounts\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"unsafeAccounts\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"}],\"name\":\"getLiquidityPool\",\"outputs\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"isRunning\",\"type\":\"bool\"},{\"internalType\":\"uint8\",\"name\":\"iPerpetualCount\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"id\",\"type\":\"uint8\"},{\"internalType\":\"int32\",\"name\":\"fCeilPnLShare\",\"type\":\"int32\"},{\"internalType\":\"uint8\",\"name\":\"marginTokenDecimals\",\"type\":\"uint8\"},{\"internalType\":\"uint16\",\"name\":\"iTargetPoolSizeUpdateTime\",\"type\":\"uint16\"},{\"internalType\":\"address\",\"name\":\"marginTokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"prevAnchor\",\"type\":\"uint64\"},{\"internalType\":\"int128\",\"name\":\"fRedemptionRate\",\"type\":\"int128\"},{\"internalType\":\"address\",\"name\":\"shareTokenAddress\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fPnLparticipantsCashCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetAMMFundSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fDefaultFundCashCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetDFSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fBrokerCollateralLotSize\",\"type\":\"int128\"},{\"internalType\":\"uint128\",\"name\":\"prevTokenAmount\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"nextTokenAmount\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"totalSupplyShareToken\",\"type\":\"uint128\"},{\"internalType\":\"int128\",\"name\":\"fBrokerFundCashCC\",\"type\":\"int128\"}],\"internalType\":\"structPerpStorage.LiquidityPoolData\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolIdFrom\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"_poolIdTo\",\"type\":\"uint8\"}],\"name\":\"getLiquidityPools\",\"outputs\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"isRunning\",\"type\":\"bool\"},{\"internalType\":\"uint8\",\"name\":\"iPerpetualCount\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"id\",\"type\":\"uint8\"},{\"internalType\":\"int32\",\"name\":\"fCeilPnLShare\",\"type\":\"int32\"},{\"internalType\":\"uint8\",\"name\":\"marginTokenDecimals\",\"type\":\"uint8\"},{\"internalType\":\"uint16\",\"name\":\"iTargetPoolSizeUpdateTime\",\"type\":\"uint16\"},{\"internalType\":\"address\",\"name\":\"marginTokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"prevAnchor\",\"type\":\"uint64\"},{\"internalType\":\"int128\",\"name\":\"fRedemptionRate\",\"type\":\"int128\"},{\"internalType\":\"address\",\"name\":\"shareTokenAddress\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fPnLparticipantsCashCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetAMMFundSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fDefaultFundCashCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetDFSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fBrokerCollateralLotSize\",\"type\":\"int128\"},{\"internalType\":\"uint128\",\"name\":\"prevTokenAmount\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"nextTokenAmount\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"totalSupplyShareToken\",\"type\":\"uint128\"},{\"internalType\":\"int128\",\"name\":\"fBrokerFundCashCC\",\"type\":\"int128\"}],\"internalType\":\"structPerpStorage.LiquidityPoolData[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddress\",\"type\":\"address\"}],\"name\":\"getMarginAccount\",\"outputs\":[{\"components\":[{\"internalType\":\"int128\",\"name\":\"fLockedInValueQC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCashCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPositionBC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fUnitAccumulatedFundingStart\",\"type\":\"int128\"},{\"internalType\":\"uint64\",\"name\":\"iLastOpenTimestamp\",\"type\":\"uint64\"},{\"internalType\":\"uint16\",\"name\":\"feeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes16\",\"name\":\"positionId\",\"type\":\"bytes16\"}],\"internalType\":\"structPerpStorage.MarginAccount\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"_fCurrentTraderPos\",\"type\":\"int128\"},{\"internalType\":\"bool\",\"name\":\"_isBuy\",\"type\":\"bool\"}],\"name\":\"getMaxSignedOpenTradeSizeForPos\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128[2]\",\"name\":\"_fIndexPrice\",\"type\":\"int128[2]\"}],\"name\":\"getNextLiquidatableTrader\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getOracleFactory\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuote\",\"type\":\"bytes4[2]\"}],\"name\":\"getOraclePrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"fPrice\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getOracleUpdateTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getOrderBookAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getOrderBookFactoryAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getPerpetual\",\"outputs\":[{\"components\":[{\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint24\",\"name\":\"id\",\"type\":\"uint24\"},{\"internalType\":\"int32\",\"name\":\"fInitialMarginRate\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fSigma2\",\"type\":\"int32\"},{\"internalType\":\"uint32\",\"name\":\"iLastFundingTime\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iLastSettlementPriceUpdateTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iLastPriceJumpTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"int32\",\"name\":\"fMaintenanceMarginRate\",\"type\":\"int32\"},{\"internalType\":\"enumPerpStorage.PerpetualState\",\"name\":\"state\",\"type\":\"uint8\"},{\"internalType\":\"enumAMMPerpLogic.CollateralCurrency\",\"name\":\"eCollateralCurrency\",\"type\":\"uint8\"},{\"internalType\":\"uint16\",\"name\":\"minimalSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes4\",\"name\":\"S2BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S2QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"uint16\",\"name\":\"incentiveSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"jumpSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes4\",\"name\":\"S3BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S3QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"int32\",\"name\":\"fSigma3\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fRho23\",\"type\":\"int32\"},{\"internalType\":\"uint16\",\"name\":\"liquidationPenaltyRateTbps\",\"type\":\"uint16\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fPrice\",\"type\":\"int128\"},{\"internalType\":\"uint64\",\"name\":\"time\",\"type\":\"uint64\"}],\"internalType\":\"structPerpStorage.PriceTimeData\",\"name\":\"currentMarkPremiumRate\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"premiumRatesEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fUnitAccumulatedFunding\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fOpenInterest\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetAMMFundSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentTraderExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentFundingRate\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLotSizeBC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fReferralRebateCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetDFSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fkStar\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMMTargetDD\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMMMinSizeCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fMinimalTraderExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fMinimalAMMExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSettlementS3PriceData\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSettlementS2PriceData\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTotalMarginBalance\",\"type\":\"int128\"},{\"internalType\":\"int32\",\"name\":\"fMarkPriceEMALambda\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fFundingRateClamp\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fMaximalTradeSizeBumpUp\",\"type\":\"int32\"},{\"internalType\":\"uint32\",\"name\":\"iLastTargetPoolSizeTime\",\"type\":\"uint32\"},{\"internalType\":\"int32\",\"name\":\"fDFCoverNRate\",\"type\":\"int32\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressReturnS3\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fDFLambda\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fCurrentAMMExposureEMA\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressReturnS2\",\"type\":\"int128[2]\"}],\"internalType\":\"structPerpStorage.PerpetualData\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"}],\"name\":\"getPerpetualCountInPool\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"_perpetualIndex\",\"type\":\"uint8\"}],\"name\":\"getPerpetualId\",\"outputs\":[{\"internalType\":\"uint24\",\"name\":\"\",\"type\":\"uint24\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24[]\",\"name\":\"perpetualIds\",\"type\":\"uint24[]\"}],\"name\":\"getPerpetualStaticInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"uint24\",\"name\":\"id\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"limitOrderBookAddr\",\"type\":\"address\"},{\"internalType\":\"int32\",\"name\":\"fInitialMarginRate\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fMaintenanceMarginRate\",\"type\":\"int32\"},{\"internalType\":\"uint8\",\"name\":\"perpetualState\",\"type\":\"uint8\"},{\"internalType\":\"enumAMMPerpLogic.CollateralCurrency\",\"name\":\"collCurrencyType\",\"type\":\"uint8\"},{\"internalType\":\"bytes4\",\"name\":\"S2BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S2QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S3BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S3QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"int128\",\"name\":\"fLotSizeBC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fReferralRebateCC\",\"type\":\"int128\"},{\"internalType\":\"bytes32[]\",\"name\":\"priceIds\",\"type\":\"bytes32[]\"},{\"internalType\":\"bool[]\",\"name\":\"isPyth\",\"type\":\"bool[]\"}],\"internalType\":\"structIPerpetualGetter.PerpetualStaticInfo[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24[]\",\"name\":\"perpetualIds\",\"type\":\"uint24[]\"}],\"name\":\"getPerpetuals\",\"outputs\":[{\"components\":[{\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint24\",\"name\":\"id\",\"type\":\"uint24\"},{\"internalType\":\"int32\",\"name\":\"fInitialMarginRate\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fSigma2\",\"type\":\"int32\"},{\"internalType\":\"uint32\",\"name\":\"iLastFundingTime\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iLastSettlementPriceUpdateTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iLastPriceJumpTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"int32\",\"name\":\"fMaintenanceMarginRate\",\"type\":\"int32\"},{\"internalType\":\"enumPerpStorage.PerpetualState\",\"name\":\"state\",\"type\":\"uint8\"},{\"internalType\":\"enumAMMPerpLogic.CollateralCurrency\",\"name\":\"eCollateralCurrency\",\"type\":\"uint8\"},{\"internalType\":\"uint16\",\"name\":\"minimalSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes4\",\"name\":\"S2BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S2QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"uint16\",\"name\":\"incentiveSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"jumpSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes4\",\"name\":\"S3BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S3QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"int32\",\"name\":\"fSigma3\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fRho23\",\"type\":\"int32\"},{\"internalType\":\"uint16\",\"name\":\"liquidationPenaltyRateTbps\",\"type\":\"uint16\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fPrice\",\"type\":\"int128\"},{\"internalType\":\"uint64\",\"name\":\"time\",\"type\":\"uint64\"}],\"internalType\":\"structPerpStorage.PriceTimeData\",\"name\":\"currentMarkPremiumRate\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"premiumRatesEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fUnitAccumulatedFunding\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fOpenInterest\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetAMMFundSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentTraderExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentFundingRate\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLotSizeBC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fReferralRebateCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetDFSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fkStar\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMMTargetDD\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMMMinSizeCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fMinimalTraderExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fMinimalAMMExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSettlementS3PriceData\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSettlementS2PriceData\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTotalMarginBalance\",\"type\":\"int128\"},{\"internalType\":\"int32\",\"name\":\"fMarkPriceEMALambda\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fFundingRateClamp\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fMaximalTradeSizeBumpUp\",\"type\":\"int32\"},{\"internalType\":\"uint32\",\"name\":\"iLastTargetPoolSizeTime\",\"type\":\"uint32\"},{\"internalType\":\"int32\",\"name\":\"fDFCoverNRate\",\"type\":\"int32\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressReturnS3\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fDFLambda\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fCurrentAMMExposureEMA\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressReturnS2\",\"type\":\"int128[2]\"}],\"internalType\":\"structPerpStorage.PerpetualData[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPoolCount\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getPoolIdByPerpetualId\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolFromIdx\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"_poolToIdx\",\"type\":\"uint8\"}],\"name\":\"getPoolStaticInfo\",\"outputs\":[{\"internalType\":\"uint24[][]\",\"name\":\"\",\"type\":\"uint24[][]\"},{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"},{\"internalType\":\"address\",\"name\":\"_oracleFactoryAddress\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getPriceInfo\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"},{\"internalType\":\"bool[]\",\"name\":\"\",\"type\":\"bool[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"uint256\",\"name\":\"start\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"count\",\"type\":\"uint256\"}],\"name\":\"getSettleableAccounts\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getShareTokenFactory\",\"outputs\":[{\"internalType\":\"contractIShareTokenFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"}],\"name\":\"getShareTokenPriceD18\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int128\",\"name\":\"_fK2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fL1\",\"type\":\"int128\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fIndexPriceS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fIndexPriceS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fRho23\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.MarketVariables\",\"name\":\"_mktVars\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"_fTargetDD\",\"type\":\"int128\"}],\"name\":\"getTargetCollateralM1\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int128\",\"name\":\"_fK2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fL1\",\"type\":\"int128\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fIndexPriceS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fIndexPriceS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fRho23\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.MarketVariables\",\"name\":\"_mktVars\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"_fTargetDD\",\"type\":\"int128\"}],\"name\":\"getTargetCollateralM2\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int128\",\"name\":\"_fK2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fL1\",\"type\":\"int128\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fIndexPriceS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fIndexPriceS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fRho23\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.MarketVariables\",\"name\":\"_mktVars\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"_fTargetDD\",\"type\":\"int128\"}],\"name\":\"getTargetCollateralM3\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"_shareAmount\",\"type\":\"uint256\"}],\"name\":\"getTokenAmountToReturn\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddress\",\"type\":\"address\"},{\"internalType\":\"int128[2]\",\"name\":\"_fIndexPrice\",\"type\":\"int128[2]\"}],\"name\":\"getTraderState\",\"outputs\":[{\"internalType\":\"int128[11]\",\"name\":\"\",\"type\":\"int128[11]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getTreasuryAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"_fromIdx\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"numRequests\",\"type\":\"uint256\"}],\"name\":\"getWithdrawRequests\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"lp\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"shareTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint64\",\"name\":\"withdrawTimestamp\",\"type\":\"uint64\"}],\"internalType\":\"structIPerpetualTreasury.WithdrawRequest[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numBlockSinceLastOpen\",\"type\":\"uint256\"},{\"internalType\":\"int128\",\"name\":\"_fLambda\",\"type\":\"int128\"}],\"name\":\"holdingPeriodPenalty\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolIdx\",\"type\":\"uint8\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"}],\"name\":\"increasePoolCash\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddress\",\"type\":\"address\"}],\"name\":\"isActiveAccount\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_trader\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_delegate\",\"type\":\"address\"}],\"name\":\"isDelegate\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"isMarketClosed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"digest\",\"type\":\"bytes32\"}],\"name\":\"isOrderCanceled\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"digest\",\"type\":\"bytes32\"}],\"name\":\"isOrderExecuted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"isPerpMarketClosed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"isClosed\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualIndex\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_liquidatorAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"liquidateByAMM\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"liquidatedAmount\",\"type\":\"int128\"}],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"bool\",\"name\":\"_pauseOn\",\"type\":\"bool\"}],\"name\":\"pauseLiquidityProvision\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"}],\"name\":\"preTrade\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"}],\"name\":\"queryExchangeFee\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24[]\",\"name\":\"perpetualIds\",\"type\":\"uint24[]\"},{\"internalType\":\"int128[]\",\"name\":\"idxPriceDataPairs\",\"type\":\"int128[]\"}],\"name\":\"queryMidPrices\",\"outputs\":[{\"internalType\":\"int128[]\",\"name\":\"\",\"type\":\"int128[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"_fTradeAmountBC\",\"type\":\"int128\"},{\"internalType\":\"int128[2]\",\"name\":\"_fIndexPrice\",\"type\":\"int128[2]\"}],\"name\":\"queryPerpetualPrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"rebalance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"},{\"internalType\":\"uint16\",\"name\":\"_feeTbps\",\"type\":\"uint16\"}],\"name\":\"rebatePostingFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_fAmountToWithdraw\",\"type\":\"int128\"}],\"name\":\"reduceMarginCollateral\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"removeDelegate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_liqPoolID\",\"type\":\"uint8\"}],\"name\":\"runLiquidityPool\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_AMMPerpLogic\",\"type\":\"address\"}],\"name\":\"setAMMPerpLogic\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_delay\",\"type\":\"uint8\"}],\"name\":\"setBlockDelay\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_tiers\",\"type\":\"uint256[]\"},{\"internalType\":\"uint16[]\",\"name\":\"_feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"setBrokerTiers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_tiers\",\"type\":\"uint256[]\"},{\"internalType\":\"uint16[]\",\"name\":\"_feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"setBrokerVolumeTiers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"delegate\",\"type\":\"address\"}],\"name\":\"setDelegate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"setEmergencyState\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32[]\",\"name\":\"_designations\",\"type\":\"uint32[]\"},{\"internalType\":\"uint16[]\",\"name\":\"_fees\",\"type\":\"uint16[]\"}],\"name\":\"setFeesForDesignation\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint16\",\"name\":\"_feeTbps\",\"type\":\"uint16\"}],\"name\":\"setInitialVolumeForFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"setNormalState\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_oracleFactory\",\"type\":\"address\"}],\"name\":\"setOracleFactory\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_oracleAddr\",\"type\":\"address\"}],\"name\":\"setOracleFactoryForPerpetual\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_orderBookFactory\",\"type\":\"address\"}],\"name\":\"setOrderBookFactory\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128[7]\",\"name\":\"_baseParams\",\"type\":\"int128[7]\"}],\"name\":\"setPerpetualBaseParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuoteS2\",\"type\":\"bytes4[2]\"},{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuoteS3\",\"type\":\"bytes4[2]\"}],\"name\":\"setPerpetualOracles\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"string\",\"name\":\"_varName\",\"type\":\"string\"},{\"internalType\":\"int128\",\"name\":\"_value\",\"type\":\"int128\"}],\"name\":\"setPerpetualParam\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"int128\",\"name\":\"_value1\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_value2\",\"type\":\"int128\"}],\"name\":\"setPerpetualParamPair\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_shareTokenFactory\",\"type\":\"address\"}],\"name\":\"setPerpetualPoolFactory\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128[5]\",\"name\":\"_underlyingRiskParams\",\"type\":\"int128[5]\"},{\"internalType\":\"int128[12]\",\"name\":\"_defaultFundRiskParams\",\"type\":\"int128[12]\"}],\"name\":\"setPerpetualRiskParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"int128\",\"name\":\"_value\",\"type\":\"int128\"}],\"name\":\"setPoolParam\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_tiers\",\"type\":\"uint256[]\"},{\"internalType\":\"uint16[]\",\"name\":\"_feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"setTraderTiers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_tiers\",\"type\":\"uint256[]\"},{\"internalType\":\"uint16[]\",\"name\":\"_feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"setTraderVolumeTiers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_treasury\",\"type\":\"address\"}],\"name\":\"setTreasury\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"}],\"name\":\"setUtilityTokenAddr\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualID\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"}],\"name\":\"settle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_id\",\"type\":\"uint8\"}],\"name\":\"settleNextTraderInPool\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"fee\",\"type\":\"uint16\"}],\"name\":\"splitProtocolFee\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"togglePerpEmergencyState\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"},{\"internalType\":\"bool\",\"name\":\"_isApprovedExecutor\",\"type\":\"bool\"}],\"name\":\"tradeViaOrderBook\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_transferToAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"_lots\",\"type\":\"uint32\"}],\"name\":\"transferBrokerLots\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_transferToAddr\",\"type\":\"address\"}],\"name\":\"transferBrokerOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"}],\"name\":\"transferEarningsToTreasury\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"transferValueToTreasury\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"updateAMMTargetFundSize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"updateDefaultFundTargetSize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolIndex\",\"type\":\"uint8\"}],\"name\":\"updateDefaultFundTargetSizeRandom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"updateFundingAndPricesAfter\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"bool\",\"name\":\"_revertIfClosed\",\"type\":\"bool\"}],\"name\":\"updateFundingAndPricesBefore\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"},{\"internalType\":\"uint256\",\"name\":\"_maxAcceptableFeedAge\",\"type\":\"uint256\"}],\"name\":\"updatePriceFeeds\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_tradeAmountBC\",\"type\":\"int128\"}],\"name\":\"updateVolumeEMAOnNewTrade\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bool\",\"name\":\"_isLong\",\"type\":\"bool\"},{\"internalType\":\"int128\",\"name\":\"_fMarkPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fTriggerPrice\",\"type\":\"int128\"}],\"name\":\"validateStopPrice\",\"outputs\":[],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"_jumpTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"_MinimalSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint256\",\"name\":\"_numBlockSinceJump\",\"type\":\"uint256\"},{\"internalType\":\"int128\",\"name\":\"_fLambda\",\"type\":\"int128\"}],\"name\":\"volatilitySpread\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"withdrawAll\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"}],\"name\":\"withdrawDepositFromMarginAccount\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"}],\"name\":\"withdrawFromDefaultFund\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolIndex\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"_shareAmount\",\"type\":\"uint256\"}],\"name\":\"withdrawLiquidity\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"numLots\",\"type\":\"uint32\"}],\"name\":\"BrokerLotsTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fVolume\",\"type\":\"int128\"}],\"name\":\"BrokerVolumeTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"}],\"name\":\"Clear\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"protocolFeeCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"participationFundFeeCC\",\"type\":\"int128\"}],\"name\":\"DistributeFees\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"liquidator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"amountLiquidatedBC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"liquidationPrice\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"newPositionSizeBC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fFeeCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fPnlCC\",\"type\":\"int128\"}],\"name\":\"Liquidate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shareAmount\",\"type\":\"uint256\"}],\"name\":\"LiquidityAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"id\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"marginTokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"shareTokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint16\",\"name\":\"iTargetPoolSizeUpdateTime\",\"type\":\"uint16\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fBrokerCollateralLotSize\",\"type\":\"int128\"}],\"name\":\"LiquidityPoolCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"pauseOn\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"}],\"name\":\"LiquidityProvisionPaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shareAmount\",\"type\":\"uint256\"}],\"name\":\"LiquidityRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shareAmount\",\"type\":\"uint256\"}],\"name\":\"LiquidityWithdrawalInitiated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"uint24\",\"name\":\"id\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128[7]\",\"name\":\"baseParams\",\"type\":\"int128[7]\"},{\"indexed\":false,\"internalType\":\"int128[5]\",\"name\":\"underlyingRiskParams\",\"type\":\"int128[5]\"},{\"indexed\":false,\"internalType\":\"int128[12]\",\"name\":\"defaultFundRiskParams\",\"type\":\"int128[12]\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"eCollateralCurrency\",\"type\":\"uint256\"}],\"name\":\"PerpetualCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"orderHash\",\"type\":\"bytes32\"}],\"name\":\"PerpetualLimitOrderCancelled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"_liqPoolID\",\"type\":\"uint8\"}],\"name\":\"RunLiquidityPool\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"delay\",\"type\":\"uint8\"}],\"name\":\"SetBlockDelay\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint32[]\",\"name\":\"designations\",\"type\":\"uint32[]\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"fees\",\"type\":\"uint16[]\"}],\"name\":\"SetBrokerDesignations\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tiers\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"SetBrokerTiers\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tiers\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"SetBrokerVolumeTiers\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"}],\"name\":\"SetClearedState\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"delegate\",\"type\":\"address\"}],\"name\":\"SetDelegate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fSettlementMarkPremiumRate\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fSettlementS2Price\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fSettlementS3Price\",\"type\":\"int128\"}],\"name\":\"SetEmergencyState\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"}],\"name\":\"SetNormalState\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"bytes4[2]\",\"name\":\"baseQuoteS2\",\"type\":\"bytes4[2]\"},{\"indexed\":false,\"internalType\":\"bytes4[2]\",\"name\":\"baseQuoteS3\",\"type\":\"bytes4[2]\"}],\"name\":\"SetOracles\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"value\",\"type\":\"int128\"}],\"name\":\"SetParameter\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"value1\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"value2\",\"type\":\"int128\"}],\"name\":\"SetParameterPair\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128[7]\",\"name\":\"baseParams\",\"type\":\"int128[7]\"}],\"name\":\"SetPerpetualBaseParameters\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128[5]\",\"name\":\"underlyingRiskParams\",\"type\":\"int128[5]\"},{\"indexed\":false,\"internalType\":\"int128[12]\",\"name\":\"defaultFundRiskParams\",\"type\":\"int128[12]\"}],\"name\":\"SetPerpetualRiskParameters\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"value\",\"type\":\"int128\"}],\"name\":\"SetPoolParameter\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tiers\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"SetTraderTiers\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tiers\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint16[]\",\"name\":\"feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"SetTraderVolumeTiers\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"}],\"name\":\"SetUtilityToken\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int256\",\"name\":\"amount\",\"type\":\"int256\"}],\"name\":\"Settle\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"}],\"name\":\"SettleState\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"}],\"name\":\"SettlementComplete\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"amount\",\"type\":\"int128\"}],\"name\":\"TokensDeposited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"amount\",\"type\":\"int128\"}],\"name\":\"TokensWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"indexed\":false,\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"order\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"orderDigest\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"newPositionSizeBC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"price\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fFeeCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fPnlCC\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fB2C\",\"type\":\"int128\"}],\"name\":\"Trade\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldOBFactory\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newOBFactory\",\"type\":\"address\"}],\"name\":\"TransferAddressTo\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"iLots\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"iNewBrokerLots\",\"type\":\"uint32\"}],\"name\":\"UpdateBrokerAddedCash\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fFundingRate\",\"type\":\"int128\"}],\"name\":\"UpdateFundingRate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fFundingPaymentCC\",\"type\":\"int128\"}],\"name\":\"UpdateMarginAccount\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fMidPricePremium\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fMarkPricePremium\",\"type\":\"int128\"},{\"indexed\":false,\"internalType\":\"int128\",\"name\":\"fSpotIndexPrice\",\"type\":\"int128\"}],\"name\":\"UpdateMarkPrice\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"activatePerpetual\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolIndex\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"addLiquidity\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"_fSettlementS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fSettlementS3\",\"type\":\"int128\"}],\"name\":\"adjustSettlementPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int128[2]\",\"name\":\"_fK2AMM\",\"type\":\"int128[2]\"},{\"internalType\":\"int128\",\"name\":\"_fk2Trader\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fCoverN\",\"type\":\"int128\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressRet2\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressRet3\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fIndexPrices\",\"type\":\"int128[2]\"},{\"internalType\":\"enumAMMPerpLogic.CollateralCurrency\",\"name\":\"_eCCY\",\"type\":\"uint8\"}],\"name\":\"calculateDefaultFundSize\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"int128\",\"name\":\"fLockedValue1\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM1\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMM_K2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentTraderExposureEMA\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.AMMVariables\",\"name\":\"_ammVars\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fIndexPriceS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fIndexPriceS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fRho23\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.MarketVariables\",\"name\":\"_mktVars\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"_fTradeAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fBidAskSpread\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fIncentiveSpread\",\"type\":\"int128\"}],\"name\":\"calculatePerpetualPrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"int128\",\"name\":\"fLockedValue1\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM1\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPoolM3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMM_K2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentTraderExposureEMA\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.AMMVariables\",\"name\":\"_ammVars\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fIndexPriceS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fIndexPriceS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fRho23\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.MarketVariables\",\"name\":\"_mktVars\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"_fTradeAmount\",\"type\":\"int128\"},{\"internalType\":\"bool\",\"name\":\"_withCDF\",\"type\":\"bool\"}],\"name\":\"calculateRiskNeutralPD\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"countActivePerpAccounts\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_marginTokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint16\",\"name\":\"_iTargetPoolSizeUpdateTime\",\"type\":\"uint16\"},{\"internalType\":\"int128\",\"name\":\"_fBrokerCollateralLotSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fCeilPnLShare\",\"type\":\"int128\"}],\"name\":\"createLiquidityPool\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolId\",\"type\":\"uint8\"},{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuoteS2\",\"type\":\"bytes4[2]\"},{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuoteS3\",\"type\":\"bytes4[2]\"},{\"internalType\":\"int128[7]\",\"name\":\"_baseParams\",\"type\":\"int128[7]\"},{\"internalType\":\"int128[5]\",\"name\":\"_underlyingRiskParams\",\"type\":\"int128[5]\"},{\"internalType\":\"int128[12]\",\"name\":\"_defaultFundRiskParams\",\"type\":\"int128[12]\"},{\"internalType\":\"uint256\",\"name\":\"_eCollateralCurrency\",\"type\":\"uint256\"}],\"name\":\"createPerpetual\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"deactivatePerp\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolIdx\",\"type\":\"uint8\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"}],\"name\":\"decreasePoolCash\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"deposit\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint32\",\"name\":\"_iLots\",\"type\":\"uint32\"}],\"name\":\"depositBrokerLots\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"_fDepositRequired\",\"type\":\"int128\"},{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"}],\"name\":\"depositMarginForOpeningTrade\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"}],\"name\":\"depositToDefaultFund\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"}],\"name\":\"determineExchangeFee\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"},{\"internalType\":\"uint16\",\"name\":\"_brkrFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"_protocolFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"bool\",\"name\":\"_hasOpened\",\"type\":\"bool\"}],\"name\":\"distributeFees\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_fDeltaPositionBC\",\"type\":\"int128\"},{\"internalType\":\"uint16\",\"name\":\"_protocolFeeTbps\",\"type\":\"uint16\"}],\"name\":\"distributeFeesLiquidation\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"bytes32\",\"name\":\"_digest\",\"type\":\"bytes32\"}],\"name\":\"executeCancelOrder\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_lpAddr\",\"type\":\"address\"}],\"name\":\"executeLiquidityWithdrawal\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_fTraderPos\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fTradeAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fPrice\",\"type\":\"int128\"},{\"internalType\":\"bool\",\"name\":\"_isClose\",\"type\":\"bool\"}],\"name\":\"executeTrade\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAMMPerpLogic\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128[2]\",\"name\":\"_fIndexPrice\",\"type\":\"int128[2]\"}],\"name\":\"getAMMState\",\"outputs\":[{\"internalType\":\"int128[15]\",\"name\":\"\",\"type\":\"int128[15]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getActivePerpAccounts\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"uint256\",\"name\":\"_from\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_to\",\"type\":\"uint256\"}],\"name\":\"getActivePerpAccountsByChunks\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"}],\"name\":\"getBrokerDesignation\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"}],\"name\":\"getBrokerInducedFee\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"}],\"name\":\"getCollateralTokenAmountForPricing\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"}],\"name\":\"getCurrentBrokerVolume\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"}],\"name\":\"getCurrentTraderVolume\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int128\",\"name\":\"_fPosition0\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fBalance0\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fTradeAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fTargetLeverage\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fS2Mark\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fS2\",\"type\":\"int128\"}],\"name\":\"getDepositAmountForLvgPosition\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"_brokerDesignation\",\"type\":\"uint32\"}],\"name\":\"getFeeForBrokerDesignation\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"}],\"name\":\"getFeeForBrokerStake\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"}],\"name\":\"getFeeForBrokerVolume\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"}],\"name\":\"getFeeForTraderStake\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"}],\"name\":\"getFeeForTraderVolume\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"getLastPerpetualBaseToUSDConversion\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128[2]\",\"name\":\"_fIndexPrice\",\"type\":\"int128[2]\"}],\"name\":\"getLiquidatableAccounts\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"unsafeAccounts\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"}],\"name\":\"getLiquidityPool\",\"outputs\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"isRunning\",\"type\":\"bool\"},{\"internalType\":\"uint8\",\"name\":\"iPerpetualCount\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"id\",\"type\":\"uint8\"},{\"internalType\":\"int32\",\"name\":\"fCeilPnLShare\",\"type\":\"int32\"},{\"internalType\":\"uint8\",\"name\":\"marginTokenDecimals\",\"type\":\"uint8\"},{\"internalType\":\"uint16\",\"name\":\"iTargetPoolSizeUpdateTime\",\"type\":\"uint16\"},{\"internalType\":\"address\",\"name\":\"marginTokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"prevAnchor\",\"type\":\"uint64\"},{\"internalType\":\"int128\",\"name\":\"fRedemptionRate\",\"type\":\"int128\"},{\"internalType\":\"address\",\"name\":\"shareTokenAddress\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fPnLparticipantsCashCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetAMMFundSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fDefaultFundCashCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetDFSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fBrokerCollateralLotSize\",\"type\":\"int128\"},{\"internalType\":\"uint128\",\"name\":\"prevTokenAmount\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"nextTokenAmount\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"totalSupplyShareToken\",\"type\":\"uint128\"},{\"internalType\":\"int128\",\"name\":\"fBrokerFundCashCC\",\"type\":\"int128\"}],\"internalType\":\"structPerpStorage.LiquidityPoolData\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolIdFrom\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"_poolIdTo\",\"type\":\"uint8\"}],\"name\":\"getLiquidityPools\",\"outputs\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"isRunning\",\"type\":\"bool\"},{\"internalType\":\"uint8\",\"name\":\"iPerpetualCount\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"id\",\"type\":\"uint8\"},{\"internalType\":\"int32\",\"name\":\"fCeilPnLShare\",\"type\":\"int32\"},{\"internalType\":\"uint8\",\"name\":\"marginTokenDecimals\",\"type\":\"uint8\"},{\"internalType\":\"uint16\",\"name\":\"iTargetPoolSizeUpdateTime\",\"type\":\"uint16\"},{\"internalType\":\"address\",\"name\":\"marginTokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"prevAnchor\",\"type\":\"uint64\"},{\"internalType\":\"int128\",\"name\":\"fRedemptionRate\",\"type\":\"int128\"},{\"internalType\":\"address\",\"name\":\"shareTokenAddress\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fPnLparticipantsCashCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetAMMFundSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fDefaultFundCashCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetDFSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fBrokerCollateralLotSize\",\"type\":\"int128\"},{\"internalType\":\"uint128\",\"name\":\"prevTokenAmount\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"nextTokenAmount\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"totalSupplyShareToken\",\"type\":\"uint128\"},{\"internalType\":\"int128\",\"name\":\"fBrokerFundCashCC\",\"type\":\"int128\"}],\"internalType\":\"structPerpStorage.LiquidityPoolData[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddress\",\"type\":\"address\"}],\"name\":\"getMarginAccount\",\"outputs\":[{\"components\":[{\"internalType\":\"int128\",\"name\":\"fLockedInValueQC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCashCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fPositionBC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fUnitAccumulatedFundingStart\",\"type\":\"int128\"},{\"internalType\":\"uint64\",\"name\":\"slot2\",\"type\":\"uint64\"},{\"internalType\":\"uint16\",\"name\":\"slot3\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"slot4\",\"type\":\"uint16\"},{\"internalType\":\"bytes16\",\"name\":\"slot\",\"type\":\"bytes16\"}],\"internalType\":\"structPerpStorage.MarginAccount\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"_fCurrentTraderPos\",\"type\":\"int128\"},{\"internalType\":\"bool\",\"name\":\"_isBuy\",\"type\":\"bool\"}],\"name\":\"getMaxSignedOpenTradeSizeForPos\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128[2]\",\"name\":\"_fIndexPrice\",\"type\":\"int128[2]\"}],\"name\":\"getNextLiquidatableTrader\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getOracleFactory\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuote\",\"type\":\"bytes4[2]\"}],\"name\":\"getOraclePrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"fPrice\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getOracleUpdateTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getOrderBookAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getOrderBookFactoryAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getPerpetual\",\"outputs\":[{\"components\":[{\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint24\",\"name\":\"id\",\"type\":\"uint24\"},{\"internalType\":\"int32\",\"name\":\"fInitialMarginRate\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fSigma2\",\"type\":\"int32\"},{\"internalType\":\"uint32\",\"name\":\"iLastFundingTime\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"slot0\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"slot1\",\"type\":\"uint32\"},{\"internalType\":\"int32\",\"name\":\"fMaintenanceMarginRate\",\"type\":\"int32\"},{\"internalType\":\"enumPerpStorage.PerpetualState\",\"name\":\"state\",\"type\":\"uint8\"},{\"internalType\":\"enumAMMPerpLogic.CollateralCurrency\",\"name\":\"eCollateralCurrency\",\"type\":\"uint8\"},{\"internalType\":\"uint16\",\"name\":\"minimalSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes4\",\"name\":\"S2BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S2QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"uint16\",\"name\":\"incentiveSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"slot2\",\"type\":\"uint16\"},{\"internalType\":\"bytes4\",\"name\":\"S3BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S3QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"int32\",\"name\":\"fSigma3\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fRho23\",\"type\":\"int32\"},{\"internalType\":\"uint16\",\"name\":\"liquidationPenaltyRateTbps\",\"type\":\"uint16\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fPrice\",\"type\":\"int128\"},{\"internalType\":\"uint64\",\"name\":\"time\",\"type\":\"uint64\"}],\"internalType\":\"structPerpStorage.PriceTimeData\",\"name\":\"currentMarkPremiumRate\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"premiumRatesEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fUnitAccumulatedFunding\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fOpenInterest\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetAMMFundSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentTraderExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentFundingRate\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLotSizeBC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fReferralRebateCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetDFSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fkStar\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMMTargetDD\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMMMinSizeCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fMinimalTraderExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fMinimalAMMExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSettlementS3PriceData\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSettlementS2PriceData\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTotalMarginBalance\",\"type\":\"int128\"},{\"internalType\":\"int32\",\"name\":\"fMarkPriceEMALambda\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fFundingRateClamp\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fMaximalTradeSizeBumpUp\",\"type\":\"int32\"},{\"internalType\":\"uint32\",\"name\":\"iLastTargetPoolSizeTime\",\"type\":\"uint32\"},{\"internalType\":\"int32\",\"name\":\"fDFCoverNRate\",\"type\":\"int32\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressReturnS3\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fDFLambda\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fCurrentAMMExposureEMA\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressReturnS2\",\"type\":\"int128[2]\"}],\"internalType\":\"structPerpStorage.PerpetualData\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"}],\"name\":\"getPerpetualCountInPool\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"_perpetualIndex\",\"type\":\"uint8\"}],\"name\":\"getPerpetualId\",\"outputs\":[{\"internalType\":\"uint24\",\"name\":\"\",\"type\":\"uint24\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24[]\",\"name\":\"perpetualIds\",\"type\":\"uint24[]\"}],\"name\":\"getPerpetualStaticInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"uint24\",\"name\":\"id\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"limitOrderBookAddr\",\"type\":\"address\"},{\"internalType\":\"int32\",\"name\":\"fInitialMarginRate\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fMaintenanceMarginRate\",\"type\":\"int32\"},{\"internalType\":\"uint8\",\"name\":\"perpetualState\",\"type\":\"uint8\"},{\"internalType\":\"enumAMMPerpLogic.CollateralCurrency\",\"name\":\"collCurrencyType\",\"type\":\"uint8\"},{\"internalType\":\"bytes4\",\"name\":\"S2BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S2QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S3BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S3QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"int128\",\"name\":\"fLotSizeBC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fReferralRebateCC\",\"type\":\"int128\"},{\"internalType\":\"bytes32[]\",\"name\":\"priceIds\",\"type\":\"bytes32[]\"},{\"internalType\":\"bool[]\",\"name\":\"isPyth\",\"type\":\"bool[]\"}],\"internalType\":\"structIPerpetualInfo.PerpetualStaticInfo[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24[]\",\"name\":\"perpetualIds\",\"type\":\"uint24[]\"}],\"name\":\"getPerpetuals\",\"outputs\":[{\"components\":[{\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint24\",\"name\":\"id\",\"type\":\"uint24\"},{\"internalType\":\"int32\",\"name\":\"fInitialMarginRate\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fSigma2\",\"type\":\"int32\"},{\"internalType\":\"uint32\",\"name\":\"iLastFundingTime\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"slot0\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"slot1\",\"type\":\"uint32\"},{\"internalType\":\"int32\",\"name\":\"fMaintenanceMarginRate\",\"type\":\"int32\"},{\"internalType\":\"enumPerpStorage.PerpetualState\",\"name\":\"state\",\"type\":\"uint8\"},{\"internalType\":\"enumAMMPerpLogic.CollateralCurrency\",\"name\":\"eCollateralCurrency\",\"type\":\"uint8\"},{\"internalType\":\"uint16\",\"name\":\"minimalSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes4\",\"name\":\"S2BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S2QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"uint16\",\"name\":\"incentiveSpreadTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"slot2\",\"type\":\"uint16\"},{\"internalType\":\"bytes4\",\"name\":\"S3BaseCCY\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"S3QuoteCCY\",\"type\":\"bytes4\"},{\"internalType\":\"int32\",\"name\":\"fSigma3\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fRho23\",\"type\":\"int32\"},{\"internalType\":\"uint16\",\"name\":\"liquidationPenaltyRateTbps\",\"type\":\"uint16\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fPrice\",\"type\":\"int128\"},{\"internalType\":\"uint64\",\"name\":\"time\",\"type\":\"uint64\"}],\"internalType\":\"structPerpStorage.PriceTimeData\",\"name\":\"currentMarkPremiumRate\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"premiumRatesEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fUnitAccumulatedFunding\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fOpenInterest\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetAMMFundSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentTraderExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fCurrentFundingRate\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLotSizeBC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fReferralRebateCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTargetDFSize\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fkStar\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMMTargetDD\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAMMMinSizeCC\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fMinimalTraderExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fMinimalAMMExposureEMA\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSettlementS3PriceData\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSettlementS2PriceData\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTotalMarginBalance\",\"type\":\"int128\"},{\"internalType\":\"int32\",\"name\":\"fMarkPriceEMALambda\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fFundingRateClamp\",\"type\":\"int32\"},{\"internalType\":\"int32\",\"name\":\"fMaximalTradeSizeBumpUp\",\"type\":\"int32\"},{\"internalType\":\"uint32\",\"name\":\"iLastTargetPoolSizeTime\",\"type\":\"uint32\"},{\"internalType\":\"int32\",\"name\":\"fDFCoverNRate\",\"type\":\"int32\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressReturnS3\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fDFLambda\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fCurrentAMMExposureEMA\",\"type\":\"int128[2]\"},{\"internalType\":\"int128[2]\",\"name\":\"fStressReturnS2\",\"type\":\"int128[2]\"}],\"internalType\":\"structPerpStorage.PerpetualData[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPoolCount\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getPoolIdByPerpetualId\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolFromIdx\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"_poolToIdx\",\"type\":\"uint8\"}],\"name\":\"getPoolStaticInfo\",\"outputs\":[{\"internalType\":\"uint24[][]\",\"name\":\"\",\"type\":\"uint24[][]\"},{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"},{\"internalType\":\"address\",\"name\":\"_oracleFactoryAddress\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"getPriceInfo\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"},{\"internalType\":\"bool[]\",\"name\":\"\",\"type\":\"bool[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"uint256\",\"name\":\"start\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"count\",\"type\":\"uint256\"}],\"name\":\"getSettleableAccounts\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getShareTokenFactory\",\"outputs\":[{\"internalType\":\"contractIShareTokenFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"}],\"name\":\"getShareTokenPriceD18\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int128\",\"name\":\"_fK2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fL1\",\"type\":\"int128\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fIndexPriceS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fIndexPriceS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fRho23\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.MarketVariables\",\"name\":\"_mktVars\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"_fTargetDD\",\"type\":\"int128\"}],\"name\":\"getTargetCollateralM1\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int128\",\"name\":\"_fK2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fL1\",\"type\":\"int128\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fIndexPriceS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fIndexPriceS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fRho23\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.MarketVariables\",\"name\":\"_mktVars\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"_fTargetDD\",\"type\":\"int128\"}],\"name\":\"getTargetCollateralM2\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int128\",\"name\":\"_fK2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fL1\",\"type\":\"int128\"},{\"components\":[{\"internalType\":\"int128\",\"name\":\"fIndexPriceS2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fIndexPriceS3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma2\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fSigma3\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fRho23\",\"type\":\"int128\"}],\"internalType\":\"structAMMPerpLogic.MarketVariables\",\"name\":\"_mktVars\",\"type\":\"tuple\"},{\"internalType\":\"int128\",\"name\":\"_fTargetDD\",\"type\":\"int128\"}],\"name\":\"getTargetCollateralM3\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"_shareAmount\",\"type\":\"uint256\"}],\"name\":\"getTokenAmountToReturn\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddress\",\"type\":\"address\"},{\"internalType\":\"int128[2]\",\"name\":\"_fIndexPrice\",\"type\":\"int128[2]\"}],\"name\":\"getTraderState\",\"outputs\":[{\"internalType\":\"int128[11]\",\"name\":\"\",\"type\":\"int128[11]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getTreasuryAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"poolId\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"_fromIdx\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"numRequests\",\"type\":\"uint256\"}],\"name\":\"getWithdrawRequests\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"lp\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"shareTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint64\",\"name\":\"withdrawTimestamp\",\"type\":\"uint64\"}],\"internalType\":\"structIPerpetualTreasury.WithdrawRequest[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolIdx\",\"type\":\"uint8\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"}],\"name\":\"increasePoolCash\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddress\",\"type\":\"address\"}],\"name\":\"isActiveAccount\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_trader\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_delegate\",\"type\":\"address\"}],\"name\":\"isDelegate\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"isMarketClosed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"digest\",\"type\":\"bytes32\"}],\"name\":\"isOrderCanceled\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"digest\",\"type\":\"bytes32\"}],\"name\":\"isOrderExecuted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"isPerpMarketClosed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"isClosed\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualIndex\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_liquidatorAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"liquidateByAMM\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"liquidatedAmount\",\"type\":\"int128\"}],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"bool\",\"name\":\"_pauseOn\",\"type\":\"bool\"}],\"name\":\"pauseLiquidityProvision\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"}],\"name\":\"preTrade\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"}],\"name\":\"queryExchangeFee\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"\",\"type\":\"uint16\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24[]\",\"name\":\"perpetualIds\",\"type\":\"uint24[]\"},{\"internalType\":\"int128[]\",\"name\":\"idxPriceDataPairs\",\"type\":\"int128[]\"}],\"name\":\"queryMidPrices\",\"outputs\":[{\"internalType\":\"int128[]\",\"name\":\"\",\"type\":\"int128[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"_fTradeAmountBC\",\"type\":\"int128\"},{\"internalType\":\"int128[2]\",\"name\":\"_fIndexPrice\",\"type\":\"int128[2]\"}],\"name\":\"queryPerpetualPrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"rebalance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_fAmountToWithdraw\",\"type\":\"int128\"}],\"name\":\"reduceMarginCollateral\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"removeDelegate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_liqPoolID\",\"type\":\"uint8\"}],\"name\":\"runLiquidityPool\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_AMMPerpLogic\",\"type\":\"address\"}],\"name\":\"setAMMPerpLogic\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_delay\",\"type\":\"uint8\"}],\"name\":\"setBlockDelay\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_tiers\",\"type\":\"uint256[]\"},{\"internalType\":\"uint16[]\",\"name\":\"_feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"setBrokerTiers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_tiers\",\"type\":\"uint256[]\"},{\"internalType\":\"uint16[]\",\"name\":\"_feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"setBrokerVolumeTiers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"delegate\",\"type\":\"address\"}],\"name\":\"setDelegate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"setEmergencyState\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32[]\",\"name\":\"_designations\",\"type\":\"uint32[]\"},{\"internalType\":\"uint16[]\",\"name\":\"_fees\",\"type\":\"uint16[]\"}],\"name\":\"setFeesForDesignation\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint16\",\"name\":\"_feeTbps\",\"type\":\"uint16\"}],\"name\":\"setInitialVolumeForFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"setNormalState\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_oracleFactory\",\"type\":\"address\"}],\"name\":\"setOracleFactory\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_oracleAddr\",\"type\":\"address\"}],\"name\":\"setOracleFactoryForPerpetual\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_orderBookFactory\",\"type\":\"address\"}],\"name\":\"setOrderBookFactory\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128[7]\",\"name\":\"_baseParams\",\"type\":\"int128[7]\"}],\"name\":\"setPerpetualBaseParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuoteS2\",\"type\":\"bytes4[2]\"},{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuoteS3\",\"type\":\"bytes4[2]\"}],\"name\":\"setPerpetualOracles\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"string\",\"name\":\"_varName\",\"type\":\"string\"},{\"internalType\":\"int128\",\"name\":\"_value\",\"type\":\"int128\"}],\"name\":\"setPerpetualParam\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"int128\",\"name\":\"_value1\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_value2\",\"type\":\"int128\"}],\"name\":\"setPerpetualParamPair\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_shareTokenFactory\",\"type\":\"address\"}],\"name\":\"setPerpetualPoolFactory\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128[5]\",\"name\":\"_underlyingRiskParams\",\"type\":\"int128[5]\"},{\"internalType\":\"int128[12]\",\"name\":\"_defaultFundRiskParams\",\"type\":\"int128[12]\"}],\"name\":\"setPerpetualRiskParams\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"int128\",\"name\":\"_value\",\"type\":\"int128\"}],\"name\":\"setPoolParam\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_tiers\",\"type\":\"uint256[]\"},{\"internalType\":\"uint16[]\",\"name\":\"_feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"setTraderTiers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_tiers\",\"type\":\"uint256[]\"},{\"internalType\":\"uint16[]\",\"name\":\"_feesTbps\",\"type\":\"uint16[]\"}],\"name\":\"setTraderVolumeTiers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_treasury\",\"type\":\"address\"}],\"name\":\"setTreasury\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"}],\"name\":\"setUtilityTokenAddr\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualID\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"}],\"name\":\"settle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_id\",\"type\":\"uint8\"}],\"name\":\"settleNextTraderInPool\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint16\",\"name\":\"fee\",\"type\":\"uint16\"}],\"name\":\"splitProtocolFee\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"togglePerpEmergencyState\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"_order\",\"type\":\"tuple\"}],\"name\":\"tradeViaOrderBook\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_transferToAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"_lots\",\"type\":\"uint32\"}],\"name\":\"transferBrokerLots\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"_transferToAddr\",\"type\":\"address\"}],\"name\":\"transferBrokerOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"}],\"name\":\"transferEarningsToTreasury\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"transferValueToTreasury\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"updateAMMTargetFundSize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"updateDefaultFundTargetSize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolIndex\",\"type\":\"uint8\"}],\"name\":\"updateDefaultFundTargetSizeRandom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"}],\"name\":\"updateFundingAndPricesAfter\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"bool\",\"name\":\"_revertIfClosed\",\"type\":\"bool\"}],\"name\":\"updateFundingAndPricesBefore\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"},{\"internalType\":\"uint256\",\"name\":\"_maxAcceptableFeedAge\",\"type\":\"uint256\"}],\"name\":\"updatePriceFeeds\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_brokerAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_tradeAmountBC\",\"type\":\"int128\"}],\"name\":\"updateVolumeEMAOnNewTrade\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bool\",\"name\":\"_isLong\",\"type\":\"bool\"},{\"internalType\":\"int128\",\"name\":\"_fMarkPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"_fTriggerPrice\",\"type\":\"int128\"}],\"name\":\"validateStopPrice\",\"outputs\":[],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"withdrawAll\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"_iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"_traderAddr\",\"type\":\"address\"}],\"name\":\"withdrawDepositFromMarginAccount\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_poolId\",\"type\":\"uint8\"},{\"internalType\":\"int128\",\"name\":\"_fAmount\",\"type\":\"int128\"}],\"name\":\"withdrawFromDefaultFund\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_iPoolIndex\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"_shareAmount\",\"type\":\"uint256\"}],\"name\":\"withdrawLiquidity\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // IPerpetualManagerABI is the input ABI used to generate the binding from.
@@ -1423,15 +1423,15 @@ func (_IPerpetualManager *IPerpetualManagerCallerSession) GetPerpetualId(_poolId
 // GetPerpetualStaticInfo is a free data retrieval call binding the contract method 0x68805619.
 //
 // Solidity: function getPerpetualStaticInfo(uint24[] perpetualIds) view returns((uint24,address,int32,int32,uint8,uint8,bytes4,bytes4,bytes4,bytes4,int128,int128,bytes32[],bool[])[])
-func (_IPerpetualManager *IPerpetualManagerCaller) GetPerpetualStaticInfo(opts *bind.CallOpts, perpetualIds []*big.Int) ([]IPerpetualGetterPerpetualStaticInfo, error) {
+func (_IPerpetualManager *IPerpetualManagerCaller) GetPerpetualStaticInfo(opts *bind.CallOpts, perpetualIds []*big.Int) ([]IPerpetualInfoPerpetualStaticInfo, error) {
 	var out []interface{}
 	err := _IPerpetualManager.contract.Call(opts, &out, "getPerpetualStaticInfo", perpetualIds)
 
 	if err != nil {
-		return *new([]IPerpetualGetterPerpetualStaticInfo), err
+		return *new([]IPerpetualInfoPerpetualStaticInfo), err
 	}
 
-	out0 := *abi.ConvertType(out[0], new([]IPerpetualGetterPerpetualStaticInfo)).(*[]IPerpetualGetterPerpetualStaticInfo)
+	out0 := *abi.ConvertType(out[0], new([]IPerpetualInfoPerpetualStaticInfo)).(*[]IPerpetualInfoPerpetualStaticInfo)
 
 	return out0, err
 
@@ -1440,14 +1440,14 @@ func (_IPerpetualManager *IPerpetualManagerCaller) GetPerpetualStaticInfo(opts *
 // GetPerpetualStaticInfo is a free data retrieval call binding the contract method 0x68805619.
 //
 // Solidity: function getPerpetualStaticInfo(uint24[] perpetualIds) view returns((uint24,address,int32,int32,uint8,uint8,bytes4,bytes4,bytes4,bytes4,int128,int128,bytes32[],bool[])[])
-func (_IPerpetualManager *IPerpetualManagerSession) GetPerpetualStaticInfo(perpetualIds []*big.Int) ([]IPerpetualGetterPerpetualStaticInfo, error) {
+func (_IPerpetualManager *IPerpetualManagerSession) GetPerpetualStaticInfo(perpetualIds []*big.Int) ([]IPerpetualInfoPerpetualStaticInfo, error) {
 	return _IPerpetualManager.Contract.GetPerpetualStaticInfo(&_IPerpetualManager.CallOpts, perpetualIds)
 }
 
 // GetPerpetualStaticInfo is a free data retrieval call binding the contract method 0x68805619.
 //
 // Solidity: function getPerpetualStaticInfo(uint24[] perpetualIds) view returns((uint24,address,int32,int32,uint8,uint8,bytes4,bytes4,bytes4,bytes4,int128,int128,bytes32[],bool[])[])
-func (_IPerpetualManager *IPerpetualManagerCallerSession) GetPerpetualStaticInfo(perpetualIds []*big.Int) ([]IPerpetualGetterPerpetualStaticInfo, error) {
+func (_IPerpetualManager *IPerpetualManagerCallerSession) GetPerpetualStaticInfo(perpetualIds []*big.Int) ([]IPerpetualInfoPerpetualStaticInfo, error) {
 	return _IPerpetualManager.Contract.GetPerpetualStaticInfo(&_IPerpetualManager.CallOpts, perpetualIds)
 }
 
@@ -1920,37 +1920,6 @@ func (_IPerpetualManager *IPerpetualManagerCallerSession) GetWithdrawRequests(po
 	return _IPerpetualManager.Contract.GetWithdrawRequests(&_IPerpetualManager.CallOpts, poolId, _fromIdx, numRequests)
 }
 
-// HoldingPeriodPenalty is a free data retrieval call binding the contract method 0x24e03d33.
-//
-// Solidity: function holdingPeriodPenalty(uint256 _numBlockSinceLastOpen, int128 _fLambda) pure returns(uint16)
-func (_IPerpetualManager *IPerpetualManagerCaller) HoldingPeriodPenalty(opts *bind.CallOpts, _numBlockSinceLastOpen *big.Int, _fLambda *big.Int) (uint16, error) {
-	var out []interface{}
-	err := _IPerpetualManager.contract.Call(opts, &out, "holdingPeriodPenalty", _numBlockSinceLastOpen, _fLambda)
-
-	if err != nil {
-		return *new(uint16), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(uint16)).(*uint16)
-
-	return out0, err
-
-}
-
-// HoldingPeriodPenalty is a free data retrieval call binding the contract method 0x24e03d33.
-//
-// Solidity: function holdingPeriodPenalty(uint256 _numBlockSinceLastOpen, int128 _fLambda) pure returns(uint16)
-func (_IPerpetualManager *IPerpetualManagerSession) HoldingPeriodPenalty(_numBlockSinceLastOpen *big.Int, _fLambda *big.Int) (uint16, error) {
-	return _IPerpetualManager.Contract.HoldingPeriodPenalty(&_IPerpetualManager.CallOpts, _numBlockSinceLastOpen, _fLambda)
-}
-
-// HoldingPeriodPenalty is a free data retrieval call binding the contract method 0x24e03d33.
-//
-// Solidity: function holdingPeriodPenalty(uint256 _numBlockSinceLastOpen, int128 _fLambda) pure returns(uint16)
-func (_IPerpetualManager *IPerpetualManagerCallerSession) HoldingPeriodPenalty(_numBlockSinceLastOpen *big.Int, _fLambda *big.Int) (uint16, error) {
-	return _IPerpetualManager.Contract.HoldingPeriodPenalty(&_IPerpetualManager.CallOpts, _numBlockSinceLastOpen, _fLambda)
-}
-
 // IsActiveAccount is a free data retrieval call binding the contract method 0x1efb7dc0.
 //
 // Solidity: function isActiveAccount(uint24 _perpetualId, address _traderAddress) view returns(bool)
@@ -2291,37 +2260,6 @@ func (_IPerpetualManager *IPerpetualManagerCallerSession) ValidateStopPrice(_isL
 	return _IPerpetualManager.Contract.ValidateStopPrice(&_IPerpetualManager.CallOpts, _isLong, _fMarkPrice, _fTriggerPrice)
 }
 
-// VolatilitySpread is a free data retrieval call binding the contract method 0x0730b613.
-//
-// Solidity: function volatilitySpread(uint16 _jumpTbps, uint16 _MinimalSpreadTbps, uint256 _numBlockSinceJump, int128 _fLambda) pure returns(int128)
-func (_IPerpetualManager *IPerpetualManagerCaller) VolatilitySpread(opts *bind.CallOpts, _jumpTbps uint16, _MinimalSpreadTbps uint16, _numBlockSinceJump *big.Int, _fLambda *big.Int) (*big.Int, error) {
-	var out []interface{}
-	err := _IPerpetualManager.contract.Call(opts, &out, "volatilitySpread", _jumpTbps, _MinimalSpreadTbps, _numBlockSinceJump, _fLambda)
-
-	if err != nil {
-		return *new(*big.Int), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
-
-	return out0, err
-
-}
-
-// VolatilitySpread is a free data retrieval call binding the contract method 0x0730b613.
-//
-// Solidity: function volatilitySpread(uint16 _jumpTbps, uint16 _MinimalSpreadTbps, uint256 _numBlockSinceJump, int128 _fLambda) pure returns(int128)
-func (_IPerpetualManager *IPerpetualManagerSession) VolatilitySpread(_jumpTbps uint16, _MinimalSpreadTbps uint16, _numBlockSinceJump *big.Int, _fLambda *big.Int) (*big.Int, error) {
-	return _IPerpetualManager.Contract.VolatilitySpread(&_IPerpetualManager.CallOpts, _jumpTbps, _MinimalSpreadTbps, _numBlockSinceJump, _fLambda)
-}
-
-// VolatilitySpread is a free data retrieval call binding the contract method 0x0730b613.
-//
-// Solidity: function volatilitySpread(uint16 _jumpTbps, uint16 _MinimalSpreadTbps, uint256 _numBlockSinceJump, int128 _fLambda) pure returns(int128)
-func (_IPerpetualManager *IPerpetualManagerCallerSession) VolatilitySpread(_jumpTbps uint16, _MinimalSpreadTbps uint16, _numBlockSinceJump *big.Int, _fLambda *big.Int) (*big.Int, error) {
-	return _IPerpetualManager.Contract.VolatilitySpread(&_IPerpetualManager.CallOpts, _jumpTbps, _MinimalSpreadTbps, _numBlockSinceJump, _fLambda)
-}
-
 // ActivatePerpetual is a paid mutator transaction binding the contract method 0xa65dbc99.
 //
 // Solidity: function activatePerpetual(uint24 _perpetualId) returns()
@@ -2383,27 +2321,6 @@ func (_IPerpetualManager *IPerpetualManagerSession) AdjustSettlementPrice(_perpe
 // Solidity: function adjustSettlementPrice(uint24 _perpetualId, int128 _fSettlementS2, int128 _fSettlementS3) returns()
 func (_IPerpetualManager *IPerpetualManagerTransactorSession) AdjustSettlementPrice(_perpetualId *big.Int, _fSettlementS2 *big.Int, _fSettlementS3 *big.Int) (*types.Transaction, error) {
 	return _IPerpetualManager.Contract.AdjustSettlementPrice(&_IPerpetualManager.TransactOpts, _perpetualId, _fSettlementS2, _fSettlementS3)
-}
-
-// ChargePostingFee is a paid mutator transaction binding the contract method 0x5ad59a1c.
-//
-// Solidity: function chargePostingFee((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, uint16 _feeTbps) returns()
-func (_IPerpetualManager *IPerpetualManagerTransactor) ChargePostingFee(opts *bind.TransactOpts, _order IPerpetualOrderOrder, _feeTbps uint16) (*types.Transaction, error) {
-	return _IPerpetualManager.contract.Transact(opts, "chargePostingFee", _order, _feeTbps)
-}
-
-// ChargePostingFee is a paid mutator transaction binding the contract method 0x5ad59a1c.
-//
-// Solidity: function chargePostingFee((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, uint16 _feeTbps) returns()
-func (_IPerpetualManager *IPerpetualManagerSession) ChargePostingFee(_order IPerpetualOrderOrder, _feeTbps uint16) (*types.Transaction, error) {
-	return _IPerpetualManager.Contract.ChargePostingFee(&_IPerpetualManager.TransactOpts, _order, _feeTbps)
-}
-
-// ChargePostingFee is a paid mutator transaction binding the contract method 0x5ad59a1c.
-//
-// Solidity: function chargePostingFee((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, uint16 _feeTbps) returns()
-func (_IPerpetualManager *IPerpetualManagerTransactorSession) ChargePostingFee(_order IPerpetualOrderOrder, _feeTbps uint16) (*types.Transaction, error) {
-	return _IPerpetualManager.Contract.ChargePostingFee(&_IPerpetualManager.TransactOpts, _order, _feeTbps)
 }
 
 // CreateLiquidityPool is a paid mutator transaction binding the contract method 0xf20bcadb.
@@ -2574,46 +2491,46 @@ func (_IPerpetualManager *IPerpetualManagerTransactorSession) DepositToDefaultFu
 	return _IPerpetualManager.Contract.DepositToDefaultFund(&_IPerpetualManager.TransactOpts, _poolId, _fAmount)
 }
 
-// DistributeFees is a paid mutator transaction binding the contract method 0x21ba98a8.
+// DistributeFees is a paid mutator transaction binding the contract method 0xce1fdf15.
 //
-// Solidity: function distributeFees((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, bool _hasOpened) returns(int128)
-func (_IPerpetualManager *IPerpetualManagerTransactor) DistributeFees(opts *bind.TransactOpts, _order IPerpetualOrderOrder, _hasOpened bool) (*types.Transaction, error) {
-	return _IPerpetualManager.contract.Transact(opts, "distributeFees", _order, _hasOpened)
+// Solidity: function distributeFees((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, uint16 _brkrFeeTbps, uint16 _protocolFeeTbps, bool _hasOpened) returns(int128)
+func (_IPerpetualManager *IPerpetualManagerTransactor) DistributeFees(opts *bind.TransactOpts, _order IPerpetualOrderOrder, _brkrFeeTbps uint16, _protocolFeeTbps uint16, _hasOpened bool) (*types.Transaction, error) {
+	return _IPerpetualManager.contract.Transact(opts, "distributeFees", _order, _brkrFeeTbps, _protocolFeeTbps, _hasOpened)
 }
 
-// DistributeFees is a paid mutator transaction binding the contract method 0x21ba98a8.
+// DistributeFees is a paid mutator transaction binding the contract method 0xce1fdf15.
 //
-// Solidity: function distributeFees((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, bool _hasOpened) returns(int128)
-func (_IPerpetualManager *IPerpetualManagerSession) DistributeFees(_order IPerpetualOrderOrder, _hasOpened bool) (*types.Transaction, error) {
-	return _IPerpetualManager.Contract.DistributeFees(&_IPerpetualManager.TransactOpts, _order, _hasOpened)
+// Solidity: function distributeFees((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, uint16 _brkrFeeTbps, uint16 _protocolFeeTbps, bool _hasOpened) returns(int128)
+func (_IPerpetualManager *IPerpetualManagerSession) DistributeFees(_order IPerpetualOrderOrder, _brkrFeeTbps uint16, _protocolFeeTbps uint16, _hasOpened bool) (*types.Transaction, error) {
+	return _IPerpetualManager.Contract.DistributeFees(&_IPerpetualManager.TransactOpts, _order, _brkrFeeTbps, _protocolFeeTbps, _hasOpened)
 }
 
-// DistributeFees is a paid mutator transaction binding the contract method 0x21ba98a8.
+// DistributeFees is a paid mutator transaction binding the contract method 0xce1fdf15.
 //
-// Solidity: function distributeFees((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, bool _hasOpened) returns(int128)
-func (_IPerpetualManager *IPerpetualManagerTransactorSession) DistributeFees(_order IPerpetualOrderOrder, _hasOpened bool) (*types.Transaction, error) {
-	return _IPerpetualManager.Contract.DistributeFees(&_IPerpetualManager.TransactOpts, _order, _hasOpened)
+// Solidity: function distributeFees((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, uint16 _brkrFeeTbps, uint16 _protocolFeeTbps, bool _hasOpened) returns(int128)
+func (_IPerpetualManager *IPerpetualManagerTransactorSession) DistributeFees(_order IPerpetualOrderOrder, _brkrFeeTbps uint16, _protocolFeeTbps uint16, _hasOpened bool) (*types.Transaction, error) {
+	return _IPerpetualManager.Contract.DistributeFees(&_IPerpetualManager.TransactOpts, _order, _brkrFeeTbps, _protocolFeeTbps, _hasOpened)
 }
 
-// DistributeFeesLiquidation is a paid mutator transaction binding the contract method 0x9baac3c4.
+// DistributeFeesLiquidation is a paid mutator transaction binding the contract method 0x1112e151.
 //
-// Solidity: function distributeFeesLiquidation(uint24 _iPerpetualId, address _traderAddr, int128 _fDeltaPositionBC) returns(int128)
-func (_IPerpetualManager *IPerpetualManagerTransactor) DistributeFeesLiquidation(opts *bind.TransactOpts, _iPerpetualId *big.Int, _traderAddr common.Address, _fDeltaPositionBC *big.Int) (*types.Transaction, error) {
-	return _IPerpetualManager.contract.Transact(opts, "distributeFeesLiquidation", _iPerpetualId, _traderAddr, _fDeltaPositionBC)
+// Solidity: function distributeFeesLiquidation(uint24 _iPerpetualId, address _traderAddr, int128 _fDeltaPositionBC, uint16 _protocolFeeTbps) returns(int128)
+func (_IPerpetualManager *IPerpetualManagerTransactor) DistributeFeesLiquidation(opts *bind.TransactOpts, _iPerpetualId *big.Int, _traderAddr common.Address, _fDeltaPositionBC *big.Int, _protocolFeeTbps uint16) (*types.Transaction, error) {
+	return _IPerpetualManager.contract.Transact(opts, "distributeFeesLiquidation", _iPerpetualId, _traderAddr, _fDeltaPositionBC, _protocolFeeTbps)
 }
 
-// DistributeFeesLiquidation is a paid mutator transaction binding the contract method 0x9baac3c4.
+// DistributeFeesLiquidation is a paid mutator transaction binding the contract method 0x1112e151.
 //
-// Solidity: function distributeFeesLiquidation(uint24 _iPerpetualId, address _traderAddr, int128 _fDeltaPositionBC) returns(int128)
-func (_IPerpetualManager *IPerpetualManagerSession) DistributeFeesLiquidation(_iPerpetualId *big.Int, _traderAddr common.Address, _fDeltaPositionBC *big.Int) (*types.Transaction, error) {
-	return _IPerpetualManager.Contract.DistributeFeesLiquidation(&_IPerpetualManager.TransactOpts, _iPerpetualId, _traderAddr, _fDeltaPositionBC)
+// Solidity: function distributeFeesLiquidation(uint24 _iPerpetualId, address _traderAddr, int128 _fDeltaPositionBC, uint16 _protocolFeeTbps) returns(int128)
+func (_IPerpetualManager *IPerpetualManagerSession) DistributeFeesLiquidation(_iPerpetualId *big.Int, _traderAddr common.Address, _fDeltaPositionBC *big.Int, _protocolFeeTbps uint16) (*types.Transaction, error) {
+	return _IPerpetualManager.Contract.DistributeFeesLiquidation(&_IPerpetualManager.TransactOpts, _iPerpetualId, _traderAddr, _fDeltaPositionBC, _protocolFeeTbps)
 }
 
-// DistributeFeesLiquidation is a paid mutator transaction binding the contract method 0x9baac3c4.
+// DistributeFeesLiquidation is a paid mutator transaction binding the contract method 0x1112e151.
 //
-// Solidity: function distributeFeesLiquidation(uint24 _iPerpetualId, address _traderAddr, int128 _fDeltaPositionBC) returns(int128)
-func (_IPerpetualManager *IPerpetualManagerTransactorSession) DistributeFeesLiquidation(_iPerpetualId *big.Int, _traderAddr common.Address, _fDeltaPositionBC *big.Int) (*types.Transaction, error) {
-	return _IPerpetualManager.Contract.DistributeFeesLiquidation(&_IPerpetualManager.TransactOpts, _iPerpetualId, _traderAddr, _fDeltaPositionBC)
+// Solidity: function distributeFeesLiquidation(uint24 _iPerpetualId, address _traderAddr, int128 _fDeltaPositionBC, uint16 _protocolFeeTbps) returns(int128)
+func (_IPerpetualManager *IPerpetualManagerTransactorSession) DistributeFeesLiquidation(_iPerpetualId *big.Int, _traderAddr common.Address, _fDeltaPositionBC *big.Int, _protocolFeeTbps uint16) (*types.Transaction, error) {
+	return _IPerpetualManager.Contract.DistributeFeesLiquidation(&_IPerpetualManager.TransactOpts, _iPerpetualId, _traderAddr, _fDeltaPositionBC, _protocolFeeTbps)
 }
 
 // ExecuteCancelOrder is a paid mutator transaction binding the contract method 0x7200c7c5.
@@ -2782,27 +2699,6 @@ func (_IPerpetualManager *IPerpetualManagerSession) Rebalance(_iPerpetualId *big
 // Solidity: function rebalance(uint24 _iPerpetualId) returns()
 func (_IPerpetualManager *IPerpetualManagerTransactorSession) Rebalance(_iPerpetualId *big.Int) (*types.Transaction, error) {
 	return _IPerpetualManager.Contract.Rebalance(&_IPerpetualManager.TransactOpts, _iPerpetualId)
-}
-
-// RebatePostingFee is a paid mutator transaction binding the contract method 0xaa0a9079.
-//
-// Solidity: function rebatePostingFee((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, uint16 _feeTbps) returns()
-func (_IPerpetualManager *IPerpetualManagerTransactor) RebatePostingFee(opts *bind.TransactOpts, _order IPerpetualOrderOrder, _feeTbps uint16) (*types.Transaction, error) {
-	return _IPerpetualManager.contract.Transact(opts, "rebatePostingFee", _order, _feeTbps)
-}
-
-// RebatePostingFee is a paid mutator transaction binding the contract method 0xaa0a9079.
-//
-// Solidity: function rebatePostingFee((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, uint16 _feeTbps) returns()
-func (_IPerpetualManager *IPerpetualManagerSession) RebatePostingFee(_order IPerpetualOrderOrder, _feeTbps uint16) (*types.Transaction, error) {
-	return _IPerpetualManager.Contract.RebatePostingFee(&_IPerpetualManager.TransactOpts, _order, _feeTbps)
-}
-
-// RebatePostingFee is a paid mutator transaction binding the contract method 0xaa0a9079.
-//
-// Solidity: function rebatePostingFee((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, uint16 _feeTbps) returns()
-func (_IPerpetualManager *IPerpetualManagerTransactorSession) RebatePostingFee(_order IPerpetualOrderOrder, _feeTbps uint16) (*types.Transaction, error) {
-	return _IPerpetualManager.Contract.RebatePostingFee(&_IPerpetualManager.TransactOpts, _order, _feeTbps)
 }
 
 // ReduceMarginCollateral is a paid mutator transaction binding the contract method 0x796596fc.
@@ -3414,25 +3310,25 @@ func (_IPerpetualManager *IPerpetualManagerTransactorSession) TogglePerpEmergenc
 	return _IPerpetualManager.Contract.TogglePerpEmergencyState(&_IPerpetualManager.TransactOpts, _perpetualId)
 }
 
-// TradeViaOrderBook is a paid mutator transaction binding the contract method 0x7b20b039.
+// TradeViaOrderBook is a paid mutator transaction binding the contract method 0x5b4c592c.
 //
-// Solidity: function tradeViaOrderBook((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, bool _isApprovedExecutor) returns(bool)
-func (_IPerpetualManager *IPerpetualManagerTransactor) TradeViaOrderBook(opts *bind.TransactOpts, _order IPerpetualOrderOrder, _isApprovedExecutor bool) (*types.Transaction, error) {
-	return _IPerpetualManager.contract.Transact(opts, "tradeViaOrderBook", _order, _isApprovedExecutor)
+// Solidity: function tradeViaOrderBook((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order) returns(bool)
+func (_IPerpetualManager *IPerpetualManagerTransactor) TradeViaOrderBook(opts *bind.TransactOpts, _order IPerpetualOrderOrder) (*types.Transaction, error) {
+	return _IPerpetualManager.contract.Transact(opts, "tradeViaOrderBook", _order)
 }
 
-// TradeViaOrderBook is a paid mutator transaction binding the contract method 0x7b20b039.
+// TradeViaOrderBook is a paid mutator transaction binding the contract method 0x5b4c592c.
 //
-// Solidity: function tradeViaOrderBook((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, bool _isApprovedExecutor) returns(bool)
-func (_IPerpetualManager *IPerpetualManagerSession) TradeViaOrderBook(_order IPerpetualOrderOrder, _isApprovedExecutor bool) (*types.Transaction, error) {
-	return _IPerpetualManager.Contract.TradeViaOrderBook(&_IPerpetualManager.TransactOpts, _order, _isApprovedExecutor)
+// Solidity: function tradeViaOrderBook((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order) returns(bool)
+func (_IPerpetualManager *IPerpetualManagerSession) TradeViaOrderBook(_order IPerpetualOrderOrder) (*types.Transaction, error) {
+	return _IPerpetualManager.Contract.TradeViaOrderBook(&_IPerpetualManager.TransactOpts, _order)
 }
 
-// TradeViaOrderBook is a paid mutator transaction binding the contract method 0x7b20b039.
+// TradeViaOrderBook is a paid mutator transaction binding the contract method 0x5b4c592c.
 //
-// Solidity: function tradeViaOrderBook((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order, bool _isApprovedExecutor) returns(bool)
-func (_IPerpetualManager *IPerpetualManagerTransactorSession) TradeViaOrderBook(_order IPerpetualOrderOrder, _isApprovedExecutor bool) (*types.Transaction, error) {
-	return _IPerpetualManager.Contract.TradeViaOrderBook(&_IPerpetualManager.TransactOpts, _order, _isApprovedExecutor)
+// Solidity: function tradeViaOrderBook((uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) _order) returns(bool)
+func (_IPerpetualManager *IPerpetualManagerTransactorSession) TradeViaOrderBook(_order IPerpetualOrderOrder) (*types.Transaction, error) {
+	return _IPerpetualManager.Contract.TradeViaOrderBook(&_IPerpetualManager.TransactOpts, _order)
 }
 
 // TransferBrokerLots is a paid mutator transaction binding the contract method 0x647307ab.
@@ -4454,7 +4350,6 @@ type IPerpetualManagerLiquidate struct {
 	PerpetualId        *big.Int
 	Liquidator         common.Address
 	Trader             common.Address
-	PositionId         [16]byte
 	AmountLiquidatedBC *big.Int
 	LiquidationPrice   *big.Int
 	NewPositionSizeBC  *big.Int
@@ -4463,10 +4358,10 @@ type IPerpetualManagerLiquidate struct {
 	Raw                types.Log // Blockchain specific contextual infos
 }
 
-// FilterLiquidate is a free log retrieval operation binding the contract event 0x3d975b766e6428036dad815db81148b8ea14d0f4255df3fd44304abdf9ff87b0.
+// FilterLiquidate is a free log retrieval operation binding the contract event 0xc0da281cdedcd3b385745af98081ebe39ef3094acf1fd83d67ef6bf20f2eb151.
 //
-// Solidity: event Liquidate(uint24 perpetualId, address indexed liquidator, address indexed trader, bytes16 indexed positionId, int128 amountLiquidatedBC, int128 liquidationPrice, int128 newPositionSizeBC, int128 fFeeCC, int128 fPnlCC)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterLiquidate(opts *bind.FilterOpts, liquidator []common.Address, trader []common.Address, positionId [][16]byte) (*IPerpetualManagerLiquidateIterator, error) {
+// Solidity: event Liquidate(uint24 perpetualId, address indexed liquidator, address indexed trader, int128 amountLiquidatedBC, int128 liquidationPrice, int128 newPositionSizeBC, int128 fFeeCC, int128 fPnlCC)
+func (_IPerpetualManager *IPerpetualManagerFilterer) FilterLiquidate(opts *bind.FilterOpts, liquidator []common.Address, trader []common.Address) (*IPerpetualManagerLiquidateIterator, error) {
 
 	var liquidatorRule []interface{}
 	for _, liquidatorItem := range liquidator {
@@ -4476,22 +4371,18 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) FilterLiquidate(opts *bind.
 	for _, traderItem := range trader {
 		traderRule = append(traderRule, traderItem)
 	}
-	var positionIdRule []interface{}
-	for _, positionIdItem := range positionId {
-		positionIdRule = append(positionIdRule, positionIdItem)
-	}
 
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "Liquidate", liquidatorRule, traderRule, positionIdRule)
+	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "Liquidate", liquidatorRule, traderRule)
 	if err != nil {
 		return nil, err
 	}
 	return &IPerpetualManagerLiquidateIterator{contract: _IPerpetualManager.contract, event: "Liquidate", logs: logs, sub: sub}, nil
 }
 
-// WatchLiquidate is a free log subscription operation binding the contract event 0x3d975b766e6428036dad815db81148b8ea14d0f4255df3fd44304abdf9ff87b0.
+// WatchLiquidate is a free log subscription operation binding the contract event 0xc0da281cdedcd3b385745af98081ebe39ef3094acf1fd83d67ef6bf20f2eb151.
 //
-// Solidity: event Liquidate(uint24 perpetualId, address indexed liquidator, address indexed trader, bytes16 indexed positionId, int128 amountLiquidatedBC, int128 liquidationPrice, int128 newPositionSizeBC, int128 fFeeCC, int128 fPnlCC)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchLiquidate(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerLiquidate, liquidator []common.Address, trader []common.Address, positionId [][16]byte) (event.Subscription, error) {
+// Solidity: event Liquidate(uint24 perpetualId, address indexed liquidator, address indexed trader, int128 amountLiquidatedBC, int128 liquidationPrice, int128 newPositionSizeBC, int128 fFeeCC, int128 fPnlCC)
+func (_IPerpetualManager *IPerpetualManagerFilterer) WatchLiquidate(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerLiquidate, liquidator []common.Address, trader []common.Address) (event.Subscription, error) {
 
 	var liquidatorRule []interface{}
 	for _, liquidatorItem := range liquidator {
@@ -4501,12 +4392,8 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) WatchLiquidate(opts *bind.W
 	for _, traderItem := range trader {
 		traderRule = append(traderRule, traderItem)
 	}
-	var positionIdRule []interface{}
-	for _, positionIdItem := range positionId {
-		positionIdRule = append(positionIdRule, positionIdItem)
-	}
 
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "Liquidate", liquidatorRule, traderRule, positionIdRule)
+	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "Liquidate", liquidatorRule, traderRule)
 	if err != nil {
 		return nil, err
 	}
@@ -4538,9 +4425,9 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) WatchLiquidate(opts *bind.W
 	}), nil
 }
 
-// ParseLiquidate is a log parse operation binding the contract event 0x3d975b766e6428036dad815db81148b8ea14d0f4255df3fd44304abdf9ff87b0.
+// ParseLiquidate is a log parse operation binding the contract event 0xc0da281cdedcd3b385745af98081ebe39ef3094acf1fd83d67ef6bf20f2eb151.
 //
-// Solidity: event Liquidate(uint24 perpetualId, address indexed liquidator, address indexed trader, bytes16 indexed positionId, int128 amountLiquidatedBC, int128 liquidationPrice, int128 newPositionSizeBC, int128 fFeeCC, int128 fPnlCC)
+// Solidity: event Liquidate(uint24 perpetualId, address indexed liquidator, address indexed trader, int128 amountLiquidatedBC, int128 liquidationPrice, int128 newPositionSizeBC, int128 fFeeCC, int128 fPnlCC)
 func (_IPerpetualManager *IPerpetualManagerFilterer) ParseLiquidate(log types.Log) (*IPerpetualManagerLiquidate, error) {
 	event := new(IPerpetualManagerLiquidate)
 	if err := _IPerpetualManager.contract.UnpackLog(event, "Liquidate", log); err != nil {
@@ -8923,7 +8810,6 @@ func (it *IPerpetualManagerTradeIterator) Close() error {
 type IPerpetualManagerTrade struct {
 	PerpetualId       *big.Int
 	Trader            common.Address
-	PositionId        [16]byte
 	Order             IPerpetualOrderOrder
 	OrderDigest       [32]byte
 	NewPositionSizeBC *big.Int
@@ -8934,10 +8820,10 @@ type IPerpetualManagerTrade struct {
 	Raw               types.Log // Blockchain specific contextual infos
 }
 
-// FilterTrade is a free log retrieval operation binding the contract event 0x0fffca67c4faacf69c1dba4ded2716fdef6f2bc7d6baf68a3b4ba2014924856d.
+// FilterTrade is a free log retrieval operation binding the contract event 0x3f54411e9da628a3fffe4ded31141cd9f6bc989ffa44335c06d55a6c0ed620a1.
 //
-// Solidity: event Trade(uint24 indexed perpetualId, address indexed trader, bytes16 indexed positionId, (uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) order, bytes32 orderDigest, int128 newPositionSizeBC, int128 price, int128 fFeeCC, int128 fPnlCC, int128 fB2C)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterTrade(opts *bind.FilterOpts, perpetualId []*big.Int, trader []common.Address, positionId [][16]byte) (*IPerpetualManagerTradeIterator, error) {
+// Solidity: event Trade(uint24 indexed perpetualId, address indexed trader, (uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) order, bytes32 orderDigest, int128 newPositionSizeBC, int128 price, int128 fFeeCC, int128 fPnlCC, int128 fB2C)
+func (_IPerpetualManager *IPerpetualManagerFilterer) FilterTrade(opts *bind.FilterOpts, perpetualId []*big.Int, trader []common.Address) (*IPerpetualManagerTradeIterator, error) {
 
 	var perpetualIdRule []interface{}
 	for _, perpetualIdItem := range perpetualId {
@@ -8947,22 +8833,18 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) FilterTrade(opts *bind.Filt
 	for _, traderItem := range trader {
 		traderRule = append(traderRule, traderItem)
 	}
-	var positionIdRule []interface{}
-	for _, positionIdItem := range positionId {
-		positionIdRule = append(positionIdRule, positionIdItem)
-	}
 
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "Trade", perpetualIdRule, traderRule, positionIdRule)
+	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "Trade", perpetualIdRule, traderRule)
 	if err != nil {
 		return nil, err
 	}
 	return &IPerpetualManagerTradeIterator{contract: _IPerpetualManager.contract, event: "Trade", logs: logs, sub: sub}, nil
 }
 
-// WatchTrade is a free log subscription operation binding the contract event 0x0fffca67c4faacf69c1dba4ded2716fdef6f2bc7d6baf68a3b4ba2014924856d.
+// WatchTrade is a free log subscription operation binding the contract event 0x3f54411e9da628a3fffe4ded31141cd9f6bc989ffa44335c06d55a6c0ed620a1.
 //
-// Solidity: event Trade(uint24 indexed perpetualId, address indexed trader, bytes16 indexed positionId, (uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) order, bytes32 orderDigest, int128 newPositionSizeBC, int128 price, int128 fFeeCC, int128 fPnlCC, int128 fB2C)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchTrade(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerTrade, perpetualId []*big.Int, trader []common.Address, positionId [][16]byte) (event.Subscription, error) {
+// Solidity: event Trade(uint24 indexed perpetualId, address indexed trader, (uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) order, bytes32 orderDigest, int128 newPositionSizeBC, int128 price, int128 fFeeCC, int128 fPnlCC, int128 fB2C)
+func (_IPerpetualManager *IPerpetualManagerFilterer) WatchTrade(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerTrade, perpetualId []*big.Int, trader []common.Address) (event.Subscription, error) {
 
 	var perpetualIdRule []interface{}
 	for _, perpetualIdItem := range perpetualId {
@@ -8972,12 +8854,8 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) WatchTrade(opts *bind.Watch
 	for _, traderItem := range trader {
 		traderRule = append(traderRule, traderItem)
 	}
-	var positionIdRule []interface{}
-	for _, positionIdItem := range positionId {
-		positionIdRule = append(positionIdRule, positionIdItem)
-	}
 
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "Trade", perpetualIdRule, traderRule, positionIdRule)
+	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "Trade", perpetualIdRule, traderRule)
 	if err != nil {
 		return nil, err
 	}
@@ -9009,9 +8887,9 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) WatchTrade(opts *bind.Watch
 	}), nil
 }
 
-// ParseTrade is a log parse operation binding the contract event 0x0fffca67c4faacf69c1dba4ded2716fdef6f2bc7d6baf68a3b4ba2014924856d.
+// ParseTrade is a log parse operation binding the contract event 0x3f54411e9da628a3fffe4ded31141cd9f6bc989ffa44335c06d55a6c0ed620a1.
 //
-// Solidity: event Trade(uint24 indexed perpetualId, address indexed trader, bytes16 indexed positionId, (uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) order, bytes32 orderDigest, int128 newPositionSizeBC, int128 price, int128 fFeeCC, int128 fPnlCC, int128 fB2C)
+// Solidity: event Trade(uint24 indexed perpetualId, address indexed trader, (uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) order, bytes32 orderDigest, int128 newPositionSizeBC, int128 price, int128 fFeeCC, int128 fPnlCC, int128 fB2C)
 func (_IPerpetualManager *IPerpetualManagerFilterer) ParseTrade(log types.Log) (*IPerpetualManagerTrade, error) {
 	event := new(IPerpetualManagerTrade)
 	if err := _IPerpetualManager.contract.UnpackLog(event, "Trade", log); err != nil {
@@ -9151,614 +9029,6 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) WatchTransferAddressTo(opts
 func (_IPerpetualManager *IPerpetualManagerFilterer) ParseTransferAddressTo(log types.Log) (*IPerpetualManagerTransferAddressTo, error) {
 	event := new(IPerpetualManagerTransferAddressTo)
 	if err := _IPerpetualManager.contract.UnpackLog(event, "TransferAddressTo", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// IPerpetualManagerTransferEarningsToTreasuryIterator is returned from FilterTransferEarningsToTreasury and is used to iterate over the raw logs and unpacked data for TransferEarningsToTreasury events raised by the IPerpetualManager contract.
-type IPerpetualManagerTransferEarningsToTreasuryIterator struct {
-	Event *IPerpetualManagerTransferEarningsToTreasury // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IPerpetualManagerTransferEarningsToTreasuryIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IPerpetualManagerTransferEarningsToTreasury)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IPerpetualManagerTransferEarningsToTreasury)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IPerpetualManagerTransferEarningsToTreasuryIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IPerpetualManagerTransferEarningsToTreasuryIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IPerpetualManagerTransferEarningsToTreasury represents a TransferEarningsToTreasury event raised by the IPerpetualManager contract.
-type IPerpetualManagerTransferEarningsToTreasury struct {
-	PoolId             uint8
-	FEarnings          *big.Int
-	NewDefaultFundSize *big.Int
-	Raw                types.Log // Blockchain specific contextual infos
-}
-
-// FilterTransferEarningsToTreasury is a free log retrieval operation binding the contract event 0xeacf1cfe92dc410ce99fbaf80d0dd3d588660d669a4aabbb225cdeb4b71dba00.
-//
-// Solidity: event TransferEarningsToTreasury(uint8 _poolId, int128 fEarnings, int128 newDefaultFundSize)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterTransferEarningsToTreasury(opts *bind.FilterOpts) (*IPerpetualManagerTransferEarningsToTreasuryIterator, error) {
-
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "TransferEarningsToTreasury")
-	if err != nil {
-		return nil, err
-	}
-	return &IPerpetualManagerTransferEarningsToTreasuryIterator{contract: _IPerpetualManager.contract, event: "TransferEarningsToTreasury", logs: logs, sub: sub}, nil
-}
-
-// WatchTransferEarningsToTreasury is a free log subscription operation binding the contract event 0xeacf1cfe92dc410ce99fbaf80d0dd3d588660d669a4aabbb225cdeb4b71dba00.
-//
-// Solidity: event TransferEarningsToTreasury(uint8 _poolId, int128 fEarnings, int128 newDefaultFundSize)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchTransferEarningsToTreasury(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerTransferEarningsToTreasury) (event.Subscription, error) {
-
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "TransferEarningsToTreasury")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IPerpetualManagerTransferEarningsToTreasury)
-				if err := _IPerpetualManager.contract.UnpackLog(event, "TransferEarningsToTreasury", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseTransferEarningsToTreasury is a log parse operation binding the contract event 0xeacf1cfe92dc410ce99fbaf80d0dd3d588660d669a4aabbb225cdeb4b71dba00.
-//
-// Solidity: event TransferEarningsToTreasury(uint8 _poolId, int128 fEarnings, int128 newDefaultFundSize)
-func (_IPerpetualManager *IPerpetualManagerFilterer) ParseTransferEarningsToTreasury(log types.Log) (*IPerpetualManagerTransferEarningsToTreasury, error) {
-	event := new(IPerpetualManagerTransferEarningsToTreasury)
-	if err := _IPerpetualManager.contract.UnpackLog(event, "TransferEarningsToTreasury", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// IPerpetualManagerTransferFeeToBrokerIterator is returned from FilterTransferFeeToBroker and is used to iterate over the raw logs and unpacked data for TransferFeeToBroker events raised by the IPerpetualManager contract.
-type IPerpetualManagerTransferFeeToBrokerIterator struct {
-	Event *IPerpetualManagerTransferFeeToBroker // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IPerpetualManagerTransferFeeToBrokerIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IPerpetualManagerTransferFeeToBroker)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IPerpetualManagerTransferFeeToBroker)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IPerpetualManagerTransferFeeToBrokerIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IPerpetualManagerTransferFeeToBrokerIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IPerpetualManagerTransferFeeToBroker represents a TransferFeeToBroker event raised by the IPerpetualManager contract.
-type IPerpetualManagerTransferFeeToBroker struct {
-	PerpetualId *big.Int
-	Broker      common.Address
-	FeeCC       *big.Int
-	Raw         types.Log // Blockchain specific contextual infos
-}
-
-// FilterTransferFeeToBroker is a free log retrieval operation binding the contract event 0xc48ca9157dad0ede520b24a175f0d341c6dade287987db04b05d9bc0a08f1da3.
-//
-// Solidity: event TransferFeeToBroker(uint24 indexed perpetualId, address indexed broker, int128 feeCC)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterTransferFeeToBroker(opts *bind.FilterOpts, perpetualId []*big.Int, broker []common.Address) (*IPerpetualManagerTransferFeeToBrokerIterator, error) {
-
-	var perpetualIdRule []interface{}
-	for _, perpetualIdItem := range perpetualId {
-		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
-	}
-	var brokerRule []interface{}
-	for _, brokerItem := range broker {
-		brokerRule = append(brokerRule, brokerItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "TransferFeeToBroker", perpetualIdRule, brokerRule)
-	if err != nil {
-		return nil, err
-	}
-	return &IPerpetualManagerTransferFeeToBrokerIterator{contract: _IPerpetualManager.contract, event: "TransferFeeToBroker", logs: logs, sub: sub}, nil
-}
-
-// WatchTransferFeeToBroker is a free log subscription operation binding the contract event 0xc48ca9157dad0ede520b24a175f0d341c6dade287987db04b05d9bc0a08f1da3.
-//
-// Solidity: event TransferFeeToBroker(uint24 indexed perpetualId, address indexed broker, int128 feeCC)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchTransferFeeToBroker(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerTransferFeeToBroker, perpetualId []*big.Int, broker []common.Address) (event.Subscription, error) {
-
-	var perpetualIdRule []interface{}
-	for _, perpetualIdItem := range perpetualId {
-		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
-	}
-	var brokerRule []interface{}
-	for _, brokerItem := range broker {
-		brokerRule = append(brokerRule, brokerItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "TransferFeeToBroker", perpetualIdRule, brokerRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IPerpetualManagerTransferFeeToBroker)
-				if err := _IPerpetualManager.contract.UnpackLog(event, "TransferFeeToBroker", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseTransferFeeToBroker is a log parse operation binding the contract event 0xc48ca9157dad0ede520b24a175f0d341c6dade287987db04b05d9bc0a08f1da3.
-//
-// Solidity: event TransferFeeToBroker(uint24 indexed perpetualId, address indexed broker, int128 feeCC)
-func (_IPerpetualManager *IPerpetualManagerFilterer) ParseTransferFeeToBroker(log types.Log) (*IPerpetualManagerTransferFeeToBroker, error) {
-	event := new(IPerpetualManagerTransferFeeToBroker)
-	if err := _IPerpetualManager.contract.UnpackLog(event, "TransferFeeToBroker", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// IPerpetualManagerTransferFeeToexecutorIterator is returned from FilterTransferFeeToexecutor and is used to iterate over the raw logs and unpacked data for TransferFeeToexecutor events raised by the IPerpetualManager contract.
-type IPerpetualManagerTransferFeeToexecutorIterator struct {
-	Event *IPerpetualManagerTransferFeeToexecutor // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IPerpetualManagerTransferFeeToexecutorIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IPerpetualManagerTransferFeeToexecutor)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IPerpetualManagerTransferFeeToexecutor)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IPerpetualManagerTransferFeeToexecutorIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IPerpetualManagerTransferFeeToexecutorIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IPerpetualManagerTransferFeeToexecutor represents a TransferFeeToexecutor event raised by the IPerpetualManager contract.
-type IPerpetualManagerTransferFeeToexecutor struct {
-	PerpetualId    *big.Int
-	Trader         common.Address
-	Executor       common.Address
-	ReferralRebate *big.Int
-	Raw            types.Log // Blockchain specific contextual infos
-}
-
-// FilterTransferFeeToexecutor is a free log retrieval operation binding the contract event 0xc3f31b59a54736794c20777067f555c0c6edb87bfc411891f366ea03fcb4a5dd.
-//
-// Solidity: event TransferFeeToexecutor(uint24 indexed perpetualId, address indexed trader, address indexed executor, int128 referralRebate)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterTransferFeeToexecutor(opts *bind.FilterOpts, perpetualId []*big.Int, trader []common.Address, executor []common.Address) (*IPerpetualManagerTransferFeeToexecutorIterator, error) {
-
-	var perpetualIdRule []interface{}
-	for _, perpetualIdItem := range perpetualId {
-		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
-	}
-	var traderRule []interface{}
-	for _, traderItem := range trader {
-		traderRule = append(traderRule, traderItem)
-	}
-	var executorRule []interface{}
-	for _, executorItem := range executor {
-		executorRule = append(executorRule, executorItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "TransferFeeToexecutor", perpetualIdRule, traderRule, executorRule)
-	if err != nil {
-		return nil, err
-	}
-	return &IPerpetualManagerTransferFeeToexecutorIterator{contract: _IPerpetualManager.contract, event: "TransferFeeToexecutor", logs: logs, sub: sub}, nil
-}
-
-// WatchTransferFeeToexecutor is a free log subscription operation binding the contract event 0xc3f31b59a54736794c20777067f555c0c6edb87bfc411891f366ea03fcb4a5dd.
-//
-// Solidity: event TransferFeeToexecutor(uint24 indexed perpetualId, address indexed trader, address indexed executor, int128 referralRebate)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchTransferFeeToexecutor(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerTransferFeeToexecutor, perpetualId []*big.Int, trader []common.Address, executor []common.Address) (event.Subscription, error) {
-
-	var perpetualIdRule []interface{}
-	for _, perpetualIdItem := range perpetualId {
-		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
-	}
-	var traderRule []interface{}
-	for _, traderItem := range trader {
-		traderRule = append(traderRule, traderItem)
-	}
-	var executorRule []interface{}
-	for _, executorItem := range executor {
-		executorRule = append(executorRule, executorItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "TransferFeeToexecutor", perpetualIdRule, traderRule, executorRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IPerpetualManagerTransferFeeToexecutor)
-				if err := _IPerpetualManager.contract.UnpackLog(event, "TransferFeeToexecutor", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseTransferFeeToexecutor is a log parse operation binding the contract event 0xc3f31b59a54736794c20777067f555c0c6edb87bfc411891f366ea03fcb4a5dd.
-//
-// Solidity: event TransferFeeToexecutor(uint24 indexed perpetualId, address indexed trader, address indexed executor, int128 referralRebate)
-func (_IPerpetualManager *IPerpetualManagerFilterer) ParseTransferFeeToexecutor(log types.Log) (*IPerpetualManagerTransferFeeToexecutor, error) {
-	event := new(IPerpetualManagerTransferFeeToexecutor)
-	if err := _IPerpetualManager.contract.UnpackLog(event, "TransferFeeToexecutor", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// IPerpetualManagerUpdateAMMFundTargetSizeIterator is returned from FilterUpdateAMMFundTargetSize and is used to iterate over the raw logs and unpacked data for UpdateAMMFundTargetSize events raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateAMMFundTargetSizeIterator struct {
-	Event *IPerpetualManagerUpdateAMMFundTargetSize // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IPerpetualManagerUpdateAMMFundTargetSizeIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IPerpetualManagerUpdateAMMFundTargetSize)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IPerpetualManagerUpdateAMMFundTargetSize)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IPerpetualManagerUpdateAMMFundTargetSizeIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IPerpetualManagerUpdateAMMFundTargetSizeIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IPerpetualManagerUpdateAMMFundTargetSize represents a UpdateAMMFundTargetSize event raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateAMMFundTargetSize struct {
-	PerpetualId                   *big.Int
-	LiquidityPoolId               uint8
-	FTargetAMMFundSizeInPerpetual *big.Int
-	FTargetAMMFundSizeInPool      *big.Int
-	Raw                           types.Log // Blockchain specific contextual infos
-}
-
-// FilterUpdateAMMFundTargetSize is a free log retrieval operation binding the contract event 0x99b16d61ecc44f57445e7c4852258101cb24ff57357c4bb4c2eb985fc9899668.
-//
-// Solidity: event UpdateAMMFundTargetSize(uint24 indexed perpetualId, uint8 indexed liquidityPoolId, int128 fTargetAMMFundSizeInPerpetual, int128 fTargetAMMFundSizeInPool)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterUpdateAMMFundTargetSize(opts *bind.FilterOpts, perpetualId []*big.Int, liquidityPoolId []uint8) (*IPerpetualManagerUpdateAMMFundTargetSizeIterator, error) {
-
-	var perpetualIdRule []interface{}
-	for _, perpetualIdItem := range perpetualId {
-		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
-	}
-	var liquidityPoolIdRule []interface{}
-	for _, liquidityPoolIdItem := range liquidityPoolId {
-		liquidityPoolIdRule = append(liquidityPoolIdRule, liquidityPoolIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "UpdateAMMFundTargetSize", perpetualIdRule, liquidityPoolIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return &IPerpetualManagerUpdateAMMFundTargetSizeIterator{contract: _IPerpetualManager.contract, event: "UpdateAMMFundTargetSize", logs: logs, sub: sub}, nil
-}
-
-// WatchUpdateAMMFundTargetSize is a free log subscription operation binding the contract event 0x99b16d61ecc44f57445e7c4852258101cb24ff57357c4bb4c2eb985fc9899668.
-//
-// Solidity: event UpdateAMMFundTargetSize(uint24 indexed perpetualId, uint8 indexed liquidityPoolId, int128 fTargetAMMFundSizeInPerpetual, int128 fTargetAMMFundSizeInPool)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateAMMFundTargetSize(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerUpdateAMMFundTargetSize, perpetualId []*big.Int, liquidityPoolId []uint8) (event.Subscription, error) {
-
-	var perpetualIdRule []interface{}
-	for _, perpetualIdItem := range perpetualId {
-		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
-	}
-	var liquidityPoolIdRule []interface{}
-	for _, liquidityPoolIdItem := range liquidityPoolId {
-		liquidityPoolIdRule = append(liquidityPoolIdRule, liquidityPoolIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "UpdateAMMFundTargetSize", perpetualIdRule, liquidityPoolIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IPerpetualManagerUpdateAMMFundTargetSize)
-				if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateAMMFundTargetSize", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseUpdateAMMFundTargetSize is a log parse operation binding the contract event 0x99b16d61ecc44f57445e7c4852258101cb24ff57357c4bb4c2eb985fc9899668.
-//
-// Solidity: event UpdateAMMFundTargetSize(uint24 indexed perpetualId, uint8 indexed liquidityPoolId, int128 fTargetAMMFundSizeInPerpetual, int128 fTargetAMMFundSizeInPool)
-func (_IPerpetualManager *IPerpetualManagerFilterer) ParseUpdateAMMFundTargetSize(log types.Log) (*IPerpetualManagerUpdateAMMFundTargetSize, error) {
-	event := new(IPerpetualManagerUpdateAMMFundTargetSize)
-	if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateAMMFundTargetSize", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -9905,444 +9175,6 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateBrokerAddedCash(
 func (_IPerpetualManager *IPerpetualManagerFilterer) ParseUpdateBrokerAddedCash(log types.Log) (*IPerpetualManagerUpdateBrokerAddedCash, error) {
 	event := new(IPerpetualManagerUpdateBrokerAddedCash)
 	if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateBrokerAddedCash", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// IPerpetualManagerUpdateBrokerFundCashIterator is returned from FilterUpdateBrokerFundCash and is used to iterate over the raw logs and unpacked data for UpdateBrokerFundCash events raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateBrokerFundCashIterator struct {
-	Event *IPerpetualManagerUpdateBrokerFundCash // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IPerpetualManagerUpdateBrokerFundCashIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IPerpetualManagerUpdateBrokerFundCash)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IPerpetualManagerUpdateBrokerFundCash)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IPerpetualManagerUpdateBrokerFundCashIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IPerpetualManagerUpdateBrokerFundCashIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IPerpetualManagerUpdateBrokerFundCash represents a UpdateBrokerFundCash event raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateBrokerFundCash struct {
-	PoolId         uint8
-	FDeltaAmountCC *big.Int
-	FNewFundCash   *big.Int
-	Raw            types.Log // Blockchain specific contextual infos
-}
-
-// FilterUpdateBrokerFundCash is a free log retrieval operation binding the contract event 0x00eac08986f3bdb64fcd6cc5e6838b9fe612152c4f35f43deb73faf0ffd049cb.
-//
-// Solidity: event UpdateBrokerFundCash(uint8 indexed poolId, int128 fDeltaAmountCC, int128 fNewFundCash)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterUpdateBrokerFundCash(opts *bind.FilterOpts, poolId []uint8) (*IPerpetualManagerUpdateBrokerFundCashIterator, error) {
-
-	var poolIdRule []interface{}
-	for _, poolIdItem := range poolId {
-		poolIdRule = append(poolIdRule, poolIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "UpdateBrokerFundCash", poolIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return &IPerpetualManagerUpdateBrokerFundCashIterator{contract: _IPerpetualManager.contract, event: "UpdateBrokerFundCash", logs: logs, sub: sub}, nil
-}
-
-// WatchUpdateBrokerFundCash is a free log subscription operation binding the contract event 0x00eac08986f3bdb64fcd6cc5e6838b9fe612152c4f35f43deb73faf0ffd049cb.
-//
-// Solidity: event UpdateBrokerFundCash(uint8 indexed poolId, int128 fDeltaAmountCC, int128 fNewFundCash)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateBrokerFundCash(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerUpdateBrokerFundCash, poolId []uint8) (event.Subscription, error) {
-
-	var poolIdRule []interface{}
-	for _, poolIdItem := range poolId {
-		poolIdRule = append(poolIdRule, poolIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "UpdateBrokerFundCash", poolIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IPerpetualManagerUpdateBrokerFundCash)
-				if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateBrokerFundCash", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseUpdateBrokerFundCash is a log parse operation binding the contract event 0x00eac08986f3bdb64fcd6cc5e6838b9fe612152c4f35f43deb73faf0ffd049cb.
-//
-// Solidity: event UpdateBrokerFundCash(uint8 indexed poolId, int128 fDeltaAmountCC, int128 fNewFundCash)
-func (_IPerpetualManager *IPerpetualManagerFilterer) ParseUpdateBrokerFundCash(log types.Log) (*IPerpetualManagerUpdateBrokerFundCash, error) {
-	event := new(IPerpetualManagerUpdateBrokerFundCash)
-	if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateBrokerFundCash", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// IPerpetualManagerUpdateDefaultFundCashIterator is returned from FilterUpdateDefaultFundCash and is used to iterate over the raw logs and unpacked data for UpdateDefaultFundCash events raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateDefaultFundCashIterator struct {
-	Event *IPerpetualManagerUpdateDefaultFundCash // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IPerpetualManagerUpdateDefaultFundCashIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IPerpetualManagerUpdateDefaultFundCash)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IPerpetualManagerUpdateDefaultFundCash)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IPerpetualManagerUpdateDefaultFundCashIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IPerpetualManagerUpdateDefaultFundCashIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IPerpetualManagerUpdateDefaultFundCash represents a UpdateDefaultFundCash event raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateDefaultFundCash struct {
-	PoolId         uint8
-	FDeltaAmountCC *big.Int
-	FNewFundCash   *big.Int
-	Raw            types.Log // Blockchain specific contextual infos
-}
-
-// FilterUpdateDefaultFundCash is a free log retrieval operation binding the contract event 0x38b3318863e4792ebc3bb07351f52bad5e84f517d77b302bead80374d06fdd04.
-//
-// Solidity: event UpdateDefaultFundCash(uint8 indexed poolId, int128 fDeltaAmountCC, int128 fNewFundCash)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterUpdateDefaultFundCash(opts *bind.FilterOpts, poolId []uint8) (*IPerpetualManagerUpdateDefaultFundCashIterator, error) {
-
-	var poolIdRule []interface{}
-	for _, poolIdItem := range poolId {
-		poolIdRule = append(poolIdRule, poolIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "UpdateDefaultFundCash", poolIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return &IPerpetualManagerUpdateDefaultFundCashIterator{contract: _IPerpetualManager.contract, event: "UpdateDefaultFundCash", logs: logs, sub: sub}, nil
-}
-
-// WatchUpdateDefaultFundCash is a free log subscription operation binding the contract event 0x38b3318863e4792ebc3bb07351f52bad5e84f517d77b302bead80374d06fdd04.
-//
-// Solidity: event UpdateDefaultFundCash(uint8 indexed poolId, int128 fDeltaAmountCC, int128 fNewFundCash)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateDefaultFundCash(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerUpdateDefaultFundCash, poolId []uint8) (event.Subscription, error) {
-
-	var poolIdRule []interface{}
-	for _, poolIdItem := range poolId {
-		poolIdRule = append(poolIdRule, poolIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "UpdateDefaultFundCash", poolIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IPerpetualManagerUpdateDefaultFundCash)
-				if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateDefaultFundCash", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseUpdateDefaultFundCash is a log parse operation binding the contract event 0x38b3318863e4792ebc3bb07351f52bad5e84f517d77b302bead80374d06fdd04.
-//
-// Solidity: event UpdateDefaultFundCash(uint8 indexed poolId, int128 fDeltaAmountCC, int128 fNewFundCash)
-func (_IPerpetualManager *IPerpetualManagerFilterer) ParseUpdateDefaultFundCash(log types.Log) (*IPerpetualManagerUpdateDefaultFundCash, error) {
-	event := new(IPerpetualManagerUpdateDefaultFundCash)
-	if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateDefaultFundCash", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// IPerpetualManagerUpdateDefaultFundTargetSizeIterator is returned from FilterUpdateDefaultFundTargetSize and is used to iterate over the raw logs and unpacked data for UpdateDefaultFundTargetSize events raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateDefaultFundTargetSizeIterator struct {
-	Event *IPerpetualManagerUpdateDefaultFundTargetSize // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IPerpetualManagerUpdateDefaultFundTargetSizeIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IPerpetualManagerUpdateDefaultFundTargetSize)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IPerpetualManagerUpdateDefaultFundTargetSize)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IPerpetualManagerUpdateDefaultFundTargetSizeIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IPerpetualManagerUpdateDefaultFundTargetSizeIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IPerpetualManagerUpdateDefaultFundTargetSize represents a UpdateDefaultFundTargetSize event raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateDefaultFundTargetSize struct {
-	LiquidityPoolId    uint8
-	FDefaultFundCashCC *big.Int
-	FTargetDFSize      *big.Int
-	Raw                types.Log // Blockchain specific contextual infos
-}
-
-// FilterUpdateDefaultFundTargetSize is a free log retrieval operation binding the contract event 0x5136c3531ecd05c0cae10a3a8a4c767b8b97d73d14f7febb510b826022988f1c.
-//
-// Solidity: event UpdateDefaultFundTargetSize(uint8 indexed liquidityPoolId, int128 fDefaultFundCashCC, int128 fTargetDFSize)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterUpdateDefaultFundTargetSize(opts *bind.FilterOpts, liquidityPoolId []uint8) (*IPerpetualManagerUpdateDefaultFundTargetSizeIterator, error) {
-
-	var liquidityPoolIdRule []interface{}
-	for _, liquidityPoolIdItem := range liquidityPoolId {
-		liquidityPoolIdRule = append(liquidityPoolIdRule, liquidityPoolIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "UpdateDefaultFundTargetSize", liquidityPoolIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return &IPerpetualManagerUpdateDefaultFundTargetSizeIterator{contract: _IPerpetualManager.contract, event: "UpdateDefaultFundTargetSize", logs: logs, sub: sub}, nil
-}
-
-// WatchUpdateDefaultFundTargetSize is a free log subscription operation binding the contract event 0x5136c3531ecd05c0cae10a3a8a4c767b8b97d73d14f7febb510b826022988f1c.
-//
-// Solidity: event UpdateDefaultFundTargetSize(uint8 indexed liquidityPoolId, int128 fDefaultFundCashCC, int128 fTargetDFSize)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateDefaultFundTargetSize(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerUpdateDefaultFundTargetSize, liquidityPoolId []uint8) (event.Subscription, error) {
-
-	var liquidityPoolIdRule []interface{}
-	for _, liquidityPoolIdItem := range liquidityPoolId {
-		liquidityPoolIdRule = append(liquidityPoolIdRule, liquidityPoolIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "UpdateDefaultFundTargetSize", liquidityPoolIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IPerpetualManagerUpdateDefaultFundTargetSize)
-				if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateDefaultFundTargetSize", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseUpdateDefaultFundTargetSize is a log parse operation binding the contract event 0x5136c3531ecd05c0cae10a3a8a4c767b8b97d73d14f7febb510b826022988f1c.
-//
-// Solidity: event UpdateDefaultFundTargetSize(uint8 indexed liquidityPoolId, int128 fDefaultFundCashCC, int128 fTargetDFSize)
-func (_IPerpetualManager *IPerpetualManagerFilterer) ParseUpdateDefaultFundTargetSize(log types.Log) (*IPerpetualManagerUpdateDefaultFundTargetSize, error) {
-	event := new(IPerpetualManagerUpdateDefaultFundTargetSize)
-	if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateDefaultFundTargetSize", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -10565,19 +9397,14 @@ func (it *IPerpetualManagerUpdateMarginAccountIterator) Close() error {
 type IPerpetualManagerUpdateMarginAccount struct {
 	PerpetualId       *big.Int
 	Trader            common.Address
-	PositionId        [16]byte
-	FPositionBC       *big.Int
-	FCashCC           *big.Int
-	FLockedInValueQC  *big.Int
 	FFundingPaymentCC *big.Int
-	FOpenInterestBC   *big.Int
 	Raw               types.Log // Blockchain specific contextual infos
 }
 
-// FilterUpdateMarginAccount is a free log retrieval operation binding the contract event 0x391b02442f61d09af65ce4ec6b400a3e3b2b2e0f0bbe3be2cdc4c0c1cc3ab24e.
+// FilterUpdateMarginAccount is a free log retrieval operation binding the contract event 0xcb8a7a287865b0cbe13e520fec53b52f20ae05faa608894cff964767e4a68cde.
 //
-// Solidity: event UpdateMarginAccount(uint24 indexed perpetualId, address indexed trader, bytes16 indexed positionId, int128 fPositionBC, int128 fCashCC, int128 fLockedInValueQC, int128 fFundingPaymentCC, int128 fOpenInterestBC)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterUpdateMarginAccount(opts *bind.FilterOpts, perpetualId []*big.Int, trader []common.Address, positionId [][16]byte) (*IPerpetualManagerUpdateMarginAccountIterator, error) {
+// Solidity: event UpdateMarginAccount(uint24 indexed perpetualId, address indexed trader, int128 fFundingPaymentCC)
+func (_IPerpetualManager *IPerpetualManagerFilterer) FilterUpdateMarginAccount(opts *bind.FilterOpts, perpetualId []*big.Int, trader []common.Address) (*IPerpetualManagerUpdateMarginAccountIterator, error) {
 
 	var perpetualIdRule []interface{}
 	for _, perpetualIdItem := range perpetualId {
@@ -10587,22 +9414,18 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) FilterUpdateMarginAccount(o
 	for _, traderItem := range trader {
 		traderRule = append(traderRule, traderItem)
 	}
-	var positionIdRule []interface{}
-	for _, positionIdItem := range positionId {
-		positionIdRule = append(positionIdRule, positionIdItem)
-	}
 
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "UpdateMarginAccount", perpetualIdRule, traderRule, positionIdRule)
+	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "UpdateMarginAccount", perpetualIdRule, traderRule)
 	if err != nil {
 		return nil, err
 	}
 	return &IPerpetualManagerUpdateMarginAccountIterator{contract: _IPerpetualManager.contract, event: "UpdateMarginAccount", logs: logs, sub: sub}, nil
 }
 
-// WatchUpdateMarginAccount is a free log subscription operation binding the contract event 0x391b02442f61d09af65ce4ec6b400a3e3b2b2e0f0bbe3be2cdc4c0c1cc3ab24e.
+// WatchUpdateMarginAccount is a free log subscription operation binding the contract event 0xcb8a7a287865b0cbe13e520fec53b52f20ae05faa608894cff964767e4a68cde.
 //
-// Solidity: event UpdateMarginAccount(uint24 indexed perpetualId, address indexed trader, bytes16 indexed positionId, int128 fPositionBC, int128 fCashCC, int128 fLockedInValueQC, int128 fFundingPaymentCC, int128 fOpenInterestBC)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateMarginAccount(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerUpdateMarginAccount, perpetualId []*big.Int, trader []common.Address, positionId [][16]byte) (event.Subscription, error) {
+// Solidity: event UpdateMarginAccount(uint24 indexed perpetualId, address indexed trader, int128 fFundingPaymentCC)
+func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateMarginAccount(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerUpdateMarginAccount, perpetualId []*big.Int, trader []common.Address) (event.Subscription, error) {
 
 	var perpetualIdRule []interface{}
 	for _, perpetualIdItem := range perpetualId {
@@ -10612,12 +9435,8 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateMarginAccount(op
 	for _, traderItem := range trader {
 		traderRule = append(traderRule, traderItem)
 	}
-	var positionIdRule []interface{}
-	for _, positionIdItem := range positionId {
-		positionIdRule = append(positionIdRule, positionIdItem)
-	}
 
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "UpdateMarginAccount", perpetualIdRule, traderRule, positionIdRule)
+	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "UpdateMarginAccount", perpetualIdRule, traderRule)
 	if err != nil {
 		return nil, err
 	}
@@ -10649,9 +9468,9 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateMarginAccount(op
 	}), nil
 }
 
-// ParseUpdateMarginAccount is a log parse operation binding the contract event 0x391b02442f61d09af65ce4ec6b400a3e3b2b2e0f0bbe3be2cdc4c0c1cc3ab24e.
+// ParseUpdateMarginAccount is a log parse operation binding the contract event 0xcb8a7a287865b0cbe13e520fec53b52f20ae05faa608894cff964767e4a68cde.
 //
-// Solidity: event UpdateMarginAccount(uint24 indexed perpetualId, address indexed trader, bytes16 indexed positionId, int128 fPositionBC, int128 fCashCC, int128 fLockedInValueQC, int128 fFundingPaymentCC, int128 fOpenInterestBC)
+// Solidity: event UpdateMarginAccount(uint24 indexed perpetualId, address indexed trader, int128 fFundingPaymentCC)
 func (_IPerpetualManager *IPerpetualManagerFilterer) ParseUpdateMarginAccount(log types.Log) (*IPerpetualManagerUpdateMarginAccount, error) {
 	event := new(IPerpetualManagerUpdateMarginAccount)
 	if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateMarginAccount", log); err != nil {
@@ -10802,434 +9621,6 @@ func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateMarkPrice(opts *
 func (_IPerpetualManager *IPerpetualManagerFilterer) ParseUpdateMarkPrice(log types.Log) (*IPerpetualManagerUpdateMarkPrice, error) {
 	event := new(IPerpetualManagerUpdateMarkPrice)
 	if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateMarkPrice", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// IPerpetualManagerUpdateParticipationFundCashIterator is returned from FilterUpdateParticipationFundCash and is used to iterate over the raw logs and unpacked data for UpdateParticipationFundCash events raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateParticipationFundCashIterator struct {
-	Event *IPerpetualManagerUpdateParticipationFundCash // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IPerpetualManagerUpdateParticipationFundCashIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IPerpetualManagerUpdateParticipationFundCash)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IPerpetualManagerUpdateParticipationFundCash)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IPerpetualManagerUpdateParticipationFundCashIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IPerpetualManagerUpdateParticipationFundCashIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IPerpetualManagerUpdateParticipationFundCash represents a UpdateParticipationFundCash event raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateParticipationFundCash struct {
-	PoolId         uint8
-	FDeltaAmountCC *big.Int
-	FNewFundCash   *big.Int
-	Raw            types.Log // Blockchain specific contextual infos
-}
-
-// FilterUpdateParticipationFundCash is a free log retrieval operation binding the contract event 0x5d881a46aafa213356fa06f9888716d00d0bcfa989a269425c25df13f5581a40.
-//
-// Solidity: event UpdateParticipationFundCash(uint8 indexed poolId, int128 fDeltaAmountCC, int128 fNewFundCash)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterUpdateParticipationFundCash(opts *bind.FilterOpts, poolId []uint8) (*IPerpetualManagerUpdateParticipationFundCashIterator, error) {
-
-	var poolIdRule []interface{}
-	for _, poolIdItem := range poolId {
-		poolIdRule = append(poolIdRule, poolIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "UpdateParticipationFundCash", poolIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return &IPerpetualManagerUpdateParticipationFundCashIterator{contract: _IPerpetualManager.contract, event: "UpdateParticipationFundCash", logs: logs, sub: sub}, nil
-}
-
-// WatchUpdateParticipationFundCash is a free log subscription operation binding the contract event 0x5d881a46aafa213356fa06f9888716d00d0bcfa989a269425c25df13f5581a40.
-//
-// Solidity: event UpdateParticipationFundCash(uint8 indexed poolId, int128 fDeltaAmountCC, int128 fNewFundCash)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateParticipationFundCash(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerUpdateParticipationFundCash, poolId []uint8) (event.Subscription, error) {
-
-	var poolIdRule []interface{}
-	for _, poolIdItem := range poolId {
-		poolIdRule = append(poolIdRule, poolIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "UpdateParticipationFundCash", poolIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IPerpetualManagerUpdateParticipationFundCash)
-				if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateParticipationFundCash", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseUpdateParticipationFundCash is a log parse operation binding the contract event 0x5d881a46aafa213356fa06f9888716d00d0bcfa989a269425c25df13f5581a40.
-//
-// Solidity: event UpdateParticipationFundCash(uint8 indexed poolId, int128 fDeltaAmountCC, int128 fNewFundCash)
-func (_IPerpetualManager *IPerpetualManagerFilterer) ParseUpdateParticipationFundCash(log types.Log) (*IPerpetualManagerUpdateParticipationFundCash, error) {
-	event := new(IPerpetualManagerUpdateParticipationFundCash)
-	if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateParticipationFundCash", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// IPerpetualManagerUpdateReprTradeSizesIterator is returned from FilterUpdateReprTradeSizes and is used to iterate over the raw logs and unpacked data for UpdateReprTradeSizes events raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateReprTradeSizesIterator struct {
-	Event *IPerpetualManagerUpdateReprTradeSizes // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IPerpetualManagerUpdateReprTradeSizesIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IPerpetualManagerUpdateReprTradeSizes)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IPerpetualManagerUpdateReprTradeSizes)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IPerpetualManagerUpdateReprTradeSizesIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IPerpetualManagerUpdateReprTradeSizesIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IPerpetualManagerUpdateReprTradeSizes represents a UpdateReprTradeSizes event raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateReprTradeSizes struct {
-	PerpetualId                 *big.Int
-	FCurrentTraderExposureEMA   *big.Int
-	FCurrentAMMExposureEMAShort *big.Int
-	FCurrentAMMExposureEMALong  *big.Int
-	Raw                         types.Log // Blockchain specific contextual infos
-}
-
-// FilterUpdateReprTradeSizes is a free log retrieval operation binding the contract event 0x5b19b87703a645e020f6ed2b9d71d1f5eeb5b5567aa1eb05fdd818505cc79d20.
-//
-// Solidity: event UpdateReprTradeSizes(uint24 indexed perpetualId, int128 fCurrentTraderExposureEMA, int128 fCurrentAMMExposureEMAShort, int128 fCurrentAMMExposureEMALong)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterUpdateReprTradeSizes(opts *bind.FilterOpts, perpetualId []*big.Int) (*IPerpetualManagerUpdateReprTradeSizesIterator, error) {
-
-	var perpetualIdRule []interface{}
-	for _, perpetualIdItem := range perpetualId {
-		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "UpdateReprTradeSizes", perpetualIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return &IPerpetualManagerUpdateReprTradeSizesIterator{contract: _IPerpetualManager.contract, event: "UpdateReprTradeSizes", logs: logs, sub: sub}, nil
-}
-
-// WatchUpdateReprTradeSizes is a free log subscription operation binding the contract event 0x5b19b87703a645e020f6ed2b9d71d1f5eeb5b5567aa1eb05fdd818505cc79d20.
-//
-// Solidity: event UpdateReprTradeSizes(uint24 indexed perpetualId, int128 fCurrentTraderExposureEMA, int128 fCurrentAMMExposureEMAShort, int128 fCurrentAMMExposureEMALong)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateReprTradeSizes(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerUpdateReprTradeSizes, perpetualId []*big.Int) (event.Subscription, error) {
-
-	var perpetualIdRule []interface{}
-	for _, perpetualIdItem := range perpetualId {
-		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
-	}
-
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "UpdateReprTradeSizes", perpetualIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IPerpetualManagerUpdateReprTradeSizes)
-				if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateReprTradeSizes", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseUpdateReprTradeSizes is a log parse operation binding the contract event 0x5b19b87703a645e020f6ed2b9d71d1f5eeb5b5567aa1eb05fdd818505cc79d20.
-//
-// Solidity: event UpdateReprTradeSizes(uint24 indexed perpetualId, int128 fCurrentTraderExposureEMA, int128 fCurrentAMMExposureEMAShort, int128 fCurrentAMMExposureEMALong)
-func (_IPerpetualManager *IPerpetualManagerFilterer) ParseUpdateReprTradeSizes(log types.Log) (*IPerpetualManagerUpdateReprTradeSizes, error) {
-	event := new(IPerpetualManagerUpdateReprTradeSizes)
-	if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateReprTradeSizes", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// IPerpetualManagerUpdateUnitAccumulatedFundingIterator is returned from FilterUpdateUnitAccumulatedFunding and is used to iterate over the raw logs and unpacked data for UpdateUnitAccumulatedFunding events raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateUnitAccumulatedFundingIterator struct {
-	Event *IPerpetualManagerUpdateUnitAccumulatedFunding // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IPerpetualManagerUpdateUnitAccumulatedFundingIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IPerpetualManagerUpdateUnitAccumulatedFunding)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IPerpetualManagerUpdateUnitAccumulatedFunding)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IPerpetualManagerUpdateUnitAccumulatedFundingIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IPerpetualManagerUpdateUnitAccumulatedFundingIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IPerpetualManagerUpdateUnitAccumulatedFunding represents a UpdateUnitAccumulatedFunding event raised by the IPerpetualManager contract.
-type IPerpetualManagerUpdateUnitAccumulatedFunding struct {
-	PerpetualId             *big.Int
-	UnitAccumulativeFunding *big.Int
-	Raw                     types.Log // Blockchain specific contextual infos
-}
-
-// FilterUpdateUnitAccumulatedFunding is a free log retrieval operation binding the contract event 0x506271456eb07872643b2726800d02892abf6c47ea9213ef161282b1d0c99ef6.
-//
-// Solidity: event UpdateUnitAccumulatedFunding(uint24 perpetualId, int128 unitAccumulativeFunding)
-func (_IPerpetualManager *IPerpetualManagerFilterer) FilterUpdateUnitAccumulatedFunding(opts *bind.FilterOpts) (*IPerpetualManagerUpdateUnitAccumulatedFundingIterator, error) {
-
-	logs, sub, err := _IPerpetualManager.contract.FilterLogs(opts, "UpdateUnitAccumulatedFunding")
-	if err != nil {
-		return nil, err
-	}
-	return &IPerpetualManagerUpdateUnitAccumulatedFundingIterator{contract: _IPerpetualManager.contract, event: "UpdateUnitAccumulatedFunding", logs: logs, sub: sub}, nil
-}
-
-// WatchUpdateUnitAccumulatedFunding is a free log subscription operation binding the contract event 0x506271456eb07872643b2726800d02892abf6c47ea9213ef161282b1d0c99ef6.
-//
-// Solidity: event UpdateUnitAccumulatedFunding(uint24 perpetualId, int128 unitAccumulativeFunding)
-func (_IPerpetualManager *IPerpetualManagerFilterer) WatchUpdateUnitAccumulatedFunding(opts *bind.WatchOpts, sink chan<- *IPerpetualManagerUpdateUnitAccumulatedFunding) (event.Subscription, error) {
-
-	logs, sub, err := _IPerpetualManager.contract.WatchLogs(opts, "UpdateUnitAccumulatedFunding")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IPerpetualManagerUpdateUnitAccumulatedFunding)
-				if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateUnitAccumulatedFunding", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseUpdateUnitAccumulatedFunding is a log parse operation binding the contract event 0x506271456eb07872643b2726800d02892abf6c47ea9213ef161282b1d0c99ef6.
-//
-// Solidity: event UpdateUnitAccumulatedFunding(uint24 perpetualId, int128 unitAccumulativeFunding)
-func (_IPerpetualManager *IPerpetualManagerFilterer) ParseUpdateUnitAccumulatedFunding(log types.Log) (*IPerpetualManagerUpdateUnitAccumulatedFunding, error) {
-	event := new(IPerpetualManagerUpdateUnitAccumulatedFunding)
-	if err := _IPerpetualManager.contract.UnpackLog(event, "UpdateUnitAccumulatedFunding", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

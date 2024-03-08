@@ -2,6 +2,7 @@ package d8x_futures
 
 import (
 	"fmt"
+	"log/slog"
 	"testing"
 	"time"
 
@@ -15,6 +16,7 @@ func TestFetchPricesFromAPI(t *testing.T) {
 	pxConf, err := config.GetDefaultPriceConfig(1442)
 	if err != nil {
 		t.Logf(err.Error())
+		t.FailNow()
 	}
 	priceIds := []string{"0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
 		"0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"}
@@ -22,7 +24,11 @@ func TestFetchPricesFromAPI(t *testing.T) {
 	fmt.Println(data)
 	priceIdsWrong := []string{"0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
 		"0x01f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"}
-	data, err = fetchPricesFromAPI(priceIdsWrong, pxConf, "https://hermes-beta.pyth.network/api")
+	_, err = fetchPricesFromAPI(priceIdsWrong, pxConf, "https://hermes-beta.pyth.network/api")
+	if err == nil {
+		slog.Error("Error: queried wrong price id but did not fail")
+		t.FailNow()
+	}
 	fmt.Println(err.Error())
 
 }
@@ -99,22 +105,26 @@ func getOrders(sdkRo SdkRO, nodeURL string, from, to int, resultChan chan<- *Ope
 
 func TestMarginAccount(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("x1Testnet")
+	err := sdkRo.New("1442")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	addressStrings := []string{"0x727921fb1e9a9aD7A259526C940A0474eDc7c7FE", "0xFF9C956Cd9eB2D27011F79d6A70F62eE6562C4b6", "0xc4C3694DBdCC41475Ebb8d624ddC8acf66d2609d"}
+	addressStrings := []string{"0x0aB6527027EcFF1144dEc3d78154fce309ac838c", "0xFF9C956Cd9eB2D27011F79d6A70F62eE6562C4b6", "0xc4C3694DBdCC41475Ebb8d624ddC8acf66d2609d"}
 	var addresses []common.Address
 	for _, addrStr := range addressStrings {
 		address := common.HexToAddress(addrStr)
 		addresses = append(addresses, address)
 	}
-	m, err := RawQueryMarginAccounts(sdkRo.Conn.Rpc, &sdkRo.Info, "BTC-USDC-USDC", addresses)
+	m, err := RawQueryMarginAccounts(sdkRo.Conn.Rpc, &sdkRo.Info, "BTC-USD-MATIC", addresses)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	m2, err := sdkRo.QueryMarginAccounts("BTC-USDC-USDC", addresses, nil)
+	m2, err := sdkRo.QueryMarginAccounts("BTC-USD-MATIC", addresses, nil)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
 	println(m[0].FPositionBC)
 	println(m2[0].FPositionBC)
 	println(m[1].FPositionBC)
@@ -134,7 +144,7 @@ func TestSdkROOrders(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	fmt.Printf("There are %d open orders", n)
+	fmt.Printf("There are %d open orders\n", n)
 	startTime = time.Now()
 	rpc := []string{"https://x1-testnet.blockpi.network/v1/rpc/public",
 		"https://testrpc.x1.tech",
@@ -157,8 +167,8 @@ func TestSdkROOrders(t *testing.T) {
 	endTime = time.Now()
 	fmt.Printf("Found %d orders\n", totalOrders)
 	fmt.Printf("in %s seconds\n", endTime.Sub(startTime))
-	k := orders[2].HashIndex[orders[2].OrderHashes[42]]
-	if k != 42 {
+	k := orders[2].HashIndex[orders[2].OrderHashes[3]]
+	if k != 3 {
 		t.Logf("hash index test failed")
 		t.Fail()
 	}
@@ -169,7 +179,7 @@ func TestSdkROOrders(t *testing.T) {
 
 func TestSdkRO(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("x1Testnet")
+	err := sdkRo.New("1442")
 	if err != nil {
 		t.Logf(err.Error())
 	}

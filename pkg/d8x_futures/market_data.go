@@ -229,8 +229,8 @@ func (sdkRo *SdkRO) GetMarginTokenBalance(symbol string, traderAddr common.Addre
 	if err != nil {
 		return 0, errors.New("GetMarginTokenBalance: creating instance of token " + tknAddr.String())
 	}
-	n, err := erc20Instance.Decimals(nil)
-	b, err := erc20Instance.BalanceOf(nil, traderAddr)
+	n, _ := erc20Instance.Decimals(nil)
+	b, _ := erc20Instance.BalanceOf(nil, traderAddr)
 	bal := utils.DecNToFloat(b, n)
 	return bal, nil
 }
@@ -638,10 +638,6 @@ func RawQueryMarginAccounts(client *ethclient.Client, xInfo *StaticExchangeInfo,
 			FCashCC:                      utils.ABDKToFloat64(call.Outputs.(*marginOutput).FCashCC),
 			FPositionBC:                  utils.ABDKToFloat64(call.Outputs.(*marginOutput).FPositionBC),
 			FUnitAccumulatedFundingStart: utils.ABDKToFloat64(call.Outputs.(*marginOutput).FUnitAccumulatedFundingStart),
-			iLastOpenTimestamp:           uint32((call.Outputs.(*marginOutput).ILastOpenTimestamp)),
-			FeeTbps:                      call.Outputs.(*marginOutput).FeeTbps,
-			BrokerFeeTbps:                call.Outputs.(*marginOutput).BrokerFeeTbps,
-			PositionId:                   string(call.Outputs.(*marginOutput).PositionId[:]),
 		}
 		accounts = append(accounts, m)
 	}

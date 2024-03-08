@@ -79,7 +79,7 @@ Generate the ABI for the network it should compile to:
 `abigen --abi abi/LimitOrderBook.json --pkg contracts --type LimitOrderBook --out LimitOrderBook.go`
 
 `abigen --abi abi/LimitOrderBookFactory.json --pkg contracts --type LimitOrderBookFactory --out LimitOrderBookFactory.go`
-
+`abigen --abi abi/LimitOrderBookBeacon.json --pkg contracts --type LimitOrderBookBeacon --out LimitOrderBookBeacon.go`
 `abigen --abi abi/IPyth.json --pkg contracts --type IPyth --out IPyth.go`
 
 `abigen --abi abi/OracleFactory.json --pkg contracts --type OracleFactory --out OracleFactory.go`
