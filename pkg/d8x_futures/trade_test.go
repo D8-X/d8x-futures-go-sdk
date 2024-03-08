@@ -21,7 +21,7 @@ func TestSdkExec(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New([]string{pk}, "x1Testnet")
+	err := sdk.New([]string{pk}, "1442")
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
