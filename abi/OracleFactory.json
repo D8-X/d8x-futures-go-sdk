@@ -140,6 +140,37 @@
                 "internalType": "address",
                 "name": "oracle",
                 "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "marketClosed",
+                "type": "bool"
+            }
+        ],
+        "name": "SetMarketClosed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes4",
+                "name": "baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes4",
+                "name": "quoteCurrency",
+                "type": "bytes4"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "oracle",
+                "type": "address"
             }
         ],
         "name": "ShortRouteAdded",
@@ -344,30 +375,6 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "bytes4",
-                "name": "_baseCurrency",
-                "type": "bytes4"
-            },
-            {
-                "internalType": "bytes4",
-                "name": "_quoteCurrency",
-                "type": "bytes4"
-            }
-        ],
-        "name": "isRouteTerminated",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
         "inputs": [],
         "name": "onDemandFeed",
         "outputs": [
@@ -409,6 +416,29 @@
     {
         "inputs": [],
         "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "_baseCurrency",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "bytes4",
+                "name": "_quoteCurrency",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "bool",
+                "name": "_marketClosed",
+                "type": "bool"
+            }
+        ],
+        "name": "setMarketClosed",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

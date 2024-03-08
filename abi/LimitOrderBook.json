@@ -1,33 +1,7 @@
 [
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_perpetualManagerAddr",
-                "type": "address"
-            },
-            {
-                "internalType": "uint24",
-                "name": "_perpetualId",
-                "type": "uint24"
-            },
-            {
-                "internalType": "uint8",
-                "name": "_iCancelDelaySec",
-                "type": "uint8"
-            },
-            {
-                "internalType": "uint16",
-                "name": "_postingFeeTbps",
-                "type": "uint16"
-            },
-            {
-                "internalType": "uint32",
-                "name": "_callbackGasLimit",
-                "type": "uint32"
-            }
-        ],
-        "stateMutability": "payable",
+        "inputs": [],
+        "stateMutability": "nonpayable",
         "type": "constructor"
     },
     {
@@ -84,6 +58,19 @@
             }
         ],
         "name": "ExecutionFailed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint8",
+                "name": "version",
+                "type": "uint8"
+            }
+        ],
+        "name": "Initialized",
         "type": "event"
     },
     {
@@ -196,6 +183,19 @@
         "type": "event"
     },
     {
+        "inputs": [],
+        "name": "CALLBACK_GAS_LIMIT",
+        "outputs": [
+            {
+                "internalType": "uint32",
+                "name": "",
+                "type": "uint32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "bytes32",
@@ -217,81 +217,6 @@
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "_executor",
-                "type": "address"
-            }
-        ],
-        "name": "addExecutor",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "allDigests",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "page",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "limit",
-                "type": "uint256"
-            }
-        ],
-        "name": "allLimitDigests",
-        "outputs": [
-            {
-                "internalType": "bytes32[]",
-                "name": "",
-                "type": "bytes32[]"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "name": "approvedExecutor",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "bytes32",
                 "name": "",
                 "type": "bytes32"
@@ -303,19 +228,6 @@
                 "internalType": "address",
                 "name": "",
                 "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "callbackGasLimit",
-        "outputs": [
-            {
-                "internalType": "uint32",
-                "name": "",
-                "type": "uint32"
             }
         ],
         "stateMutability": "view",
@@ -546,6 +458,29 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_perpetualManagerAddr",
+                "type": "address"
+            },
+            {
+                "internalType": "uint24",
+                "name": "_perpetualId",
+                "type": "uint24"
+            },
+            {
+                "internalType": "uint8",
+                "name": "_iCancelDelaySec",
+                "type": "uint8"
+            }
+        ],
+        "name": "initialize",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "inputs": [],
         "name": "lastOrderHash",
         "outputs": [
@@ -595,19 +530,6 @@
                 "internalType": "int64",
                 "name": "",
                 "type": "int64"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "numberOfAllDigests",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -747,25 +669,6 @@
             {
                 "internalType": "bytes",
                 "name": "brokerSignature",
-                "type": "bytes"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
-        "name": "orderSignature",
-        "outputs": [
-            {
-                "internalType": "bytes",
-                "name": "",
                 "type": "bytes"
             }
         ],
@@ -1002,32 +905,6 @@
         "name": "postOrders",
         "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_executor",
-                "type": "address"
-            }
-        ],
-        "name": "removeExecutor",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint32",
-                "name": "_gasLimit",
-                "type": "uint32"
-            }
-        ],
-        "name": "setCallbackGasLimit",
-        "outputs": [],
-        "stateMutability": "payable",
         "type": "function"
     }
 ]

@@ -37,7 +37,7 @@ type OracleFactoryOracleData struct {
 
 // OracleFactoryMetaData contains all meta data concerning the OracleFactory contract.
 var OracleFactoryMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_maxFeedTimeGapSec\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_pythFeedAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_onDemandfeedAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"OracleAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"OracleCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"oracle\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"isInverse\",\"type\":\"bool[]\"}],\"name\":\"RouteAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"ShortRouteAdded\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_oracle\",\"type\":\"address\"}],\"name\":\"addOracle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"address[]\",\"name\":\"_oracles\",\"type\":\"address[]\"},{\"internalType\":\"bool[]\",\"name\":\"_isInverse\",\"type\":\"bool[]\"}],\"name\":\"addRoute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"uint16\",\"name\":\"_tradingBreakMins\",\"type\":\"uint16\"},{\"internalType\":\"address\",\"name\":\"_feedAddress\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_priceId\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_feedPeriod\",\"type\":\"uint256\"}],\"name\":\"createOracle\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"existsRoute\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"getRoute\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"isInverse\",\"type\":\"bool\"}],\"internalType\":\"structOracleFactory.OracleData[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuote\",\"type\":\"bytes4[2]\"}],\"name\":\"getRouteIds\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"},{\"internalType\":\"bool[]\",\"name\":\"\",\"type\":\"bool[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"getSpotPrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"isRouteTerminated\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"onDemandFeed\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pyth\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"bytes32[]\",\"name\":\"_priceIds\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"},{\"internalType\":\"uint256\",\"name\":\"_maxAcceptableFeedAge\",\"type\":\"uint256\"}],\"name\":\"updatePriceFeeds\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_maxFeedTimeGapSec\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_pythFeedAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_onDemandfeedAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"OracleAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"OracleCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"oracle\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"isInverse\",\"type\":\"bool[]\"}],\"name\":\"RouteAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"marketClosed\",\"type\":\"bool\"}],\"name\":\"SetMarketClosed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"ShortRouteAdded\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_oracle\",\"type\":\"address\"}],\"name\":\"addOracle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"address[]\",\"name\":\"_oracles\",\"type\":\"address[]\"},{\"internalType\":\"bool[]\",\"name\":\"_isInverse\",\"type\":\"bool[]\"}],\"name\":\"addRoute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"uint16\",\"name\":\"_tradingBreakMins\",\"type\":\"uint16\"},{\"internalType\":\"address\",\"name\":\"_feedAddress\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_priceId\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_feedPeriod\",\"type\":\"uint256\"}],\"name\":\"createOracle\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"existsRoute\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"getRoute\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"isInverse\",\"type\":\"bool\"}],\"internalType\":\"structOracleFactory.OracleData[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuote\",\"type\":\"bytes4[2]\"}],\"name\":\"getRouteIds\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"},{\"internalType\":\"bool[]\",\"name\":\"\",\"type\":\"bool[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"getSpotPrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"onDemandFeed\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pyth\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bool\",\"name\":\"_marketClosed\",\"type\":\"bool\"}],\"name\":\"setMarketClosed\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"bytes32[]\",\"name\":\"_priceIds\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"},{\"internalType\":\"uint256\",\"name\":\"_maxAcceptableFeedAge\",\"type\":\"uint256\"}],\"name\":\"updatePriceFeeds\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
 }
 
 // OracleFactoryABI is the input ABI used to generate the binding from.
@@ -312,37 +312,6 @@ func (_OracleFactory *OracleFactoryCallerSession) GetSpotPrice(_baseCurrency [4]
 	return _OracleFactory.Contract.GetSpotPrice(&_OracleFactory.CallOpts, _baseCurrency, _quoteCurrency)
 }
 
-// IsRouteTerminated is a free data retrieval call binding the contract method 0x4e38af50.
-//
-// Solidity: function isRouteTerminated(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(bool)
-func (_OracleFactory *OracleFactoryCaller) IsRouteTerminated(opts *bind.CallOpts, _baseCurrency [4]byte, _quoteCurrency [4]byte) (bool, error) {
-	var out []interface{}
-	err := _OracleFactory.contract.Call(opts, &out, "isRouteTerminated", _baseCurrency, _quoteCurrency)
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// IsRouteTerminated is a free data retrieval call binding the contract method 0x4e38af50.
-//
-// Solidity: function isRouteTerminated(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(bool)
-func (_OracleFactory *OracleFactorySession) IsRouteTerminated(_baseCurrency [4]byte, _quoteCurrency [4]byte) (bool, error) {
-	return _OracleFactory.Contract.IsRouteTerminated(&_OracleFactory.CallOpts, _baseCurrency, _quoteCurrency)
-}
-
-// IsRouteTerminated is a free data retrieval call binding the contract method 0x4e38af50.
-//
-// Solidity: function isRouteTerminated(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(bool)
-func (_OracleFactory *OracleFactoryCallerSession) IsRouteTerminated(_baseCurrency [4]byte, _quoteCurrency [4]byte) (bool, error) {
-	return _OracleFactory.Contract.IsRouteTerminated(&_OracleFactory.CallOpts, _baseCurrency, _quoteCurrency)
-}
-
 // OnDemandFeed is a free data retrieval call binding the contract method 0x3b12b600.
 //
 // Solidity: function onDemandFeed() view returns(address)
@@ -518,6 +487,27 @@ func (_OracleFactory *OracleFactorySession) RenounceOwnership() (*types.Transact
 // Solidity: function renounceOwnership() returns()
 func (_OracleFactory *OracleFactoryTransactorSession) RenounceOwnership() (*types.Transaction, error) {
 	return _OracleFactory.Contract.RenounceOwnership(&_OracleFactory.TransactOpts)
+}
+
+// SetMarketClosed is a paid mutator transaction binding the contract method 0x0b3bea39.
+//
+// Solidity: function setMarketClosed(bytes4 _baseCurrency, bytes4 _quoteCurrency, bool _marketClosed) returns()
+func (_OracleFactory *OracleFactoryTransactor) SetMarketClosed(opts *bind.TransactOpts, _baseCurrency [4]byte, _quoteCurrency [4]byte, _marketClosed bool) (*types.Transaction, error) {
+	return _OracleFactory.contract.Transact(opts, "setMarketClosed", _baseCurrency, _quoteCurrency, _marketClosed)
+}
+
+// SetMarketClosed is a paid mutator transaction binding the contract method 0x0b3bea39.
+//
+// Solidity: function setMarketClosed(bytes4 _baseCurrency, bytes4 _quoteCurrency, bool _marketClosed) returns()
+func (_OracleFactory *OracleFactorySession) SetMarketClosed(_baseCurrency [4]byte, _quoteCurrency [4]byte, _marketClosed bool) (*types.Transaction, error) {
+	return _OracleFactory.Contract.SetMarketClosed(&_OracleFactory.TransactOpts, _baseCurrency, _quoteCurrency, _marketClosed)
+}
+
+// SetMarketClosed is a paid mutator transaction binding the contract method 0x0b3bea39.
+//
+// Solidity: function setMarketClosed(bytes4 _baseCurrency, bytes4 _quoteCurrency, bool _marketClosed) returns()
+func (_OracleFactory *OracleFactoryTransactorSession) SetMarketClosed(_baseCurrency [4]byte, _quoteCurrency [4]byte, _marketClosed bool) (*types.Transaction, error) {
+	return _OracleFactory.Contract.SetMarketClosed(&_OracleFactory.TransactOpts, _baseCurrency, _quoteCurrency, _marketClosed)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
@@ -1118,6 +1108,143 @@ func (_OracleFactory *OracleFactoryFilterer) WatchRouteAdded(opts *bind.WatchOpt
 func (_OracleFactory *OracleFactoryFilterer) ParseRouteAdded(log types.Log) (*OracleFactoryRouteAdded, error) {
 	event := new(OracleFactoryRouteAdded)
 	if err := _OracleFactory.contract.UnpackLog(event, "RouteAdded", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// OracleFactorySetMarketClosedIterator is returned from FilterSetMarketClosed and is used to iterate over the raw logs and unpacked data for SetMarketClosed events raised by the OracleFactory contract.
+type OracleFactorySetMarketClosedIterator struct {
+	Event *OracleFactorySetMarketClosed // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *OracleFactorySetMarketClosedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(OracleFactorySetMarketClosed)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(OracleFactorySetMarketClosed)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *OracleFactorySetMarketClosedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *OracleFactorySetMarketClosedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// OracleFactorySetMarketClosed represents a SetMarketClosed event raised by the OracleFactory contract.
+type OracleFactorySetMarketClosed struct {
+	BaseCurrency  [4]byte
+	QuoteCurrency [4]byte
+	Oracle        common.Address
+	MarketClosed  bool
+	Raw           types.Log // Blockchain specific contextual infos
+}
+
+// FilterSetMarketClosed is a free log retrieval operation binding the contract event 0xa820cee6e9183dedbc6cc3fcb50a4aa424da7a07bed41482a24542fcfdd4b7da.
+//
+// Solidity: event SetMarketClosed(bytes4 baseCurrency, bytes4 quoteCurrency, address oracle, bool marketClosed)
+func (_OracleFactory *OracleFactoryFilterer) FilterSetMarketClosed(opts *bind.FilterOpts) (*OracleFactorySetMarketClosedIterator, error) {
+
+	logs, sub, err := _OracleFactory.contract.FilterLogs(opts, "SetMarketClosed")
+	if err != nil {
+		return nil, err
+	}
+	return &OracleFactorySetMarketClosedIterator{contract: _OracleFactory.contract, event: "SetMarketClosed", logs: logs, sub: sub}, nil
+}
+
+// WatchSetMarketClosed is a free log subscription operation binding the contract event 0xa820cee6e9183dedbc6cc3fcb50a4aa424da7a07bed41482a24542fcfdd4b7da.
+//
+// Solidity: event SetMarketClosed(bytes4 baseCurrency, bytes4 quoteCurrency, address oracle, bool marketClosed)
+func (_OracleFactory *OracleFactoryFilterer) WatchSetMarketClosed(opts *bind.WatchOpts, sink chan<- *OracleFactorySetMarketClosed) (event.Subscription, error) {
+
+	logs, sub, err := _OracleFactory.contract.WatchLogs(opts, "SetMarketClosed")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(OracleFactorySetMarketClosed)
+				if err := _OracleFactory.contract.UnpackLog(event, "SetMarketClosed", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseSetMarketClosed is a log parse operation binding the contract event 0xa820cee6e9183dedbc6cc3fcb50a4aa424da7a07bed41482a24542fcfdd4b7da.
+//
+// Solidity: event SetMarketClosed(bytes4 baseCurrency, bytes4 quoteCurrency, address oracle, bool marketClosed)
+func (_OracleFactory *OracleFactoryFilterer) ParseSetMarketClosed(log types.Log) (*OracleFactorySetMarketClosed, error) {
+	event := new(OracleFactorySetMarketClosed)
+	if err := _OracleFactory.contract.UnpackLog(event, "SetMarketClosed", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

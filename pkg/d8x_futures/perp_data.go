@@ -265,7 +265,7 @@ func initPriceFeeds(pxConfig *utils.PriceFeedConfig, symbolSet utils.Set) Triang
 	return triangulations
 }
 
-func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualGetterPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {
+func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {
 	var poolId int32 = int32(pIn.Id.Int64()) / 100000
 	base := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
 	quote := ContractSymbolToSymbol(pIn.S2QuoteCCY, symMap)
