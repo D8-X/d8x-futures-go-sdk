@@ -35,7 +35,8 @@ func TestFetchPricesFromAPI(t *testing.T) {
 
 func TestGetPerpetualData(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("80085")
+	err := sdkRo.New("421614") //arbitrum sepolia
+	//err := sdkRo.New("195") //x1
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -133,7 +134,8 @@ func TestMarginAccount(t *testing.T) {
 
 func TestSdkROOrders(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("x1Testnet")
+	//err := sdkRo.New("x1Testnet")
+	err := sdkRo.New("421614") //arb sepolia
 	if err != nil {
 		t.Logf(err.Error())
 	}
@@ -160,6 +162,9 @@ func TestSdkROOrders(t *testing.T) {
 	totalOrders := 0
 	for i := 0; i < len(rpc); i++ {
 		res := <-orderChan
+		if res == nil {
+			continue
+		}
 		orders = append(orders, res)
 		totalOrders += len(res.OrderHashes)
 	}
@@ -167,6 +172,10 @@ func TestSdkROOrders(t *testing.T) {
 	endTime = time.Now()
 	fmt.Printf("Found %d orders\n", totalOrders)
 	fmt.Printf("in %s seconds\n", endTime.Sub(startTime))
+	if len(orders) < 2 {
+		fmt.Printf("not enough orders for test")
+		return
+	}
 	k := orders[2].HashIndex[orders[2].OrderHashes[3]]
 	if k != 3 {
 		t.Logf("hash index test failed")
@@ -360,7 +369,7 @@ func TestQueryOpenOrders(t *testing.T) {
 		return
 	}
 	d := digests[0]
-	status, err := RawQueryOrderStatus(conn.Rpc, info, traderAddr, d, "MATIC-USD-MATIC")
+	status, _ := RawQueryOrderStatus(conn.Rpc, info, traderAddr, d, "MATIC-USD-MATIC")
 	fmt.Println("order status: ", status)
 }
 

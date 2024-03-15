@@ -165,10 +165,6 @@ type BlockChainConnector struct {
 	PriceFeedConfig   utils.PriceFeedConfig
 }
 
-type ExchangeInfo struct {
-	pools []PoolState
-}
-
 type PerpetualPriceInfo struct {
 	S2Price          float64
 	S3Price          float64
