@@ -310,7 +310,7 @@ func RawCreateOrderBrokerSignature(proxyAddr common.Address, chainId int64, brok
 		return "", "", err
 	}
 	if brokerWallet.PrivateKey == nil {
-		return "", "", fmt.Errorf("Broker key not defined")
+		return "", "", fmt.Errorf("broker key not defined")
 	}
 	sig, err := CreateEvmSignature(digestBytes32[:], brokerWallet.PrivateKey)
 	if err != nil {
@@ -327,7 +327,7 @@ func RawCreatePaymentBrokerSignature(ps *PaySummary, brokerWallet *Wallet) (stri
 		return "", "", err
 	}
 	if brokerWallet.PrivateKey == nil {
-		return "", "", fmt.Errorf("Broker key not defined")
+		return "", "", fmt.Errorf("broker key not defined")
 	}
 	sig, err := CreateEvmSignature(digestBytes32[:], brokerWallet.PrivateKey)
 	if err != nil {

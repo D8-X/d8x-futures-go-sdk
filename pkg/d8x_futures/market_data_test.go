@@ -369,7 +369,7 @@ func TestQueryOpenOrders(t *testing.T) {
 		return
 	}
 	d := digests[0]
-	status, err := RawQueryOrderStatus(conn.Rpc, info, traderAddr, d, "MATIC-USD-MATIC")
+	status, _ := RawQueryOrderStatus(conn.Rpc, info, traderAddr, d, "MATIC-USD-MATIC")
 	fmt.Println("order status: ", status)
 }
 
