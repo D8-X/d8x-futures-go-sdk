@@ -7,6 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.24.2
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/ethereum/go-ethereum v1.13.5
+	github.com/forta-network/go-multicall v0.0.0-20230701154355-9467c4ddaa83
 	github.com/miguelmota/go-solidity-sha3 v0.1.1
 )
 
@@ -24,7 +25,6 @@ require (
 	github.com/deckarep/golang-set/v2 v2.5.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/ethereum/c-kzg-4844 v0.4.0 // indirect
-	github.com/forta-network/go-multicall v0.0.0-20230701154355-9467c4ddaa83 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect

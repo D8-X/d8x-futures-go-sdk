@@ -644,6 +644,7 @@ func RawQueryMarginAccounts(client *ethclient.Client, xInfo *StaticExchangeInfo,
 	return accounts, nil
 }
 
+// Not compatible with zkevm deployment
 func RawGetPerpetualData(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbol string) (*contracts.PerpStoragePerpetualData, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
