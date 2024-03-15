@@ -26,7 +26,7 @@
       "priceFeedNetwork": "PythEVMStable",
       "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
       "chainId": 195,
-      "proxyAddr": "0x459C0af496c7a48cD6f4FCdab81ccAAAd7E2981a",
+      "proxyAddr": "0x2971f469685C93812449B755ed7D1EC105E21Cd8",
       "nodeURL": "https://testrpc.x1.tech",
       "postOrderGasLimit": 3000000,
       "priceUpdateFeeGwei": 1,
