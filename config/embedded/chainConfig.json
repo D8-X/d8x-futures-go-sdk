@@ -37,7 +37,7 @@
       "priceFeedNetwork": "PythEVMStable",
       "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
       "chainId": 2442,
-      "proxyAddr": "0xef64b7A00AFf37ECbf85eD8EB355395B72FDBCF0",
+      "proxyAddr": "0x36ce59a9cC9b0cBc68B19143240357a0b51E70c6",
       "nodeURL": "https://rpc.cardona.zkevm-rpc.com",
       "postOrderGasLimit": 3000000,
       "priceUpdateFeeGwei": 1,
@@ -46,7 +46,7 @@
     {
       "name": "arbitrumSepolia",
       "priceFeedNetwork": "PythEVMStable",
-      "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
+      "priceFeedEndpoints": ["https://hermes.pyth.network/api"],
       "chainId": 421614,
       "proxyAddr": "0x05e72cc11A642abd27031925611cB125ccE05969",
       "nodeURL": "https://sepolia-rollup.arbitrum.io/rpc",
