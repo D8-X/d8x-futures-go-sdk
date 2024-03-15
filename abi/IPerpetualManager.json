@@ -2882,14 +2882,9 @@
                         "type": "uint32"
                     },
                     {
-                        "internalType": "uint32",
-                        "name": "slot0",
-                        "type": "uint32"
-                    },
-                    {
-                        "internalType": "uint32",
-                        "name": "slot1",
-                        "type": "uint32"
+                        "internalType": "int32",
+                        "name": "fDFCoverNRate",
+                        "type": "int32"
                     },
                     {
                         "internalType": "int32",
@@ -2905,11 +2900,6 @@
                         "internalType": "enum AMMPerpLogic.CollateralCurrency",
                         "name": "eCollateralCurrency",
                         "type": "uint8"
-                    },
-                    {
-                        "internalType": "uint16",
-                        "name": "minimalSpreadTbps",
-                        "type": "uint16"
                     },
                     {
                         "internalType": "bytes4",
@@ -2928,7 +2918,7 @@
                     },
                     {
                         "internalType": "uint16",
-                        "name": "slot2",
+                        "name": "minimalSpreadTbps",
                         "type": "uint16"
                     },
                     {
@@ -3077,11 +3067,6 @@
                         "internalType": "uint32",
                         "name": "iLastTargetPoolSizeTime",
                         "type": "uint32"
-                    },
-                    {
-                        "internalType": "int32",
-                        "name": "fDFCoverNRate",
-                        "type": "int32"
                     },
                     {
                         "internalType": "int128[2]",
@@ -3284,14 +3269,9 @@
                         "type": "uint32"
                     },
                     {
-                        "internalType": "uint32",
-                        "name": "slot0",
-                        "type": "uint32"
-                    },
-                    {
-                        "internalType": "uint32",
-                        "name": "slot1",
-                        "type": "uint32"
+                        "internalType": "int32",
+                        "name": "fDFCoverNRate",
+                        "type": "int32"
                     },
                     {
                         "internalType": "int32",
@@ -3307,11 +3287,6 @@
                         "internalType": "enum AMMPerpLogic.CollateralCurrency",
                         "name": "eCollateralCurrency",
                         "type": "uint8"
-                    },
-                    {
-                        "internalType": "uint16",
-                        "name": "minimalSpreadTbps",
-                        "type": "uint16"
                     },
                     {
                         "internalType": "bytes4",
@@ -3330,7 +3305,7 @@
                     },
                     {
                         "internalType": "uint16",
-                        "name": "slot2",
+                        "name": "minimalSpreadTbps",
                         "type": "uint16"
                     },
                     {
@@ -3479,11 +3454,6 @@
                         "internalType": "uint32",
                         "name": "iLastTargetPoolSizeTime",
                         "type": "uint32"
-                    },
-                    {
-                        "internalType": "int32",
-                        "name": "fDFCoverNRate",
-                        "type": "int32"
                     },
                     {
                         "internalType": "int128[2]",
@@ -3957,7 +3927,7 @@
                         "type": "uint64"
                     }
                 ],
-                "internalType": "struct IPerpetualTreasury.WithdrawRequest[]",
+                "internalType": "struct PerpStorage.WithdrawRequest[]",
                 "name": "",
                 "type": "tuple[]"
             }
@@ -4954,6 +4924,11 @@
                 "internalType": "struct IPerpetualOrder.Order",
                 "name": "_order",
                 "type": "tuple"
+            },
+            {
+                "internalType": "address",
+                "name": "_executor",
+                "type": "address"
             }
         ],
         "name": "tradeViaOrderBook",
