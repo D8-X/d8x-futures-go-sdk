@@ -48,7 +48,7 @@
       "priceFeedNetwork": "PythEVMStable",
       "priceFeedEndpoints": ["https://hermes.pyth.network/api"],
       "chainId": 421614,
-      "proxyAddr": "0x05e72cc11A642abd27031925611cB125ccE05969",
+      "proxyAddr": "0x2163cf2f1B7c331C0C757E068D00eFC9A707A1D7",
       "nodeURL": "https://sepolia-rollup.arbitrum.io/rpc",
       "postOrderGasLimit": 3000000,
       "priceUpdateFeeGwei": 1,
