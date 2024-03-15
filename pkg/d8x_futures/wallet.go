@@ -3,8 +3,8 @@ package d8x_futures
 import (
 	"context"
 	"crypto/ecdsa"
+	"errors"
 	"fmt"
-	"log"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -26,7 +26,6 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 	var w Wallet
 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
 	if err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 	publicKey := privateKey.Public()
@@ -38,7 +37,10 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 	w.PrivateKey = privateKey
 	var chainIdBI big.Int
 	chainIdBI.SetInt64(chainId)
-	w.Auth, _ = bind.NewKeyedTransactorWithChainID(privateKey, &chainIdBI)
+	w.Auth, err = bind.NewKeyedTransactorWithChainID(privateKey, &chainIdBI)
+	if err != nil {
+		return nil, err
+	}
 	signerFn := func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 		chainID := big.NewInt(chainId)
 		return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
@@ -54,11 +56,11 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 	// query current values
 	w.Auth.GasPrice, err = GetGasPrice(rpc)
 	if err != nil {
-		return nil, fmt.Errorf("RPC could not determine gas price")
+		return nil, errors.New("RPC could not determine gas price:" + err.Error())
 	}
 	n, err := GetNonce(rpc, w.Address)
 	if err != nil {
-		return nil, fmt.Errorf("RPC could not determine nonce")
+		return nil, errors.New("RPC could not determine nonce:" + err.Error())
 	}
 	w.Auth.Nonce = big.NewInt(int64(n))
 
@@ -77,33 +79,35 @@ func (w *Wallet) SetValue(val int64) {
 	w.Auth.Value = big.NewInt(val)
 }
 
-func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client) {
-	w.UpdateNonce(rpc)
-	w.UpdateGasPrice(rpc)
+func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client) error {
+	err := w.UpdateNonce(rpc)
+	if err != nil {
+		return err
+	}
+	return w.UpdateGasPrice(rpc)
 }
 
-func (w *Wallet) UpdateGasPrice(rpc *ethclient.Client) {
+func (w *Wallet) UpdateGasPrice(rpc *ethclient.Client) error {
 	g, err := GetGasPrice(rpc)
 	if err != nil {
-		log.Fatal("RPC could not determine gas price")
-		return
+		return errors.New("RPC could not determine gas price:" + err.Error())
 	}
 	w.Auth.GasPrice = g
+	return nil
 }
 
-func (w *Wallet) UpdateNonce(rpc *ethclient.Client) {
+func (w *Wallet) UpdateNonce(rpc *ethclient.Client) error {
 	n, err := GetNonce(rpc, w.Address)
 	if err != nil {
-		log.Fatal("RPC could not determine nonce")
-		return
+		return errors.New("RPC could not determine nonce:" + err.Error())
 	}
 	w.Auth.Nonce = big.NewInt(int64(n))
+	return nil
 }
 
 func GetNonce(rpc *ethclient.Client, a common.Address) (uint64, error) {
 	nonce, err := rpc.PendingNonceAt(context.Background(), a)
 	if err != nil {
-		log.Fatal(err)
 		return 0, err
 	}
 	return nonce, nil
@@ -112,7 +116,6 @@ func GetNonce(rpc *ethclient.Client, a common.Address) (uint64, error) {
 func GetGasPrice(rpc *ethclient.Client) (*big.Int, error) {
 	gasPrice, err := rpc.SuggestGasPrice(context.Background())
 	if err != nil {
-		log.Fatal(err)
 		return (new(big.Int)).SetInt64(0), err
 	}
 	return gasPrice, nil
