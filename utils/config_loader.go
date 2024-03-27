@@ -15,6 +15,7 @@ type ChainConfig struct {
 	PriceFeedEndpoints []string       `json:"priceFeedEndpoints"`
 	ChainId            int64          `json:"chainId"`
 	ProxyAddr          common.Address `json:"proxyAddr"`
+	MultiPayAddr       common.Address `json:"multipayAddr"`
 	NodeURL            string         `json:"nodeURL"`
 	PostOrderGasLimit  int64          `json:"postOrderGasLimit"`
 	PriceUpdateFeeGwei int64          `json:"priceUpdateFeeGwei"`
