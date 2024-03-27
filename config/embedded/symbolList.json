@@ -13,5 +13,6 @@
   "stTH": "STETH",
   "stER": "STEUR",
   "agER": "AGEUR",
-  "LUSD": "LUSD"
+  "LUSD": "LUSD",
+  "WETH": "WETH"
 }

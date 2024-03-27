@@ -88,3 +88,12 @@ func TestTriangulate(t *testing.T) {
 	triangs2 := Triangulate("CHF-DOGE", pxConf.PriceFeedIds)
 	fmt.Println(triangs2)
 }
+
+func TestConfig(t *testing.T) {
+	addr, err := config.GetMultiPayAddr(42161)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Printf("addr = %s\n", addr)
+}

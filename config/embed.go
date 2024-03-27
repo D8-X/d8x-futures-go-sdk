@@ -46,6 +46,24 @@ func GetDefaultChainConfigNames() ([]string, error) {
 	return utils.LoadChainConfigNames(data)
 }
 
+func GetMultiPayAddr(chainId int64) (string, error) {
+	// Read the JSON file
+	fs, err := EmbededConfigs.Open("embedded/chainConfig.json")
+	if err != nil {
+		log.Fatal("Error reading JSON file:", err)
+		return "", err
+	}
+	data, err := io.ReadAll(fs)
+	if err != nil {
+		return "", err
+	}
+	c, err := utils.LoadChainConfigFromId(data, chainId)
+	if err != nil {
+		return "", err
+	}
+	return c.MultiPayAddr.Hex(), nil
+}
+
 func GetCustomChainConfig(filePath, configName string) (utils.ChainConfig, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
