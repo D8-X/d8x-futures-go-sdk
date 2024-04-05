@@ -51,6 +51,16 @@ func DecNToFloat(decN *big.Int, n uint8) float64 {
 	return f
 }
 
+func ABDKToDecN(x *big.Int, n uint8) *big.Int {
+	one64x64 := new(big.Int)
+	one64x64.SetString(ONE_64x64, 10)
+	N := new(big.Int).SetUint64(uint64(n))
+	decN := new(big.Int).Exp(big.NewInt(10), N, nil)
+	y := new(big.Int).Mul(x, decN)
+	y = new(big.Int).Div(y, one64x64)
+	return y
+}
+
 func Float64ToABDK(x float64) *big.Int {
 	if x == 0 {
 		return big.NewInt(0)
