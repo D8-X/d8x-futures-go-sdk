@@ -477,16 +477,22 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "trader",
                 "type": "address"
             },
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "delegate",
                 "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
             }
         ],
         "name": "SetDelegate",
@@ -4334,13 +4340,6 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "removeDelegate",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
         "inputs": [
             {
                 "internalType": "uint8",
@@ -4421,6 +4420,11 @@
                 "internalType": "address",
                 "name": "delegate",
                 "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
             }
         ],
         "name": "setDelegate",
