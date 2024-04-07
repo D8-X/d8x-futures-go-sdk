@@ -54,7 +54,7 @@
       "chainId": 42161,
       "proxyAddr": "0x8f8BccE4c180B699F81499005281fA89440D1e95",
       "multipayAddr": "0x215975839684a365df2387b1f0FcEaBf4F0B77eb",
-      "nodeURL": "0x8f8BccE4c180B699F81499005281fA89440D1e95",
+      "nodeURL": "https://arbitrum-one-rpc.publicnode.com",
       "postOrderGasLimit": 3000000,
       "priceUpdateFeeGwei": 1,
       "splitExecutionTx": false
