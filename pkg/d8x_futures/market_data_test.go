@@ -35,14 +35,15 @@ func TestFetchPricesFromAPI(t *testing.T) {
 
 func TestGetPerpetualData(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("421614") //arbitrum sepolia
+	//err := sdkRo.New("421614") //arbitrum sepolia
 	//err := sdkRo.New("195") //x1
+	err := sdkRo.New("196") //xlayer
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	startTime := time.Now()
-	d, err := RawGetPerpetualData(sdkRo.Conn.Rpc, &sdkRo.Info, "BTC-USDC-USDC")
+	d, err := RawGetPerpetualData(sdkRo.Conn.Rpc, &sdkRo.Info, "OKB-USD-OKB")
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {
@@ -56,13 +57,13 @@ func TestGetPerpetualData(t *testing.T) {
 
 func TestPerpetualPrice(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("x1Testnet")
+	err := sdkRo.New("196")
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	startTime := time.Now()
-	px, err := sdkRo.QueryPerpetualPrices("BTC-USDC-USDC", []float64{0.01}, nil)
+	px, err := sdkRo.QueryPerpetualPrices("OKB-USD-OKB", []float64{0.01}, nil)
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {
@@ -76,14 +77,14 @@ func TestPerpetualPrice(t *testing.T) {
 func TestPerpetualPriceTuple(t *testing.T) {
 
 	var sdkRo SdkRO
-	err := sdkRo.New("x1Testnet")
+	err := sdkRo.New("196")
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	startTime := time.Now()
 	tradeAmt := []float64{-0.06, -0.05, -0.01, 0, 0.01, 0.05}
-	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoints[0], "BTC-USDC-USDC", tradeAmt)
+	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoints[0], "OKB-USD-OKB", tradeAmt)
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {
