@@ -70,5 +70,17 @@
       "postOrderGasLimit": 3000000,
       "priceUpdateFeeGwei": 1,
       "splitExecutionTx": false
+    },
+    {
+      "name": "xlayer",
+      "priceFeedNetwork": "PythEVMStable",
+      "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
+      "chainId": 196,
+      "proxyAddr": "0xb24dB543749277E8625a59C061aE7574C8235475",
+      "multipayAddr": "0x66D1B11B519b060FE2afa4Ba81c0c8e63061eB6C",
+      "nodeURL": "https://xlayerrpc.okx.com",
+      "postOrderGasLimit": 3000000,
+      "priceUpdateFeeGwei": 1,
+      "splitExecutionTx": false
     }
 ]

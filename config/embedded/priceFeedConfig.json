@@ -67,6 +67,12 @@
         "id": "0x3b670a7aa22cf0dc3b76b42dc2e26a85bac35eafc5a5ae2defd6d98201b1b997",
         "type": "pyth",
         "origin": "Crypto.AGEUR/USD"
+      },
+      {
+        "symbol": "OKB-USD",
+        "id": "0xd6f83dfeaff95d596ddec26af2ee32f391c206a183b161b7980821860eeef2f5",
+        "type": "pyth",
+        "origin": "Crypto.OKB/USD"
       }
     ]
   }
