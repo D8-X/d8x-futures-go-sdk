@@ -69,7 +69,7 @@
         "origin": "Crypto.AGEUR/USD"
       },
       {
-        "symbol": "OKB-USD",
+        "symbol": "WOKB-USD",
         "id": "0xd6f83dfeaff95d596ddec26af2ee32f391c206a183b161b7980821860eeef2f5",
         "type": "pyth",
         "origin": "Crypto.OKB/USD"
