@@ -43,7 +43,7 @@ func TestGetPerpetualData(t *testing.T) {
 		t.FailNow()
 	}
 	startTime := time.Now()
-	d, err := RawGetPerpetualData(sdkRo.Conn.Rpc, &sdkRo.Info, "OKB-USD-OKB")
+	d, err := RawGetPerpetualData(sdkRo.Conn.Rpc, &sdkRo.Info, "WOKB-USD-WOKB")
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {
