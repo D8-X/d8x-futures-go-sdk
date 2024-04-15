@@ -54,26 +54,6 @@ const MARGIN_ACCOUNT_ABI = `[{
 					"internalType": "int128",
 					"name": "fUnitAccumulatedFundingStart",
 					"type": "int128"
-				},
-				{
-					"internalType": "uint64",
-					"name": "iLastOpenTimestamp",
-					"type": "uint64"
-				},
-				{
-					"internalType": "uint16",
-					"name": "feeTbps",
-					"type": "uint16"
-				},
-				{
-					"internalType": "uint16",
-					"name": "brokerFeeTbps",
-					"type": "uint16"
-				},
-				{
-					"internalType": "bytes16",
-					"name": "positionId",
-					"type": "bytes16"
 				}],
 		"stateMutability": "view",
 		"type": "function"}]`
@@ -612,10 +592,6 @@ func RawQueryMarginAccounts(client *ethclient.Client, xInfo *StaticExchangeInfo,
 		FCashCC                      *big.Int
 		FPositionBC                  *big.Int
 		FUnitAccumulatedFundingStart *big.Int
-		ILastOpenTimestamp           uint64
-		FeeTbps                      uint16
-		BrokerFeeTbps                uint16
-		PositionId                   [16]byte
 	}
 	contract, err := multicall.NewContract(MARGIN_ACCOUNT_ABI, xInfo.ProxyAddr.Hex())
 	if err != nil {

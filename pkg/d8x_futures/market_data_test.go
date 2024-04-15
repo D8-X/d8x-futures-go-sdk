@@ -107,22 +107,22 @@ func getOrders(sdkRo SdkRO, nodeURL string, from, to int, resultChan chan<- *Ope
 
 func TestMarginAccount(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("1442")
+	err := sdkRo.New("196")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	addressStrings := []string{"0x0aB6527027EcFF1144dEc3d78154fce309ac838c", "0xFF9C956Cd9eB2D27011F79d6A70F62eE6562C4b6", "0xc4C3694DBdCC41475Ebb8d624ddC8acf66d2609d"}
+	addressStrings := []string{"0xdef43CF2Dd024abc5447C1Dcdc2fE3FE58547b84", "0xFF9C956Cd9eB2D27011F79d6A70F62eE6562C4b6", "0xc4C3694DBdCC41475Ebb8d624ddC8acf66d2609d"}
 	var addresses []common.Address
 	for _, addrStr := range addressStrings {
 		address := common.HexToAddress(addrStr)
 		addresses = append(addresses, address)
 	}
-	m, err := RawQueryMarginAccounts(sdkRo.Conn.Rpc, &sdkRo.Info, "BTC-USD-MATIC", addresses)
+	m, err := RawQueryMarginAccounts(sdkRo.Conn.Rpc, &sdkRo.Info, "WOKB-USD-WOKB", addresses)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	m2, err := sdkRo.QueryMarginAccounts("BTC-USD-MATIC", addresses, nil)
+	m2, err := sdkRo.QueryMarginAccounts("WOKB-USD-WOKB", addresses, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
