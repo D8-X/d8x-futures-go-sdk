@@ -79,6 +79,12 @@
         "id": "0xd6f83dfeaff95d596ddec26af2ee32f391c206a183b161b7980821860eeef2f5",
         "type": "pyth",
         "origin": "Crypto.OKB/USD"
+      },
+      {
+        "symbol": "DOGE-USD",
+        "id": "0xdcef50dd0a4cd2dcc17e45df1676dcb336a11a61c69df7a0299b0150c672d25c",
+        "type": "pyth",
+        "origin": "Crypto.DOGE/USD"
       }
     ]
   }
