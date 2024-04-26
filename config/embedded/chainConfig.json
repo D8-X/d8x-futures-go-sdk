@@ -14,7 +14,7 @@
     {
       "name": "x1Testnet",
       "priceFeedNetwork": "PythEVMStable",
-      "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
+      "priceFeedEndpoints": ["https://odin.d8x.xyz/api"],
       "chainId": 195,
       "proxyAddr": "0x2971f469685C93812449B755ed7D1EC105E21Cd8",
       "multipayAddr": "0x3594D0eAAaC82D3AFA7347d098bc4a39A71e918c",
@@ -26,7 +26,7 @@
     {
       "name": "cardona",
       "priceFeedNetwork": "PythEVMStable",
-      "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
+      "priceFeedEndpoints": ["https://odin.d8x.xyz/api"],
       "chainId": 2442,
       "proxyAddr": "0x36ce59a9cC9b0cBc68B19143240357a0b51E70c6",
       "multipayAddr": "0xF08A1E0d5E5a0b90D082e218f5CA2416916C5e8c",
@@ -62,7 +62,7 @@
     {
       "name": "artio",
       "priceFeedNetwork": "PythEVMStable",
-      "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
+      "priceFeedEndpoints": ["https://odin.d8x.xyz/api"],
       "chainId": 80085,
       "proxyAddr": "0x70212F1E2eB66C82990312FA5AB3f851706fD1E1",
       "multipayAddr": "0xDa7f988605Abe824dF767Aa583d8fD60f09E23D0",
@@ -74,7 +74,7 @@
     {
       "name": "xlayer",
       "priceFeedNetwork": "PythEVMStable",
-      "priceFeedEndpoints": ["https://odin.quantena.tech/api"],
+      "priceFeedEndpoints": ["https://odin.d8x.xyz/api"],
       "chainId": 196,
       "proxyAddr": "0xb24dB543749277E8625a59C061aE7574C8235475",
       "multipayAddr": "0x66D1B11B519b060FE2afa4Ba81c0c8e63061eB6C",
