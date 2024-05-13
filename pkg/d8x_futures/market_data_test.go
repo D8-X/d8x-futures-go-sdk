@@ -63,7 +63,7 @@ func TestPerpetualPrice(t *testing.T) {
 		t.FailNow()
 	}
 	startTime := time.Now()
-	px, err := sdkRo.QueryPerpetualPrices("OKB-USD-OKB", []float64{0.01}, nil)
+	px, err := sdkRo.QueryPerpetualPrices("WOKB-USD-WOKB", []float64{0.01}, nil)
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"log"
+	"log/slog"
 	"math/big"
 	"os"
 	"testing"
@@ -12,17 +13,23 @@ import (
 	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/spf13/viper"
 )
 
 func TestSdkExec(t *testing.T) {
+
 	var sdk Sdk
-	pk := os.Getenv("PK")
+	viper.SetConfigFile("../../.env")
+	if err := viper.ReadInConfig(); err != nil {
+		slog.Error("could not load .env file" + err.Error())
+	}
+	pk := viper.GetString("PK")
 	if pk == "" {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New([]string{pk}, "421614") //arbitrum
-	//err := sdk.New([]string{pk}, "x1Testnet") //x1
+	//err := sdk.New([]string{pk}, "421614") //arbitrum
+	err := sdk.New([]string{pk}, "x1Testnet") //x1
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
 	if err != nil {
