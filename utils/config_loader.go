@@ -24,6 +24,7 @@ type ChainConfig struct {
 
 type PriceFeedConfig struct {
 	Network                  string        `json:"network"`
+	CandleIrrelevant         []string      `json:"candleIrrelevant"`
 	PriceFeedIds             []PriceFeedId `json:"ids"`
 	ThresholdMarketClosedSec int32         `json:"threshold_market_closed_sec"`
 	PriceUpdateFeeGwei       int64
