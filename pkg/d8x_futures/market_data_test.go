@@ -46,7 +46,11 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Println("Amount =", amt)
-
+	px, err := sdkRo.GetPoolShareTknPrice([]int{1, 2, 3}, nil)
+	if err != nil {
+		t.FailNow()
+	}
+	fmt.Println("prices =", px)
 }
 
 func TestGetPerpetualData(t *testing.T) {

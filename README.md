@@ -30,6 +30,7 @@ fee, err := sdkRo.QueryExchangeFeeTbpsForTrader(1, trader, broker, nil) // (uint
 minpos, err := sdkRo.GetMinimalPositionSize("BTC-USD-MATIC") //(float64, error)
 marginaccounts, err := sdkRo.QueryMarginAccounts("BTC-USDC-USDC", addresses, nil)
 amt, err := sdkRo.GetPoolShareTknBalance(1, common.HexToAddress(addr), nil)
+px, err := sdkRo.GetPoolShareTknPrice([]int{1, 2, 3}, nil)
 ```
 # Read-Write
 Create a read-write SDK instance for zkEVM testnet (gas and collateral tokens are spent)

@@ -88,6 +88,26 @@ const QUERY_PERP_PX_ABI = `[{
 			"type": "function"
 		}]`
 
+const POOL_SHTKN_PX_ABI = `[  {
+	"inputs": [
+		{
+			"internalType": "uint8",
+			"name": "_poolId",
+			"type": "uint8"
+		}
+	],
+	"name": "getShareTokenPriceD18",
+	"outputs": [
+		{
+			"internalType": "uint256",
+			"name": "price",
+			"type": "uint256"
+		}
+	],
+	"stateMutability": "view",
+	"type": "function"
+}]`
+
 func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, optRpc *ethclient.Client) (PositionRisk, error) {
 	if optRpc == nil {
 		optRpc = sdkRo.Conn.Rpc
@@ -215,6 +235,14 @@ func (sdkRo *SdkRO) GetPoolShareTknBalance(poolId int, lpAddr common.Address, op
 		rpc = optRpc
 	}
 	return RawQueryPoolShTknBalance(lpAddr, poolId, sdkRo.Info, rpc)
+}
+
+func (sdkRo *SdkRO) GetPoolShareTknPrice(poolIds []int, optRpc *ethclient.Client) ([]float64, error) {
+	rpc := sdkRo.Conn.Rpc
+	if optRpc != nil {
+		rpc = optRpc
+	}
+	return RawGetPoolShTknPrice(rpc, poolIds, sdkRo.Info)
 }
 
 func RawGetMarginTknAddr(xInfo *StaticExchangeInfo, symbol string) (common.Address, error) {
@@ -666,6 +694,35 @@ func RawQueryExchangeFeeTbpsForTrader(rpc *ethclient.Client, xInfo StaticExchang
 		return 0, err
 	}
 	return feeTbps, nil
+}
+
+func RawGetPoolShTknPrice(rpc *ethclient.Client, poolIds []int, xInfo StaticExchangeInfo) ([]float64, error) {
+	caller, err := multicall.New(rpc)
+	if err != nil {
+		return nil, err
+	}
+	type priceOutput struct {
+		PriceD18 *big.Int
+	}
+	contract, err := multicall.NewContract(POOL_SHTKN_PX_ABI, xInfo.ProxyAddr.Hex())
+	if err != nil {
+		return nil, err
+	}
+	calls := make([]*multicall.Call, 0, len(poolIds))
+	for _, id := range poolIds {
+		c := contract.NewCall(new(priceOutput), "getShareTokenPriceD18", uint8(id))
+		calls = append(calls, c)
+	}
+	res, err := caller.Call(nil, calls...)
+	if err != nil {
+		return nil, err
+	}
+	prices := make([]float64, 0, len(poolIds))
+	for _, call := range res {
+		px := utils.DecNToFloat(call.Outputs.(*priceOutput).PriceD18, 18)
+		prices = append(prices, px)
+	}
+	return prices, nil
 }
 
 func RawCalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, positionBC float64, cashCC float64, tau float64, S3 float64, Sm float64) float64 {
