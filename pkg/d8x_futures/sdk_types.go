@@ -400,7 +400,10 @@ func (sdkRo *SdkRO) New(networkNameOrId string, endpoints ...string) error {
 		return err
 	}
 	sdkRo.Conn = conn
-	sdkRo.Info = QueryExchangeStaticInfo(&conn, &chConf, &nest)
+	sdkRo.Info, err = QueryExchangeStaticInfo(&conn, &chConf, &nest)
+	if err != nil {
+		return err
+	}
 	sdkRo.ChainConfig = chConf
 	return nil
 }

@@ -48,7 +48,7 @@ func TestQueryPoolStaticInfo(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	info := QueryExchangeStaticInfo(&conn, &chConf, &nest)
+	info, _ := QueryExchangeStaticInfo(&conn, &chConf, &nest)
 	fmt.Println(info)
 	info.Store("./tmpXchInfo.json")
 }
