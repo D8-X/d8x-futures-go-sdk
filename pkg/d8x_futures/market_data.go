@@ -205,14 +205,16 @@ func (sdkRo *SdkRO) GetMarginTokenBalance(symbol string, traderAddr common.Addre
 	if optRpc != nil {
 		rpc = optRpc
 	}
-	erc20Instance, err := contracts.NewErc20(tknAddr, rpc)
-	if err != nil {
-		return 0, errors.New("GetMarginTokenBalance: creating instance of token " + tknAddr.String())
+	return RawGetTknBalance(tknAddr, traderAddr, rpc)
+}
+
+// GetPoolShareTknBalance returns the amount of pool share tokens that the lpAddr holds in decimals
+func (sdkRo *SdkRO) GetPoolShareTknBalance(poolId int, lpAddr common.Address, optRpc *ethclient.Client) (float64, error) {
+	rpc := sdkRo.Conn.Rpc
+	if optRpc != nil {
+		rpc = optRpc
 	}
-	n, _ := erc20Instance.Decimals(nil)
-	b, _ := erc20Instance.BalanceOf(nil, traderAddr)
-	bal := utils.DecNToFloat(b, n)
-	return bal, nil
+	return RawQueryPoolShTknBalance(lpAddr, poolId, sdkRo.Info, rpc)
 }
 
 func RawGetMarginTknAddr(xInfo *StaticExchangeInfo, symbol string) (common.Address, error) {
@@ -802,4 +804,20 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFe
 		}
 	}
 	return pxData, nil
+}
+
+func RawGetTknBalance(tknAddr common.Address, userAddr common.Address, rpc *ethclient.Client) (float64, error) {
+	erc20Instance, err := contracts.NewErc20(tknAddr, rpc)
+	if err != nil {
+		return 0, errors.New("GetMarginTokenBalance: creating instance of token " + tknAddr.String())
+	}
+	n, _ := erc20Instance.Decimals(nil)
+	b, _ := erc20Instance.BalanceOf(nil, userAddr)
+	bal := utils.DecNToFloat(b, n)
+	return bal, nil
+}
+
+func RawQueryPoolShTknBalance(lpAddr common.Address, poolId int, xInfo StaticExchangeInfo, rpc *ethclient.Client) (float64, error) {
+	var shTkn = xInfo.Pools[poolId-1].ShareTokenAddr
+	return RawGetTknBalance(shTkn, lpAddr, rpc)
 }
