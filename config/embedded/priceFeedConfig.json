@@ -1,6 +1,7 @@
 [
   {
     "network": "PythEVMStable",
+    "candleIrrelevant": ["STUSD-USD", "AGEUR-USD"],
     "ids": [
       {
         "symbol": "USDC-USD",
@@ -10,9 +11,9 @@
       },  
       {
         "symbol": "STUSD-USD",
-        "id": "0xb0948a5e5313200c632b51bb5ca32f6de0d36e9950a942d19751e833f70dabfd",
+        "id": "0x2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b",
         "type": "pyth",
-        "origin": "Crypto.DAI/USD"
+        "origin": "Crypto.USDT/USD"
       },
       {
         "symbol": "USDT-USD",

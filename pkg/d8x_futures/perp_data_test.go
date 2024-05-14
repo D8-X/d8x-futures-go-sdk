@@ -76,9 +76,9 @@ func TestABDKToFloat64(t *testing.T) {
 }
 
 func TestTriangulate(t *testing.T) {
-	pxConf, err := config.GetDefaultPriceConfig(1442)
+	pxConf, err := config.GetDefaultPriceConfig(196)
 	if err != nil {
-		t.Logf(err.Error())
+		t.FailNow()
 	}
 	triangs := Triangulate("CHF-USDC", pxConf.PriceFeedIds)
 	fmt.Println("Triangulate")

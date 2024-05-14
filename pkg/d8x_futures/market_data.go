@@ -88,6 +88,26 @@ const QUERY_PERP_PX_ABI = `[{
 			"type": "function"
 		}]`
 
+const POOL_SHTKN_PX_ABI = `[  {
+	"inputs": [
+		{
+			"internalType": "uint8",
+			"name": "_poolId",
+			"type": "uint8"
+		}
+	],
+	"name": "getShareTokenPriceD18",
+	"outputs": [
+		{
+			"internalType": "uint256",
+			"name": "price",
+			"type": "uint256"
+		}
+	],
+	"stateMutability": "view",
+	"type": "function"
+}]`
+
 func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, optRpc *ethclient.Client) (PositionRisk, error) {
 	if optRpc == nil {
 		optRpc = sdkRo.Conn.Rpc
@@ -205,14 +225,24 @@ func (sdkRo *SdkRO) GetMarginTokenBalance(symbol string, traderAddr common.Addre
 	if optRpc != nil {
 		rpc = optRpc
 	}
-	erc20Instance, err := contracts.NewErc20(tknAddr, rpc)
-	if err != nil {
-		return 0, errors.New("GetMarginTokenBalance: creating instance of token " + tknAddr.String())
+	return RawGetTknBalance(tknAddr, traderAddr, rpc)
+}
+
+// GetPoolShareTknBalance returns the amount of pool share tokens that the lpAddr holds in decimals
+func (sdkRo *SdkRO) GetPoolShareTknBalance(poolId int, lpAddr common.Address, optRpc *ethclient.Client) (float64, error) {
+	rpc := sdkRo.Conn.Rpc
+	if optRpc != nil {
+		rpc = optRpc
 	}
-	n, _ := erc20Instance.Decimals(nil)
-	b, _ := erc20Instance.BalanceOf(nil, traderAddr)
-	bal := utils.DecNToFloat(b, n)
-	return bal, nil
+	return RawQueryPoolShTknBalance(lpAddr, poolId, sdkRo.Info, rpc)
+}
+
+func (sdkRo *SdkRO) GetPoolShareTknPrice(poolIds []int, optRpc *ethclient.Client) ([]float64, error) {
+	rpc := sdkRo.Conn.Rpc
+	if optRpc != nil {
+		rpc = optRpc
+	}
+	return RawGetPoolShTknPrice(rpc, poolIds, sdkRo.Info)
 }
 
 func RawGetMarginTknAddr(xInfo *StaticExchangeInfo, symbol string) (common.Address, error) {
@@ -666,6 +696,35 @@ func RawQueryExchangeFeeTbpsForTrader(rpc *ethclient.Client, xInfo StaticExchang
 	return feeTbps, nil
 }
 
+func RawGetPoolShTknPrice(rpc *ethclient.Client, poolIds []int, xInfo StaticExchangeInfo) ([]float64, error) {
+	caller, err := multicall.New(rpc)
+	if err != nil {
+		return nil, err
+	}
+	type priceOutput struct {
+		PriceD18 *big.Int
+	}
+	contract, err := multicall.NewContract(POOL_SHTKN_PX_ABI, xInfo.ProxyAddr.Hex())
+	if err != nil {
+		return nil, err
+	}
+	calls := make([]*multicall.Call, 0, len(poolIds))
+	for _, id := range poolIds {
+		c := contract.NewCall(new(priceOutput), "getShareTokenPriceD18", uint8(id))
+		calls = append(calls, c)
+	}
+	res, err := caller.Call(nil, calls...)
+	if err != nil {
+		return nil, err
+	}
+	prices := make([]float64, 0, len(poolIds))
+	for _, call := range res {
+		px := utils.DecNToFloat(call.Outputs.(*priceOutput).PriceD18, 18)
+		prices = append(prices, px)
+	}
+	return prices, nil
+}
+
 func RawCalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, positionBC float64, cashCC float64, tau float64, S3 float64, Sm float64) float64 {
 	if positionBC == 0 {
 		return float64(0)
@@ -802,4 +861,20 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFe
 		}
 	}
 	return pxData, nil
+}
+
+func RawGetTknBalance(tknAddr common.Address, userAddr common.Address, rpc *ethclient.Client) (float64, error) {
+	erc20Instance, err := contracts.NewErc20(tknAddr, rpc)
+	if err != nil {
+		return 0, errors.New("GetMarginTokenBalance: creating instance of token " + tknAddr.String())
+	}
+	n, _ := erc20Instance.Decimals(nil)
+	b, _ := erc20Instance.BalanceOf(nil, userAddr)
+	bal := utils.DecNToFloat(b, n)
+	return bal, nil
+}
+
+func RawQueryPoolShTknBalance(lpAddr common.Address, poolId int, xInfo StaticExchangeInfo, rpc *ethclient.Client) (float64, error) {
+	var shTkn = xInfo.Pools[poolId-1].ShareTokenAddr
+	return RawGetTknBalance(shTkn, lpAddr, rpc)
 }
