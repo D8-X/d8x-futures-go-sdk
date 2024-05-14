@@ -868,8 +868,14 @@ func RawGetTknBalance(tknAddr common.Address, userAddr common.Address, rpc *ethc
 	if err != nil {
 		return 0, errors.New("GetMarginTokenBalance: creating instance of token " + tknAddr.String())
 	}
-	n, _ := erc20Instance.Decimals(nil)
-	b, _ := erc20Instance.BalanceOf(nil, userAddr)
+	n, err := erc20Instance.Decimals(nil)
+	if err != nil {
+		return 0, err
+	}
+	b, err := erc20Instance.BalanceOf(nil, userAddr)
+	if err != nil {
+		return 0, err
+	}
 	bal := utils.DecNToFloat(b, n)
 	return bal, nil
 }
