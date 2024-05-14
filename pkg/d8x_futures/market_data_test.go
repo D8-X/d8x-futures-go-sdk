@@ -33,6 +33,26 @@ func TestFetchPricesFromAPI(t *testing.T) {
 
 }
 
+func TestGetPoolShareTknBalance(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("196") //xlayer
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	addr := "0xdef43CF2Dd024abc5447C1Dcdc2fE3FE58547b84"
+	amt, err := sdkRo.GetPoolShareTknBalance(1, common.HexToAddress(addr), nil)
+	if err != nil {
+		t.FailNow()
+	}
+	fmt.Println("Amount =", amt)
+	px, err := sdkRo.GetPoolShareTknPrice([]int{1, 2, 3}, nil)
+	if err != nil {
+		t.FailNow()
+	}
+	fmt.Println("prices =", px)
+}
+
 func TestGetPerpetualData(t *testing.T) {
 	var sdkRo SdkRO
 	//err := sdkRo.New("421614") //arbitrum sepolia
