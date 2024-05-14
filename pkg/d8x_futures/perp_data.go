@@ -146,7 +146,7 @@ func GetPerpetualStaticInfoIdxFromId(exchangeInfo *StaticExchangeInfo, perpId in
 	return -1
 }
 
-func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfig, nest *NestedPerpetualIds) StaticExchangeInfo {
+func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfig, nest *NestedPerpetualIds) (StaticExchangeInfo, error) {
 	symbolsSet := make(utils.Set)
 
 	perpIds := nest.PerpetualIds
@@ -165,7 +165,7 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		// we query all perpetuals within the current pool
 		perpGetterStaticInfos, err := conn.PerpetualManager.GetPerpetualStaticInfo(nil, poolPerpIds)
 		if err != nil {
-			panic(err)
+			return StaticExchangeInfo{}, err
 		}
 
 		for _, perpStatic := range perpGetterStaticInfos {
@@ -205,11 +205,11 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 	}
 	of, err := contracts.NewOracleFactory(nest.OracleFactoryAddr, conn.Rpc)
 	if err != nil {
-		panic(err)
+		return StaticExchangeInfo{}, err
 	}
 	pythAddr, err := of.Pyth(nil)
 	if err != nil {
-		panic(err)
+		return StaticExchangeInfo{}, err
 	}
 	triangulations := initPriceFeeds(&conn.PriceFeedConfig, symbolsSet)
 	xInfo := StaticExchangeInfo{
@@ -223,7 +223,7 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		IdxPriceTriangulations: triangulations,
 		PythAddr:               pythAddr,
 	}
-	return xInfo
+	return xInfo, nil
 }
 
 // Store stores the StaticExchangeInfo in a file
