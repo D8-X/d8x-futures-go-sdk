@@ -1,6 +1,7 @@
 package d8x_futures
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"errors"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -24,12 +26,7 @@ import (
 type OptsOverrides struct {
 	Rpc       *ethclient.Client
 	WalletIdx int
-}
-type OptsExecuteOrderOverrides struct {
-	Rpc            *ethclient.Client
-	WalletIdx      int
-	SplitExecution bool
-	GasLimit       int
+	GasLimit  int
 }
 
 // PostOrder posts an order to the corresponding limit order book.
@@ -46,6 +43,13 @@ func (sdk *Sdk) PostOrder(order *Order, overrides *OptsOverrides) (string, strin
 	if rpc == nil {
 		rpc = sdk.Conn.Rpc
 	}
+	g := w.Auth.GasLimit
+	defer w.SetGasLimit(g)
+	limit := int(sdk.Conn.PostOrderGasLimit)
+	if overrides != nil && overrides.GasLimit != 0 {
+		limit = overrides.GasLimit
+	}
+	w.SetGasLimit(uint64(limit))
 	return RawPostOrder(rpc, &sdk.Conn, &sdk.Info, w, []byte{}, order, w.Address)
 }
 
@@ -72,6 +76,13 @@ func (sdk *Sdk) AddCollateral(symbol string, amountCC float64, overrides *OptsOv
 	if rpc == nil {
 		rpc = sdk.Conn.Rpc
 	}
+	g := w.Auth.GasLimit
+	defer w.SetGasLimit(g)
+	limit := 15_000_000
+	if overrides != nil && overrides.GasLimit != 0 {
+		limit = overrides.GasLimit
+	}
+	w.SetGasLimit(uint64(limit))
 	return RawAddCollateral(rpc, &sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], w, symbol, amountCC)
 }
 
@@ -87,13 +98,21 @@ func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverri
 	if rpc == nil {
 		rpc = sdk.Conn.Rpc
 	}
+	g := w.Auth.GasLimit
+	defer w.SetGasLimit(g)
+	limit := 15_000_000
+	if overrides != nil && overrides.GasLimit != 0 {
+		limit = overrides.GasLimit
+	}
+	w.SetGasLimit(uint64(limit))
+
 	return RawCancelOrder(rpc, &sdk.Conn, &sdk.Info,
 		sdk.ChainConfig.PriceFeedEndpoints[0], w, symbol, orderId)
 }
 
-func (sdk *Sdk) ExecuteOrders(symbol string, orderIds []string, opts *OptsExecuteOrderOverrides) (*types.Transaction, error) {
+func (sdk *Sdk) ExecuteOrders(symbol string, orderIds []string, opts *OptsOverrides) (*types.Transaction, error) {
 	if opts == nil {
-		o := OptsExecuteOrderOverrides{Rpc: sdk.Conn.Rpc, WalletIdx: 0, SplitExecution: sdk.ChainConfig.SplitExecutionTx, GasLimit: 0}
+		o := OptsOverrides{Rpc: sdk.Conn.Rpc, WalletIdx: 0, GasLimit: 0}
 		opts = &o
 	}
 	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallets[opts.WalletIdx], symbol, orderIds, opts)
@@ -126,6 +145,12 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int, overrides *Op
 		amt = amount
 	}
 	w.UpdateNonceAndGasPx(rpc)
+	limit := 3_000_000
+	if overrides != nil && overrides.GasLimit != 0 {
+		limit = overrides.GasLimit
+	}
+	w.SetGasLimit(uint64(limit))
+
 	approvalTx, err := erc20Instance.Approve(w.Auth, sdk.Info.ProxyAddr, amt)
 	if err != nil {
 		return nil, errors.New("Error approving token for chain " + strconv.Itoa(int(sdk.Conn.ChainId)) + ": " + err.Error())
@@ -143,9 +168,6 @@ func RawPostOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Stati
 	scOrder := order.ToChainType(xInfo, trader)
 	scOrders := []contracts.IClientOrderClientOrder{scOrder}
 	tsigs := [][]byte{traderSig}
-	g := postingWallet.Auth.GasLimit
-	defer postingWallet.SetGasLimit(g)
-	postingWallet.SetGasLimit(uint64(conn.PostOrderGasLimit))
 	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	postingWallet.UpdateNonceAndGasPx(rpc)
 	dgst, err := CreateOrderDigest(scOrder, int(conn.ChainId), true, xInfo.ProxyAddr.Hex())
@@ -181,10 +203,6 @@ func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Sta
 	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
 	postingWallet.Auth.Value = big.NewInt(val)
 
-	g := postingWallet.Auth.GasLimit
-	defer postingWallet.SetGasLimit(g)
-	postingWallet.SetGasLimit(uint64(15_000_000))
-
 	postingWallet.UpdateNonceAndGasPx(rpc)
 	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	tx, err = ob.CancelOrder(postingWallet.Auth, dig, []byte{}, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
@@ -195,11 +213,12 @@ func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Sta
 }
 
 // RawExecuteOrders executes order
-func RawExecuteOrders(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint string, postingWallet *Wallet, symbol string, orderIds []string, opts *OptsExecuteOrderOverrides) (*types.Transaction, error) {
+func RawExecuteOrders(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint string, postingWallet *Wallet, symbol string, orderIds []string, opts *OptsOverrides) (*types.Transaction, error) {
 	rpc := conn.Rpc
 	if opts != nil && opts.Rpc != nil {
 		rpc = opts.Rpc
 	}
+
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
 	if err != nil {
@@ -212,32 +231,41 @@ func RawExecuteOrders(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pyth
 		copy(dig[:], bytesDigest)
 		digests = append(digests, dig)
 	}
-	if opts != nil && opts.SplitExecution {
-		_, err = RawUpdatePythPriceFeeds(conn.PriceFeedConfig.PriceUpdateFeeGwei, rpc, xInfo, postingWallet, &pxFeed)
-		if err != nil {
-			return nil, errors.New("Unable to update price feeds:" + err.Error())
-		}
 
-	} else {
-		v := postingWallet.Auth.Value
-		defer func() { postingWallet.Auth.Value = v }()
-		val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
-		postingWallet.Auth.Value = big.NewInt(val)
-	}
+	v := postingWallet.Auth.Value
+	defer func() { postingWallet.Auth.Value = v }()
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	postingWallet.Auth.Value = big.NewInt(val)
+
 	g := postingWallet.Auth.GasLimit
-	defer postingWallet.SetGasLimit(g)
+	defer postingWallet.SetGasLimit(g) // set back after
+
+	postingWallet.UpdateNonceAndGasPx(rpc)
+	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+
 	limit := 2_000_000 + 1_000_000*(len(digests)-1)
-	if opts != nil && opts.GasLimit > 0 {
+	if opts != nil && opts.GasLimit != 0 {
 		limit = opts.GasLimit
 	}
 	postingWallet.SetGasLimit(uint64(limit))
 
-	postingWallet.UpdateNonceAndGasPx(rpc)
-	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-	if opts.SplitExecution {
-		return ob.ExecuteOrders(postingWallet.Auth, digests, postingWallet.Address, [][]byte{}, []uint64{})
-	}
 	return ob.ExecuteOrders(postingWallet.Auth, digests, postingWallet.Address, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+}
+
+// estimateGasLimit estimates the gaslimit
+func EstimateGasLimit(rpc *ethclient.Client, msg ethereum.CallMsg, defaultLimit int) (int, error) {
+
+	gasLimit, err := rpc.EstimateGas(context.Background(), msg)
+	if err != nil {
+		return defaultLimit, fmt.Errorf("failed to estimate gas: %v. Using default value", err)
+	}
+
+	if int(gasLimit) > 3*defaultLimit {
+		fmt.Printf("estimated gas unrealistically high: %d. Using default value %d", gasLimit, defaultLimit)
+		return defaultLimit, nil
+	}
+
+	return int(gasLimit), nil
 }
 
 func RawUpdatePythPriceFeeds(priceUpdateFeeGwei int64, rpc *ethclient.Client, xInfo *StaticExchangeInfo, postingWallet *Wallet, pxFeed *PerpetualPriceInfo) (*types.Transaction, error) {
@@ -284,9 +312,6 @@ func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *S
 	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
 	postingWallet.Auth.Value = big.NewInt(val)
 
-	g := postingWallet.Auth.GasLimit
-	defer postingWallet.SetGasLimit(g)
-	postingWallet.SetGasLimit(uint64(15_000_000))
 	postingWallet.UpdateNonceAndGasPx(rpc)
 	if amountCC > 0 {
 		tx, err = perpCtrct.Deposit(postingWallet.Auth, big.NewInt(id),
