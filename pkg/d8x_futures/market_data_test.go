@@ -53,6 +53,20 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 	fmt.Println("prices =", px)
 }
 
+func TestQueryLiquidatableAccounts(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("196") //xlayer
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	acc, err := sdkRo.QueryLiquidatableAccounts(100000, nil)
+	if err != nil {
+		t.FailNow()
+	}
+	fmt.Println("Accounts =", acc)
+}
+
 func TestGetPerpetualData(t *testing.T) {
 	var sdkRo SdkRO
 	//err := sdkRo.New("421614") //arbitrum sepolia

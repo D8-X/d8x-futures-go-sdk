@@ -208,6 +208,13 @@ func (sdkRo *SdkRO) GetMinimalPositionSize(symbol string) (float64, error) {
 	return v.LotSizeBC * 10.0, nil
 }
 
+func (sdkRo *SdkRO) QueryLiquidatableAccounts(perpId int32, optRpc *ethclient.Client) ([]common.Address, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryLiquidatableAccounts(optRpc, &sdkRo.Info, perpId, sdkRo.ChainConfig.PriceFeedEndpoints[0])
+}
+
 func (sdkRo *SdkRO) FetchPricesForPerpetualId(id int32) (PerpetualPriceInfo, error) {
 	return RawFetchPricesForPerpetualId(sdkRo.Info, id, sdkRo.ChainConfig.PriceFeedEndpoints[0])
 }
@@ -740,6 +747,19 @@ func RawCalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, posi
 	} else {
 		return lockedInValue / (positionBC - tau*math.Abs(positionBC) + cashCC)
 	}
+}
+
+func RawQueryLiquidatableAccounts(client *ethclient.Client, xInfo *StaticExchangeInfo, perpId int32, pythEndpoint string) ([]common.Address, error) {
+
+	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
+	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	if err != nil {
+		return nil, errors.New("RawQueryLiquidatableAccounts: failed fetching oracle prices " + err.Error())
+	}
+	pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxFeed.S2Price), utils.Float64ToABDK(pxFeed.S3Price)}
+	proxy := CreatePerpetualManagerInstance(client, xInfo.ProxyAddr)
+	id := big.NewInt(int64(perpId))
+	return proxy.GetLiquidatableAccounts(nil, id, pricesAbdk)
 }
 
 func RawFetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, endpoint string) (PerpetualPriceInfo, error) {
