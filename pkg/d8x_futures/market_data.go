@@ -88,6 +88,33 @@ const QUERY_PERP_PX_ABI = `[{
 			"type": "function"
 		}]`
 
+const GET_LIQUIDATABLE_ACC_ABI = `[
+	{
+        "inputs": [
+            {
+                "internalType": "uint24",
+                "name": "_perpetualId",
+                "type": "uint24"
+            },
+            {
+                "internalType": "int128[2]",
+                "name": "_fIndexPrice",
+                "type": "int128[2]"
+            }
+        ],
+        "name": "getLiquidatableAccounts",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "unsafeAccounts",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]`
+
 const POOL_SHTKN_PX_ABI = `[  {
 	"inputs": [
 		{
@@ -206,6 +233,23 @@ func (sdkRo *SdkRO) GetMinimalPositionSize(symbol string) (float64, error) {
 	}
 	v := sdkRo.Info.Perpetuals[j]
 	return v.LotSizeBC * 10.0, nil
+}
+
+// QueryLiquidatableAccounts identifies all liquidatable accounts in the given perpetuals
+func (sdkRo *SdkRO) QueryLiquidatableAccounts(perpId int32, optRpc *ethclient.Client) ([]common.Address, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryLiquidatableAccounts(optRpc, &sdkRo.Info, perpId, sdkRo.ChainConfig.PriceFeedEndpoints[0])
+}
+
+// QueryLiquidatableAccountsInPool identifies all traders that can be liquidated in all perpetuals of
+// the given pool.
+func (sdkRo *SdkRO) QueryLiquidatableAccountsInPool(poolId int32, optRpc *ethclient.Client) ([]LiquidatableAccounts, error) {
+	if optRpc == nil {
+		optRpc = sdkRo.Conn.Rpc
+	}
+	return RawQueryLiquidatableAccountsInPool(optRpc, &sdkRo.Info, poolId, sdkRo.ChainConfig.PriceFeedEndpoints[0])
 }
 
 func (sdkRo *SdkRO) FetchPricesForPerpetualId(id int32) (PerpetualPriceInfo, error) {
@@ -742,6 +786,85 @@ func RawCalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, posi
 	}
 }
 
+func RawQueryLiquidatableAccounts(client *ethclient.Client, xInfo *StaticExchangeInfo, perpId int32, pythEndpoint string) ([]common.Address, error) {
+
+	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
+	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	if err != nil {
+		return nil, errors.New("RawQueryLiquidatableAccounts: failed fetching oracle prices " + err.Error())
+	}
+	pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxFeed.S2Price), utils.Float64ToABDK(pxFeed.S3Price)}
+	proxy := CreatePerpetualManagerInstance(client, xInfo.ProxyAddr)
+	id := big.NewInt(int64(perpId))
+	return proxy.GetLiquidatableAccounts(nil, id, pricesAbdk)
+}
+
+func RawQueryLiquidatableAccountsInPool(client *ethclient.Client, xInfo *StaticExchangeInfo, poolId int32, pythEndpoint string) ([]LiquidatableAccounts, error) {
+	caller, err := multicall.New(client)
+	if err != nil {
+		return nil, err
+	}
+	contract, err := multicall.NewContract(GET_LIQUIDATABLE_ACC_ABI, xInfo.ProxyAddr.Hex())
+	if err != nil {
+		return nil, err
+	}
+	// get perpetuals in the pool and gather indices
+	perpIds := make([]int32, 0, len(xInfo.Perpetuals))
+	perpIdx := make([]int, 0, len(xInfo.Perpetuals))
+	priceIdSet := make(map[string]bool)
+	priceIds := make([]string, 0, len(xInfo.Perpetuals))
+	for k, perp := range xInfo.Perpetuals {
+		if perp.PoolId != poolId {
+			continue
+		}
+		perpIds = append(perpIds, perp.Id)
+		perpIdx = append(perpIdx, k)
+		for _, pxId := range xInfo.Perpetuals[k].PriceIds {
+			if priceIdSet[pxId] {
+				continue
+			}
+			priceIdSet[pxId] = true
+			priceIds = append(priceIds, pxId)
+		}
+	}
+	feedData, err := fetchPricesFromAPI(priceIds, xInfo.PriceFeedInfo, pythEndpoint, true)
+	if err != nil {
+		return nil, err
+	}
+	calls := make([]*multicall.Call, 0, len(perpIdx))
+	type liqOutput struct {
+		LiqAccount []common.Address
+	}
+	// build multi-call
+	for _, idx := range perpIdx {
+		S2Sym := xInfo.Perpetuals[idx].S2Symbol
+		S3Sym := xInfo.Perpetuals[idx].S3Symbol
+		perpId := big.NewInt(int64(xInfo.Perpetuals[idx].Id))
+		pxInfo, err := calculatePerpPxFromFeed(xInfo, feedData, S2Sym, S3Sym)
+		if err != nil {
+			return nil, err
+		}
+		pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxInfo.S2Price), utils.Float64ToABDK(pxInfo.S3Price)}
+		c := contract.NewCall(new(liqOutput), "getLiquidatableAccounts", perpId, pricesAbdk)
+		calls = append(calls, c)
+	}
+	res, err := caller.Call(nil, calls...)
+	if err != nil {
+		return nil, err
+	}
+	liqAccs := make([]LiquidatableAccounts, 0, len(perpIdx))
+	for k, call := range res {
+		addr := call.Outputs.(*liqOutput)
+		if len(addr.LiqAccount) == 0 {
+			continue
+		}
+		liqAccs = append(liqAccs,
+			LiquidatableAccounts{PerpId: perpIds[k], LiqAccounts: addr.LiqAccount})
+	}
+
+	return liqAccs, nil
+}
+
 func RawFetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, endpoint string) (PerpetualPriceInfo, error) {
 	j := GetPerpetualStaticInfoIdxFromId(&exchangeInfo, id)
 	if j == -1 {
@@ -764,22 +887,35 @@ func RawFetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string, 
 
 // fetchPricesForPerpetual gets prices from the VAA-endpoint, perpetual number j
 // and endpoint number epNo. j is the index of the perpetual in StaticExchangeInfo
-func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int, endpoint string) (PerpetualPriceInfo, error) {
-	// get underlying data from rest-api
-	feedData, err := fetchPricesFromAPI(exchangeInfo.Perpetuals[j].PriceIds, exchangeInfo.PriceFeedInfo, endpoint)
+func fetchPricesForPerpetual(xInfo StaticExchangeInfo, j int, endpoint string) (PerpetualPriceInfo, error) {
+	// get underlying data from rest-api with vaa
+	feedData, err := fetchPricesFromAPI(xInfo.Perpetuals[j].PriceIds, xInfo.PriceFeedInfo, endpoint, true)
 	if err != nil {
 		return PerpetualPriceInfo{}, err
 	}
+	return calculatePerpPxFromFeed(&xInfo, feedData, xInfo.Perpetuals[j].S2Symbol, xInfo.Perpetuals[j].S3Symbol)
+}
+
+// calculatePerpPxFromFeed calculates the prices for the given symbols via pre-calculated triangulations
+// based on feedData
+func calculatePerpPxFromFeed(xInfo *StaticExchangeInfo, feedData PriceFeedData, S2Sym, S3Sym string) (PerpetualPriceInfo, error) {
 	// triangulate fetched prices to obtain index prices
-	triang := exchangeInfo.IdxPriceTriangulations[exchangeInfo.Perpetuals[j].S2Symbol]
-	pxS2, isMarketClosedS2 := CalculateTriangulation(triang, feedData)
+	triang := xInfo.IdxPriceTriangulations[S2Sym]
+	pxS2, isMarketClosedS2, err := calculateTriangulation(triang, feedData, xInfo.PriceFeedInfo.SymbolToId)
+	if err != nil {
+		return PerpetualPriceInfo{}, err
+	}
 	var pxS3 float64 = 0
 	var isMarketClosedS3 bool = false
 	// triangulate S3 if there is an S3 index
-	if exchangeInfo.Perpetuals[j].S3Symbol != "" {
-		triang = exchangeInfo.IdxPriceTriangulations[exchangeInfo.Perpetuals[j].S3Symbol]
-		pxS3, isMarketClosedS3 = CalculateTriangulation(triang, feedData)
+	if S3Sym != "" {
+		triang = xInfo.IdxPriceTriangulations[S3Sym]
+		pxS3, isMarketClosedS3, err = calculateTriangulation(triang, feedData, xInfo.PriceFeedInfo.SymbolToId)
+		if err != nil {
+			return PerpetualPriceInfo{}, err
+		}
 	}
+
 	var priceInfo = PerpetualPriceInfo{
 		S2Price:          pxS2,
 		S3Price:          pxS3,
@@ -791,55 +927,24 @@ func fetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, j int, endpoint st
 }
 
 // fetchPricesFromAPI gets the prices for the given priceIds from the
-// configured REST-API. The PriceFeedConfig is needed to extract the
-// correct endpoint per feed, and store what symbol (e.g. BTC-USD) the
-// price feed covers. endPtNo is the endpoint number in the config
-func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFeedEndpoint string) (PriceFeedData, error) {
+// configured REST-API. The PriceFeedConfig is needed to store what
+// symbol (e.g. BTC-USD) the price feed covers.
+func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFeedEndpoint string, withVaa bool) (PriceFeedData, error) {
 	pxData := PriceFeedData{
-		Symbols:        make([]string, len(priceIds)),
 		PriceIds:       priceIds,
 		Prices:         make([]float64, len(priceIds)),
-		IsMarketClosed: make([]bool, len(priceIds)),
-		Vaas:           make([][]byte, len(priceIds)),
+		IsFeedOutdated: make([]bool, len(priceIds)),
 		PublishTimes:   make([]uint64, len(priceIds)),
 	}
-	// binary=true <- include VAA
-	query := priceFeedEndpoint + "/latest_price_feeds?binary=true&"
-	// loop through price id's, find its endpoints and prepare the query
-	for i, id := range priceIds {
-		priceIds[i] = strings.TrimPrefix(id, "0x")
-		pxData.Symbols[i] = "not in config"
-		query += "ids[]=" + priceIds[i] + "&"
-		for _, c := range config.PriceFeedIds {
-			if c.Id == "0x"+priceIds[i] {
-				pxData.Symbols[i] = c.Symbol
-				break
-			}
-		}
+	if withVaa {
+		pxData.Vaas = make([][]byte, len(priceIds))
 	}
-	query = strings.TrimSuffix(query, "&")
+
 	timestampNow := time.Now().Unix()
 	// REST query (#queries == number of endpoints for feeds)
-	response, err := http.Get(query)
+	// include VAA
+	data, err := fetchPythPrices(priceIds, true, priceFeedEndpoint)
 	if err != nil {
-		err := errors.New("Error sending fetchPricesFromAPI request:" + err.Error())
-		return PriceFeedData{}, err
-	}
-	defer response.Body.Close()
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		err := errors.New("Error reading response body:" + err.Error())
-		return PriceFeedData{}, err
-	}
-	if response.StatusCode != 200 {
-		err := errors.New("Error fetchPricesFromAPI status " + strconv.Itoa(response.StatusCode) + " " + string(body[:]))
-		return PriceFeedData{}, err
-	}
-	var data []ResponsePythLatestPriceFeed
-	err = json.Unmarshal(body, &data)
-	if err != nil {
-		err := errors.New("fetchPricesFromAPI:" + err.Error())
 		return PriceFeedData{}, err
 	}
 	// process data
@@ -848,19 +953,55 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFe
 		for i, id := range priceIds {
 			if id == d.Id {
 				pxData.Prices[i] = utils.PythNToFloat64(d.Price.Price, d.Price.Expo)
-				pxData.IsMarketClosed[i] = timestampNow-int64(d.Price.PublishTime) > int64(config.ThresholdMarketClosedSec)
+				pxData.IsFeedOutdated[i] = timestampNow-int64(d.Price.PublishTime) > int64(config.ThresholdFeedOutdatedSec)
+				pxData.PublishTimes[i] = uint64(d.Price.PublishTime)
+				if !withVaa {
+					break
+				}
 				decodedVaaBytes, err := base64.StdEncoding.DecodeString(d.Vaa)
 				if err != nil {
 					err := errors.New("fetchPricesFromAPI decoding base64:" + err.Error())
 					return PriceFeedData{}, err
 				}
 				pxData.Vaas[i] = decodedVaaBytes
-				pxData.PublishTimes[i] = uint64(d.Price.PublishTime)
 				break
 			}
 		}
 	}
 	return pxData, nil
+}
+
+// fetchPythPrices gets the specified priceIds from the pyth endpoint 'priceFeedEndpoint'
+// and includes VAA (signed prices) if withVaa is true
+func fetchPythPrices(priceIds []string, withVaa bool, priceFeedEndpoint string) ([]ResponsePythLatestPriceFeed, error) {
+	query := fmt.Sprintf("%s/latest_price_feeds?binary=%t&", priceFeedEndpoint, withVaa)
+	for _, id := range priceIds {
+		query += "ids[]=" + strings.TrimPrefix(id, "0x") + "&"
+	}
+	query = strings.TrimSuffix(query, "&")
+	response, err := http.Get(query)
+	if err != nil {
+		err := errors.New("Error sending fetchPricesFromAPI request:" + err.Error())
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		err := errors.New("Error reading response body:" + err.Error())
+		return nil, err
+	}
+	if response.StatusCode != 200 {
+		err := errors.New("Error fetchPricesFromAPI status " + strconv.Itoa(response.StatusCode) + " " + string(body[:]))
+		return nil, err
+	}
+	var data []ResponsePythLatestPriceFeed
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		err := errors.New("fetchPricesFromAPI:" + err.Error())
+		return nil, err
+	}
+	return data, nil
 }
 
 func RawGetTknBalance(tknAddr common.Address, userAddr common.Address, rpc *ethclient.Client) (float64, error) {

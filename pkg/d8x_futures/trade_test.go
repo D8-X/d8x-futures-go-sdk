@@ -32,15 +32,15 @@ func TestSdkExec(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New([]string{pk}, "421614") //arbitrum
-	//err := sdk.New([]string{pk}, "x1Testnet") //x1
+	//err := sdk.New([]string{pk}, "421614") //arbitrum
+	err := sdk.New([]string{pk}, "195") //x-layer testnet
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	orderObj, err := sdk.QueryAllOpenOrders("ETH-USD-WETH", nil)
+	orderObj, err := sdk.QueryAllOpenOrders("BTC-USDC-USDC", nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -58,7 +58,7 @@ func TestSdkExec(t *testing.T) {
 		}
 	}
 	if len(mktOrderIds) == 0 {
-		order := NewOrder("ETH-USD-WETH", SIDE_SELL, ORDER_TYPE_MARKET, 0.01, 10, &OrderOptions{LimitPrice: 2240})
+		order := NewOrder("BTC-USDC-USDC", SIDE_SELL, ORDER_TYPE_MARKET, 0.01, 10, &OrderOptions{LimitPrice: 2240})
 		orderId, _, err := sdk.PostOrder(order, nil)
 		if err != nil {
 			t.Logf(err.Error())
@@ -67,12 +67,46 @@ func TestSdkExec(t *testing.T) {
 
 		mktOrderIds = append(mktOrderIds, orderId)
 	}
-	tx, err := sdk.ExecuteOrders("ETH-USD-WETH", []string{mktOrderIds[0]}, nil)
+	tx, err := sdk.ExecuteOrders("BTC-USDC-USDC", []string{mktOrderIds[0]}, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	fmt.Println("tx = ", tx.Hash())
+}
+
+func TestSdkLiquidatePosition(t *testing.T) {
+
+	var sdk Sdk
+	pk := loadPk()
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	err := sdk.New([]string{pk}, "195") //x-layer testnet
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	acc2, err := sdk.QueryLiquidatableAccountsInPool(1, nil)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Println(acc2)
+	if len(acc2) == 0 {
+		return
+	}
+	for _, el := range acc2 {
+		for _, addr := range el.LiqAccounts {
+			tx, err := sdk.LiquidatePosition(el.PerpId, &addr, nil, nil)
+			if err != nil {
+				fmt.Printf("error liquidating: %s\n", err.Error())
+				continue
+			}
+			fmt.Printf("liquidated %d trader %s tx=%s\n", el.PerpId, addr.Hex(), tx.Hash())
+		}
+	}
 }
 
 func TestTradingFunc(t *testing.T) {

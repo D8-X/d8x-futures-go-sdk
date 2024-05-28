@@ -95,6 +95,11 @@ type PerpetualState struct {
 	IsMarketClosed        bool
 }
 
+type LiquidatableAccounts struct {
+	PerpId      int32
+	LiqAccounts []common.Address
+}
+
 type OpenOrders struct {
 	Orders      []Order
 	OrderHashes []string
@@ -181,10 +186,9 @@ type Triangulation struct {
 type Triangulations map[string]Triangulation
 
 type PriceFeedData struct {
-	Symbols        []string
 	PriceIds       []string
 	Prices         []float64
-	IsMarketClosed []bool
+	IsFeedOutdated []bool // price feed older than threshold_feed_outdated_sec
 	Vaas           [][]byte
 	PublishTimes   []uint64
 }

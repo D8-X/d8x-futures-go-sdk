@@ -1,36 +1,41 @@
 package d8x_futures
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 )
 
-// CalculateTriangulation calculates the triangulated price and reports whether any
-// of the price-feeds has a closed market, given a triangulation path and price data
-func CalculateTriangulation(triang Triangulation, pxData PriceFeedData) (float64, bool) {
+// calculateTriangulation calculates the triangulated price and reports whether any
+// of the price-feeds is outdated, given a triangulation path and price data
+func calculateTriangulation(triang Triangulation, pxData PriceFeedData, symToPriceId map[string]string) (float64, bool, error) {
 	var price float64 = 1.0
-	var isMarketClosed = false
+	var isFeedOutdated = false
 	// loop over triangulation
 	for i, symCurr := range triang.Symbol {
 		// find the current symbol symCurr of the triangulation in the
 		// price data
-		for j, symPrice := range pxData.Symbols {
-			if symPrice == symCurr {
+		idCurr, exists := symToPriceId[symCurr]
+		if !exists {
+			return 0, true, fmt.Errorf("symbol %s does not exist in config", symCurr)
+		}
+		for j, idPrice := range pxData.PriceIds {
+			if idPrice == idCurr {
 				// multiply or divide depending on isInverse
 				if triang.IsInverse[i] {
 					price = price / pxData.Prices[j]
 				} else {
 					price = price * pxData.Prices[j]
 				}
-				if pxData.IsMarketClosed[j] {
-					isMarketClosed = true
+				if pxData.IsFeedOutdated[j] {
+					isFeedOutdated = true
 				}
 				break
 			}
 		}
 	}
-	return price, isMarketClosed
+	return price, isFeedOutdated, nil
 }
 
 // Triangulate finds the shortest triangulation path for symbol (e.g. BTC-USDC) using

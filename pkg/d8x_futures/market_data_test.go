@@ -13,24 +13,38 @@ import (
 )
 
 func TestFetchPricesFromAPI(t *testing.T) {
-	pxConf, err := config.GetDefaultPriceConfig(1442)
+	pxConf, err := config.GetDefaultPriceConfig(196)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	priceIds := []string{"0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
-		"0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"}
-	data, _ := fetchPricesFromAPI(priceIds, pxConf, "https://hermes-beta.pyth.network/api")
+	priceIds := []string{"0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
+		"0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"}
+	data, _ := fetchPricesFromAPI(priceIds, pxConf, "https://hermes.pyth.network/api", false)
 	fmt.Println(data)
 	priceIdsWrong := []string{"0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
 		"0x01f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"}
-	_, err = fetchPricesFromAPI(priceIdsWrong, pxConf, "https://hermes-beta.pyth.network/api")
+	_, err = fetchPricesFromAPI(priceIdsWrong, pxConf, "https://hermes.pyth.network/api", false)
 	if err == nil {
 		slog.Error("Error: queried wrong price id but did not fail")
 		t.FailNow()
 	}
 	fmt.Println(err.Error())
 
+}
+
+func TestFetchPythPrices(t *testing.T) {
+	pxConf, err := config.GetDefaultPriceConfig(196)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	r, err := fetchPythPrices([]string{pxConf.PriceFeedIds[0].Id, pxConf.PriceFeedIds[1].Id}, false, "https://hermes.pyth.network/api")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Print(r)
 }
 
 func TestGetPoolShareTknBalance(t *testing.T) {
@@ -51,6 +65,34 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Println("prices =", px)
+}
+
+func TestQueryLiquidatableAccounts(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("195") //xlayer testnet
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	acc, err := sdkRo.QueryLiquidatableAccounts(100000, nil)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Println("Accounts =", acc)
+
+	accs, err := RawQueryLiquidatableAccountsInPool(sdkRo.Conn.Rpc, &sdkRo.Info, 1, "https://hermes.pyth.network/api")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Print(accs)
+	acc2, err := sdkRo.QueryLiquidatableAccountsInPool(1, nil)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Print(acc2)
 }
 
 func TestGetPerpetualData(t *testing.T) {
@@ -291,9 +333,15 @@ func TestSdkRO(t *testing.T) {
 }
 
 func TestFetchPricesForPerpetual(t *testing.T) {
-	var info StaticExchangeInfo
-	info.Load("./tmpXchInfo.json")
-	pxBundle, _ := RawFetchPricesForPerpetual(info, "BTC-USD-MATIC", "https://hermes-beta.pyth.network/api")
+	var sdkRo SdkRO
+	err := sdkRo.New("196")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	pxBundle, err := RawFetchPricesForPerpetual(sdkRo.Info, "ETH-USDC-USDC", "https://hermes.pyth.network/api")
+	if err != nil {
+		t.Logf(err.Error())
+	}
 	fmt.Println(pxBundle)
 }
 
