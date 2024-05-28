@@ -2,6 +2,7 @@
   {
     "network": "PythEVMStable",
     "candleIrrelevant": ["STUSD-USD", "AGEUR-USD"],
+    "threshold_feed_outdated_sec": 60,
     "ids": [
       {
         "symbol": "USDC-USD",
