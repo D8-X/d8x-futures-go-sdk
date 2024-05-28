@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -26,8 +27,9 @@ type PriceFeedConfig struct {
 	Network                  string        `json:"network"`
 	CandleIrrelevant         []string      `json:"candleIrrelevant"`
 	PriceFeedIds             []PriceFeedId `json:"ids"`
-	ThresholdMarketClosedSec int32         `json:"threshold_market_closed_sec"`
+	ThresholdFeedOutdatedSec int32         `json:"threshold_feed_outdated_sec"`
 	PriceUpdateFeeGwei       int64
+	SymbolToId               map[string]string //map the symbol (BTC-USD) to price id 0x382738927...
 }
 
 type PriceFeedId struct {
@@ -39,7 +41,7 @@ type PriceFeedId struct {
 
 // LoadPriceFeedConfig loads the price feed config file
 // data into struct PriceFeedConfig for the network called configNetwork
-// for example LoadPriceFeedConfig("config/priceFeedConfig.json", "testnet")
+// for example LoadPriceFeedConfig("config/priceFeedConfig.json", "PythEVMStable")
 func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, error) {
 	var configuration []PriceFeedConfig
 	// Unmarshal the JSON data into the Configuration struct
@@ -48,12 +50,23 @@ func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, er
 		log.Fatal("Error decoding JSON:", err)
 		return PriceFeedConfig{}, err
 	}
+	j := -1
 	for i := 0; i < len(configuration); i++ {
 		if configuration[i].Network == configNetwork {
-			return configuration[i], nil
+			j = i
+			break
 		}
 	}
-	return PriceFeedConfig{}, errors.New("config not found")
+	if j == -1 {
+		return PriceFeedConfig{}, errors.New("config not found")
+	}
+	//SymbolToId
+	config := configuration[j]
+	config.SymbolToId = make(map[string]string)
+	for _, feed := range config.PriceFeedIds {
+		config.SymbolToId[feed.Symbol] = strings.TrimPrefix(feed.Id, "0x")
+	}
+	return config, nil
 }
 
 // LoadChainConfig loads the chain-config from data into ChainConfig struct
