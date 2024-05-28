@@ -110,12 +110,49 @@ func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverri
 		sdk.ChainConfig.PriceFeedEndpoints[0], w, symbol, orderId)
 }
 
-func (sdk *Sdk) ExecuteOrders(symbol string, orderIds []string, opts *OptsOverrides) (*types.Transaction, error) {
+func (sdk *Sdk) ExecuteOrders(
+	symbol string,
+	orderIds []string,
+	opts *OptsOverrides,
+) (
+	*types.Transaction,
+	error,
+) {
 	if opts == nil {
 		o := OptsOverrides{Rpc: sdk.Conn.Rpc, WalletIdx: 0, GasLimit: 0}
 		opts = &o
 	}
 	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallets[opts.WalletIdx], symbol, orderIds, opts)
+}
+
+// LiquidatePosition liquidates the position of traderAddr in perpetual with id perpId, given it is liquidatable. Liquidation
+// reward is paid to the optional liquidator address or if nil to the executing wallet. Gaslimit and rpc as well as wallet index
+// can be provided via OptsOverrides.
+func (sdk *Sdk) LiquidatePosition(
+	perpId int32,
+	traderAddr, optLiquidatorAddr *common.Address,
+	opts *OptsOverrides,
+) (
+	*types.Transaction,
+	error,
+) {
+	if opts == nil {
+		o := OptsOverrides{Rpc: sdk.Conn.Rpc, WalletIdx: 0, GasLimit: 0}
+		opts = &o
+	}
+	if optLiquidatorAddr == nil {
+		optLiquidatorAddr = &(sdk.Wallets[opts.WalletIdx].Address)
+	}
+
+	return RawLiquidatePosition(
+		&sdk.Conn,
+		&sdk.Info,
+		sdk.ChainConfig.PriceFeedEndpoints[0],
+		sdk.Wallets[opts.WalletIdx],
+		perpId,
+		traderAddr,
+		optLiquidatorAddr,
+		opts)
 }
 
 // ApproveTknSpending approves the manager to spend the wallet's margin tokens for the given
@@ -213,7 +250,18 @@ func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Sta
 }
 
 // RawExecuteOrders executes order
-func RawExecuteOrders(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint string, postingWallet *Wallet, symbol string, orderIds []string, opts *OptsOverrides) (*types.Transaction, error) {
+func RawExecuteOrders(
+	conn *BlockChainConnector,
+	xInfo *StaticExchangeInfo,
+	pythEndpoint string,
+	postingWallet *Wallet,
+	symbol string,
+	orderIds []string,
+	opts *OptsOverrides,
+) (
+	*types.Transaction,
+	error,
+) {
 	rpc := conn.Rpc
 	if opts != nil && opts.Rpc != nil {
 		rpc = opts.Rpc
@@ -250,6 +298,44 @@ func RawExecuteOrders(conn *BlockChainConnector, xInfo *StaticExchangeInfo, pyth
 	postingWallet.SetGasLimit(uint64(limit))
 
 	return ob.ExecuteOrders(postingWallet.Auth, digests, postingWallet.Address, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+}
+
+func RawLiquidatePosition(
+	conn *BlockChainConnector,
+	xInfo *StaticExchangeInfo,
+	pythEndpoint string,
+	postingWallet *Wallet,
+	perpId int32,
+	traderAddr, liquidatorAddr *common.Address,
+	opts *OptsOverrides,
+) (
+	*types.Transaction,
+	error,
+) {
+	rpc := conn.Rpc
+	if opts != nil && opts.Rpc != nil {
+		rpc = opts.Rpc
+	}
+	perpCtrct := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	g := postingWallet.Auth.GasLimit
+	defer postingWallet.SetGasLimit(g) // set back after
+	postingWallet.UpdateNonceAndGasPx(rpc)
+
+	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
+	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	if err != nil {
+		return nil, errors.New("RawLiquidatePosition: failed fetching oracle prices " + err.Error())
+	}
+	v := postingWallet.Auth.Value
+	defer func() { postingWallet.Auth.Value = v }()
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	postingWallet.Auth.Value = big.NewInt(val)
+	limit := 3_000_000
+	if opts != nil && opts.GasLimit != 0 {
+		limit = opts.GasLimit
+	}
+	postingWallet.SetGasLimit(uint64(limit))
+	return perpCtrct.LiquidateByAMM(postingWallet.Auth, big.NewInt(int64(perpId)), *liquidatorAddr, *traderAddr, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
 }
 
 // estimateGasLimit estimates the gaslimit

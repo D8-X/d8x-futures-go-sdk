@@ -75,6 +75,40 @@ func TestSdkExec(t *testing.T) {
 	fmt.Println("tx = ", tx.Hash())
 }
 
+func TestSdkLiquidatePosition(t *testing.T) {
+
+	var sdk Sdk
+	pk := loadPk()
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	err := sdk.New([]string{pk}, "195") //x-layer testnet
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	acc2, err := sdk.QueryLiquidatableAccountsInPool(1, nil)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Println(acc2)
+	if len(acc2) == 0 {
+		return
+	}
+	for _, el := range acc2 {
+		for _, addr := range el.LiqAccounts {
+			tx, err := sdk.LiquidatePosition(el.PerpId, &addr, nil, nil)
+			if err != nil {
+				fmt.Printf("error liquidating: %s\n", err.Error())
+				continue
+			}
+			fmt.Printf("liquidated %d trader %s tx=%s\n", el.PerpId, addr.Hex(), tx.Hash())
+		}
+	}
+}
+
 func TestTradingFunc(t *testing.T) {
 	var sdk Sdk
 	pk := loadPk()

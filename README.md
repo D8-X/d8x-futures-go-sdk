@@ -81,6 +81,14 @@ Example 6: Execute order
 tx, err := sdk.ExecuteOrders("ETH-USDC-USDC", orderIds, nil)
 ```
 
+Example 7: Liquidate (liquidatable) order
+
+```
+acc2, err := sdk.QueryLiquidatableAccountsInPool(1, nil)
+tx, err := sdk.LiquidatePosition(acc2[0].PerpId, &acc2[0].addr[0], nil, nil)
+```
+
+
 ### Dev
 Generate the ABI for the network it should compile to:
 `abigen --abi abi/IPerpetualManager.json --pkg contracts --type IPerpetualManager --out IPerpetualManager.go`
