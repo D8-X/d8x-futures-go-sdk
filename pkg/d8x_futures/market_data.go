@@ -852,7 +852,6 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client, xInfo *StaticE
 	if err != nil {
 		return nil, err
 	}
-	fmt.Print(res)
 	liqAccs := make([]LiquidatableAccounts, 0, len(perpIdx))
 	for k, call := range res {
 		addr := call.Outputs.(*liqOutput)

@@ -87,6 +87,12 @@ func TestQueryLiquidatableAccounts(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Print(accs)
+	acc2, err := sdkRo.QueryLiquidatableAccountsInPool(1, nil)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Print(acc2)
 }
 
 func TestGetPerpetualData(t *testing.T) {
