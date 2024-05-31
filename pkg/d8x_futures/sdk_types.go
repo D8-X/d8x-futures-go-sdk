@@ -71,7 +71,8 @@ type PerpetualStaticInfo struct {
 	S3Symbol               string
 	LotSizeBC              float64
 	ReferralRebate         float64
-	PriceIds               []string
+	PriceIds               []string //off-chain price feeds
+	OnChainSymbols         []string //on-chain price feeds
 }
 
 type PoolState struct {

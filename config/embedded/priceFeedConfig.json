@@ -1,7 +1,7 @@
 [
   {
     "network": "PythEVMStable",
-    "candleIrrelevant": ["STUSD-USD", "AGEUR-USD"],
+    "candleIrrelevant": ["STUSD-USD", "AGEUR-USD", "WEETH-ETH"],
     "threshold_feed_outdated_sec": 60,
     "ids": [
       {
@@ -93,6 +93,12 @@
         "id": "0xdcef50dd0a4cd2dcc17e45df1676dcb336a11a61c69df7a0299b0150c672d25c",
         "type": "pyth",
         "origin": "Crypto.DOGE/USD"
+      },
+      {
+        "symbol": "WEETH-ETH",
+        "id": "0x119A190b510c9c0D5Ec301b60B2fE70A50356aE9",
+        "type": "onchain",
+        "origin": ""
       }
     ]
   }
