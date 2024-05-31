@@ -39,6 +39,14 @@ type PriceFeedId struct {
 	Origin string `json:"origin"`
 }
 
+type PriceFeedOnChainConfig struct {
+	Name          string   `json:"name"`
+	RPCs          []string `json:"rpcs"`
+	PxFeedAddress string   `json:"pxFeedAddress"`
+	Decimals      int      `json:"decimals"`
+	MaxFeedAgeSec int64    `json:"maxFeedAgeSec"`
+}
+
 // LoadPriceFeedConfig loads the price feed config file
 // data into struct PriceFeedConfig for the network called configNetwork
 // for example LoadPriceFeedConfig("config/priceFeedConfig.json", "PythEVMStable")

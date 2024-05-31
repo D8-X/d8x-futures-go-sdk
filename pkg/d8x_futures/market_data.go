@@ -789,6 +789,9 @@ func RawCalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, posi
 func RawQueryLiquidatableAccounts(client *ethclient.Client, xInfo *StaticExchangeInfo, perpId int32, pythEndpoint string) ([]common.Address, error) {
 
 	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
+	if j == -1 {
+		return nil, fmt.Errorf("RawQueryLiquidatableAccounts: perp id %d not found", perpId)
+	}
 	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
 	if err != nil {
 		return nil, errors.New("RawQueryLiquidatableAccounts: failed fetching oracle prices " + err.Error())

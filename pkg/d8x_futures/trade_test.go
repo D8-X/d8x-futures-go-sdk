@@ -83,12 +83,13 @@ func TestSdkLiquidatePosition(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New([]string{pk}, "195") //x-layer testnet
+	//err := sdk.New([]string{pk}, "195") //x-layer testnet
+	err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	acc2, err := sdk.QueryLiquidatableAccountsInPool(1, nil)
+	acc2, err := sdk.QueryLiquidatableAccountsInPool(2, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -99,6 +100,7 @@ func TestSdkLiquidatePosition(t *testing.T) {
 	}
 	for _, el := range acc2 {
 		for _, addr := range el.LiqAccounts {
+			fmt.Printf("liquidating %s\n", addr.Hex())
 			tx, err := sdk.LiquidatePosition(el.PerpId, &addr, nil, nil)
 			if err != nil {
 				fmt.Printf("error liquidating: %s\n", err.Error())

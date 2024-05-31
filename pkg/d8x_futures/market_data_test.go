@@ -69,12 +69,13 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 
 func TestQueryLiquidatableAccounts(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("195") //xlayer testnet
+	//err := sdkRo.New("195") //xlayer testnet
+	err := sdkRo.New("421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	acc, err := sdkRo.QueryLiquidatableAccounts(100000, nil)
+	acc, err := sdkRo.QueryLiquidatableAccounts(200000, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
