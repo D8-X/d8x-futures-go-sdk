@@ -13,12 +13,12 @@ func TestGetPrice(t *testing.T) {
 		t.FailNow()
 	}
 	for k := 0; k < 4; k++ {
-		px, err := oracles.GetPrice("WEETH-ETH", true)
+		px, ts, err := oracles.GetPrice("WEETH-ETH", true)
 		if err != nil {
 			fmt.Println(err.Error())
 			t.FailNow()
 		}
-		fmt.Printf("px=%.4f\n", px)
+		fmt.Printf("px=%.4f ts=%d\n", px, ts)
 		// wait
 		time.Sleep(5 * time.Second)
 	}

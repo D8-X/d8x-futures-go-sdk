@@ -21,10 +21,11 @@ type ChainOracles struct {
 }
 
 type OracleObs struct {
-	Px      float64
-	Ts      int64
-	muRW    *sync.Mutex
-	muChain *sync.Mutex
+	Px          float64
+	Ts          int64 //when did our query happen?
+	UpdatedAtTs int64 //from oracle
+	muRW        *sync.Mutex
+	muChain     *sync.Mutex
 }
 
 func NewChainOracles() (*ChainOracles, error) {
@@ -38,10 +39,11 @@ func NewChainOracles() (*ChainOracles, error) {
 	var wg sync.WaitGroup
 	for _, c := range oracles.Config {
 		oracles.LastResult[c.Name] = &OracleObs{
-			Px:      0,
-			Ts:      0,
-			muRW:    &sync.Mutex{},
-			muChain: &sync.Mutex{},
+			Px:          0,
+			Ts:          0,
+			UpdatedAtTs: 0,
+			muRW:        &sync.Mutex{},
+			muChain:     &sync.Mutex{},
 		}
 		wg.Add(1)
 		go oracles.updatePrice(c.Name, true, &wg)
@@ -51,26 +53,27 @@ func NewChainOracles() (*ChainOracles, error) {
 	return &oracles, nil
 }
 
-// GetPrice returns the last queried price from on-chain. It also queries a new price
+// GetPrice returns the last queried price and the updatedAt-timestamp from on-chain. It also queries a new price
 // if max-feed age is exceeded but returns the last queried.
-func (ch *ChainOracles) GetPrice(name string, doLog bool) (float64, error) {
+func (ch *ChainOracles) GetPrice(name string, doLog bool) (float64, int64, error) {
 	j, err := ch.findConfigIdx(name)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	obs, exists := ch.LastResult[name]
 	if !exists {
-		return 0, fmt.Errorf("no price feed %s", name)
+		return 0, 0, fmt.Errorf("no price feed %s", name)
 	}
 	nowTs := time.Now().Unix()
 	obs.muRW.Lock()
 	ts := obs.Ts
 	px := obs.Px
+	updated := obs.UpdatedAtTs
 	obs.muRW.Unlock()
 	if nowTs-ts > ch.Config[j].MaxFeedAgeSec {
 		go ch.updatePrice(name, doLog, nil)
 	}
-	return px, nil
+	return px, updated, nil
 }
 
 // updatePrice updates the price from on-chain unless there is another routine
@@ -88,7 +91,7 @@ func (ch *ChainOracles) updatePrice(name string, doLog bool, wg *sync.WaitGroup)
 		fmt.Printf("updating price for %s\n", name)
 	}
 	defer obs.muChain.Unlock()
-	px, err := ch.FetchPrice(name, doLog)
+	px, ts, err := ch.FetchPrice(name, doLog)
 	if err != nil {
 		fmt.Println("unable to fetch on-chain price in go-routine:" + err.Error())
 		return
@@ -96,14 +99,15 @@ func (ch *ChainOracles) updatePrice(name string, doLog bool, wg *sync.WaitGroup)
 	obs.muRW.Lock()
 	defer obs.muRW.Unlock()
 	obs.Px = px
+	obs.UpdatedAtTs = ts
 	obs.Ts = time.Now().Unix()
 }
 
 // FetchPrice gets the price for the given symbol from on-chain
-func (ch *ChainOracles) FetchPrice(name string, doLog bool) (float64, error) {
+func (ch *ChainOracles) FetchPrice(name string, doLog bool) (float64, int64, error) {
 	j, err := ch.findConfigIdx(name)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	return ch.fetchPrice(j, doLog)
 }
@@ -123,7 +127,7 @@ func (ch *ChainOracles) findConfigIdx(name string) (int, error) {
 }
 
 // fetchPrice gets the price for the symbol with config idx j from on-chain
-func (ch *ChainOracles) fetchPrice(j int, doLog bool) (float64, error) {
+func (ch *ChainOracles) fetchPrice(j int, doLog bool) (float64, int64, error) {
 	var err error
 	var rpc *ethclient.Client
 	rpcIdx := -1
@@ -162,7 +166,8 @@ func (ch *ChainOracles) fetchPrice(j int, doLog bool) (float64, error) {
 			}
 			continue
 		}
-		return utils.DecNToFloat(data.Answer, uint8(ch.Config[j].Decimals)), nil
+		ts := data.UpdatedAt.Int64()
+		return utils.DecNToFloat(data.Answer, uint8(ch.Config[j].Decimals)), ts, nil
 	}
-	return 0, fmt.Errorf("no working call for token %s", ch.Config[j].Name)
+	return 0, 0, fmt.Errorf("no working call for token %s", ch.Config[j].Name)
 }
