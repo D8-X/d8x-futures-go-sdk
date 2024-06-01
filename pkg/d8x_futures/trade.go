@@ -230,7 +230,7 @@ func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Sta
 	bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderId, "0x"))
 	copy(dig[:], bytesDigest)
 
-	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
 	if err != nil {
 		return nil, errors.New("RawCancelOrder: failed fetching oracle prices " + err.Error())
 	}
@@ -268,7 +268,7 @@ func RawExecuteOrders(
 	}
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
-	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
 	if err != nil {
 		return nil, errors.New("RawExecuteOrder: failed fetching oracle prices " + err.Error())
 	}
@@ -322,7 +322,7 @@ func RawLiquidatePosition(
 	postingWallet.UpdateNonceAndGasPx(rpc)
 
 	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
-	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
 	if err != nil {
 		return nil, errors.New("RawLiquidatePosition: failed fetching oracle prices " + err.Error())
 	}
@@ -388,7 +388,7 @@ func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *S
 	amount := utils.Float64ToABDK(math.Abs(amountCC))
 	perpCtrct := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
 
-	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
 	if err != nil {
 		return nil, errors.New("RawAddCollateral: failed fetching oracle prices " + err.Error())
 	}

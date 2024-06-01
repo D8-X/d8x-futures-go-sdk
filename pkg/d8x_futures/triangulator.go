@@ -3,37 +3,34 @@ package d8x_futures
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 )
 
 // calculateTriangulation calculates the triangulated price and reports whether any
 // of the price-feeds is outdated, given a triangulation path and price data
-func calculateTriangulation(triang Triangulation, pxData PriceFeedData, symToPriceId map[string]string) (float64, bool, error) {
+func calculateTriangulation(triang Triangulation, outDateOffChain, outDateOnChain int64, symToPrice map[string]PriceObs) (float64, bool, error) {
 	var price float64 = 1.0
+	timestampNow := time.Now().Unix()
 	var isFeedOutdated = false
 	// loop over triangulation
 	for i, symCurr := range triang.Symbol {
 		// find the current symbol symCurr of the triangulation in the
 		// price data
-		idCurr, exists := symToPriceId[symCurr]
+		pxObs, exists := symToPrice[symCurr]
 		if !exists {
 			return 0, true, fmt.Errorf("symbol %s does not exist in config", symCurr)
 		}
-		for j, idPrice := range pxData.PriceIds {
-			if idPrice == idCurr {
-				// multiply or divide depending on isInverse
-				if triang.IsInverse[i] {
-					price = price / pxData.Prices[j]
-				} else {
-					price = price * pxData.Prices[j]
-				}
-				if pxData.IsFeedOutdated[j] {
-					isFeedOutdated = true
-				}
-				break
-			}
+
+		// multiply or divide depending on isInverse
+		if triang.IsInverse[i] {
+			price = price / pxObs.Px
+		} else {
+			price = price * pxObs.Px
 		}
+		isFeedOutdated = isFeedOutdated || ((pxObs.IsOffChain && timestampNow-pxObs.Ts > outDateOffChain) ||
+			(!pxObs.IsOffChain && timestampNow-pxObs.Ts > outDateOnChain))
 	}
 	return price, isFeedOutdated, nil
 }

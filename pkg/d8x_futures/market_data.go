@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
@@ -608,13 +607,15 @@ func RawQueryOrderStatus(rpc *ethclient.Client, xInfo StaticExchangeInfo, trader
 	return statusStr, nil
 }
 
+// RawQueryPerpetualPriceTuple queries prices for different trade amounts for the given perpetual. The perpetual
+// is given by symbol (e.g., "ETH-USD-WEETH")
 func RawQueryPerpetualPriceTuple(client *ethclient.Client, xInfo *StaticExchangeInfo, pythEndpoint, symbol string, tradeAmt []float64) ([]float64, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
 		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
 	perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
-	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
 	if err != nil {
 		return nil, errors.New("RawAddCollateral: failed fetching oracle prices " + err.Error())
 	}
@@ -789,7 +790,10 @@ func RawCalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, posi
 func RawQueryLiquidatableAccounts(client *ethclient.Client, xInfo *StaticExchangeInfo, perpId int32, pythEndpoint string) ([]common.Address, error) {
 
 	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
-	pxFeed, err := fetchPricesForPerpetual(*xInfo, j, pythEndpoint)
+	if j == -1 {
+		return nil, fmt.Errorf("RawQueryLiquidatableAccounts: perp id %d not found", perpId)
+	}
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
 	if err != nil {
 		return nil, errors.New("RawQueryLiquidatableAccounts: failed fetching oracle prices " + err.Error())
 	}
@@ -808,17 +812,17 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client, xInfo *StaticE
 	if err != nil {
 		return nil, err
 	}
-	// get perpetuals in the pool and gather indices
-	perpIds := make([]int32, 0, len(xInfo.Perpetuals))
-	perpIdx := make([]int, 0, len(xInfo.Perpetuals))
+	// get perpetuals in the pool and gather all symbols in
+	// a first loop to query all prices at once
+	symbols := make([]string, 0, len(xInfo.Perpetuals))
 	priceIdSet := make(map[string]bool)
+	symSet := make(map[string]bool)
 	priceIds := make([]string, 0, len(xInfo.Perpetuals))
 	for k, perp := range xInfo.Perpetuals {
 		if perp.PoolId != poolId {
 			continue
 		}
-		perpIds = append(perpIds, perp.Id)
-		perpIdx = append(perpIdx, k)
+
 		for _, pxId := range xInfo.Perpetuals[k].PriceIds {
 			if priceIdSet[pxId] {
 				continue
@@ -826,33 +830,61 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client, xInfo *StaticE
 			priceIdSet[pxId] = true
 			priceIds = append(priceIds, pxId)
 		}
+		for _, sym := range xInfo.Perpetuals[k].OnChainSymbols {
+			if symSet[sym] {
+				continue
+			}
+			symSet[sym] = true
+			symbols = append(symbols, sym)
+		}
 	}
-	feedData, err := fetchPricesFromAPI(priceIds, xInfo.PriceFeedInfo, pythEndpoint, true)
+	feedData, err := fetchPricesFromAPI(priceIds, pythEndpoint, false)
 	if err != nil {
 		return nil, err
 	}
-	calls := make([]*multicall.Call, 0, len(perpIdx))
+	pxMap, err := fetchPricesFromChain(symbols, xInfo.ChainOracles)
+	if err != nil {
+		return nil, err
+	}
+	for k, id := range feedData.PriceIds {
+		syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
+		for _, sym := range syms {
+			pxMap[sym] = PriceObs{Px: feedData.Prices[k], Ts: int64(feedData.PublishTimes[k]), IsOffChain: true}
+		}
+	}
+	// now that we have all prices, we build the multi-call
+	calls := make([]*multicall.Call, 0, len(xInfo.Perpetuals))
 	type liqOutput struct {
 		LiqAccount []common.Address
 	}
 	// build multi-call
-	for _, idx := range perpIdx {
-		S2Sym := xInfo.Perpetuals[idx].S2Symbol
-		S3Sym := xInfo.Perpetuals[idx].S3Symbol
-		perpId := big.NewInt(int64(xInfo.Perpetuals[idx].Id))
-		pxInfo, err := calculatePerpPxFromFeed(xInfo, feedData, S2Sym, S3Sym)
+	perpIds := make([]int32, 0, len(xInfo.Perpetuals))
+	for j := range xInfo.Perpetuals {
+		if xInfo.Perpetuals[j].PoolId != poolId {
+			continue
+		}
+		S2Sym := xInfo.Perpetuals[j].S2Symbol
+		S3Sym := xInfo.Perpetuals[j].S3Symbol
+		pxInfo, err := calculatePerpIdxPx(xInfo, pxMap, S2Sym, S3Sym)
 		if err != nil {
 			return nil, err
 		}
+		if pxInfo.IsMarketClosedS2 || pxInfo.IsMarketClosedS3 {
+			// skip
+			continue
+		}
+		perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
 		pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxInfo.S2Price), utils.Float64ToABDK(pxInfo.S3Price)}
 		c := contract.NewCall(new(liqOutput), "getLiquidatableAccounts", perpId, pricesAbdk)
+
+		perpIds = append(perpIds, xInfo.Perpetuals[j].Id)
 		calls = append(calls, c)
 	}
 	res, err := caller.Call(nil, calls...)
 	if err != nil {
 		return nil, err
 	}
-	liqAccs := make([]LiquidatableAccounts, 0, len(perpIdx))
+	liqAccs := make([]LiquidatableAccounts, 0, len(calls))
 	for k, call := range res {
 		addr := call.Outputs.(*liqOutput)
 		if len(addr.LiqAccount) == 0 {
@@ -861,7 +893,6 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client, xInfo *StaticE
 		liqAccs = append(liqAccs,
 			LiquidatableAccounts{PerpId: perpIds[k], LiqAccounts: addr.LiqAccount})
 	}
-
 	return liqAccs, nil
 }
 
@@ -870,10 +901,10 @@ func RawFetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, end
 	if j == -1 {
 		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
-	return fetchPricesForPerpetual(exchangeInfo, j, endpoint)
+	return fetchPerpetualPriceInfo(&exchangeInfo, j, endpoint)
 }
 
-// FetchPricesForPerpetual queries the REST-endpoints of the oracles and calculates S2,S3
+// FetchPricesForPerpetual queries the REST-endpoints/onchain oracles and calculates S2,S3
 // index prices, also returns the price-feed-data required for blockchain submission and
 // information whether the market is closed or not. endpoint is the endpoint that provides pyth prices.
 func RawFetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string, endpoint string) (PerpetualPriceInfo, error) {
@@ -882,26 +913,57 @@ func RawFetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string, 
 	if j == -1 {
 		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
-	return fetchPricesForPerpetual(exchangeInfo, j, endpoint)
+	return fetchPerpetualPriceInfo(&exchangeInfo, j, endpoint)
 }
 
-// fetchPricesForPerpetual gets prices from the VAA-endpoint, perpetual number j
-// and endpoint number epNo. j is the index of the perpetual in StaticExchangeInfo
-func fetchPricesForPerpetual(xInfo StaticExchangeInfo, j int, endpoint string) (PerpetualPriceInfo, error) {
-	// get underlying data from rest-api with vaa
-	feedData, err := fetchPricesFromAPI(xInfo.Perpetuals[j].PriceIds, xInfo.PriceFeedInfo, endpoint, true)
+// fetchPerpetualPriceInfo gets prices from the VAA-endpoint and on-chain if needed,
+// j is the index of the perpetual in StaticExchangeInfo
+func fetchPerpetualPriceInfo(xInfo *StaticExchangeInfo, j int, endpoint string) (PerpetualPriceInfo, error) {
+	pxMap, feedData, err := fetchIndexPricesForPerpetual(xInfo, j, endpoint)
 	if err != nil {
 		return PerpetualPriceInfo{}, err
 	}
-	return calculatePerpPxFromFeed(&xInfo, feedData, xInfo.Perpetuals[j].S2Symbol, xInfo.Perpetuals[j].S3Symbol)
+	p, err := calculatePerpIdxPx(xInfo, pxMap, xInfo.Perpetuals[j].S2Symbol, xInfo.Perpetuals[j].S3Symbol)
+	if err != nil {
+		return PerpetualPriceInfo{}, err
+	}
+	p.PriceFeed = feedData
+	return p, nil
+}
+
+// fetchIndexPricesForPerpetual gets the index prices required to calculate S2 and S3 indices for the given perpetual.
+// prices are gathered on-chain and offchain (depending on feeds)
+// j is the index of the perpetual in StaticExchangeInfo
+func fetchIndexPricesForPerpetual(xInfo *StaticExchangeInfo, j int, endpoint string) (map[string]PriceObs, PriceFeedData, error) {
+	// get underlying data from rest-api with vaa
+	feedData, err := fetchPricesFromAPI(xInfo.Perpetuals[j].PriceIds, endpoint, true)
+	if err != nil {
+		return nil, PriceFeedData{}, err
+	}
+	pxMap, err := fetchPricesFromChain(xInfo.Perpetuals[j].OnChainSymbols, xInfo.ChainOracles)
+	if err != nil {
+		return nil, PriceFeedData{}, err
+	}
+	for k, id := range feedData.PriceIds {
+		syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
+		for _, sym := range syms {
+			pxMap[sym] = PriceObs{Px: feedData.Prices[k], Ts: int64(feedData.PublishTimes[k]), IsOffChain: true}
+		}
+	}
+	return pxMap, feedData, nil
 }
 
 // calculatePerpPxFromFeed calculates the prices for the given symbols via pre-calculated triangulations
 // based on feedData
-func calculatePerpPxFromFeed(xInfo *StaticExchangeInfo, feedData PriceFeedData, S2Sym, S3Sym string) (PerpetualPriceInfo, error) {
+func calculatePerpIdxPx(xInfo *StaticExchangeInfo, pxMap map[string]PriceObs, S2Sym, S3Sym string) (PerpetualPriceInfo, error) {
 	// triangulate fetched prices to obtain index prices
 	triang := xInfo.IdxPriceTriangulations[S2Sym]
-	pxS2, isMarketClosedS2, err := calculateTriangulation(triang, feedData, xInfo.PriceFeedInfo.SymbolToId)
+	if len(triang.Symbol) == 0 {
+		return PerpetualPriceInfo{}, fmt.Errorf("no triangulation for symbol %s", S2Sym)
+	}
+	th1 := int64(xInfo.PriceFeedInfo.ThreshOnChainFeedOutdatedSec)
+	th2 := int64(xInfo.PriceFeedInfo.ThreshOffChainFeedOutdatedSec)
+	pxS2, isMarketClosedS2, err := calculateTriangulation(triang, th1, th2, pxMap)
 	if err != nil {
 		return PerpetualPriceInfo{}, err
 	}
@@ -910,7 +972,10 @@ func calculatePerpPxFromFeed(xInfo *StaticExchangeInfo, feedData PriceFeedData, 
 	// triangulate S3 if there is an S3 index
 	if S3Sym != "" {
 		triang = xInfo.IdxPriceTriangulations[S3Sym]
-		pxS3, isMarketClosedS3, err = calculateTriangulation(triang, feedData, xInfo.PriceFeedInfo.SymbolToId)
+		if len(triang.Symbol) == 0 {
+			return PerpetualPriceInfo{}, fmt.Errorf("no triangulation for symbol %s", S3Sym)
+		}
+		pxS3, isMarketClosedS3, err = calculateTriangulation(triang, th1, th2, pxMap)
 		if err != nil {
 			return PerpetualPriceInfo{}, err
 		}
@@ -921,26 +986,36 @@ func calculatePerpPxFromFeed(xInfo *StaticExchangeInfo, feedData PriceFeedData, 
 		S3Price:          pxS3,
 		IsMarketClosedS2: isMarketClosedS2,
 		IsMarketClosedS3: isMarketClosedS3,
-		PriceFeed:        feedData,
 	}
 	return priceInfo, nil
+}
+
+// fetchPricesFromChain retrieves the requested symbol prices from configured on-chain oracles
+func fetchPricesFromChain(symbols []string, oracle *ChainOracles) (map[string]PriceObs, error) {
+	prices := make(map[string]PriceObs)
+	for _, sym := range symbols {
+		px, ts, err := oracle.GetPrice(sym, false)
+		if err != nil {
+			return nil, err
+		}
+		prices[sym] = PriceObs{Px: px, Ts: ts, IsOffChain: false}
+	}
+	return prices, nil
 }
 
 // fetchPricesFromAPI gets the prices for the given priceIds from the
 // configured REST-API. The PriceFeedConfig is needed to store what
 // symbol (e.g. BTC-USD) the price feed covers.
-func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFeedEndpoint string, withVaa bool) (PriceFeedData, error) {
+func fetchPricesFromAPI(priceIds []string, priceFeedEndpoint string, withVaa bool) (PriceFeedData, error) {
 	pxData := PriceFeedData{
-		PriceIds:       priceIds,
-		Prices:         make([]float64, len(priceIds)),
-		IsFeedOutdated: make([]bool, len(priceIds)),
-		PublishTimes:   make([]uint64, len(priceIds)),
+		PriceIds:     priceIds,
+		Prices:       make([]float64, len(priceIds)),
+		PublishTimes: make([]uint64, len(priceIds)),
 	}
 	if withVaa {
 		pxData.Vaas = make([][]byte, len(priceIds))
 	}
 
-	timestampNow := time.Now().Unix()
 	// REST query (#queries == number of endpoints for feeds)
 	// include VAA
 	data, err := fetchPythPrices(priceIds, true, priceFeedEndpoint)
@@ -953,7 +1028,6 @@ func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFe
 		for i, id := range priceIds {
 			if id == d.Id {
 				pxData.Prices[i] = utils.PythNToFloat64(d.Price.Price, d.Price.Expo)
-				pxData.IsFeedOutdated[i] = timestampNow-int64(d.Price.PublishTime) > int64(config.ThresholdFeedOutdatedSec)
 				pxData.PublishTimes[i] = uint64(d.Price.PublishTime)
 				if !withVaa {
 					break

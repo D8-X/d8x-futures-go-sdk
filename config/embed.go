@@ -129,3 +129,24 @@ func GetDefaultPriceConfigByName(configNetwork string) (utils.PriceFeedConfig, e
 	}
 	return utils.LoadPriceFeedConfig(data, configNetwork)
 }
+
+// GetPriceFeedOnChain loads priceFeedOnChain into the corresponding structure
+func GetPriceFeedOnChain() ([]utils.PriceFeedOnChainConfig, error) {
+	fs, err := EmbededConfigs.Open("embedded/priceFeedOnChain.json")
+	if err != nil {
+		log.Fatal("Error reading JSON file:", err)
+		return nil, err
+	}
+	data, err := io.ReadAll(fs)
+	if err != nil {
+		return nil, err
+	}
+	var configuration []utils.PriceFeedOnChainConfig
+	// Unmarshal the JSON data into the Configuration struct
+	err = json.Unmarshal(data, &configuration)
+	if err != nil {
+		log.Fatal("Error decoding JSON:", err)
+		return nil, err
+	}
+	return configuration, nil
+}

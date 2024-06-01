@@ -13,18 +13,13 @@ import (
 )
 
 func TestFetchPricesFromAPI(t *testing.T) {
-	pxConf, err := config.GetDefaultPriceConfig(196)
-	if err != nil {
-		t.Logf(err.Error())
-		t.FailNow()
-	}
 	priceIds := []string{"0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
 		"0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"}
-	data, _ := fetchPricesFromAPI(priceIds, pxConf, "https://hermes.pyth.network/api", false)
+	data, _ := fetchPricesFromAPI(priceIds, "https://hermes.pyth.network/api", false)
 	fmt.Println(data)
 	priceIdsWrong := []string{"0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
 		"0x01f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"}
-	_, err = fetchPricesFromAPI(priceIdsWrong, pxConf, "https://hermes.pyth.network/api", false)
+	_, err := fetchPricesFromAPI(priceIdsWrong, "https://hermes.pyth.network/api", false)
 	if err == nil {
 		slog.Error("Error: queried wrong price id but did not fail")
 		t.FailNow()
@@ -49,7 +44,8 @@ func TestFetchPythPrices(t *testing.T) {
 
 func TestGetPoolShareTknBalance(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("196") //xlayer
+	//err := sdkRo.New("195") //xlayer testnet
+	err := sdkRo.New("421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -69,12 +65,13 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 
 func TestQueryLiquidatableAccounts(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("195") //xlayer testnet
+	//err := sdkRo.New("195") //xlayer testnet
+	err := sdkRo.New("421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	acc, err := sdkRo.QueryLiquidatableAccounts(100000, nil)
+	acc, err := sdkRo.QueryLiquidatableAccounts(200000, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -87,7 +84,7 @@ func TestQueryLiquidatableAccounts(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Print(accs)
-	acc2, err := sdkRo.QueryLiquidatableAccountsInPool(1, nil)
+	acc2, err := sdkRo.QueryLiquidatableAccountsInPool(2, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -119,13 +116,14 @@ func TestGetPerpetualData(t *testing.T) {
 
 func TestPerpetualPrice(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("196")
+	//err := sdkRo.New("196")
+	err := sdkRo.New("421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	startTime := time.Now()
-	px, err := sdkRo.QueryPerpetualPrices("WOKB-USD-WOKB", []float64{0.01}, nil)
+	px, err := sdkRo.QueryPerpetualPrices("ETH-USD-WEETH", []float64{0.01}, nil)
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {
@@ -139,14 +137,15 @@ func TestPerpetualPrice(t *testing.T) {
 func TestPerpetualPriceTuple(t *testing.T) {
 
 	var sdkRo SdkRO
-	err := sdkRo.New("196")
+	//err := sdkRo.New("196")
+	err := sdkRo.New("421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	startTime := time.Now()
 	tradeAmt := []float64{-0.06, -0.05, -0.01, 0, 0.01, 0.05}
-	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoints[0], "OKB-USD-OKB", tradeAmt)
+	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoints[0], "ETH-USD-WEETH", tradeAmt)
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {
