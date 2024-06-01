@@ -40,7 +40,7 @@ func TestSdkExec(t *testing.T) {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	orderObj, err := sdk.QueryAllOpenOrders("MATIC-USDC-USDC", nil)
+	orderObj, err := sdk.QueryAllOpenOrders("BTC-USDC-USDC", nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -67,7 +67,8 @@ func TestSdkExec(t *testing.T) {
 
 		mktOrderIds = append(mktOrderIds, orderId)
 	}
-	tx, err := sdk.ExecuteOrders("BTC-USDC-USDC", []string{mktOrderIds[0]}, nil)
+	now := time.Now().Unix()
+	tx, err := sdk.ExecuteOrders("BTC-USDC-USDC", []string{mktOrderIds[0]}, &OptsOverridesExec{TsMin: uint32(now)})
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()

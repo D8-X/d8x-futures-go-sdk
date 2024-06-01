@@ -29,6 +29,12 @@ type OptsOverrides struct {
 	GasLimit  int
 }
 
+// overrides for order execution
+type OptsOverridesExec struct {
+	OptsOverrides
+	TsMin uint32 //minimal timestamp we require for the off-chain price sources
+}
+
 // PostOrder posts an order to the corresponding limit order book.
 // Returns orderId, tx hash, error
 func (sdk *Sdk) PostOrder(order *Order, overrides *OptsOverrides) (string, string, error) {
@@ -113,13 +119,13 @@ func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverri
 func (sdk *Sdk) ExecuteOrders(
 	symbol string,
 	orderIds []string,
-	opts *OptsOverrides,
+	opts *OptsOverridesExec,
 ) (
 	*types.Transaction,
 	error,
 ) {
 	if opts == nil {
-		o := OptsOverrides{Rpc: sdk.Conn.Rpc, WalletIdx: 0, GasLimit: 0}
+		o := OptsOverridesExec{OptsOverrides: OptsOverrides{Rpc: sdk.Conn.Rpc, WalletIdx: 0, GasLimit: 0}, TsMin: 0}
 		opts = &o
 	}
 	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallets[opts.WalletIdx], symbol, orderIds, opts)
@@ -257,7 +263,7 @@ func RawExecuteOrders(
 	postingWallet *Wallet,
 	symbol string,
 	orderIds []string,
-	opts *OptsOverrides,
+	opts *OptsOverridesExec,
 ) (
 	*types.Transaction,
 	error,
@@ -268,10 +274,32 @@ func RawExecuteOrders(
 	}
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
-	if err != nil {
-		return nil, errors.New("RawExecuteOrder: failed fetching oracle prices " + err.Error())
+	var pxFeed PerpetualPriceInfo
+	var err error
+	for {
+		// fetch prices
+		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
+		if err != nil {
+			return nil, errors.New("RawExecuteOrder: failed fetching oracle prices " + err.Error())
+		}
+		if opts.TsMin == 0 {
+			break
+		}
+		// check whether prices are too old
+		var delta int64 = -10
+		for _, tsFeed := range pxFeed.PriceFeed.PublishTimes {
+			delta = max(delta, int64(tsFeed)-int64(opts.TsMin))
+		}
+		if delta > 0 {
+			// price feed newer than submission timestamp,
+			// we can execute
+			break
+		}
+		if delta < -5 {
+			return nil, fmt.Errorf("feed price too old %d sec difference to order ts", delta)
+		}
 	}
+
 	var digests [][32]byte
 	for _, orderId := range orderIds {
 		var dig [32]byte
