@@ -24,12 +24,14 @@ type ChainConfig struct {
 }
 
 type PriceFeedConfig struct {
-	Network                  string        `json:"network"`
-	CandleIrrelevant         []string      `json:"candleIrrelevant"`
-	PriceFeedIds             []PriceFeedId `json:"ids"`
-	ThresholdFeedOutdatedSec int32         `json:"threshold_feed_outdated_sec"`
-	PriceUpdateFeeGwei       int64
-	SymbolToId               map[string]string //map the symbol (BTC-USD) to price id 0x382738927...
+	Network                       string        `json:"network"`
+	CandleIrrelevant              []string      `json:"candleIrrelevant"`
+	PriceFeedIds                  []PriceFeedId `json:"ids"`
+	ThreshOnChainFeedOutdatedSec  int32         `json:"threshOnChainFeedOutdatedSec"`
+	ThreshOffChainFeedOutdatedSec int32         `json:"threshOffChainFeedOutdatedSec"`
+	PriceUpdateFeeGwei            int64
+	SymbolToPxId                  map[string]string   //map the symbol (BTC-USD) to price id 0x382738927...
+	PxIdToSymbols                 map[string][]string //map the symbol price id 0x382738927... to one or more symbols
 }
 
 type PriceFeedId struct {
@@ -37,6 +39,14 @@ type PriceFeedId struct {
 	Id     string `json:"id"`
 	Type   string `json:"type"`
 	Origin string `json:"origin"`
+}
+
+type PriceFeedOnChainConfig struct {
+	Name          string   `json:"name"`
+	RPCs          []string `json:"rpcs"`
+	PxFeedAddress string   `json:"pxFeedAddress"`
+	Decimals      int      `json:"decimals"`
+	MaxFeedAgeSec int64    `json:"maxFeedAgeSec"`
 }
 
 // LoadPriceFeedConfig loads the price feed config file
@@ -62,9 +72,18 @@ func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, er
 	}
 	//SymbolToId
 	config := configuration[j]
-	config.SymbolToId = make(map[string]string)
+	config.SymbolToPxId = make(map[string]string)
 	for _, feed := range config.PriceFeedIds {
-		config.SymbolToId[feed.Symbol] = strings.TrimPrefix(feed.Id, "0x")
+		config.SymbolToPxId[feed.Symbol] = strings.TrimPrefix(feed.Id, "0x")
+	}
+	//PxIdToSymbols
+	config.PxIdToSymbols = make(map[string][]string)
+	for _, feed := range config.PriceFeedIds {
+		id := strings.TrimPrefix(feed.Id, "0x")
+		if _, exists := config.PxIdToSymbols[feed.Symbol]; !exists {
+			config.PxIdToSymbols[id] = make([]string, 0)
+		}
+		config.PxIdToSymbols[id] = append(config.PxIdToSymbols[id], feed.Symbol)
 	}
 	return config, nil
 }

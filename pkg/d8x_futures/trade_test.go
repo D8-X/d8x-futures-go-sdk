@@ -40,7 +40,7 @@ func TestSdkExec(t *testing.T) {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	orderObj, err := sdk.QueryAllOpenOrders("BTC-USDC-USDC", nil)
+	orderObj, err := sdk.QueryAllOpenOrders("MATIC-USDC-USDC", nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -84,6 +84,7 @@ func TestSdkLiquidatePosition(t *testing.T) {
 		t.FailNow()
 	}
 	err := sdk.New([]string{pk}, "195") //x-layer testnet
+	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -99,6 +100,7 @@ func TestSdkLiquidatePosition(t *testing.T) {
 	}
 	for _, el := range acc2 {
 		for _, addr := range el.LiqAccounts {
+			fmt.Printf("liquidating %s\n", addr.Hex())
 			tx, err := sdk.LiquidatePosition(el.PerpId, &addr, nil, nil)
 			if err != nil {
 				fmt.Printf("error liquidating: %s\n", err.Error())

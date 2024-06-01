@@ -212,6 +212,28 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		return StaticExchangeInfo{}, err
 	}
 	triangulations := initPriceFeeds(&conn.PriceFeedConfig, symbolsSet)
+	// add off-chain ids to perpetuals: we go through all perps and its
+	// triangulations and add the id to the price-id to the onchain-feed list,
+	// if we find an on-chain price source in the triangulation.
+	for i := range perpetuals {
+		p := &perpetuals[i]
+		symbols := []string{p.S2Symbol, p.S3Symbol}
+		for _, sym := range symbols {
+			if sym == "" {
+				continue
+			}
+			for _, symT := range triangulations[sym].Symbol {
+				id := conn.PriceFeedConfig.SymbolToPxId[symT]
+				if isOnChainId(id) {
+					p.OnChainSymbols = append(p.OnChainSymbols, symT)
+				}
+			}
+		}
+	}
+	chainOracles, err := NewChainOracles()
+	if err != nil {
+		return StaticExchangeInfo{}, err
+	}
 	xInfo := StaticExchangeInfo{
 		Pools:                  pools,
 		Perpetuals:             perpetuals,
@@ -222,8 +244,13 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		PriceFeedInfo:          conn.PriceFeedConfig,
 		IdxPriceTriangulations: triangulations,
 		PythAddr:               pythAddr,
+		ChainOracles:           chainOracles,
 	}
 	return xInfo, nil
+}
+
+func isOnChainId(id string) bool {
+	return len(id) == 42 || len(id) == 40
 }
 
 // Store stores the StaticExchangeInfo in a file
@@ -296,6 +323,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		LotSizeBC:              utils.ABDKToFloat64(pIn.FLotSizeBC),
 		ReferralRebate:         utils.ABDKToFloat64(pIn.FReferralRebateCC),
 		PriceIds:               priceIds,
+		OnChainSymbols:         make([]string, 0),
 	}
 	return pOut
 }
