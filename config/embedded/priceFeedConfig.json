@@ -2,7 +2,8 @@
   {
     "network": "PythEVMStable",
     "candleIrrelevant": ["STUSD-USD", "AGEUR-USD", "WEETH-ETH"],
-    "threshold_feed_outdated_sec": 60,
+    "threshOffChainFeedOutdatedSec": 60,
+    "threshOnChainFeedOutdatedSec": 86400,
     "ids": [
       {
         "symbol": "USDC-USD",

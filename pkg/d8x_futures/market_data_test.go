@@ -49,7 +49,8 @@ func TestFetchPythPrices(t *testing.T) {
 
 func TestGetPoolShareTknBalance(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("196") //xlayer
+	//err := sdkRo.New("195") //xlayer testnet
+	err := sdkRo.New("421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -88,7 +89,7 @@ func TestQueryLiquidatableAccounts(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Print(accs)
-	acc2, err := sdkRo.QueryLiquidatableAccountsInPool(1, nil)
+	acc2, err := sdkRo.QueryLiquidatableAccountsInPool(2, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -120,13 +121,14 @@ func TestGetPerpetualData(t *testing.T) {
 
 func TestPerpetualPrice(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("196")
+	//err := sdkRo.New("196")
+	err := sdkRo.New("421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	startTime := time.Now()
-	px, err := sdkRo.QueryPerpetualPrices("WOKB-USD-WOKB", []float64{0.01}, nil)
+	px, err := sdkRo.QueryPerpetualPrices("ETH-USD-WEETH", []float64{0.01}, nil)
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {
@@ -140,14 +142,15 @@ func TestPerpetualPrice(t *testing.T) {
 func TestPerpetualPriceTuple(t *testing.T) {
 
 	var sdkRo SdkRO
-	err := sdkRo.New("196")
+	//err := sdkRo.New("196")
+	err := sdkRo.New("421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	startTime := time.Now()
 	tradeAmt := []float64{-0.06, -0.05, -0.01, 0, 0.01, 0.05}
-	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoints[0], "OKB-USD-OKB", tradeAmt)
+	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoints[0], "ETH-USD-WEETH", tradeAmt)
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {

@@ -223,12 +223,16 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 				continue
 			}
 			for _, symT := range triangulations[sym].Symbol {
-				id := conn.PriceFeedConfig.SymbolToId[symT]
+				id := conn.PriceFeedConfig.SymbolToPxId[symT]
 				if isOnChainId(id) {
 					p.OnChainSymbols = append(p.OnChainSymbols, symT)
 				}
 			}
 		}
+	}
+	chainOracles, err := NewChainOracles()
+	if err != nil {
+		return StaticExchangeInfo{}, err
 	}
 	xInfo := StaticExchangeInfo{
 		Pools:                  pools,
@@ -240,6 +244,7 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		PriceFeedInfo:          conn.PriceFeedConfig,
 		IdxPriceTriangulations: triangulations,
 		PythAddr:               pythAddr,
+		ChainOracles:           chainOracles,
 	}
 	return xInfo, nil
 }

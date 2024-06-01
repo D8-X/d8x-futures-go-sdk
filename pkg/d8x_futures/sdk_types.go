@@ -51,6 +51,7 @@ type StaticExchangeInfo struct {
 	OracleFactoryAddr      common.Address
 	PythAddr               common.Address
 	ProxyAddr              common.Address
+	ChainOracles           *ChainOracles
 }
 
 type PoolStaticInfo struct {
@@ -108,6 +109,11 @@ type OpenOrders struct {
 	HashIndex   map[string]int // Map to store OrderHash indices
 }
 
+type PriceObs struct {
+	Px         float64
+	Ts         int64
+	IsOffChain bool
+}
 type CollateralCCY int8
 
 const (
@@ -176,7 +182,7 @@ type PerpetualPriceInfo struct {
 	S3Price          float64
 	IsMarketClosedS2 bool
 	IsMarketClosedS3 bool
-	PriceFeed        PriceFeedData
+	PriceFeed        PriceFeedData //off-chain price feeds
 }
 
 type Triangulation struct {
@@ -187,11 +193,10 @@ type Triangulation struct {
 type Triangulations map[string]Triangulation
 
 type PriceFeedData struct {
-	PriceIds       []string
-	Prices         []float64
-	IsFeedOutdated []bool // price feed older than threshold_feed_outdated_sec
-	Vaas           [][]byte
-	PublishTimes   []uint64
+	PriceIds     []string
+	Prices       []float64
+	Vaas         [][]byte
+	PublishTimes []uint64
 }
 
 type ResponsePythLatestPriceFeed struct {
@@ -410,6 +415,10 @@ func (sdkRo *SdkRO) New(networkNameOrId string, endpoints ...string) error {
 		return err
 	}
 	sdkRo.ChainConfig = chConf
+
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
