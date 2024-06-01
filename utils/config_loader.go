@@ -80,7 +80,7 @@ func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, er
 	config.PxIdToSymbols = make(map[string][]string)
 	for _, feed := range config.PriceFeedIds {
 		id := strings.TrimPrefix(feed.Id, "0x")
-		if _, exists := config.PxIdToSymbols[feed.Symbol]; !exists {
+		if _, exists := config.PxIdToSymbols[id]; !exists {
 			config.PxIdToSymbols[id] = make([]string, 0)
 		}
 		config.PxIdToSymbols[id] = append(config.PxIdToSymbols[id], feed.Symbol)
