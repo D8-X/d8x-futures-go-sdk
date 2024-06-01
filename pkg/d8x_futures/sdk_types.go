@@ -416,9 +416,6 @@ func (sdkRo *SdkRO) New(networkNameOrId string, endpoints ...string) error {
 	}
 	sdkRo.ChainConfig = chConf
 
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

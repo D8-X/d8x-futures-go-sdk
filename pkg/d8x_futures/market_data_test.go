@@ -13,18 +13,13 @@ import (
 )
 
 func TestFetchPricesFromAPI(t *testing.T) {
-	pxConf, err := config.GetDefaultPriceConfig(196)
-	if err != nil {
-		t.Logf(err.Error())
-		t.FailNow()
-	}
 	priceIds := []string{"0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
 		"0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"}
-	data, _ := fetchPricesFromAPI(priceIds, pxConf, "https://hermes.pyth.network/api", false)
+	data, _ := fetchPricesFromAPI(priceIds, "https://hermes.pyth.network/api", false)
 	fmt.Println(data)
 	priceIdsWrong := []string{"0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
 		"0x01f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"}
-	_, err = fetchPricesFromAPI(priceIdsWrong, pxConf, "https://hermes.pyth.network/api", false)
+	_, err := fetchPricesFromAPI(priceIdsWrong, "https://hermes.pyth.network/api", false)
 	if err == nil {
 		slog.Error("Error: queried wrong price id but did not fail")
 		t.FailNow()

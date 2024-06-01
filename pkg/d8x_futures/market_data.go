@@ -838,7 +838,7 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client, xInfo *StaticE
 			symbols = append(symbols, sym)
 		}
 	}
-	feedData, err := fetchPricesFromAPI(priceIds, xInfo.PriceFeedInfo, pythEndpoint, false)
+	feedData, err := fetchPricesFromAPI(priceIds, pythEndpoint, false)
 	if err != nil {
 		return nil, err
 	}
@@ -936,7 +936,7 @@ func fetchPerpetualPriceInfo(xInfo *StaticExchangeInfo, j int, endpoint string) 
 // j is the index of the perpetual in StaticExchangeInfo
 func fetchIndexPricesForPerpetual(xInfo *StaticExchangeInfo, j int, endpoint string) (map[string]PriceObs, PriceFeedData, error) {
 	// get underlying data from rest-api with vaa
-	feedData, err := fetchPricesFromAPI(xInfo.Perpetuals[j].PriceIds, xInfo.PriceFeedInfo, endpoint, true)
+	feedData, err := fetchPricesFromAPI(xInfo.Perpetuals[j].PriceIds, endpoint, true)
 	if err != nil {
 		return nil, PriceFeedData{}, err
 	}
@@ -1006,7 +1006,7 @@ func fetchPricesFromChain(symbols []string, oracle *ChainOracles) (map[string]Pr
 // fetchPricesFromAPI gets the prices for the given priceIds from the
 // configured REST-API. The PriceFeedConfig is needed to store what
 // symbol (e.g. BTC-USD) the price feed covers.
-func fetchPricesFromAPI(priceIds []string, config utils.PriceFeedConfig, priceFeedEndpoint string, withVaa bool) (PriceFeedData, error) {
+func fetchPricesFromAPI(priceIds []string, priceFeedEndpoint string, withVaa bool) (PriceFeedData, error) {
 	pxData := PriceFeedData{
 		PriceIds:     priceIds,
 		Prices:       make([]float64, len(priceIds)),
