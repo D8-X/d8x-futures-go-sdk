@@ -68,7 +68,8 @@ func TestSdkExec(t *testing.T) {
 		mktOrderIds = append(mktOrderIds, orderId)
 	}
 	now := time.Now().Unix()
-	tx, err := sdk.ExecuteOrders("BTC-USDC-USDC", []string{mktOrderIds[0]}, &OptsOverridesExec{TsMin: uint32(now)})
+	payoutAddr := common.HexToAddress("0x98DfAFF5126836E339493a6021FD5B92Bf005F0D")
+	tx, err := sdk.ExecuteOrders("BTC-USDC-USDC", []string{mktOrderIds[0]}, &OptsOverridesExec{TsMin: uint32(now), PayoutAddr: payoutAddr})
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
