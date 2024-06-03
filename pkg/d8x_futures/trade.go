@@ -32,7 +32,8 @@ type OptsOverrides struct {
 // overrides for order execution
 type OptsOverridesExec struct {
 	OptsOverrides
-	TsMin uint32 //minimal timestamp we require for the off-chain price sources
+	TsMin      uint32         //minimal timestamp we require for the off-chain price sources
+	PayoutAddr common.Address // address we want to payout the referral fee
 }
 
 // PostOrder posts an order to the corresponding limit order book.
@@ -324,8 +325,11 @@ func RawExecuteOrders(
 		limit = opts.GasLimit
 	}
 	postingWallet.SetGasLimit(uint64(limit))
-
-	return ob.ExecuteOrders(postingWallet.Auth, digests, postingWallet.Address, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+	if opts.PayoutAddr == (common.Address{}) {
+		// payout addr was not provided
+		opts.PayoutAddr = postingWallet.Address
+	}
+	return ob.ExecuteOrders(postingWallet.Auth, digests, opts.PayoutAddr, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
 }
 
 func RawLiquidatePosition(
