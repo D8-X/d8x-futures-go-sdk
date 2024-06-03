@@ -46,7 +46,7 @@ func NewChainOracles() (*ChainOracles, error) {
 			muChain:     &sync.Mutex{},
 		}
 		wg.Add(1)
-		go oracles.updatePrice(c.Name, true, &wg)
+		go oracles.updatePrice(c.Name, false, &wg)
 	}
 	// wait for all on-chain prices to finish
 	wg.Wait()
