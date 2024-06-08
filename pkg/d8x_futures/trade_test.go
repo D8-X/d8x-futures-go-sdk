@@ -113,6 +113,29 @@ func TestSdkLiquidatePosition(t *testing.T) {
 	}
 }
 
+func TestAddCollateral(t *testing.T) {
+	var sdk Sdk
+	pk := loadPk()
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	err := sdk.New([]string{pk}, "42161")
+	if err != nil {
+		fmt.Println(err.Error())
+		t.FailNow()
+	}
+	fmt.Println("wallet = " + sdk.Wallets[0].Address.Hex())
+	//opts := nil //OptsOverrides{GasLimit: }
+	tx, err := sdk.AddCollateral("ETH-USD-WEETH", -0.0001, nil)
+	if err != nil {
+		fmt.Println(err.Error())
+		t.FailNow()
+	} else {
+		fmt.Println("tx hash adding collateral=", tx.Hash())
+	}
+}
+
 func TestTradingFunc(t *testing.T) {
 	var sdk Sdk
 	pk := loadPk()
