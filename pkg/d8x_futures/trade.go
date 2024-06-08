@@ -188,7 +188,7 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int, overrides *Op
 	} else {
 		amt = amount
 	}
-	w.UpdateNonceAndGasCaps(rpc)
+	w.UpdateNonceAndGasPx(rpc)
 	limit := 3_000_000
 	if overrides != nil && overrides.GasLimit != 0 {
 		limit = overrides.GasLimit
@@ -213,7 +213,7 @@ func RawPostOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Stati
 	scOrders := []contracts.IClientOrderClientOrder{scOrder}
 	tsigs := [][]byte{traderSig}
 	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-	postingWallet.UpdateNonceAndGasCaps(rpc)
+	postingWallet.UpdateNonceAndGasPx(rpc)
 	dgst, err := CreateOrderDigest(scOrder, int(conn.ChainId), true, xInfo.ProxyAddr.Hex())
 	if err != nil {
 		return "", "", err
@@ -247,7 +247,7 @@ func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Sta
 	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
 	postingWallet.Auth.Value = big.NewInt(val)
 
-	postingWallet.UpdateNonceAndGasCaps(rpc)
+	postingWallet.UpdateNonceAndGasPx(rpc)
 	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	tx, err = ob.CancelOrder(postingWallet.Auth, dig, []byte{}, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
 	if err != nil {
@@ -317,7 +317,7 @@ func RawExecuteOrders(
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g) // set back after
 
-	postingWallet.UpdateNonceAndGasCaps(rpc)
+	postingWallet.UpdateNonceAndGasPx(rpc)
 	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 
 	limit := 2_000_000 + 1_000_000*(len(digests)-1)
@@ -351,7 +351,7 @@ func RawLiquidatePosition(
 	perpCtrct := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g) // set back after
-	postingWallet.UpdateNonceAndGasCaps(rpc)
+	postingWallet.UpdateNonceAndGasPx(rpc)
 
 	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
 	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
@@ -405,7 +405,7 @@ func RawUpdatePythPriceFeeds(priceUpdateFeeGwei int64, rpc *ethclient.Client, xI
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(1_000_000))
 
-	postingWallet.UpdateNonceAndGasCaps(rpc)
+	postingWallet.UpdateNonceAndGasPx(rpc)
 	return pyth.UpdatePriceFeedsIfNecessary(postingWallet.Auth, pxFeed.PriceFeed.Vaas, ids, pxFeed.PriceFeed.PublishTimes)
 }
 
