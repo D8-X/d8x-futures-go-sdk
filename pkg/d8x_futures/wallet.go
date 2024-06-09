@@ -15,9 +15,10 @@ import (
 )
 
 type Wallet struct {
-	PrivateKey *ecdsa.PrivateKey
-	Address    common.Address
-	Auth       *bind.TransactOpts
+	PrivateKey   *ecdsa.PrivateKey
+	Address      common.Address
+	Auth         *bind.TransactOpts
+	IsPostLondon bool
 }
 
 // NewWallet constructs a new wallet. ChainId must be provided and privatekey must be of the form "abcdef012" (no 0x)
@@ -41,34 +42,43 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 	if err != nil {
 		return nil, err
 	}
-	signerFn := func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
-		chainID := big.NewInt(chainId)
-		return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
+	// determine the type of RPC (post London EIP-1559 or pre)
+	head, err := rpc.HeaderByNumber(context.Background(), nil)
+	if err != nil {
+		return nil, err
 	}
-	w.Auth.Signer = signerFn
-	// set default values
+	w.IsPostLondon = head.BaseFee != nil
+	if w.IsPostLondon {
+		w.Auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
+			chainID := big.NewInt(chainId)
+			return types.SignTx(tx, types.NewLondonSigner(chainID), privateKey)
+		}
+		// we only have layer 2 chains with no tip amount, hence set here and
+		// no need to touch again
+		tip, err := rpc.SuggestGasTipCap(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		w.Auth.GasTipCap = tip
+	} else {
+		w.Auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
+			chainID := big.NewInt(chainId)
+			return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
+		}
+	}
 	w.Auth.Value = big.NewInt(0)
-	w.Auth.GasLimit = uint64(300_000)
-
 	if rpc == nil {
 		return &w, nil
 	}
-	// query current values
-	w.Auth.GasPrice, err = GetGasPrice(rpc)
-	if err != nil {
-		return nil, errors.New("RPC could not determine gas price:" + err.Error())
-	}
-	n, err := GetNonce(rpc, w.Address)
-	if err != nil {
-		return nil, errors.New("RPC could not determine nonce:" + err.Error())
-	}
-	w.Auth.Nonce = big.NewInt(int64(n))
-
 	return &w, nil
 }
 
-func (w *Wallet) SetGasPrice(p *big.Int) {
+func (w *Wallet) SetGasPrice(p *big.Int) error {
+	if w.Auth.GasFeeCap != nil || w.Auth.GasTipCap != nil {
+		return errors.New("both gasPrice and (maxFeePerGas or maxPriorityFeePerGas) specified")
+	}
 	w.Auth.GasPrice = p
+	return nil
 }
 
 func (w *Wallet) SetGasLimit(lim uint64) {
@@ -79,12 +89,30 @@ func (w *Wallet) SetValue(val int64) {
 	w.Auth.Value = big.NewInt(val)
 }
 
+// UpdateNonceAndGasPx updates nonce and gas price, or nonce and
+// gas fee cap if w.IsPostLondon
 func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client) error {
 	err := w.UpdateNonce(rpc)
 	if err != nil {
 		return err
 	}
-	return w.UpdateGasPrice(rpc)
+	if !w.IsPostLondon {
+		return w.UpdateGasPrice(rpc)
+	}
+	return w.updateGasFeeCap(rpc)
+}
+
+func (w *Wallet) updateGasFeeCap(rpc *ethclient.Client) error {
+	head, err := rpc.HeaderByNumber(context.Background(), nil)
+	if err != nil {
+		return errors.New("updateGasFeeCap: rpc could not get BaseFee; " + err.Error())
+	}
+	const basefeeWiggleMultiplier = 2
+	w.Auth.GasFeeCap = new(big.Int).Add(
+		w.Auth.GasTipCap,
+		new(big.Int).Mul(head.BaseFee, big.NewInt(basefeeWiggleMultiplier)),
+	)
+	return nil
 }
 
 func (w *Wallet) UpdateGasPrice(rpc *ethclient.Client) error {

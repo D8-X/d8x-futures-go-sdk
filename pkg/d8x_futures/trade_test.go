@@ -32,8 +32,9 @@ func TestSdkExec(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	//err := sdk.New([]string{pk}, "421614") //arbitrum
-	err := sdk.New([]string{pk}, "195") //x-layer testnet
+	//err := sdk.New([]string{pk}, "42161") //arbitrum
+	err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
+	//err := sdk.New([]string{pk}, "195") //x-layer testnet
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
 	if err != nil {
@@ -120,14 +121,16 @@ func TestAddCollateral(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New([]string{pk}, "42161")
+	//err := sdk.New([]string{pk}, "421614")
+	err := sdk.New([]string{pk}, "195")
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
 	}
 	fmt.Println("wallet = " + sdk.Wallets[0].Address.Hex())
 	//opts := nil //OptsOverrides{GasLimit: }
-	tx, err := sdk.AddCollateral("ETH-USD-WEETH", -0.0001, nil)
+	//tx, err := sdk.AddCollateral("ETH-USD-WEETH", 0.0001, nil)
+	tx, err := sdk.AddCollateral("BTC-USDC-USDC", -0.0001, nil)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
