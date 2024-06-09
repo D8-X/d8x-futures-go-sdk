@@ -60,11 +60,13 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 			return nil, err
 		}
 		w.Auth.GasTipCap = tip
+		w.updateGasFeeCap(rpc)
 	} else {
 		w.Auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			chainID := big.NewInt(chainId)
 			return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
 		}
+		w.UpdateGasPrice(rpc)
 	}
 	w.Auth.Value = big.NewInt(0)
 	if rpc == nil {
