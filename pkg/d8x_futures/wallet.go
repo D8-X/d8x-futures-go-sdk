@@ -89,6 +89,18 @@ func (w *Wallet) SetValue(val int64) {
 	w.Auth.Value = big.NewInt(val)
 }
 
+// GetLastGasPrix returns the currently set gas price
+// or (post London) the gasfeecap+gastip
+func (w *Wallet) GetLastGasPrice() *big.Int {
+	if w.IsPostLondon {
+		if w.Auth.GasFeeCap == nil {
+			return nil
+		}
+		return new(big.Int).Add(w.Auth.GasFeeCap, w.Auth.GasTipCap)
+	}
+	return w.Auth.GasPrice
+}
+
 // UpdateNonceAndGasPx updates nonce and gas price, or nonce and
 // gas fee cap if w.IsPostLondon
 func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client) error {
