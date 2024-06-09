@@ -85,7 +85,7 @@ func (sdk *Sdk) AddCollateral(symbol string, amountCC float64, overrides *OptsOv
 	}
 	g := w.Auth.GasLimit
 	defer w.SetGasLimit(g)
-	limit := 1_000_000
+	limit := 3_000_000
 	if overrides != nil && overrides.GasLimit != 0 {
 		limit = overrides.GasLimit
 	}
