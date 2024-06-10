@@ -288,6 +288,34 @@ func (sdkRo *SdkRO) GetPoolShareTknPrice(poolIds []int, optRpc *ethclient.Client
 	return RawGetPoolShTknPrice(rpc, poolIds, sdkRo.Info)
 }
 
+// Allowance checks the allowance of the given address to spend margin tokens for the given
+// pool (via symbol) on the manager. Returns the value in decimals and the decimal-N value (big-int).
+// Symbol is a pool symbol like "USDC" (or perpetual symbol like MATIC-USDC-USDC works too)
+func (sdkRo *SdkRO) Allowance(symbol string, user common.Address, optRpc *ethclient.Client) (float64, *big.Int, error) {
+	tknAddr, err := RawGetMarginTknAddr(&sdkRo.Info, symbol)
+	if err != nil {
+		return 0, nil, err
+	}
+	rpc := sdkRo.Conn.Rpc
+	if optRpc != nil {
+		rpc = optRpc
+	}
+	erc20Instance, err := contracts.NewErc20(tknAddr, rpc)
+	if err != nil {
+		return 0, nil, fmt.Errorf("error creating instance of token %s: %s", tknAddr.String(), err.Error())
+	}
+	n, err := erc20Instance.Decimals(nil)
+	if err != nil {
+		return 0, nil, err
+	}
+	a, err := erc20Instance.Allowance(nil, user, sdkRo.Info.ProxyAddr)
+	if err != nil {
+		return 0, nil, fmt.Errorf("error getting allowance for token %s:%s", tknAddr.String(), err.Error())
+	}
+	amt := utils.DecNToFloat(a, n)
+	return amt, a, nil
+}
+
 func RawGetMarginTknAddr(xInfo *StaticExchangeInfo, symbol string) (common.Address, error) {
 	j := GetPoolStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {

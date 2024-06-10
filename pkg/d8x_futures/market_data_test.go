@@ -134,6 +134,23 @@ func TestPerpetualPrice(t *testing.T) {
 	fmt.Printf("Time taken: %s\n", elapsedTime)
 }
 
+func TestAllowance(t *testing.T) {
+
+	var sdkRo SdkRO
+	//err := sdkRo.New("196")
+	err := sdkRo.New("42161") //arbitrum
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	a, _, err := sdkRo.Allowance("STUSD", common.HexToAddress("0xdef43CF2Dd024abc5447C1Dcdc2fE3FE58547b84"), nil)
+	if err != nil {
+		fmt.Println(err.Error())
+		t.FailNow()
+	}
+	fmt.Printf("allowance = %f\n", a)
+}
+
 func TestPerpetualPriceTuple(t *testing.T) {
 
 	var sdkRo SdkRO
