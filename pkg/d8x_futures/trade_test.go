@@ -33,14 +33,16 @@ func TestSdkExec(t *testing.T) {
 		t.FailNow()
 	}
 	//err := sdk.New([]string{pk}, "42161") //arbitrum
-	err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
+	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
 	//err := sdk.New([]string{pk}, "195") //x-layer testnet
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
+	err := sdk.New([]string{pk}, "80084") //bartio
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
+	fmt.Printf("wallet addr =%s\n", sdk.Wallets[0].Address.Hex())
 	orderObj, err := sdk.QueryAllOpenOrders("BTC-USDC-USDC", nil)
 	if err != nil {
 		t.Logf(err.Error())
@@ -69,7 +71,7 @@ func TestSdkExec(t *testing.T) {
 		mktOrderIds = append(mktOrderIds, orderId)
 	}
 	now := time.Now().Unix()
-	payoutAddr := common.HexToAddress("0x98DfAFF5126836E339493a6021FD5B92Bf005F0D")
+	payoutAddr := common.Address{} // common.HexToAddress("0x98DfAFF5126836E339493a6021FD5B92Bf005F0D")
 	tx, err := sdk.ExecuteOrders("BTC-USDC-USDC", []string{mktOrderIds[0]}, &OptsOverridesExec{TsMin: uint32(now), PayoutAddr: payoutAddr})
 	if err != nil {
 		t.Logf(err.Error())

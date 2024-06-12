@@ -57,7 +57,7 @@
     {
       "name": "bartio",
       "priceFeedNetwork": "PythEVMStable",
-      "priceFeedEndpoints": ["https://odin.d8x.xyz/api"],
+      "priceFeedEndpoints": ["https://hermes.pyth.network/api"],
       "chainId": 80084,
       "proxyAddr": "0xf922A26375967130aeaB637cB3eE59f498CB2d24",
       "multipayAddr": "0x0115dBc1eF289BbDC906b2f7be2bdB6cb8952670",
