@@ -20,7 +20,6 @@ type ChainConfig struct {
 	NodeURL            string         `json:"nodeURL"`
 	PostOrderGasLimit  int64          `json:"postOrderGasLimit"`
 	PriceUpdateFeeGwei int64          `json:"priceUpdateFeeGwei"`
-	SplitExecutionTx   bool           `json:"splitExecutionTx"`
 }
 
 type PriceFeedConfig struct {

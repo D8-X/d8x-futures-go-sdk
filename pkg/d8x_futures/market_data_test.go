@@ -96,13 +96,14 @@ func TestGetPerpetualData(t *testing.T) {
 	var sdkRo SdkRO
 	//err := sdkRo.New("421614") //arbitrum sepolia
 	//err := sdkRo.New("195") //x1
-	err := sdkRo.New("196") //xlayer
+	//err := sdkRo.New("196") //xlayer
+	err := sdkRo.New("80084") //bartio
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	startTime := time.Now()
-	d, err := RawGetPerpetualData(sdkRo.Conn.Rpc, &sdkRo.Info, "WOKB-USD-WOKB")
+	d, err := RawGetPerpetualData(sdkRo.Conn.Rpc, &sdkRo.Info, "BTC-USDC-USDC")
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {

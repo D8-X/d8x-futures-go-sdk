@@ -8,8 +8,7 @@
       "multipayAddr": "0x5a1e7bbcf0a02a84c5bce8865ac88668fc6389fe",
       "nodeURL": "https://zkevm-rpc.com",
       "postOrderGasLimit": 3000000,
-      "priceUpdateFeeGwei": 1,
-      "splitExecutionTx": true
+      "priceUpdateFeeGwei": 1
     },
     {
       "name": "x1Testnet",
@@ -20,8 +19,7 @@
       "multipayAddr": "0x3594D0eAAaC82D3AFA7347d098bc4a39A71e918c",
       "nodeURL": "https://testrpc.x1.tech",
       "postOrderGasLimit": 3000000,
-      "priceUpdateFeeGwei": 1,
-      "splitExecutionTx": false
+      "priceUpdateFeeGwei": 1
     },
     {
       "name": "cardona",
@@ -32,8 +30,7 @@
       "multipayAddr": "0xF08A1E0d5E5a0b90D082e218f5CA2416916C5e8c",
       "nodeURL": "https://rpc.cardona.zkevm-rpc.com",
       "postOrderGasLimit": 3000000,
-      "priceUpdateFeeGwei": 1,
-      "splitExecutionTx": false
+      "priceUpdateFeeGwei": 1
     },
     {
       "name": "arbitrumSepolia",
@@ -44,8 +41,7 @@
       "multipayAddr": "0x35672963523bc874f13da5CeED024249794E6a16",
       "nodeURL": "https://sepolia-rollup.arbitrum.io/rpc",
       "postOrderGasLimit": 3000000,
-      "priceUpdateFeeGwei": 1,
-      "splitExecutionTx": false
+      "priceUpdateFeeGwei": 1
     },
     {
       "name": "arbitrum",
@@ -56,20 +52,18 @@
       "multipayAddr": "0x215975839684a365df2387b1f0FcEaBf4F0B77eb",
       "nodeURL": "https://arbitrum-one-rpc.publicnode.com",
       "postOrderGasLimit": 3000000,
-      "priceUpdateFeeGwei": 1,
-      "splitExecutionTx": false
+      "priceUpdateFeeGwei": 1
     },
     {
-      "name": "artio",
+      "name": "bartio",
       "priceFeedNetwork": "PythEVMStable",
       "priceFeedEndpoints": ["https://odin.d8x.xyz/api"],
-      "chainId": 80085,
-      "proxyAddr": "0x70212F1E2eB66C82990312FA5AB3f851706fD1E1",
-      "multipayAddr": "0xDa7f988605Abe824dF767Aa583d8fD60f09E23D0",
-      "nodeURL": "https://rpc.ankr.com/berachain_testnet",
+      "chainId": 80084,
+      "proxyAddr": "0xf922A26375967130aeaB637cB3eE59f498CB2d24",
+      "multipayAddr": "0x0115dBc1eF289BbDC906b2f7be2bdB6cb8952670",
+      "nodeURL": "https://bartio.rpc.berachain.com",
       "postOrderGasLimit": 3000000,
-      "priceUpdateFeeGwei": 1,
-      "splitExecutionTx": false
+      "priceUpdateFeeGwei": 1
     },
     {
       "name": "xlayer",
@@ -80,7 +74,6 @@
       "multipayAddr": "0x66D1B11B519b060FE2afa4Ba81c0c8e63061eB6C",
       "nodeURL": "https://xlayerrpc.okx.com",
       "postOrderGasLimit": 3000000,
-      "priceUpdateFeeGwei": 1,
-      "splitExecutionTx": false
+      "priceUpdateFeeGwei": 1
     }
 ]
