@@ -44,7 +44,7 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 	}
 	// determine the type of RPC (post London EIP-1559 or pre)
 	head, err := rpc.HeaderByNumber(context.Background(), nil)
-	w.IsPostLondon = err != nil && head.BaseFee != nil
+	w.IsPostLondon = err == nil && head.BaseFee != nil
 	if w.IsPostLondon {
 		w.Auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			chainID := big.NewInt(chainId)
