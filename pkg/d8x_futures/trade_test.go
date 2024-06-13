@@ -34,10 +34,10 @@ func TestSdkExec(t *testing.T) {
 	}
 	//err := sdk.New([]string{pk}, "42161") //arbitrum
 	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
-	//err := sdk.New([]string{pk}, "195") //x-layer testnet
+	err := sdk.New([]string{pk}, "195") //x-layer testnet
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
-	err := sdk.New([]string{pk}, "80084") //bartio
+	//err := sdk.New([]string{pk}, "80084") //bartio
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
