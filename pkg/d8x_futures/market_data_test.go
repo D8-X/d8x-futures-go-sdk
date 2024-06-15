@@ -34,7 +34,7 @@ func TestFetchPythPrices(t *testing.T) {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	r, err := fetchPythPrices([]string{pxConf.PriceFeedIds[0].Id, pxConf.PriceFeedIds[1].Id}, false, "https://hermes.pyth.network/api")
+	r, err := fetchPythPrices([]string{pxConf.PriceFeedIds[0].Id, pxConf.PriceFeedIds[1].Id}, "https://hermes.pyth.network/")
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()

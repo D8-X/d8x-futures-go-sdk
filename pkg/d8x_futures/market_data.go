@@ -1046,7 +1046,7 @@ func fetchPricesFromAPI(priceIds []string, priceFeedEndpoint string, withVaa boo
 
 	// REST query (#queries == number of endpoints for feeds)
 	// include VAA
-	data, err := fetchPythPrices(priceIds, true, priceFeedEndpoint)
+	data, err := fetchPythPrices(priceIds, priceFeedEndpoint)
 	if err != nil {
 		return PriceFeedData{}, err
 	}
@@ -1074,36 +1074,59 @@ func fetchPricesFromAPI(priceIds []string, priceFeedEndpoint string, withVaa boo
 }
 
 // fetchPythPrices gets the specified priceIds from the pyth endpoint 'priceFeedEndpoint'
-// and includes VAA (signed prices) if withVaa is true
-func fetchPythPrices(priceIds []string, withVaa bool, priceFeedEndpoint string) ([]ResponsePythLatestPriceFeed, error) {
-	query := fmt.Sprintf("%s/latest_price_feeds?binary=%t&", priceFeedEndpoint, withVaa)
+// and includes VAA (signed prices)
+func fetchPythPrices(priceIds []string, priceFeedEndpoint string) ([]ResponsePythLatestPriceFeed, error) {
+	// see https://hermes.pyth.network/docs/
+	priceFeedEndpoint = strings.TrimSuffix(priceFeedEndpoint, "/api") //cut off legacy url suffix
+	priceFeedEndpoint = strings.TrimSuffix(priceFeedEndpoint, "/")
+	resCh := make(chan *PythLatestPxV2, len(priceIds))
+	errCh := make(chan error, len(priceIds))
+	query := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", priceFeedEndpoint)
 	for _, id := range priceIds {
-		query += "ids[]=" + strings.TrimPrefix(id, "0x") + "&"
+		fetchPythPrice(query+strings.TrimPrefix(id, "0x"), resCh, errCh)
 	}
-	query = strings.TrimSuffix(query, "&")
+	// collect the results and errors
+	res := make([]ResponsePythLatestPriceFeed, len(priceIds))
+	for i := 0; i < len(priceIds); i++ {
+		select {
+		case result := <-resCh:
+			res[i] = ResponsePythLatestPriceFeed{
+				EmaPrice: result.Parsed[0].EmaPrice,
+				Id:       result.Parsed[0].ID,
+				Price:    result.Parsed[0].Price,
+				Vaa:      result.Binary.Data[0],
+			}
+		case err := <-errCh:
+			return nil, err
+		}
+	}
+	close(resCh)
+	close(errCh)
+	return res, nil
+}
+
+func fetchPythPrice(query string, resCh chan<- *PythLatestPxV2, errCh chan<- error) {
 	response, err := http.Get(query)
 	if err != nil {
-		err := errors.New("Error sending fetchPricesFromAPI request:" + err.Error())
-		return nil, err
+		errCh <- errors.New("error sending fetchPricesFromAPI request:" + err.Error())
+		return
 	}
 	defer response.Body.Close()
-
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		err := errors.New("Error reading response body:" + err.Error())
-		return nil, err
+		errCh <- errors.New("error reading response body:" + err.Error())
 	}
 	if response.StatusCode != 200 {
-		err := errors.New("Error fetchPricesFromAPI status " + strconv.Itoa(response.StatusCode) + " " + string(body[:]))
-		return nil, err
+		errCh <- errors.New("error fetchPricesFromAPI status " + strconv.Itoa(response.StatusCode) + " " + string(body[:]))
+		return
 	}
-	var data []ResponsePythLatestPriceFeed
+	var data PythLatestPxV2
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		err := errors.New("fetchPricesFromAPI:" + err.Error())
-		return nil, err
+		errCh <- errors.New("fetchPricesFromAPI:" + err.Error())
+		return
 	}
-	return data, nil
+	resCh <- &data
 }
 
 func RawGetTknBalance(tknAddr common.Address, userAddr common.Address, rpc *ethclient.Client) (float64, error) {
