@@ -206,6 +206,25 @@ type ResponsePythLatestPriceFeed struct {
 	Vaa      string            `json:"vaa"`
 }
 
+type PythLatestPxV2 struct {
+	Binary struct {
+		Encoding string   `json:"encoding"`
+		Data     []string `json:"data"`
+	} `json:"binary"`
+	Parsed []struct {
+		ID       string            `json:"id"`
+		Price    ResponsePythPrice `json:"price"`
+		EmaPrice ResponsePythPrice `json:"ema_price"`
+		Metadata Metadata          `json:"metadata"`
+	} `json:"parsed"`
+}
+
+type Metadata struct {
+	Slot               int64 `json:"slot"`
+	ProofAvailableTime int64 `json:"proof_available_time"`
+	PrevPublishTime    int64 `json:"prev_publish_time"`
+}
+
 type ResponsePythPrice struct {
 	Conf        string `json:"conf"`
 	Expo        int32  `json:"expo"`
