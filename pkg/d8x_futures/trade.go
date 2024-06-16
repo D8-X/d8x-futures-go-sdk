@@ -24,9 +24,10 @@ import (
 )
 
 type OptsOverrides struct {
-	Rpc       *ethclient.Client
-	WalletIdx int
-	GasLimit  int
+	Rpc            *ethclient.Client
+	PriceFeedEndPt string //not all functions require it
+	WalletIdx      int
+	GasLimit       int
 }
 
 // overrides for order execution
@@ -39,17 +40,8 @@ type OptsOverridesExec struct {
 // PostOrder posts an order to the corresponding limit order book.
 // Returns orderId, tx hash, error
 func (sdk *Sdk) PostOrder(order *Order, overrides *OptsOverrides) (string, string, error) {
-	var w *Wallet
-	var rpc *ethclient.Client
-	if overrides == nil {
-		w = sdk.Wallets[0]
-		rpc = sdk.Conn.Rpc
-	} else {
-		w = sdk.Wallets[overrides.WalletIdx]
-	}
-	if rpc == nil {
-		rpc = sdk.Conn.Rpc
-	}
+	widx, rpc, _ := extractOverrides(sdk, overrides)
+	w := sdk.Wallets[widx]
 	g := w.Auth.GasLimit
 	defer w.SetGasLimit(g)
 	limit := int(sdk.Conn.PostOrderGasLimit)
@@ -71,18 +63,27 @@ func (sdk *Sdk) CreatePaymentBrokerSignature(ps *PaySummary, optWalletIdx int) (
 	return RawCreatePaymentBrokerSignature(ps, w)
 }
 
-func (sdk *Sdk) AddCollateral(symbol string, amountCC float64, overrides *OptsOverrides) (*types.Transaction, error) {
-	var w *Wallet
-	var rpc *ethclient.Client
+// extractOverrides returns wallet-idx, rpc and price-feed enpoint. Does not return gas limit that is also in OptsOverrides.
+func extractOverrides(sdk *Sdk, overrides *OptsOverrides) (int, *ethclient.Client, string) {
+	w := int(0)
+	rpc := sdk.Conn.Rpc
+	priceFeedEndPt := sdk.ChainConfig.PriceFeedEndpoints[0]
 	if overrides == nil {
-		w = sdk.Wallets[0]
-		rpc = sdk.Conn.Rpc
-	} else {
-		w = sdk.Wallets[overrides.WalletIdx]
+		return w, rpc, priceFeedEndPt
 	}
-	if rpc == nil {
-		rpc = sdk.Conn.Rpc
+	w = overrides.WalletIdx
+	if overrides.PriceFeedEndPt != "" {
+		priceFeedEndPt = overrides.PriceFeedEndPt
 	}
+	if overrides.Rpc != nil {
+		rpc = overrides.Rpc
+	}
+	return w, rpc, priceFeedEndPt
+}
+
+func (sdk *Sdk) AddCollateral(symbol string, amountCC float64, overrides *OptsOverrides) (*types.Transaction, error) {
+	widx, rpc, priceFeedEndPt := extractOverrides(sdk, overrides)
+	w := sdk.Wallets[widx]
 	g := w.Auth.GasLimit
 	defer w.SetGasLimit(g)
 	limit := 3_000_000
@@ -90,21 +91,12 @@ func (sdk *Sdk) AddCollateral(symbol string, amountCC float64, overrides *OptsOv
 		limit = overrides.GasLimit
 	}
 	w.SetGasLimit(uint64(limit))
-	return RawAddCollateral(rpc, &sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], w, symbol, amountCC)
+	return RawAddCollateral(rpc, &sdk.Conn, &sdk.Info, priceFeedEndPt, w, symbol, amountCC)
 }
 
 func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverrides) (*types.Transaction, error) {
-	var w *Wallet
-	var rpc *ethclient.Client
-	if overrides == nil {
-		w = sdk.Wallets[0]
-		rpc = sdk.Conn.Rpc
-	} else {
-		w = sdk.Wallets[overrides.WalletIdx]
-	}
-	if rpc == nil {
-		rpc = sdk.Conn.Rpc
-	}
+	widx, rpc, priceFeedEndPt := extractOverrides(sdk, overrides)
+	w := sdk.Wallets[widx]
 	g := w.Auth.GasLimit
 	defer w.SetGasLimit(g)
 	limit := 15_000_000
@@ -113,8 +105,7 @@ func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverri
 	}
 	w.SetGasLimit(uint64(limit))
 
-	return RawCancelOrder(rpc, &sdk.Conn, &sdk.Info,
-		sdk.ChainConfig.PriceFeedEndpoints[0], w, symbol, orderId)
+	return RawCancelOrder(rpc, &sdk.Conn, &sdk.Info, priceFeedEndPt, w, symbol, orderId)
 }
 
 func (sdk *Sdk) ExecuteOrders(
@@ -125,11 +116,18 @@ func (sdk *Sdk) ExecuteOrders(
 	*types.Transaction,
 	error,
 ) {
-	if opts == nil {
-		o := OptsOverridesExec{OptsOverrides: OptsOverrides{Rpc: sdk.Conn.Rpc, WalletIdx: 0, GasLimit: 0}, TsMin: 0}
-		opts = &o
+	var op0 *OptsOverrides
+	var gas int
+	var tsMin uint32
+	if opts != nil {
+		op0 = &opts.OptsOverrides
+		gas = opts.GasLimit
+		tsMin = opts.TsMin
 	}
-	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.ChainConfig.PriceFeedEndpoints[0], sdk.Wallets[opts.WalletIdx], symbol, orderIds, opts)
+	widx, rpc, priceFeedEndPt := extractOverrides(sdk, op0)
+	o := OptsOverridesExec{OptsOverrides: OptsOverrides{Rpc: rpc, PriceFeedEndPt: priceFeedEndPt, WalletIdx: widx, GasLimit: gas}, TsMin: tsMin}
+
+	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.Wallets[widx], symbol, orderIds, &o)
 }
 
 // LiquidatePosition liquidates the position of traderAddr in perpetual with id perpId, given it is liquidatable. Liquidation
@@ -143,23 +141,24 @@ func (sdk *Sdk) LiquidatePosition(
 	*types.Transaction,
 	error,
 ) {
-	if opts == nil {
-		o := OptsOverrides{Rpc: sdk.Conn.Rpc, WalletIdx: 0, GasLimit: 0}
-		opts = &o
+	widx, rpc, priceFeedEndPt := extractOverrides(sdk, opts)
+
+	o := OptsOverrides{Rpc: rpc, PriceFeedEndPt: priceFeedEndPt, WalletIdx: widx, GasLimit: 0}
+	if opts != nil {
+		o.GasLimit = opts.GasLimit
 	}
 	if optLiquidatorAddr == nil {
-		optLiquidatorAddr = &(sdk.Wallets[opts.WalletIdx].Address)
+		optLiquidatorAddr = &(sdk.Wallets[o.WalletIdx].Address)
 	}
 
 	return RawLiquidatePosition(
 		&sdk.Conn,
 		&sdk.Info,
-		sdk.ChainConfig.PriceFeedEndpoints[0],
-		sdk.Wallets[opts.WalletIdx],
+		sdk.Wallets[widx],
 		perpId,
 		traderAddr,
 		optLiquidatorAddr,
-		opts)
+		&o)
 }
 
 // ApproveTknSpending approves the manager to spend the wallet's margin tokens for the given
@@ -170,14 +169,8 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int, overrides *Op
 	if err != nil {
 		return nil, err
 	}
-	rpc := sdk.Conn.Rpc
-	w := sdk.Wallets[0]
-	if overrides != nil {
-		if overrides.Rpc != nil {
-			rpc = overrides.Rpc
-		}
-		w = sdk.Wallets[overrides.WalletIdx]
-	}
+	widx, rpc, _ := extractOverrides(sdk, overrides)
+	w := sdk.Wallets[widx]
 	erc20Instance, err := contracts.NewErc20(tknAddr, rpc)
 	if err != nil {
 		return nil, errors.New("ApproveTknSpending: creating instance of token " + tknAddr.String())
@@ -256,11 +249,10 @@ func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Sta
 	return tx, nil
 }
 
-// RawExecuteOrders executes order
+// RawExecuteOrders executes order; opts not optional here
 func RawExecuteOrders(
 	conn *BlockChainConnector,
 	xInfo *StaticExchangeInfo,
-	pythEndpoint string,
 	postingWallet *Wallet,
 	symbol string,
 	orderIds []string,
@@ -269,9 +261,8 @@ func RawExecuteOrders(
 	*types.Transaction,
 	error,
 ) {
-	rpc := conn.Rpc
-	if opts != nil && opts.Rpc != nil {
-		rpc = opts.Rpc
+	if opts == nil {
+		return nil, errors.New("opts cannot be nil")
 	}
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
@@ -279,7 +270,7 @@ func RawExecuteOrders(
 	var err error
 	for {
 		// fetch prices
-		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
+		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt)
 		if err != nil {
 			return nil, errors.New("RawExecuteOrder: failed fetching oracle prices " + err.Error())
 		}
@@ -317,11 +308,11 @@ func RawExecuteOrders(
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g) // set back after
 
-	postingWallet.UpdateNonceAndGasPx(rpc)
-	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+	postingWallet.UpdateNonceAndGasPx(opts.Rpc)
+	ob := CreateLimitOrderBookInstance(opts.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 
 	limit := 2_000_000 + 1_000_000*(len(digests)-1)
-	if opts != nil && opts.GasLimit != 0 {
+	if opts.GasLimit != 0 {
 		limit = opts.GasLimit
 	}
 	postingWallet.SetGasLimit(uint64(limit))
@@ -335,7 +326,6 @@ func RawExecuteOrders(
 func RawLiquidatePosition(
 	conn *BlockChainConnector,
 	xInfo *StaticExchangeInfo,
-	pythEndpoint string,
 	postingWallet *Wallet,
 	perpId int32,
 	traderAddr, liquidatorAddr *common.Address,
@@ -344,17 +334,16 @@ func RawLiquidatePosition(
 	*types.Transaction,
 	error,
 ) {
-	rpc := conn.Rpc
-	if opts != nil && opts.Rpc != nil {
-		rpc = opts.Rpc
+	if opts == nil {
+		return nil, errors.New("opts cannot be nil")
 	}
-	perpCtrct := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	perpCtrct := CreatePerpetualManagerInstance(opts.Rpc, xInfo.ProxyAddr)
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g) // set back after
-	postingWallet.UpdateNonceAndGasPx(rpc)
+	postingWallet.UpdateNonceAndGasPx(opts.Rpc)
 
 	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt)
 	if err != nil {
 		return nil, errors.New("RawLiquidatePosition: failed fetching oracle prices " + err.Error())
 	}
