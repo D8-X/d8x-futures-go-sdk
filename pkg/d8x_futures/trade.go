@@ -352,7 +352,7 @@ func RawLiquidatePosition(
 	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
 	postingWallet.Auth.Value = big.NewInt(val)
 	limit := 3_000_000
-	if opts != nil && opts.GasLimit != 0 {
+	if opts.GasLimit != 0 {
 		limit = opts.GasLimit
 	}
 	postingWallet.SetGasLimit(uint64(limit))
