@@ -134,18 +134,39 @@ const POOL_SHTKN_PX_ABI = `[  {
 	"type": "function"
 }]`
 
-func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, optRpc *ethclient.Client) (PositionRisk, error) {
-	if optRpc == nil {
-		optRpc = sdkRo.Conn.Rpc
-	}
-	return RawGetPositionRisk(sdkRo.Info, optRpc, &traderAddr, symbol, sdkRo.ChainConfig.PriceFeedEndpoints[0])
+type OptEndPoints struct {
+	Rpc       *ethclient.Client
+	PythEndPt string
 }
 
-func (sdkRo *SdkRO) QueryPerpetualState(perpetualIds []int32, optRpc *ethclient.Client) ([]PerpetualState, error) {
-	if optRpc == nil {
-		optRpc = sdkRo.Conn.Rpc
+func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, optEndPt *OptEndPoints) (PositionRisk, error) {
+	optRpc, optPyth := extractEndpoints(sdkRo, optEndPt)
+	return RawGetPositionRisk(sdkRo.Info, optRpc, &traderAddr, symbol, optPyth)
+}
+
+func (sdkRo *SdkRO) QueryPerpetualState(perpetualIds []int32, optEndPt *OptEndPoints) ([]PerpetualState, error) {
+	optRpc, optPyth := extractEndpoints(sdkRo, optEndPt)
+	return RawQueryPerpetualState(optRpc, sdkRo.Info, perpetualIds, optPyth)
+}
+
+func (sdkRo *SdkRO) QueryPerpetualPrices(symbol string, tradeAmt []float64, optEndPt *OptEndPoints) ([]float64, error) {
+	optRpc, optPyth := extractEndpoints(sdkRo, optEndPt)
+	return RawQueryPerpetualPriceTuple(optRpc, &sdkRo.Info, optPyth, symbol, tradeAmt)
+}
+
+func extractEndpoints(sdkRo *SdkRO, optEndPt *OptEndPoints) (*ethclient.Client, string) {
+	optRpc := sdkRo.Conn.Rpc
+	optPyth := sdkRo.ChainConfig.PriceFeedEndpoints[0]
+	if optEndPt == nil {
+		return optRpc, optPyth
 	}
-	return RawQueryPerpetualState(optRpc, sdkRo.Info, perpetualIds, sdkRo.ChainConfig.PriceFeedEndpoints[0])
+	if optEndPt.Rpc != nil {
+		optRpc = optEndPt.Rpc
+	}
+	if optEndPt.PythEndPt != "" {
+		optPyth = optEndPt.PythEndPt
+	}
+	return optRpc, optPyth
 }
 
 func (sdkRo *SdkRO) QueryPoolStates(optRpc *ethclient.Client) ([]PoolState, error) {
@@ -153,13 +174,6 @@ func (sdkRo *SdkRO) QueryPoolStates(optRpc *ethclient.Client) ([]PoolState, erro
 		optRpc = sdkRo.Conn.Rpc
 	}
 	return RawQueryPoolStates(optRpc, sdkRo.Info)
-}
-
-func (sdkRo *SdkRO) QueryPerpetualPrices(symbol string, tradeAmt []float64, optRpc *ethclient.Client) ([]float64, error) {
-	if optRpc == nil {
-		optRpc = sdkRo.Conn.Rpc
-	}
-	return RawQueryPerpetualPriceTuple(optRpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoints[0], symbol, tradeAmt)
 }
 
 func (sdkRo *SdkRO) QueryOpenOrders(symbol string, traderAddr common.Address, optRpc *ethclient.Client) ([]Order, []string, error) {
@@ -235,28 +249,30 @@ func (sdkRo *SdkRO) GetMinimalPositionSize(symbol string) (float64, error) {
 }
 
 // QueryLiquidatableAccounts identifies all liquidatable accounts in the given perpetuals
-func (sdkRo *SdkRO) QueryLiquidatableAccounts(perpId int32, optRpc *ethclient.Client) ([]common.Address, error) {
-	if optRpc == nil {
-		optRpc = sdkRo.Conn.Rpc
-	}
-	return RawQueryLiquidatableAccounts(optRpc, &sdkRo.Info, perpId, sdkRo.ChainConfig.PriceFeedEndpoints[0])
+func (sdkRo *SdkRO) QueryLiquidatableAccounts(perpId int32, optEndPt *OptEndPoints) ([]common.Address, error) {
+	optRpc, optPyth := extractEndpoints(sdkRo, optEndPt)
+	return RawQueryLiquidatableAccounts(optRpc, &sdkRo.Info, perpId, optPyth)
 }
 
 // QueryLiquidatableAccountsInPool identifies all traders that can be liquidated in all perpetuals of
 // the given pool.
-func (sdkRo *SdkRO) QueryLiquidatableAccountsInPool(poolId int32, optRpc *ethclient.Client) ([]LiquidatableAccounts, error) {
-	if optRpc == nil {
-		optRpc = sdkRo.Conn.Rpc
+func (sdkRo *SdkRO) QueryLiquidatableAccountsInPool(poolId int32, optEndPt *OptEndPoints) ([]LiquidatableAccounts, error) {
+	optRpc, optPyth := extractEndpoints(sdkRo, optEndPt)
+	return RawQueryLiquidatableAccountsInPool(optRpc, &sdkRo.Info, poolId, optPyth)
+}
+
+func (sdkRo *SdkRO) FetchPricesForPerpetualId(id int32, optPythEndPt string) (PerpetualPriceInfo, error) {
+	if optPythEndPt == "" {
+		optPythEndPt = sdkRo.ChainConfig.PriceFeedEndpoints[0]
 	}
-	return RawQueryLiquidatableAccountsInPool(optRpc, &sdkRo.Info, poolId, sdkRo.ChainConfig.PriceFeedEndpoints[0])
+	return RawFetchPricesForPerpetualId(sdkRo.Info, id, optPythEndPt)
 }
 
-func (sdkRo *SdkRO) FetchPricesForPerpetualId(id int32) (PerpetualPriceInfo, error) {
-	return RawFetchPricesForPerpetualId(sdkRo.Info, id, sdkRo.ChainConfig.PriceFeedEndpoints[0])
-}
-
-func (sdkRo *SdkRO) FetchPricesForPerpetual(symbol string, endpoint string) (PerpetualPriceInfo, error) {
-	return RawFetchPricesForPerpetual(sdkRo.Info, symbol, sdkRo.ChainConfig.PriceFeedEndpoints[0])
+func (sdkRo *SdkRO) FetchPricesForPerpetual(symbol string, optPythEndPt string) (PerpetualPriceInfo, error) {
+	if optPythEndPt == "" {
+		optPythEndPt = sdkRo.ChainConfig.PriceFeedEndpoints[0]
+	}
+	return RawFetchPricesForPerpetual(sdkRo.Info, symbol, optPythEndPt)
 }
 
 func (sdkRo *SdkRO) GetMarginTokenBalance(symbol string, traderAddr common.Address, optRpc *ethclient.Client) (float64, error) {
