@@ -135,8 +135,8 @@ const POOL_SHTKN_PX_ABI = `[  {
 }]`
 
 type OptEndPoints struct {
-	Rpc       *ethclient.Client
-	PythEndPt string
+	Rpc            *ethclient.Client
+	PriceFeedEndPt string
 }
 
 func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, optEndPt *OptEndPoints) (PositionRisk, error) {
@@ -163,8 +163,8 @@ func extractEndpoints(sdkRo *SdkRO, optEndPt *OptEndPoints) (*ethclient.Client, 
 	if optEndPt.Rpc != nil {
 		optRpc = optEndPt.Rpc
 	}
-	if optEndPt.PythEndPt != "" {
-		optPyth = optEndPt.PythEndPt
+	if optEndPt.PriceFeedEndPt != "" {
+		optPyth = optEndPt.PriceFeedEndPt
 	}
 	return optRpc, optPyth
 }
