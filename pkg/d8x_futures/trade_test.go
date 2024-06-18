@@ -91,8 +91,8 @@ func TestSdkLiquidatePosition(t *testing.T) {
 		t.FailNow()
 	}
 	//err := sdk.New([]string{pk}, "195") //x-layer testnet
-	//err := sdk.New([]string{pk}, "196") //x-layer testnet
-	err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
+	err := sdk.New([]string{pk}, "196") //x-layer testnet
+	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()

@@ -347,6 +347,9 @@ func RawLiquidatePosition(
 	if err != nil {
 		return nil, errors.New("RawLiquidatePosition: failed fetching oracle prices " + err.Error())
 	}
+	if pxFeed.IsMarketClosedS2 || pxFeed.IsMarketClosedS3 {
+		return nil, errors.New("RawLiquidatePosition: market closed or outdated oracle")
+	}
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
 	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
