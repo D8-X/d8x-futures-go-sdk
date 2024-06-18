@@ -35,15 +35,17 @@ func TestSdkExec(t *testing.T) {
 	//err := sdk.New([]string{pk}, "42161") //arbitrum
 	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
 	// err := sdk.New([]string{pk}, "195") //x-layer testnet
+	err := sdk.New([]string{pk}, "196") //x-layer
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
-	err := sdk.New([]string{pk}, "80084") //bartio
+	//err := sdk.New([]string{pk}, "80084") //bartio
+	perp := "BTC-USDT-USDT"
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	fmt.Printf("wallet addr =%s\n", sdk.Wallets[0].Address.Hex())
-	orderObj, err := sdk.QueryAllOpenOrders("BTC-USDC-USDC", nil)
+	orderObj, err := sdk.QueryAllOpenOrders(perp, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -61,7 +63,7 @@ func TestSdkExec(t *testing.T) {
 		}
 	}
 	if len(mktOrderIds) == 0 {
-		order := NewOrder("BTC-USDC-USDC", SIDE_SELL, ORDER_TYPE_MARKET, 0.01, 10, &OrderOptions{LimitPrice: 2240})
+		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 0.01, 10, &OrderOptions{LimitPrice: 2240})
 		orderId, _, err := sdk.PostOrder(order, nil)
 		if err != nil {
 			t.Logf(err.Error())
@@ -72,7 +74,7 @@ func TestSdkExec(t *testing.T) {
 	}
 	now := time.Now().Unix()
 	payoutAddr := common.Address{} // common.HexToAddress("0x98DfAFF5126836E339493a6021FD5B92Bf005F0D")
-	tx, err := sdk.ExecuteOrders("BTC-USDC-USDC", []string{mktOrderIds[0]}, &OptsOverridesExec{TsMin: uint32(now), PayoutAddr: payoutAddr})
+	tx, err := sdk.ExecuteOrders(perp, []string{mktOrderIds[0]}, &OptsOverridesExec{TsMin: uint32(now), PayoutAddr: payoutAddr})
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -88,13 +90,14 @@ func TestSdkLiquidatePosition(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New([]string{pk}, "195") //x-layer testnet
-	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
+	//err := sdk.New([]string{pk}, "195") //x-layer testnet
+	//err := sdk.New([]string{pk}, "196") //x-layer testnet
+	err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	acc2, err := sdk.QueryLiquidatableAccountsInPool(1, nil)
+	acc2, err := sdk.QueryLiquidatableAccountsInPool(2, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
