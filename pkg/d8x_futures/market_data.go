@@ -354,16 +354,17 @@ func RawGetPositionRisk(xInfo StaticExchangeInfo, rpc *ethclient.Client, traderA
 	}
 	indexPrices := [2]*big.Int{utils.Float64ToABDK(priceData.S2Price), utils.Float64ToABDK(priceData.S3Price)}
 
-	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
-
+	proxy, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return PositionRisk{}, err
+	}
 	traderState, err := proxy.GetTraderState(
 		nil,
 		new(big.Int).SetInt64(int64(xInfo.Perpetuals[j].Id)),
 		*traderAddr,
 		indexPrices)
 	if err != nil {
-		fmt.Println("Error fetching margin account:", err)
-		return PositionRisk{}, err
+		return PositionRisk{}, fmt.Errorf("error fetching margin account: %v", err.Error())
 	}
 	const idxAvailableCashCC = 2
 	const idxCash = 3
@@ -436,10 +437,13 @@ func RawQueryPerpetualState(rpc *ethclient.Client, xInfo StaticExchangeInfo, per
 	}
 	// perpetual data via blockchain
 
-	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	proxy, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return nil, err
+	}
 	perps, err := proxy.GetPerpetuals(nil, bigIntSlice)
 	if err != nil {
-		return []PerpetualState{}, err
+		return nil, err
 	}
 	// gather perpetual index prices (offchain REST)
 	pxInfo := make([]*big.Int, len(perpetualIds)*2)
@@ -482,7 +486,10 @@ func RawQueryPoolStates(rpc *ethclient.Client, xInfo StaticExchangeInfo) ([]Pool
 	// we query a maximum of 10 pools at once
 	const MAXPOOLS = 10
 	iterations := (numPools + MAXPOOLS - 1) / MAXPOOLS
-	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	proxy, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return nil, err
+	}
 	for i := 0; i < iterations; i++ {
 		from := i * MAXPOOLS
 		to := (i+1)*MAXPOOLS - 1
@@ -492,7 +499,7 @@ func RawQueryPoolStates(rpc *ethclient.Client, xInfo StaticExchangeInfo) ([]Pool
 
 		pools, err := proxy.GetLiquidityPools(nil, uint8(from+1), uint8(to+1))
 		if err != nil {
-			return []PoolState{}, nil
+			return nil, err
 		}
 		pIdx := 0
 		for j := from; j < to; j++ {
@@ -745,7 +752,10 @@ func RawGetPerpetualData(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbo
 	if j == -1 {
 		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
-	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	proxy, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return nil, err
+	}
 	perpData, err := proxy.GetPerpetual(nil, big.NewInt(int64(xInfo.Perpetuals[j].Id)))
 	if err != nil {
 		return nil, err
@@ -759,7 +769,10 @@ func RawQueryMaxTradeAmount(rpc *ethclient.Client, xInfo StaticExchangeInfo, cur
 		return 0, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
 	p := utils.Float64ToABDK(currentPositionNotional)
-	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	proxy, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return 0, err
+	}
 	t, err := proxy.GetMaxSignedOpenTradeSizeForPos(nil, big.NewInt(int64(xInfo.Perpetuals[j].Id)), p, isBuy)
 	if err != nil {
 		return 0, err
@@ -768,7 +781,10 @@ func RawQueryMaxTradeAmount(rpc *ethclient.Client, xInfo StaticExchangeInfo, cur
 }
 
 func RawQueryTraderVolume(rpc *ethclient.Client, xInfo StaticExchangeInfo, traderAddr common.Address, poolId int32) (float64, error) {
-	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	proxy, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return 0, err
+	}
 	vol, err := proxy.GetCurrentTraderVolume(nil, uint8(poolId), traderAddr)
 	if err != nil {
 		return 0, err
@@ -777,7 +793,10 @@ func RawQueryTraderVolume(rpc *ethclient.Client, xInfo StaticExchangeInfo, trade
 }
 
 func RawQueryExchangeFeeTbpsForTrader(rpc *ethclient.Client, xInfo StaticExchangeInfo, poolId int32, traderAddr common.Address, brokerAddr common.Address) (uint16, error) {
-	proxy := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	proxy, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return 0, err
+	}
 	feeTbps, err := proxy.QueryExchangeFee(nil, uint8(poolId), traderAddr, brokerAddr)
 	if err != nil {
 		return 0, err
@@ -842,7 +861,10 @@ func RawQueryLiquidatableAccounts(client *ethclient.Client, xInfo *StaticExchang
 		return nil, errors.New("RawQueryLiquidatableAccounts: failed fetching oracle prices " + err.Error())
 	}
 	pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxFeed.S2Price), utils.Float64ToABDK(pxFeed.S3Price)}
-	proxy := CreatePerpetualManagerInstance(client, xInfo.ProxyAddr)
+	proxy, err := CreatePerpetualManagerInstance(client, xInfo.ProxyAddr)
+	if err != nil {
+		return nil, err
+	}
 	id := big.NewInt(int64(perpId))
 	return proxy.GetLiquidatableAccounts(nil, id, pricesAbdk)
 }

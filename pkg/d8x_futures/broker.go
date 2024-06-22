@@ -39,7 +39,10 @@ func RawQueryBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbol
 	}
 	pool := xInfo.Pools[j]
 	poolId := pool.PoolId
-	perpCtrct := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	perpCtrct, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return -1, errors.New("RawQueryBrokerLots:" + err.Error())
+	}
 	lots, err := perpCtrct.GetBrokerDesignation(nil, uint8(poolId), *addr)
 	if err != nil {
 		return -1, errors.New("RawQueryBrokerLots:" + err.Error())
@@ -54,7 +57,10 @@ func RawPurchaseBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, pos
 	}
 	pool := xInfo.Pools[j]
 	poolId := pool.PoolId
-	perpCtrct := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	perpCtrct, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return nil, errors.New("RawPurchaseBrokerLots:" + err.Error())
+	}
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(1_000_000))

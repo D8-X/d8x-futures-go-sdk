@@ -1,8 +1,11 @@
 package d8x_futures
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -10,6 +13,8 @@ import (
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/spf13/viper"
 )
 
 func TestFetchPricesFromAPI(t *testing.T) {
@@ -26,6 +31,70 @@ func TestFetchPricesFromAPI(t *testing.T) {
 	}
 	fmt.Println(err.Error())
 
+}
+
+func CreateProxiedRpc(proxyRawUrl, rpcRawUrl string) (*ethclient.Client, error) {
+	proxyURL, err := url.Parse(proxyRawUrl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse proxy URL: %v", err)
+	}
+
+	// Create a custom HTTP transport with the proxy
+	transport := &http.Transport{
+		Proxy: http.ProxyURL(proxyURL),
+	}
+
+	// Create a custom HTTP client with the transport
+	httpClient := &http.Client{
+		Transport: transport,
+		Timeout:   5 * time.Second, // Set a timeout for the HTTP client
+	}
+	resp, err := httpClient.Get("http://www.google.com")
+	if err != nil {
+		return nil, err
+	}
+	resp.Body.Close()
+	// Use the custom HTTP client to create an RPC client
+	rpcClient, err := rpc.DialOptions(context.Background(), rpcRawUrl, rpc.WithHTTPClient(httpClient))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create RPC client: %v", err)
+	}
+
+	// Create an ethclient.Client instance using the RPC client
+	return ethclient.NewClient(rpcClient), nil
+}
+
+func loadProxyUrl() string {
+	viper.SetConfigFile("../../.env")
+	if err := viper.ReadInConfig(); err != nil {
+		slog.Error("could not load .env file" + err.Error())
+	}
+	return viper.GetString("PROXY_URL")
+}
+
+func TestCustomRpc(t *testing.T) {
+	url := loadProxyUrl()
+	if url == "" {
+		fmt.Println("need to define a proxy url in .env")
+		t.FailNow()
+	}
+	rpc, err := CreateProxiedRpc(url, "https://rpc.ankr.com/arbitrum")
+	if err != nil {
+		fmt.Println(err.Error())
+		t.FailNow()
+	}
+	var sdkRo SdkRO
+	err = sdkRo.New("42161", WithRpcClient(rpc))
+	if err != nil {
+		fmt.Println(err.Error())
+		t.FailNow()
+	}
+	addr := "0xdef43CF2Dd024abc5447C1Dcdc2fE3FE58547b84"
+	amt, err := sdkRo.GetPoolShareTknBalance(1, common.HexToAddress(addr), nil)
+	if err != nil {
+		t.FailNow()
+	}
+	fmt.Println("Amount =", amt)
 }
 
 func TestFetchPythPrices(t *testing.T) {

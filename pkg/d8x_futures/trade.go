@@ -337,7 +337,10 @@ func RawLiquidatePosition(
 	if opts == nil {
 		return nil, errors.New("opts cannot be nil")
 	}
-	perpCtrct := CreatePerpetualManagerInstance(opts.Rpc, xInfo.ProxyAddr)
+	perpCtrct, err := CreatePerpetualManagerInstance(opts.Rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return nil, fmt.Errorf("RawLiquidatePosition: failed fetching oracle prices %v", err.Error())
+	}
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g) // set back after
 	postingWallet.UpdateNonceAndGasPx(opts.Rpc)
@@ -345,7 +348,7 @@ func RawLiquidatePosition(
 	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
 	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt)
 	if err != nil {
-		return nil, errors.New("RawLiquidatePosition: failed fetching oracle prices " + err.Error())
+		return nil, fmt.Errorf("RawLiquidatePosition: failed fetching oracle prices %v", err.Error())
 	}
 	if pxFeed.IsMarketClosedS2 || pxFeed.IsMarketClosedS3 {
 		return nil, errors.New("RawLiquidatePosition: market closed or outdated oracle")
@@ -410,11 +413,13 @@ func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *S
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	id := int64(xInfo.Perpetuals[j].Id)
 	amount := utils.Float64ToABDK(math.Abs(amountCC))
-	perpCtrct := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
-
+	perpCtrct, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return nil, fmt.Errorf("RawAddCollateral: failed CreatePerpetualManagerInstance %v", err.Error())
+	}
 	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
 	if err != nil {
-		return nil, errors.New("RawAddCollateral: failed fetching oracle prices " + err.Error())
+		return nil, fmt.Errorf("RawAddCollateral: failed fetching oracle prices %v", err.Error())
 	}
 	var tx *types.Transaction
 	v := postingWallet.Auth.Value
@@ -427,13 +432,13 @@ func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *S
 		tx, err = perpCtrct.Deposit(postingWallet.Auth, big.NewInt(id),
 			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
 		if err != nil {
-			return nil, errors.New("RawAddCollateral:" + err.Error())
+			return nil, fmt.Errorf("RawAddCollateral: %v", err.Error())
 		}
 	} else {
 		tx, err = perpCtrct.Withdraw(postingWallet.Auth, big.NewInt(id),
 			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
 		if err != nil {
-			return nil, errors.New("RawAddCollateral:" + err.Error())
+			return nil, fmt.Errorf("RawAddCollateral: %v", err.Error())
 		}
 	}
 	return tx, nil

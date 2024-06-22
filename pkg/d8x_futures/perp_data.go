@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math"
 	"math/big"
@@ -22,12 +23,12 @@ import (
 //
 // It takes an rpc and proxyAddr as argument
 // It returns an instance IPerpetualManager of the proxy contract.
-func CreatePerpetualManagerInstance(rpc *ethclient.Client, proxyAddr common.Address) *contracts.IPerpetualManager {
+func CreatePerpetualManagerInstance(rpc *ethclient.Client, proxyAddr common.Address) (*contracts.IPerpetualManager, error) {
 	proxy, err := contracts.NewIPerpetualManager(proxyAddr, rpc)
 	if err != nil {
-		log.Fatalf("Failed to instantiate Proxy contract: %v", err)
+		return nil, fmt.Errorf("failed to instantiate Proxy contract: %v", err)
 	}
-	return proxy
+	return proxy, err
 }
 
 func CreateLimitOrderBookFactoryInstance(rpc *ethclient.Client, factoryAddr common.Address) *contracts.LimitOrderBookFactory {
@@ -65,7 +66,10 @@ func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.Chai
 	} else {
 		rpc = optRpc
 	}
-	proxy := CreatePerpetualManagerInstance(rpc, chConf.ProxyAddr)
+	proxy, err := CreatePerpetualManagerInstance(rpc, chConf.ProxyAddr)
+	if err != nil {
+		return BlockChainConnector{}, err
+	}
 	symbolMap, err := config.GetSymbolList()
 	if err != nil {
 		return BlockChainConnector{}, err
