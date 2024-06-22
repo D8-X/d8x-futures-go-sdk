@@ -54,15 +54,21 @@ func CreateRPC(nodeURL string) (*ethclient.Client, error) {
 	return rpc, nil
 }
 
-func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.ChainConfig) BlockChainConnector {
-	rpc, err := CreateRPC(chConf.NodeURL)
-	if err != nil {
-		panic(err)
+func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.ChainConfig, optRpc *ethclient.Client) (BlockChainConnector, error) {
+	var rpc *ethclient.Client
+	if optRpc == nil {
+		var err error
+		rpc, err = CreateRPC(chConf.NodeURL)
+		if err != nil {
+			return BlockChainConnector{}, err
+		}
+	} else {
+		rpc = optRpc
 	}
 	proxy := CreatePerpetualManagerInstance(rpc, chConf.ProxyAddr)
 	symbolMap, err := config.GetSymbolList()
 	if err != nil {
-		panic(err)
+		return BlockChainConnector{}, err
 	}
 	priceFeedNetwork := chConf.PriceFeedNetwork
 	var b = BlockChainConnector{
@@ -75,7 +81,7 @@ func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.Chai
 		PriceFeedConfig:   pxConfig,
 	}
 	b.PriceFeedConfig.PriceUpdateFeeGwei = chConf.PriceUpdateFeeGwei
-	return b
+	return b, nil
 }
 
 func QueryNestedPerpetualInfo(conn BlockChainConnector) (NestedPerpetualIds, error) {

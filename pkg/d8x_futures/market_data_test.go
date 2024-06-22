@@ -45,7 +45,9 @@ func TestFetchPythPrices(t *testing.T) {
 func TestGetPoolShareTknBalance(t *testing.T) {
 	var sdkRo SdkRO
 	//err := sdkRo.New("195") //xlayer testnet
-	err := sdkRo.New("421614") //arbitrum sepolia
+	err := sdkRo.New("421614",
+		withPriceFeedEndpoint("https://hermes.pyth.network"),
+		withRpcUrl("https://rpc.ankr.com/arbitrum")) //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -163,7 +165,7 @@ func TestPerpetualPriceTuple(t *testing.T) {
 	}
 	startTime := time.Now()
 	tradeAmt := []float64{-0.06, -0.05, -0.01, 0, 0.01, 0.05}
-	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoints[0], "ETH-USD-WEETH", tradeAmt)
+	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoint, "ETH-USD-WEETH", tradeAmt)
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {
@@ -374,7 +376,10 @@ func TestGetPositionRisk(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(pxConf, chConf)
+	conn, err := CreateBlockChainConnector(pxConf, chConf, nil)
+	if err != nil {
+		t.Logf(err.Error())
+	}
 	pRisk, err := RawGetPositionRisk(info, conn.Rpc, (*common.Address)(&traderAddr), "ETH-USD-MATIC", "https://hermes-beta.pyth.network/api")
 	if err != nil {
 		t.Logf(err.Error())
@@ -393,7 +398,7 @@ func TestQueryPerpetualState(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(pxConf, chConf)
+	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
 	perpIds := []int32{100001, 100002}
 	perpState, err := RawQueryPerpetualState(conn.Rpc, info, perpIds, "https://hermes-beta.pyth.network/api")
 	if err != nil {
@@ -413,7 +418,7 @@ func TestQueryPoolStates(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(pxConf, chConf)
+	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
 	poolStates, err := RawQueryPoolStates(conn.Rpc, info)
 	if err != nil {
 		t.Logf(err.Error())
@@ -442,7 +447,7 @@ func TestQueryOpenOrders(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(pxConf, chConf)
+	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
 	orders, digests, err := RawQueryOpenOrders(conn.Rpc, info, "MATIC-USD-MATIC", traderAddr)
 	if err != nil {
 		t.Logf(err.Error())
@@ -471,7 +476,7 @@ func TestQueryTraderVolume(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(pxConf, chConf)
+	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
 	volume, err := RawQueryTraderVolume(conn.Rpc, info, traderAddr, 1)
 	if err != nil {
 		t.Logf(err.Error())
@@ -492,7 +497,7 @@ func TestQueryExchangeFeeTbpsForTrader(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(pxConf, chConf)
+	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
 	fee, err := RawQueryExchangeFeeTbpsForTrader(conn.Rpc, info, 1, traderAddr, brokerAddr)
 	if err != nil {
 		t.Logf(err.Error())
@@ -511,7 +516,7 @@ func TestQueryMaxTradeAmount(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(pxConf, chConf)
+	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
 	trade, err := RawQueryMaxTradeAmount(conn.Rpc, info, 0.01, "ETH-USD-MATIC", true)
 	if err != nil {
 		t.Logf(err.Error())

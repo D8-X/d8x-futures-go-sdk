@@ -340,7 +340,10 @@ func (m *Model) actionScreen12() error {
 	if err != nil {
 		return errors.New("connection failed")
 	}
-	conn := d8x_futures.CreateBlockChainConnector(pxConf, chConf)
+	conn, err := d8x_futures.CreateBlockChainConnector(pxConf, chConf, nil)
+	if err != nil {
+		return errors.New("connection failed")
+	}
 	m.BlockChainConnector = conn
 	nest, err := d8x_futures.QueryNestedPerpetualInfo(conn)
 	if err != nil {
@@ -363,7 +366,7 @@ func (m *Model) actionScreen23() error {
 
 func (m *Model) actionScreen34() error {
 	ids := []int32{m.selectedPerpId}
-	s, err := d8x_futures.RawQueryPerpetualState(m.BlockChainConnector.Rpc, m.XchInfo, ids, m.ChainConfig.PriceFeedEndpoints[0])
+	s, err := d8x_futures.RawQueryPerpetualState(m.BlockChainConnector.Rpc, m.XchInfo, ids, m.ChainConfig.PriceFeedEndpoint)
 	if err != nil {
 		return err
 	}
@@ -378,7 +381,7 @@ func (m *Model) actionScreen34() error {
 }
 
 func (m *Model) setPositionRisk(symbol string) error {
-	pRisk, err := d8x_futures.RawGetPositionRisk(m.XchInfo, m.BlockChainConnector.Rpc, &m.traderAddr, symbol, m.ChainConfig.PriceFeedEndpoints[0])
+	pRisk, err := d8x_futures.RawGetPositionRisk(m.XchInfo, m.BlockChainConnector.Rpc, &m.traderAddr, symbol, m.ChainConfig.PriceFeedEndpoint)
 	if err != nil {
 		return err
 	}

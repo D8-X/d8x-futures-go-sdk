@@ -13,7 +13,7 @@ import (
 type ChainConfig struct {
 	Name               string         `json:"name"`
 	PriceFeedNetwork   string         `json:"priceFeedNetwork"`
-	PriceFeedEndpoints []string       `json:"priceFeedEndpoints"`
+	PriceFeedEndpoint  string         `json:"priceFeedEndpoint"`
 	ChainId            int64          `json:"chainId"`
 	ProxyAddr          common.Address `json:"proxyAddr"`
 	MultiPayAddr       common.Address `json:"multipayAddr"`

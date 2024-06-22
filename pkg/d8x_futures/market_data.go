@@ -156,7 +156,7 @@ func (sdkRo *SdkRO) QueryPerpetualPrices(symbol string, tradeAmt []float64, optE
 
 func extractEndpoints(sdkRo *SdkRO, optEndPt *OptEndPoints) (*ethclient.Client, string) {
 	optRpc := sdkRo.Conn.Rpc
-	optPyth := sdkRo.ChainConfig.PriceFeedEndpoints[0]
+	optPyth := sdkRo.ChainConfig.PriceFeedEndpoint
 	if optEndPt == nil {
 		return optRpc, optPyth
 	}
@@ -263,14 +263,14 @@ func (sdkRo *SdkRO) QueryLiquidatableAccountsInPool(poolId int32, optEndPt *OptE
 
 func (sdkRo *SdkRO) FetchPricesForPerpetualId(id int32, optPythEndPt string) (PerpetualPriceInfo, error) {
 	if optPythEndPt == "" {
-		optPythEndPt = sdkRo.ChainConfig.PriceFeedEndpoints[0]
+		optPythEndPt = sdkRo.ChainConfig.PriceFeedEndpoint
 	}
 	return RawFetchPricesForPerpetualId(sdkRo.Info, id, optPythEndPt)
 }
 
 func (sdkRo *SdkRO) FetchPricesForPerpetual(symbol string, optPythEndPt string) (PerpetualPriceInfo, error) {
 	if optPythEndPt == "" {
-		optPythEndPt = sdkRo.ChainConfig.PriceFeedEndpoints[0]
+		optPythEndPt = sdkRo.ChainConfig.PriceFeedEndpoint
 	}
 	return RawFetchPricesForPerpetual(sdkRo.Info, symbol, optPythEndPt)
 }

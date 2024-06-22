@@ -294,7 +294,7 @@ func TestPostOrder(t *testing.T) {
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	conn := CreateBlockChainConnector(pxConf, chConfig)
+	conn, _ := CreateBlockChainConnector(pxConf, chConfig, nil)
 	wallet, err := NewWallet(fmt.Sprintf("%x", execPk.D), conn.ChainId, conn.Rpc)
 	if err != nil {
 		t.Logf(err.Error())
@@ -333,7 +333,7 @@ func TestPostOrder2(t *testing.T) {
 		return
 	}
 	var sdk Sdk
-	sdk.New([]string{pk}, "testnet", "", "")
+	sdk.New([]string{pk}, "testnet")
 
 }
 

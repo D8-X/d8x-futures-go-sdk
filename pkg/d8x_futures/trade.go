@@ -67,7 +67,7 @@ func (sdk *Sdk) CreatePaymentBrokerSignature(ps *PaySummary, optWalletIdx int) (
 func extractOverrides(sdk *Sdk, overrides *OptsOverrides) (int, *ethclient.Client, string) {
 	w := int(0)
 	rpc := sdk.Conn.Rpc
-	priceFeedEndPt := sdk.ChainConfig.PriceFeedEndpoints[0]
+	priceFeedEndPt := sdk.ChainConfig.PriceFeedEndpoint
 	if overrides == nil {
 		return w, rpc, priceFeedEndPt
 	}

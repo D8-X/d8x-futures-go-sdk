@@ -398,32 +398,63 @@ func (ps *BrokerPaySignatureReq) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type optionFunc func(*SdkOption)
+
+type SdkOption struct {
+	PriceFeedUrl string
+	RpcUrl       string
+	RpcClient    *ethclient.Client
+}
+
+func defaultSdkOpts(chConf utils.ChainConfig) SdkOption {
+	return SdkOption{
+		PriceFeedUrl: chConf.PriceFeedEndpoint,
+		RpcUrl:       chConf.NodeURL,
+		RpcClient:    nil,
+	}
+}
+
+func withRpcClient(client *ethclient.Client) optionFunc {
+	return func(opts *SdkOption) {
+		opts.RpcClient = client
+	}
+}
+
+func withPriceFeedEndpoint(url string) optionFunc {
+	return func(opts *SdkOption) {
+		opts.PriceFeedUrl = url
+	}
+}
+
+func withRpcUrl(url string) optionFunc {
+	return func(opts *SdkOption) {
+		opts.RpcUrl = url
+	}
+}
+
 // New creates a new read-only SDK instance
 // endpoints contain an rpc endpoint and a pyth Endpoint in this order
 // use New("network", "", "pythendpoint") to provide a pyth endpoint
 // but no RPC
-func (sdkRo *SdkRO) New(networkNameOrId string, endpoints ...string) error {
+func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
 	chConf, err := config.GetDefaultChainConfig(networkNameOrId)
 	if err != nil {
 		return err
 	}
-	// Use the first endpoint if provided
-	if len(endpoints) > 0 && endpoints[0] != "" {
-		chConf.NodeURL = endpoints[0]
+	o := defaultSdkOpts(chConf)
+	for _, fn := range opts {
+		fn(&o)
 	}
-
-	// Use the second endpoint if provided
-	if len(endpoints) > 1 && endpoints[1] != "" {
-		chConf.PriceFeedEndpoints = []string{endpoints[1]}
-	}
-	if len(endpoints) > 2 {
-		slog.Info("SdkRO.New: only 2 endpoints are used")
-	}
+	chConf.NodeURL = o.RpcUrl
+	chConf.PriceFeedEndpoint = o.PriceFeedUrl
 	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
 		return err
 	}
-	conn := CreateBlockChainConnector(pxConf, chConf)
+	conn, err := CreateBlockChainConnector(pxConf, chConf, o.RpcClient)
+	if err != nil {
+		return err
+	}
 	nest, err := QueryNestedPerpetualInfo(conn)
 	if err != nil {
 		return err
@@ -440,9 +471,9 @@ func (sdkRo *SdkRO) New(networkNameOrId string, endpoints ...string) error {
 
 // New creates a new read/write Sdk instance
 // networkname according to chainConfig or a chainId; rpcEndpoint and pythEndpoint can be ""
-func (sdk *Sdk) New(privateKeys []string, networkName string, endpoints ...string) error {
+func (sdk *Sdk) New(privateKeys []string, networkName string, opts ...optionFunc) error {
 
-	sdk.SdkRO.New(networkName, endpoints...)
+	sdk.SdkRO.New(networkName, opts...)
 	if sdk.Conn.Rpc == nil {
 		return errors.New("sdk.Conn.Rpc=nil; required")
 	}
