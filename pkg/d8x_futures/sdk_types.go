@@ -414,19 +414,19 @@ func defaultSdkOpts(chConf utils.ChainConfig) SdkOption {
 	}
 }
 
-func withRpcClient(client *ethclient.Client) optionFunc {
+func WithRpcClient(client *ethclient.Client) optionFunc {
 	return func(opts *SdkOption) {
 		opts.RpcClient = client
 	}
 }
 
-func withPriceFeedEndpoint(url string) optionFunc {
+func WithPriceFeedEndpoint(url string) optionFunc {
 	return func(opts *SdkOption) {
 		opts.PriceFeedUrl = url
 	}
 }
 
-func withRpcUrl(url string) optionFunc {
+func WithRpcUrl(url string) optionFunc {
 	return func(opts *SdkOption) {
 		opts.RpcUrl = url
 	}

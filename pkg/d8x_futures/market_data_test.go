@@ -46,8 +46,8 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 	var sdkRo SdkRO
 	//err := sdkRo.New("195") //xlayer testnet
 	err := sdkRo.New("421614",
-		withPriceFeedEndpoint("https://hermes.pyth.network"),
-		withRpcUrl("https://rpc.ankr.com/arbitrum")) //arbitrum sepolia
+		WithPriceFeedEndpoint("https://hermes.pyth.network"),
+		WithRpcUrl("https://rpc.ankr.com/arbitrum")) //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
