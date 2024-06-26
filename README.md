@@ -9,9 +9,14 @@ Create a read-only SDK instance for X Layer testnet (no gas is spent)
 var sdkRo SdkRO
 err := sdkRo.New("195")
 ```
-To use a custom blockchain node-RPC, add an argument `sdkRo.New("195", "https://testrpc.xlayer.tech")` 
-to use a custom Pyth-Hermes server  `sdkRo.New("testnet", "", "https://hermes.pyth.network/")`, keeping the second argument "" 
-(or adding a custom RPC).
+
+err := sdkRo.New("421614",
+		WithPriceFeedEndpoint("https://hermes.pyth.network"),
+		WithRpcUrl("https://rpc.ankr.com/arbitrum")) //arbitrum sepolia
+
+To use a custom blockchain node-RPC, add `sdkRo.New("195", WithRpcUrl("https://testrpc.xlayer.tech"))` 
+to use a custom Pyth-Hermes server `sdkRo.New("testnet", WithPriceFeedEndpoint("https://hermes.pyth.network/"))`,
+or you can add both.
 
 The most relevant functions for the read-only SDK are as follows, ignoring the error return value for simplicity:
 ```
@@ -46,7 +51,8 @@ err := sdk.New(pk, "196")
 tx, err := sdk.ApproveTknSpending("ETH-USDC-USDC", nil)
 ```
 where `pk` is the private-key (string) of the wallet that is trading (or a broker depending on the functions used). Alternatively,
-RPC and Pyth-server can be added as for the read-only sdk: `sdk.New(pk, "195", "", "https://mypythendpoint.com/api")`. All functions of the read-only SDK can be executed also on the read-write sdk.
+RPC and Pyth-server can be added as for the read-only sdk: `sdk.New(pk, "195", WithPriceFeedEndpoint("https://hermes.mine.network/"))`. 
+All functions of the read-only SDK can be executed also on the read-write sdk.
 
 Add (amountCC positive) or remove (amountCC negative) collateral:
 ```
