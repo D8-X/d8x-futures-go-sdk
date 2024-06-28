@@ -75,5 +75,16 @@
     "nodeURL": "https://xlayerrpc.okx.com",
     "postOrderGasLimit": 3000000,
     "priceUpdateFeeGwei": 1
+  },
+  {
+    "name": "europaTestnet",
+    "priceFeedNetwork": "PythEVMStable",
+    "priceFeedEndpoint": "https://odin.d8x.xyz",
+    "chainId": 1444673419,
+    "proxyAddr": "0xDF2406f251766747148F8aDE8EF2BB5fa343Db93",
+    "multipayAddr": "0xe964eD9B2548ef63ffD71f7293166ed6a1E8C28E",
+    "nodeURL": "https://testnet.skalenodes.com/v1/juicy-low-small-testnet",
+    "postOrderGasLimit": 3000000,
+    "priceUpdateFeeGwei": 1
   }
 ]
