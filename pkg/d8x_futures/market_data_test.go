@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
@@ -116,7 +117,7 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 	//err := sdkRo.New("195") //xlayer testnet
 	err := sdkRo.New("421614",
 		WithPriceFeedEndpoint("https://hermes.pyth.network"),
-		WithRpcUrl("https://rpc.ankr.com/arbitrum")) //arbitrum sepolia
+		WithRpcUrl("https://falling-wiser-dust.arbitrum-sepolia.quiknode.pro/74433490515d956aad882ccb04850d1768742b1b/")) //arbitrum sepolia
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -132,6 +133,53 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Println("prices =", px)
+}
+
+func TestSettlementToken(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("42161") //arbitrum
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	addr, err := RawGetSettleTknAddr(&sdkRo.Info, "STUSD")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	mgnAddr, err := RawGetMarginTknAddr(&sdkRo.Info, "STUSD")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	expAddr := "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+	if strings.EqualFold(addr.Hex(), expAddr) {
+		fmt.Println("correct settlement token address for STUSD pool")
+	} else {
+		fmt.Printf("incorrect settlement token address %s instead of %s for STUSD pool", addr.Hex(), expAddr)
+		t.FailNow()
+	}
+	if strings.EqualFold(addr.Hex(), mgnAddr.Hex()) {
+		fmt.Printf("margin token is equal to settle token for STUSD pool")
+		t.FailNow()
+	}
+	addr, err = RawGetSettleTknAddr(&sdkRo.Info, "WEETH")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	mgnAddr, err = RawGetMarginTknAddr(&sdkRo.Info, "USDC")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	if !strings.EqualFold(addr.Hex(), mgnAddr.Hex()) {
+		fmt.Println("correct settlement token address for WEETH pool")
+	} else {
+		fmt.Printf("incorrect settlement token address for WEETH pool")
+		t.FailNow()
+	}
+
 }
 
 func TestQueryLiquidatableAccounts(t *testing.T) {

@@ -3,7 +3,9 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"math/big"
 	"strconv"
 	"strings"
 
@@ -46,6 +48,40 @@ type PriceFeedOnChainConfig struct {
 	PxFeedAddress string   `json:"pxFeedAddress"`
 	Decimals      int      `json:"decimals"`
 	MaxFeedAgeSec int64    `json:"maxFeedAgeSec"`
+}
+
+type SettlementConfig struct {
+	Description         string   `json:"description"`
+	PerpFlags           *big.Int `json:"perpFlags"`
+	SettleTokenDecimals int      `json:"settleTokenDecimals"`
+	SettleCCY           string   `json:"settleCCY"`
+	SettleCCYAddr       string   `json:"settleCCYAddr"`
+	CollateralCCY       string   `json:"collateralCCY"`
+	CollateralCCYAddr   string   `json:"collateralCCYAddr"`
+	Triangulation       []string `json:"triangulation"`
+}
+
+func (s *SettlementConfig) UnmarshalJSON(data []byte) error {
+	type Alias SettlementConfig
+	aux := &struct {
+		PerpFlags string `json:"perpFlags"`
+		*Alias
+	}{
+		Alias: (*Alias)(s),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	perpFlagsInt := new(big.Int)
+	perpFlagsInt, ok := perpFlagsInt.SetString(aux.PerpFlags, 0)
+	if !ok {
+		return fmt.Errorf("invalid value for PerpFlags: %s", aux.PerpFlags)
+	}
+	s.PerpFlags = perpFlagsInt
+
+	return nil
 }
 
 // LoadPriceFeedConfig loads the price feed config file
