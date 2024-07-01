@@ -58,6 +58,8 @@ type PoolStaticInfo struct {
 	PoolId              int32
 	PoolMarginSymbol    string
 	PoolMarginTokenAddr common.Address
+	PoolSettleSymbol    string
+	PoolSettleTokenAddr common.Address
 	ShareTokenAddr      common.Address
 }
 
