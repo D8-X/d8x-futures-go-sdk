@@ -63,7 +63,7 @@ func TestSdkExec(t *testing.T) {
 		}
 	}
 	if len(mktOrderIds) == 0 {
-		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 0.01, 10, &OrderOptions{LimitPrice: 2240})
+		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 0.001, 10, &OrderOptions{LimitPrice: 2240})
 		orderId, _, err := sdk.PostOrder(order, nil)
 		if err != nil {
 			t.Logf(err.Error())

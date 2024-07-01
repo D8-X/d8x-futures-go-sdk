@@ -288,7 +288,7 @@ func setSettlementCurrencies(flag *big.Int, pool *PoolStaticInfo) error {
 }
 
 func isOnChainId(id string) bool {
-	return len(id) == 42 || len(id) == 40
+	return len(id) < 64
 }
 
 // Store stores the StaticExchangeInfo in a file

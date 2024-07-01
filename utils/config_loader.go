@@ -48,6 +48,7 @@ type PriceFeedOnChainConfig struct {
 	PxFeedAddress string   `json:"pxFeedAddress"`
 	Decimals      int      `json:"decimals"`
 	MaxFeedAgeSec int64    `json:"maxFeedAgeSec"`
+	Type          string   `json:"type"`
 }
 
 type SettlementConfig struct {
