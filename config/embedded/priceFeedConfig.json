@@ -96,8 +96,8 @@
         "origin": ""
       }, 
       {
-        "symbol": "STUSD-USD",
-        "id": "",
+        "symbol": "STUSD-USDC",
+        "id": "angle1",
         "type": "onchain",
         "origin": ""
       }
