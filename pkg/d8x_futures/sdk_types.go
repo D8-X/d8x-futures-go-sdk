@@ -58,6 +58,8 @@ type PoolStaticInfo struct {
 	PoolId              int32
 	PoolMarginSymbol    string
 	PoolMarginTokenAddr common.Address
+	PoolSettleSymbol    string
+	PoolSettleTokenAddr common.Address
 	ShareTokenAddr      common.Address
 }
 
@@ -74,6 +76,7 @@ type PerpetualStaticInfo struct {
 	ReferralRebate         float64
 	PriceIds               []string //off-chain price feeds
 	OnChainSymbols         []string //on-chain price feeds
+	PerpFlags              *big.Int
 }
 
 type PoolState struct {

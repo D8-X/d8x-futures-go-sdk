@@ -1,0 +1,12 @@
+[
+  {
+    "description": "stUSD to USDC settlement on 42161",
+    "perpFlags": "0x1",
+    "settleTokenDecimals": 6,
+    "settleCCY": "USDC",
+    "settleCCYAddr": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "collateralCCY": "STUSD",
+    "collateralCCYAddr": "0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776",
+    "triangulation": ["*", "STUSD-USDC"]
+  }
+]

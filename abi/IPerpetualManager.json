@@ -3006,7 +3006,7 @@
                     },
                     {
                         "internalType": "int128",
-                        "name": "fAMMMinSizeCC",
+                        "name": "perpFlags",
                         "type": "int128"
                     },
                     {
@@ -3207,6 +3207,11 @@
                         "internalType": "bool[]",
                         "name": "isPyth",
                         "type": "bool[]"
+                    },
+                    {
+                        "internalType": "int128",
+                        "name": "perpFlags",
+                        "type": "int128"
                     }
                 ],
                 "internalType": "struct IPerpetualInfo.PerpetualStaticInfo[]",
@@ -3393,7 +3398,7 @@
                     },
                     {
                         "internalType": "int128",
-                        "name": "fAMMMinSizeCC",
+                        "name": "perpFlags",
                         "type": "int128"
                     },
                     {

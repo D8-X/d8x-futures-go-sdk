@@ -170,6 +170,8 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 			PoolId:              int32(i + 1),
 			PoolMarginSymbol:    "", // fill later
 			PoolMarginTokenAddr: nest.PoolMarginTokenAddr[i],
+			PoolSettleSymbol:    "",               // fill later
+			PoolSettleTokenAddr: common.Address{}, // correct later
 			ShareTokenAddr:      nest.PoolShareTokenAddr[i],
 		}
 		// we query all perpetuals within the current pool
@@ -196,6 +198,7 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		default:
 			pools[i].PoolMarginSymbol = strings.Split(perpetuals[j].S3Symbol, "-")[0]
 		}
+
 		// if we already have a margin symbol with the same name, we rename it using the pool id
 		poolId := i + 1
 		for k := 0; k < i; k++ {
@@ -203,6 +206,14 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 				pools[i].PoolMarginSymbol = pools[i].PoolMarginSymbol + strconv.Itoa(poolId)
 				break
 			}
+		}
+
+		// after margin symbol is set correctly, we
+		// set the settlement currency.
+		// settlement currency is based on the flag of the first perpetual
+		err = setSettlementCurrencies(perpGetterStaticInfos[0].PerpFlags, &pools[i])
+		if err != nil {
+			return StaticExchangeInfo{}, err
 		}
 
 	}
@@ -257,6 +268,23 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		ChainOracles:           chainOracles,
 	}
 	return xInfo, nil
+}
+
+func setSettlementCurrencies(flag *big.Int, pool *PoolStaticInfo) error {
+	configs, err := config.GetSettlementConfig()
+	if err != nil {
+		return err
+	}
+	pool.PoolSettleSymbol = pool.PoolMarginSymbol
+	pool.PoolSettleTokenAddr = pool.PoolMarginTokenAddr
+	for _, c := range configs {
+		result := new(big.Int).And(c.PerpFlags, flag)
+		if result.Cmp(big.NewInt(0)) != 0 {
+			pool.PoolSettleSymbol = c.SettleCCY
+			pool.PoolSettleTokenAddr = common.HexToAddress(c.SettleCCYAddr)
+		}
+	}
+	return nil
 }
 
 func isOnChainId(id string) bool {
@@ -334,6 +362,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		ReferralRebate:         utils.ABDKToFloat64(pIn.FReferralRebateCC),
 		PriceIds:               priceIds,
 		OnChainSymbols:         make([]string, 0),
+		PerpFlags:              pIn.PerpFlags,
 	}
 	return pOut
 }
