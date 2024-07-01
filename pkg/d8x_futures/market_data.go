@@ -304,11 +304,11 @@ func (sdkRo *SdkRO) GetPoolShareTknPrice(poolIds []int, optRpc *ethclient.Client
 	return RawGetPoolShTknPrice(rpc, poolIds, sdkRo.Info)
 }
 
-// Allowance checks the allowance of the given address to spend margin tokens for the given
+// Allowance checks the allowance of the given address to spend settlement tokens for the given
 // pool (via symbol) on the manager. Returns the value in decimals and the decimal-N value (big-int).
-// Symbol is a pool symbol like "USDC" (or perpetual symbol like MATIC-USDC-USDC works too)
+// Symbol is a pool symbol like "USDC" (or perpetual symbol like ETH-USDC-USDC works too)
 func (sdkRo *SdkRO) Allowance(symbol string, user common.Address, optRpc *ethclient.Client) (float64, *big.Int, error) {
-	tknAddr, err := RawGetMarginTknAddr(&sdkRo.Info, symbol)
+	tknAddr, err := RawGetSettleTknAddr(&sdkRo.Info, symbol)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -341,6 +341,17 @@ func RawGetMarginTknAddr(xInfo *StaticExchangeInfo, symbol string) (common.Addre
 	poolId := pool.PoolId
 
 	return (xInfo.Pools[poolId-1].PoolMarginTokenAddr), nil
+}
+
+func RawGetSettleTknAddr(xInfo *StaticExchangeInfo, symbol string) (common.Address, error) {
+	j := GetPoolStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
+		return common.Address{}, errors.New("RawGetMarginTknAddr: no perpetual " + symbol)
+	}
+	pool := xInfo.Pools[j]
+	poolId := pool.PoolId
+
+	return (xInfo.Pools[poolId-1].PoolSettleTokenAddr), nil
 }
 
 func RawGetPositionRisk(xInfo StaticExchangeInfo, rpc *ethclient.Client, traderAddr *common.Address, symbol string, endpoint string) (PositionRisk, error) {

@@ -33,6 +33,23 @@ func GetSymbolList() (map[string]string, error) {
 	return data, nil
 }
 
+func GetSettlementConfig() ([]utils.SettlementConfig, error) {
+	fs, err := EmbededConfigs.Open("embedded/settlement.json")
+	if err != nil {
+		return nil, err
+	}
+	jsonStr, err := io.ReadAll(fs)
+	if err != nil {
+		return nil, err
+	}
+	var settlements []utils.SettlementConfig
+	err = json.Unmarshal([]byte(jsonStr), &settlements)
+	if err != nil {
+		return nil, err
+	}
+	return settlements, nil
+}
+
 func GetDefaultChainConfigNames() ([]string, error) {
 	// Read the JSON file
 	fs, err := EmbededConfigs.Open("embedded/chainConfig.json")
