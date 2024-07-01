@@ -74,6 +74,7 @@ type PerpetualStaticInfo struct {
 	ReferralRebate         float64
 	PriceIds               []string //off-chain price feeds
 	OnChainSymbols         []string //on-chain price feeds
+	PerpFlags              *big.Int
 }
 
 type PoolState struct {

@@ -334,6 +334,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		ReferralRebate:         utils.ABDKToFloat64(pIn.FReferralRebateCC),
 		PriceIds:               priceIds,
 		OnChainSymbols:         make([]string, 0),
+		PerpFlags:              pIn.PerpFlags,
 	}
 	return pOut
 }
