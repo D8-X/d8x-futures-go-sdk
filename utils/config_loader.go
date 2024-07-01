@@ -46,6 +46,7 @@ type PriceFeedOnChainConfig struct {
 	PxFeedAddress string   `json:"pxFeedAddress"`
 	Decimals      int      `json:"decimals"`
 	MaxFeedAgeSec int64    `json:"maxFeedAgeSec"`
+	Type          string   `json:"type"`
 }
 
 // LoadPriceFeedConfig loads the price feed config file

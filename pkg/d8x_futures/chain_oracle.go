@@ -140,34 +140,47 @@ func (ch *ChainOracles) fetchPrice(j int, doLog bool) (float64, int64, error) {
 			}
 			continue
 		}
-		oracleCtrct, err := contracts.NewRedStoneOracle(common.HexToAddress(ch.Config[j].PxFeedAddress), rpc)
-		if err != nil {
-			if doLog {
-				fmt.Printf(
-					"FetchPrice: could not initiate contract %s with rpc %s: %s. Retrying",
-					ch.Config[j].PxFeedAddress,
-					ch.Config[j].RPCs[rpcIdx],
-					err.Error(),
-				)
+		if ch.Config[j].Type == "redstone" {
+			px, ts, err := fetchRedstonePx(&ch.Config[j], rpc)
+			if err != nil {
+				if doLog {
+					fmt.Printf("FetchPrice: could not get price rpc %s: %s. Retrying", ch.Config[j].RPCs[rpcIdx], err.Error())
+				}
+				continue
 			}
-			continue
-		}
-		var data struct {
-			RoundId         *big.Int
-			Answer          *big.Int
-			StartedAt       *big.Int
-			UpdatedAt       *big.Int
-			AnsweredInRound *big.Int
-		}
-		data, err = oracleCtrct.LatestRoundData(nil)
-		if err != nil {
-			if doLog {
-				fmt.Printf("FetchPrice: could not get price rpc %s: %s. Retrying", ch.Config[j].RPCs[rpcIdx], err.Error())
+			return px, ts, nil
+		} else {
+			// angle
+			px, err := STUSDToUSDC(rpc)
+			if err != nil {
+				if doLog {
+					fmt.Printf("FetchPrice: could not get angle price with rpc %s: %s. Retrying", ch.Config[j].RPCs[rpcIdx], err.Error())
+				}
+				continue
 			}
-			continue
+			ts := time.Now().Unix()
+			return px, ts, nil
 		}
-		ts := data.UpdatedAt.Int64()
-		return utils.DecNToFloat(data.Answer, uint8(ch.Config[j].Decimals)), ts, nil
 	}
 	return 0, 0, fmt.Errorf("no working call for token %s", ch.Config[j].Name)
+}
+
+func fetchRedstonePx(config *utils.PriceFeedOnChainConfig, rpc *ethclient.Client) (float64, int64, error) {
+	oracleCtrct, err := contracts.NewRedStoneOracle(common.HexToAddress(config.PxFeedAddress), rpc)
+	if err != nil {
+		return 0, 0, fmt.Errorf("could not initiate contract: %s", err.Error())
+	}
+	var data struct {
+		RoundId         *big.Int
+		Answer          *big.Int
+		StartedAt       *big.Int
+		UpdatedAt       *big.Int
+		AnsweredInRound *big.Int
+	}
+	data, err = oracleCtrct.LatestRoundData(nil)
+	if err != nil {
+		return 0, 0, fmt.Errorf("could not get price: %s", err.Error())
+	}
+	ts := data.UpdatedAt.Int64()
+	return utils.DecNToFloat(data.Answer, uint8(config.Decimals)), ts, nil
 }

@@ -9,8 +9,22 @@
       "https://arbitrum.blockpi.network/v1/rpc/public",
       "https://arbitrum-one.public.blastapi.io"
     ],
+    "type": "redstone",
     "pxFeedAddress": "0x119A190b510c9c0D5Ec301b60B2fE70A50356aE9",
     "decimals": 8,
+    "maxFeedAgeSec": 120
+  },
+  {
+    "name": "STUSD-USDC",
+    "rpcs": [
+      "https://arbitrum-one.public.blastapi.io",
+      "https://arbitrum.llamarpc.com",
+      "https://arb1.arbitrum.io/rpc",
+      "https://rpc.ankr.com/arbitrum",
+      "https://1rpc.io/arb",
+      "https://arbitrum.blockpi.network/v1/rpc/public"
+    ],
+    "type": "angle",
     "maxFeedAgeSec": 120
   }
 ]

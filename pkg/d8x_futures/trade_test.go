@@ -32,14 +32,14 @@ func TestSdkExec(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	//err := sdk.New([]string{pk}, "42161") //arbitrum
+	err := sdk.New([]string{pk}, "42161") //arbitrum
 	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
-	// err := sdk.New([]string{pk}, "195") //x-layer testnet
-	err := sdk.New([]string{pk}, "196") //x-layer
+	//err := sdk.New([]string{pk}, "195") //x-layer testnet
+	//err := sdk.New([]string{pk}, "196") //x-layer
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
 	//err := sdk.New([]string{pk}, "80084") //bartio
-	perp := "BTC-USDT-USDT"
+	perp := "BTC-USD-STUSD"
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
@@ -63,7 +63,7 @@ func TestSdkExec(t *testing.T) {
 		}
 	}
 	if len(mktOrderIds) == 0 {
-		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 0.01, 10, &OrderOptions{LimitPrice: 2240})
+		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 0.001, 10, &OrderOptions{LimitPrice: 2240})
 		orderId, _, err := sdk.PostOrder(order, nil)
 		if err != nil {
 			t.Logf(err.Error())

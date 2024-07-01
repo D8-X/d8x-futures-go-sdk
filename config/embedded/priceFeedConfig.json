@@ -12,12 +12,6 @@
         "origin": "Crypto.USDC/USD"
       },  
       {
-        "symbol": "STUSD-USD",
-        "id": "0x2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b",
-        "type": "pyth",
-        "origin": "Crypto.USDT/USD"
-      },
-      {
         "symbol": "USDT-USD",
         "id": "0x2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b",
         "type": "pyth",
@@ -98,6 +92,12 @@
       {
         "symbol": "WEETH-ETH",
         "id": "0x119A190b510c9c0D5Ec301b60B2fE70A50356aE9",
+        "type": "onchain",
+        "origin": ""
+      }, 
+      {
+        "symbol": "STUSD-USD",
+        "id": "",
         "type": "onchain",
         "origin": ""
       }

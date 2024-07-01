@@ -3,6 +3,7 @@ package config
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -145,8 +146,7 @@ func GetPriceFeedOnChain() ([]utils.PriceFeedOnChainConfig, error) {
 	// Unmarshal the JSON data into the Configuration struct
 	err = json.Unmarshal(data, &configuration)
 	if err != nil {
-		log.Fatal("Error decoding JSON:", err)
-		return nil, err
+		return nil, fmt.Errorf("decoding JSON: %s", err.Error())
 	}
 	return configuration, nil
 }
