@@ -275,6 +275,33 @@ func (sdkRo *SdkRO) FetchPricesForPerpetual(symbol string, optPythEndPt string) 
 	return RawFetchPricesForPerpetual(sdkRo.Info, symbol, optPythEndPt)
 }
 
+// FetchCollToSettlePx gets the conversion from collateral price to settlement price
+func (sdkRo *SdkRO) FetchCollToSettlePx(symbol string, optPythEndPt string) (float64, error) {
+	info := &sdkRo.Info
+	j := GetPoolStaticInfoIdxFromSymbol(info, symbol)
+	if j == -1 {
+		return 0, errors.New("FetchCollToSettlePx: no perpetual " + symbol)
+	}
+	settleCCY := info.Pools[j].PoolSettleSymbol
+	mgnSymbol := info.Pools[j].PoolMarginSymbol
+	if settleCCY == mgnSymbol {
+		return float64(1), nil
+	}
+	if optPythEndPt == "" {
+		optPythEndPt = sdkRo.ChainConfig.PriceFeedEndpoint
+	}
+	pxMap, _, err := fetchIndexPricesForPerpetual(info, j, optPythEndPt)
+	if err != nil {
+		return 0, err
+	}
+	sym := mgnSymbol + "-" + settleCCY
+	px, exists := pxMap[sym]
+	if !exists {
+		return 0, fmt.Errorf("symbol %s does not exist in index prices", sym)
+	}
+	return px.Px, nil
+}
+
 // GetSettleTokenBalance retreives the balance of the settlement token for traderAddr and the given perpetual or pool symbol
 func (sdkRo *SdkRO) GetSettleTokenBalance(symbol string, traderAddr common.Address, optRpc *ethclient.Client) (float64, error) {
 	tknAddr, err := RawGetSettleTknAddr(&sdkRo.Info, symbol)
