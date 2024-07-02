@@ -385,6 +385,28 @@ func TestSdkROOrders(t *testing.T) {
 	fmt.Println(orders[0].Orders[2].OptTraderAddr.Hex())
 }
 
+func TestFetchCollToSettlePx(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("42161")
+	if err != nil {
+		t.Logf(err.Error())
+	}
+	perp := "BTC-USD-STUSD"
+	px, err := sdkRo.FetchCollToSettlePx(perp, "")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Printf("collateral to settlement conversion STUSD-USDC= %f", px)
+	perp = "ETH-USD-WEETH"
+	px, err = sdkRo.FetchCollToSettlePx(perp, "")
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Printf("collateral to settlement conversion WEETH-WEETH= %f", px)
+}
+
 func TestSdkRO(t *testing.T) {
 	var sdkRo SdkRO
 	err := sdkRo.New("42161")
