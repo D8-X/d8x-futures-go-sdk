@@ -307,6 +307,7 @@ func (sdkRo *SdkRO) GetPoolShareTknPrice(poolIds []int, optRpc *ethclient.Client
 // Allowance checks the allowance of the given address to spend settlement tokens for the given
 // pool (via symbol) on the manager. Returns the value in decimals and the decimal-N value (big-int).
 // Symbol is a pool symbol like "USDC" (or perpetual symbol like ETH-USDC-USDC works too)
+// Use ApproveTknSpending to approve if allowance not enough.
 func (sdkRo *SdkRO) Allowance(symbol string, user common.Address, optRpc *ethclient.Client) (float64, *big.Int, error) {
 	tknAddr, err := RawGetSettleTknAddr(&sdkRo.Info, symbol)
 	if err != nil {
