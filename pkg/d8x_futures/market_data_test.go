@@ -387,11 +387,12 @@ func TestSdkROOrders(t *testing.T) {
 
 func TestSdkRO(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("1442")
+	err := sdkRo.New("42161")
 	if err != nil {
 		t.Logf(err.Error())
 	}
-	orders, err := sdkRo.QueryAllOpenOrders("BTC-USDC-USDC", nil) //([]Order, []string, error)
+	perp := "BTC-USD-STUSD"
+	orders, err := sdkRo.QueryAllOpenOrders(perp, nil) //([]Order, []string, error)
 	oo := orders.Orders
 	dgsts := orders.OrderHashes
 	if err != nil {
@@ -403,13 +404,13 @@ func TestSdkRO(t *testing.T) {
 
 	trader := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	broker := common.HexToAddress("0xB0CBeeC370Af6ca2ed541F6a2264bc95b991F6E1")
-	pr, err := sdkRo.GetPositionRisk("BTC-USDC-USDC", trader, nil)
+	pr, err := sdkRo.GetPositionRisk(perp, trader, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
 		fmt.Println(pr)
 	}
-	bal, err := sdkRo.GetMarginTokenBalance("BTC-USDC-USDC", trader, nil)
+	bal, err := sdkRo.GetSettleTokenBalance(perp, trader, nil)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
@@ -427,7 +428,7 @@ func TestSdkRO(t *testing.T) {
 	} else {
 		fmt.Println(poolState)
 	}
-	oo, dgsts, err = sdkRo.QueryOpenOrders("BTC-USD-MATIC", trader, nil) //([]Order, []string, error)
+	oo, dgsts, err = sdkRo.QueryOpenOrders(perp, trader, nil) //([]Order, []string, error)
 	if err != nil {
 		t.Logf(err.Error())
 	} else {
@@ -435,13 +436,13 @@ func TestSdkRO(t *testing.T) {
 		fmt.Println(dgsts)
 	}
 	id := "258ae021f8743b903d8bde405dba7cc7a74d977ce956db8cb6c2c308976ceb89"
-	status, err := sdkRo.QueryOrderStatus("BTC-USDC-USDC", trader, id, nil) // (string, error)
+	status, err := sdkRo.QueryOrderStatus(perp, trader, id, nil) // (string, error)
 	if err != nil {
 		fmt.Println(err.Error())
 	} else {
 		t.Log(status)
 	}
-	m, err := sdkRo.QueryMaxTradeAmount("BTC-USD-MATIC", 0, true, nil) // (float64, error) {
+	m, err := sdkRo.QueryMaxTradeAmount(perp, 0, true, nil) // (float64, error) {
 	if err != nil {
 		fmt.Println(err.Error())
 	} else {
@@ -459,7 +460,7 @@ func TestSdkRO(t *testing.T) {
 	} else {
 		fmt.Println(fee)
 	}
-	minpos, err := sdkRo.GetMinimalPositionSize("BTC-USD-MATIC") //(float64, error)
+	minpos, err := sdkRo.GetMinimalPositionSize(perp) //(float64, error)
 	if err != nil {
 		fmt.Println(err.Error())
 	} else {

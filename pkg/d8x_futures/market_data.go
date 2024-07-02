@@ -275,8 +275,9 @@ func (sdkRo *SdkRO) FetchPricesForPerpetual(symbol string, optPythEndPt string) 
 	return RawFetchPricesForPerpetual(sdkRo.Info, symbol, optPythEndPt)
 }
 
-func (sdkRo *SdkRO) GetMarginTokenBalance(symbol string, traderAddr common.Address, optRpc *ethclient.Client) (float64, error) {
-	tknAddr, err := RawGetMarginTknAddr(&sdkRo.Info, symbol)
+// GetSettleTokenBalance retreives the balance of the settlement token for traderAddr and the given perpetual or pool symbol
+func (sdkRo *SdkRO) GetSettleTokenBalance(symbol string, traderAddr common.Address, optRpc *ethclient.Client) (float64, error) {
+	tknAddr, err := RawGetSettleTknAddr(&sdkRo.Info, symbol)
 	if err != nil {
 		return 0, err
 	}
@@ -1182,7 +1183,7 @@ func fetchPythPrice(query string, resCh chan<- *PythLatestPxV2, errCh chan<- err
 func RawGetTknBalance(tknAddr common.Address, userAddr common.Address, rpc *ethclient.Client) (float64, error) {
 	erc20Instance, err := contracts.NewErc20(tknAddr, rpc)
 	if err != nil {
-		return 0, errors.New("GetMarginTokenBalance: creating instance of token " + tknAddr.String())
+		return 0, errors.New("RawGetTknBalance: creating instance of token " + tknAddr.String())
 	}
 	n, err := erc20Instance.Decimals(nil)
 	if err != nil {
