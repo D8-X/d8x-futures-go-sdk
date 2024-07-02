@@ -2,10 +2,11 @@ package d8x_futures
 
 import (
 	"fmt"
-	"os"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 func TestQueryBrokerLots(t *testing.T) {
@@ -26,26 +27,48 @@ func TestQueryBrokerLots(t *testing.T) {
 
 func TestPurchaseBrokerLots(t *testing.T) {
 	var sdk Sdk
-	pk := os.Getenv("PK")
+	pk := loadPk()
 	if pk == "" {
-		fmt.Println("Provide private key for testnet as environment variable PK")
+		fmt.Println("provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New([]string{pk}, "testnet")
+	err := sdk.New([]string{pk}, "42161")
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	tx, err := sdk.ApproveTknSpending("USDC", nil, nil)
+	amountFlt, _, err := sdk.Allowance("BTC-USD-STUSD", sdk.Wallets[0].Address, nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
-	fmt.Printf("approved tkn spending, tx = %s\n", tx.Hash().Hex())
-	tx, err = sdk.PurchaseBrokerLots(1, "USDC", nil)
+	var tx *types.Transaction
+	if amountFlt < 100 {
+		tx, err = sdk.ApproveTknSpending("BTC-USD-STUSD", nil, nil)
+		if err != nil {
+			t.Logf(err.Error())
+			t.FailNow()
+		}
+		fmt.Printf("approved tkn spending, tx = %s\n", tx.Hash().Hex())
+		time.Sleep(10 * time.Second)
+		amountFlt, _, err = sdk.Allowance("BTC-USD-STUSD", sdk.Wallets[0].Address, nil)
+		if err != nil {
+			t.Logf(err.Error())
+			t.FailNow()
+		}
+	}
+	fmt.Printf("allowance %f = \n", amountFlt)
+	tx, err = sdk.PurchaseBrokerLots(1, "BTC-USD-STUSD", nil)
 	if err != nil {
 		t.Logf(err.Error())
 		t.FailNow()
 	}
 	fmt.Printf("success, tx = %s\n", tx.Hash().Hex())
+	time.Sleep(10 * time.Second)
+	num, err := sdk.QueryBrokerLots("BTC-USD-STUSD", &sdk.Wallets[0].Address, nil)
+	if err != nil {
+		t.Logf(err.Error())
+		t.FailNow()
+	}
+	fmt.Printf("num lots = %d\n", num)
 }

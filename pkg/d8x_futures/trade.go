@@ -161,11 +161,11 @@ func (sdk *Sdk) LiquidatePosition(
 		&o)
 }
 
-// ApproveTknSpending approves the manager to spend the wallet's margin tokens for the given
+// ApproveTknSpending approves the manager to spend the wallet's settlement tokens for the given
 // pool (via symbol), if amount = nil, max approval. Symbol is a pool symbol like "USDC"
 // (or perpetual symbol like MATIC-USDC-USDC works too)
 func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int, overrides *OptsOverrides) (*types.Transaction, error) {
-	tknAddr, err := RawGetMarginTknAddr(&sdk.Info, symbol)
+	tknAddr, err := RawGetSettleTknAddr(&sdk.Info, symbol)
 	if err != nil {
 		return nil, err
 	}
