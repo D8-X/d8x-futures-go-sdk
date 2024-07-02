@@ -61,7 +61,7 @@ func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.Chai
 		var err error
 		rpc, err = CreateRPC(chConf.NodeURL)
 		if err != nil {
-			return BlockChainConnector{}, err
+			return BlockChainConnector{}, fmt.Errorf("failed connecting to %s: %s", chConf.NodeURL, err.Error())
 		}
 	} else {
 		rpc = optRpc
