@@ -90,6 +90,12 @@
         "origin": "Crypto.DOGE/USD"
       },
       {
+        "symbol": "WIF-USD",
+        "id": "0x4ca4beeca86f0d164160323817a4e42b10010a724c2217c6ee41b54cd4cc61fc",
+        "type": "pyth",
+        "origin": "Crypto.WIF/USD"
+      },
+      {
         "symbol": "WEETH-ETH",
         "id": "0x119A190b510c9c0D5Ec301b60B2fE70A50356aE9",
         "type": "onchain",
