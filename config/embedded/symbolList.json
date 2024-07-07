@@ -19,5 +19,9 @@
   "wETH": "WEETH",
   "OKB": "WOKB",
   "USDT": "USDT",
-  "WIF": "WIF"
+  "WIF": "WIF",
+  "SOL": "SOL",
+  "ZRO": "ZRO",
+  "ETHf": "ETHFI",
+  "ZK": "ZK"
 }
