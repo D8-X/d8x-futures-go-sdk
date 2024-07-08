@@ -126,6 +126,12 @@
         "origin": "Crypto.ZK/USD"
       },
       {
+        "symbol": "PENDLE-USD",
+        "id": "0x9a4df90b25497f66b1afb012467e316e801ca3d839456db028892fe8c70c8016",
+        "type": "pyth",
+        "origin": "Crypto.PENDLE/USD"
+      },
+      {
         "symbol": "STUSD-USDC",
         "id": "angle1",
         "type": "onchain",
