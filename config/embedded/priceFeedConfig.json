@@ -100,7 +100,37 @@
         "id": "0x119A190b510c9c0D5Ec301b60B2fE70A50356aE9",
         "type": "onchain",
         "origin": ""
-      }, 
+      },
+      {
+        "symbol": "SOL-USD",
+        "id": "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+        "type": "pyth",
+        "origin": "Crypto.SOL/USD"
+      },
+      {
+        "symbol": "ZRO-USD",
+        "id": "0x3bd860bea28bf982fa06bcf358118064bb114086cc03993bd76197eaab0b8018",
+        "type": "pyth",
+        "origin": "Crypto.ZRO/USD"
+      },
+      {
+        "symbol": "ETHFI-USD",
+        "id": "0xb27578a9654246cb0a2950842b92330e9ace141c52b63829cc72d5c45a5a595a",
+        "type": "pyth",
+        "origin": "Crypto.ETHFI/USD"
+      },
+      {
+        "symbol": "ZK-USD",
+        "id": "0xcc03dc09298fb447e0bf9afdb760d5b24340fd2167fd33d8967dd8f9a141a2e8",
+        "type": "pyth",
+        "origin": "Crypto.ZK/USD"
+      },
+      {
+        "symbol": "PENDLE-USD",
+        "id": "0x9a4df90b25497f66b1afb012467e316e801ca3d839456db028892fe8c70c8016",
+        "type": "pyth",
+        "origin": "Crypto.PENDLE/USD"
+      },
       {
         "symbol": "STUSD-USDC",
         "id": "angle1",
