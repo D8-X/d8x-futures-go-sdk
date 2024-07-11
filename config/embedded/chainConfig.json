@@ -49,7 +49,7 @@
     "priceFeedEndpoint": "https://hermes.pyth.network",
     "chainId": 42161,
     "proxyAddr": "0x8f8BccE4c180B699F81499005281fA89440D1e95",
-    "multipayAddr": "0x215975839684a365df2387b1f0FcEaBf4F0B77eb",
+    "multipayAddr": "0x7A75327f5758884bF05966bfDad8C8af63646dc3",
     "nodeURL": "https://arbitrum-one-rpc.publicnode.com",
     "postOrderGasLimit": 3000000,
     "priceUpdateFeeGwei": 1
