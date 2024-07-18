@@ -6,6 +6,12 @@
     "threshOnChainFeedOutdatedSec": 86400,
     "ids": [
       {
+        "symbol": "TRUMP24-USD",
+        "id": "0x3011e4ede0f6befa0ad3f571001d3e1ffeef3d4af78c3112aaac90416e3a43e7",
+        "type": "polymarket",
+        "origin": "0xdd22472e552920b8438158ea7238bfadfa4f736aa4cee91a6b86c39ead110917"
+      },
+      {
         "symbol": "USDC-USD",
         "id": "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
         "type": "pyth",
