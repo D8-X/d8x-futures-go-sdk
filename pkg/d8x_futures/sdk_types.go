@@ -63,6 +63,11 @@ type PoolStaticInfo struct {
 	ShareTokenAddr      common.Address
 }
 
+type PriceId struct {
+	Id   string
+	Type PriceTypeEnum
+}
+
 type PerpetualStaticInfo struct {
 	Id                     int32
 	PoolId                 int32
@@ -74,8 +79,8 @@ type PerpetualStaticInfo struct {
 	S3Symbol               string
 	LotSizeBC              float64
 	ReferralRebate         float64
-	PriceIds               []string //off-chain price feeds
-	OnChainSymbols         []string //on-chain price feeds
+	PriceIds               []PriceId //off-chain price feeds
+	OnChainSymbols         []string  //on-chain price feeds
 	PerpFlags              *big.Int
 }
 
@@ -98,6 +103,21 @@ type PerpetualState struct {
 	CurrentFundingRateBps float64
 	OpenInterestBC        float64
 	IsMarketClosed        bool
+}
+
+type IdxPriceInfo struct {
+	S2         float64
+	S3         float64
+	Ema        float64
+	Conf       big.Int
+	CLOBParams big.Int
+}
+
+type PriceInfo struct {
+	Price      float64
+	Ema        float64
+	Conf       *big.Int
+	CLOBParams *big.Int
 }
 
 type LiquidatableAccounts struct {
@@ -170,6 +190,21 @@ var (
 	MASK_KEEP_POS_LEVERAGE uint32 = 0x08000000
 )
 
+const (
+	PRICE_TYPE_ONCHAIN_STR = "onchain"
+	PRICE_TYPE_PYTH_STR    = "pyth"
+	PRICE_TYPE_PRDMKTS_STR = "polymarket"
+)
+
+type PriceTypeEnum int8
+
+const (
+	PX_TYPE_INVALID PriceTypeEnum = iota
+	PX_ONCHAIN
+	PX_PYTH
+	PX_PRDMKTS
+)
+
 type BlockChainConnector struct {
 	Rpc               *ethclient.Client
 	ChainId           int64
@@ -197,7 +232,7 @@ type Triangulations map[string]Triangulation
 
 type PriceFeedData struct {
 	PriceIds     []string
-	Prices       []float64
+	Prices       []PriceInfo
 	Vaas         [][]byte
 	PublishTimes []uint64
 }
@@ -404,16 +439,18 @@ func (ps *BrokerPaySignatureReq) UnmarshalJSON(data []byte) error {
 type optionFunc func(*SdkOption)
 
 type SdkOption struct {
-	PriceFeedUrl string
-	RpcUrl       string
-	RpcClient    *ethclient.Client
+	PriceFeedUrl  string
+	PrdMktFeedUrl string
+	RpcUrl        string
+	RpcClient     *ethclient.Client
 }
 
 func defaultSdkOpts(chConf utils.ChainConfig) SdkOption {
 	return SdkOption{
-		PriceFeedUrl: chConf.PriceFeedEndpoint,
-		RpcUrl:       chConf.NodeURL,
-		RpcClient:    nil,
+		PriceFeedUrl:  chConf.PriceFeedEndpoint,
+		PrdMktFeedUrl: chConf.PrdMktFeedEndpoint,
+		RpcUrl:        chConf.NodeURL,
+		RpcClient:     nil,
 	}
 }
 
@@ -450,6 +487,7 @@ func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
 	}
 	chConf.NodeURL = o.RpcUrl
 	chConf.PriceFeedEndpoint = o.PriceFeedUrl
+	chConf.PrdMktFeedEndpoint = o.PrdMktFeedUrl
 	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
 		return err
@@ -463,7 +501,7 @@ func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
 		return err
 	}
 	sdkRo.Conn = conn
-	sdkRo.Info, err = QueryExchangeStaticInfo(&conn, &chConf, &nest)
+	sdkRo.Info, err = QueryExchangeStaticInfo(&conn, &chConf, &pxConf, &nest)
 	if err != nil {
 		return err
 	}

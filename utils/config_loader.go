@@ -16,6 +16,7 @@ type ChainConfig struct {
 	Name               string         `json:"name"`
 	PriceFeedNetwork   string         `json:"priceFeedNetwork"`
 	PriceFeedEndpoint  string         `json:"priceFeedEndpoint"`
+	PrdMktFeedEndpoint string         `json:"prdMktFeedEndpoint"`
 	ChainId            int64          `json:"chainId"`
 	ProxyAddr          common.Address `json:"proxyAddr"`
 	MultiPayAddr       common.Address `json:"multipayAddr"`
@@ -31,8 +32,8 @@ type PriceFeedConfig struct {
 	ThreshOnChainFeedOutdatedSec  int32         `json:"threshOnChainFeedOutdatedSec"`
 	ThreshOffChainFeedOutdatedSec int32         `json:"threshOffChainFeedOutdatedSec"`
 	PriceUpdateFeeGwei            int64
-	SymbolToPxId                  map[string]string   //map the symbol (BTC-USD) to price id 0x382738927...
-	PxIdToSymbols                 map[string][]string //map the symbol price id 0x382738927... to one or more symbols
+	SymbolToPxId                  map[string]PriceFeedId //map the symbol (BTC-USD) to PriceFeedId data
+	PxIdToSymbols                 map[string][]string    //map the symbol price id 0x382738927... to one or more symbols
 }
 
 type PriceFeedId struct {
@@ -108,9 +109,14 @@ func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, er
 	}
 	//SymbolToId
 	config := configuration[j]
-	config.SymbolToPxId = make(map[string]string)
+	config.SymbolToPxId = make(map[string]PriceFeedId)
 	for _, feed := range config.PriceFeedIds {
-		config.SymbolToPxId[feed.Symbol] = strings.TrimPrefix(feed.Id, "0x")
+		config.SymbolToPxId[feed.Symbol] = PriceFeedId{
+			Symbol: feed.Symbol,
+			Id:     strings.TrimPrefix(feed.Id, "0x"),
+			Type:   feed.Type,
+			Origin: feed.Origin,
+		}
 	}
 	//PxIdToSymbols
 	config.PxIdToSymbols = make(map[string][]string)

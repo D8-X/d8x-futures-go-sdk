@@ -156,7 +156,7 @@ func GetPerpetualStaticInfoIdxFromId(exchangeInfo *StaticExchangeInfo, perpId in
 	return -1
 }
 
-func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfig, nest *NestedPerpetualIds) (StaticExchangeInfo, error) {
+func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfig, configPx *utils.PriceFeedConfig, nest *NestedPerpetualIds) (StaticExchangeInfo, error) {
 	symbolsSet := make(utils.Set)
 
 	perpIds := nest.PerpetualIds
@@ -181,7 +181,10 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		}
 
 		for _, perpStatic := range perpGetterStaticInfos {
-			info := getterDataToPerpetualStaticInfo(&perpStatic, conn.SymbolMapping)
+			info, err := getterDataToPerpetualStaticInfo(&perpStatic, configPx, conn.SymbolMapping)
+			if err != nil {
+				return StaticExchangeInfo{}, err
+			}
 			perpetuals = append(perpetuals, info)
 			symbolsSet.Add(info.S2Symbol)
 			if info.S3Symbol != "" {
@@ -245,7 +248,7 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 			}
 			for _, symT := range triangulations[sym].Symbol {
 				id := conn.PriceFeedConfig.SymbolToPxId[symT]
-				if isOnChainId(id) {
+				if id.Type == PRICE_TYPE_ONCHAIN_STR {
 					p.OnChainSymbols = append(p.OnChainSymbols, symT)
 				}
 			}
@@ -287,10 +290,6 @@ func setSettlementCurrencies(flag *big.Int, pool *PoolStaticInfo) error {
 	return nil
 }
 
-func isOnChainId(id string) bool {
-	return len(id) < 64
-}
-
 // Store stores the StaticExchangeInfo in a file
 func (s *StaticExchangeInfo) Store(filename string) error {
 	jsonData, err := json.Marshal(s)
@@ -330,7 +329,7 @@ func initPriceFeeds(pxConfig *utils.PriceFeedConfig, symbolSet utils.Set) Triang
 	return triangulations
 }
 
-func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {
+func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStaticInfo, configPx *utils.PriceFeedConfig, symMap *map[string]string) (PerpetualStaticInfo, error) {
 	var poolId int32 = int32(pIn.Id.Int64()) / 100000
 	base := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
 	quote := ContractSymbolToSymbol(pIn.S2QuoteCCY, symMap)
@@ -341,13 +340,37 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 	if base3 != "" {
 		S3Symbol = base3 + "-" + quote3
 	}
-	priceIds := make([]string, len(pIn.PriceIds))
+	priceIds := make([]PriceId, len(pIn.PriceIds))
 	for i, uint8Array := range pIn.PriceIds {
 		byteArray := make([]byte, len(uint8Array))
-		for i, v := range uint8Array {
-			byteArray[i] = byte(v)
+		for j, v := range uint8Array {
+			byteArray[j] = byte(v)
 		}
-		priceIds[i] = hex.EncodeToString(byteArray)
+		priceIds[i] = PriceId{
+			Id:   hex.EncodeToString(byteArray),
+			Type: PX_TYPE_INVALID,
+		}
+		//find id in config
+		for _, v := range configPx.PriceFeedIds {
+			if v.Id != priceIds[i].Id {
+				continue
+			}
+			if v.Type == PRICE_TYPE_ONCHAIN_STR {
+				priceIds[i].Type = PX_ONCHAIN
+			} else if v.Type == PRICE_TYPE_PRDMKTS_STR {
+				priceIds[i].Type = PX_PRDMKTS
+			} else if v.Type == PRICE_TYPE_PYTH_STR {
+				priceIds[i].Type = PX_PYTH
+			} else {
+				return PerpetualStaticInfo{}, fmt.Errorf("unknown price type %s in config", v.Type)
+			}
+			break
+		}
+		if priceIds[i].Type == PX_TYPE_INVALID {
+			// no price type found
+			return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", priceIds[i].Id)
+		}
+
 	}
 	var pOut = PerpetualStaticInfo{
 		Id:                     int32(pIn.Id.Int64()),
@@ -364,7 +387,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		OnChainSymbols:         make([]string, 0),
 		PerpFlags:              pIn.PerpFlags,
 	}
-	return pOut
+	return pOut, nil
 }
 
 func ContractSymbolToSymbol(cSym [4]byte, symMap *map[string]string) string {
