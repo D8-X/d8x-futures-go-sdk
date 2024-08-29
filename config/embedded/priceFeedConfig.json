@@ -142,6 +142,30 @@
         "id": "angle1",
         "type": "onchain",
         "origin": ""
+      },
+      {
+        "symbol": "TON-USD",
+        "id": "0x8963217838ab4cf5cadc172203c1f0b763fbaa45f346d8ee50ba994bbcac3026",
+        "type": "pyth",
+        "origin": "Crypto.TON/USD"
+      },
+      {
+        "symbol": "SHIB-USD",
+        "id": "0xf0d57deca57b3da2fe63a493f4c25925fdfd8edf834b20f93e1f84dbd1504d4a",
+        "type": "pyth",
+        "origin": "Crypto.SHIB/USD"
+      },
+      {
+        "symbol": "PEPE-USD",
+        "id": "0xd69731a2e74ac1ce884fc3890f7ee324b6deb66147055249568869ed700882e4",
+        "type": "pyth",
+        "origin": "Crypto.PEPE/USD"
+      },
+      {
+        "symbol": "BNB-USD",
+        "id": "0x2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f",
+        "type": "pyth",
+        "origin": "Crypto.BNB/USD"
       }
     ]
   }
