@@ -352,7 +352,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		}
 		//find id in config
 		for _, v := range configPx.PriceFeedIds {
-			if v.Id != priceIds[i].Id {
+			if v.Id != "0x"+priceIds[i].Id {
 				continue
 			}
 			if v.Type == PRICE_TYPE_ONCHAIN_STR {

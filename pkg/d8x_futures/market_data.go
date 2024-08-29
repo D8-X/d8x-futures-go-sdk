@@ -1185,7 +1185,7 @@ func fetchPythPrices(priceIds []PriceId, priceFeedEndpoint, prdMktEndpoint strin
 		case result := <-resCh:
 			res[i] = ResponsePythLatestPriceFeed{
 				EmaPrice: result.Parsed[0].EmaPrice,
-				Id:       result.Parsed[0].ID,
+				Id:       strings.TrimPrefix(result.Parsed[0].ID, "0x"),
 				Price:    result.Parsed[0].Price,
 				Vaa:      result.Binary.Data[0],
 			}
