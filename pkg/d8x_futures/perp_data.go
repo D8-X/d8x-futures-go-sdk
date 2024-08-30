@@ -290,6 +290,13 @@ func setSettlementCurrencies(flag *big.Int, pool *PoolStaticInfo) error {
 	return nil
 }
 
+// isPrdMktPerp checks whether the prediction market flag
+// of the perpetual is set
+func isPrdMktPerp(perp *PerpetualStaticInfo) bool {
+	result := new(big.Int).And(big.NewInt(int64(FLAG_PREDICTION_MKT)), perp.PerpFlags)
+	return result.Cmp(big.NewInt(0)) != 0
+}
+
 // Store stores the StaticExchangeInfo in a file
 func (s *StaticExchangeInfo) Store(filename string) error {
 	jsonData, err := json.Marshal(s)
