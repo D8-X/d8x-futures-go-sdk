@@ -105,21 +105,6 @@ type PerpetualState struct {
 	IsMarketClosed        bool
 }
 
-type IdxPriceInfo struct {
-	S2         float64
-	S3         float64
-	Ema        float64
-	Conf       big.Int
-	CLOBParams big.Int
-}
-
-type PriceInfo struct {
-	Price      float64
-	Ema        float64
-	Conf       *big.Int
-	CLOBParams *big.Int
-}
-
 type LiquidatableAccounts struct {
 	PerpId      int32
 	LiqAccounts []common.Address
@@ -134,9 +119,35 @@ type OpenOrders struct {
 
 type PriceObs struct {
 	Px         float64
+	Ema        float64
+	Conf       uint16
+	CLOBParams uint64
 	Ts         int64
 	IsOffChain bool
 }
+
+type Price struct {
+	Px         float64
+	Ts         int64
+	IsOffChain bool
+}
+
+type PerpetualPriceInfo struct {
+	S2Price          float64
+	S3Price          float64
+	Ema              float64
+	Conf             uint16
+	CLOBParams       uint64
+	IsMarketClosedS2 bool
+	IsMarketClosedS3 bool
+	PriceFeed        PriceFeedData //off-chain price feeds
+}
+type PriceFeedData struct {
+	PriceIds []string
+	Prices   []PriceObs
+	Vaas     [][]byte
+}
+
 type CollateralCCY int8
 
 const (
@@ -190,6 +201,10 @@ var (
 	MASK_KEEP_POS_LEVERAGE uint32 = 0x08000000
 )
 
+var (
+	FLAG_PREDICTION_MKT = 0x2
+)
+
 const (
 	PRICE_TYPE_ONCHAIN_STR = "onchain"
 	PRICE_TYPE_PYTH_STR    = "pyth"
@@ -215,27 +230,12 @@ type BlockChainConnector struct {
 	PriceFeedConfig   utils.PriceFeedConfig
 }
 
-type PerpetualPriceInfo struct {
-	S2Price          float64
-	S3Price          float64
-	IsMarketClosedS2 bool
-	IsMarketClosedS3 bool
-	PriceFeed        PriceFeedData //off-chain price feeds
-}
-
 type Triangulation struct {
 	IsInverse []bool   //[false, true]
 	Symbol    []string // [BTC-USD, USDC-USD]
 }
 
 type Triangulations map[string]Triangulation
-
-type PriceFeedData struct {
-	PriceIds     []string
-	Prices       []PriceInfo
-	Vaas         [][]byte
-	PublishTimes []uint64
-}
 
 type ResponsePythLatestPriceFeed struct {
 	EmaPrice ResponsePythPrice `json:"ema_price"`

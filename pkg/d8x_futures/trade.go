@@ -239,12 +239,16 @@ func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Sta
 	var tx *types.Transaction
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
-	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
 
 	postingWallet.UpdateNonceAndGasPx(rpc)
 	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-	tx, err = ob.CancelOrder(postingWallet.Auth, dig, []byte{}, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
+	for k, p := range pxFeed.PriceFeed.Prices {
+		publishTimes[k] = uint64(p.Ts)
+	}
+	tx, err = ob.CancelOrder(postingWallet.Auth, dig, []byte{}, pxFeed.PriceFeed.Vaas, publishTimes)
 	if err != nil {
 		return nil, errors.New("RawCancelOrder:" + err.Error())
 	}
@@ -282,8 +286,8 @@ func RawExecuteOrders(
 		}
 		// check whether prices are too old
 		var delta int64 = -10
-		for _, tsFeed := range pxFeed.PriceFeed.PublishTimes {
-			delta = max(delta, int64(tsFeed)-int64(opts.TsMin))
+		for _, tsFeed := range pxFeed.PriceFeed.Prices {
+			delta = max(delta, int64(tsFeed.Ts)-int64(opts.TsMin))
 		}
 		if delta > 0 {
 			// price feed newer than submission timestamp,
@@ -305,7 +309,7 @@ func RawExecuteOrders(
 
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
-	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
 
 	g := postingWallet.Auth.GasLimit
@@ -323,7 +327,11 @@ func RawExecuteOrders(
 		// payout addr was not provided
 		opts.PayoutAddr = postingWallet.Address
 	}
-	return ob.ExecuteOrders(postingWallet.Auth, digests, opts.PayoutAddr, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
+	for k, p := range pxFeed.PriceFeed.Prices {
+		publishTimes[k] = uint64(p.Ts)
+	}
+	return ob.ExecuteOrders(postingWallet.Auth, digests, opts.PayoutAddr, pxFeed.PriceFeed.Vaas, publishTimes)
 }
 
 func RawLiquidatePosition(
@@ -359,14 +367,18 @@ func RawLiquidatePosition(
 	}
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
-	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
 	limit := 3_000_000
 	if opts.GasLimit != 0 {
 		limit = opts.GasLimit
 	}
 	postingWallet.SetGasLimit(uint64(limit))
-	return perpCtrct.LiquidateByAMM(postingWallet.Auth, big.NewInt(int64(perpId)), *liquidatorAddr, *traderAddr, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
+	for k, p := range pxFeed.PriceFeed.Prices {
+		publishTimes[k] = uint64(p.Ts)
+	}
+	return perpCtrct.LiquidateByAMM(postingWallet.Auth, big.NewInt(int64(perpId)), *liquidatorAddr, *traderAddr, pxFeed.PriceFeed.Vaas, publishTimes)
 }
 
 // estimateGasLimit estimates the gaslimit
@@ -398,14 +410,18 @@ func RawUpdatePythPriceFeeds(priceUpdateFeeGwei int64, rpc *ethclient.Client, xI
 	}
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
-	val := priceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	val := priceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(1_000_000))
 
 	postingWallet.UpdateNonceAndGasPx(rpc)
-	return pyth.UpdatePriceFeedsIfNecessary(postingWallet.Auth, pxFeed.PriceFeed.Vaas, ids, pxFeed.PriceFeed.PublishTimes)
+	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
+	for k, p := range pxFeed.PriceFeed.Prices {
+		publishTimes[k] = uint64(p.Ts)
+	}
+	return pyth.UpdatePriceFeedsIfNecessary(postingWallet.Auth, pxFeed.PriceFeed.Vaas, ids, publishTimes)
 }
 
 // RawAddCollateral adds (amountCC>0) or removes (amountCC<0) collateral to/from the margin account of the given perpetual
@@ -428,19 +444,24 @@ func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *S
 	var tx *types.Transaction
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
-	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
+
+	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
+	for k, p := range pxFeed.PriceFeed.Prices {
+		publishTimes[k] = uint64(p.Ts)
+	}
 
 	postingWallet.UpdateNonceAndGasPx(rpc)
 	if amountCC > 0 {
 		tx, err = perpCtrct.Deposit(postingWallet.Auth, big.NewInt(id),
-			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, publishTimes)
 		if err != nil {
 			return nil, fmt.Errorf("RawAddCollateral: %v", err.Error())
 		}
 	} else {
 		tx, err = perpCtrct.Withdraw(postingWallet.Auth, big.NewInt(id),
-			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, publishTimes)
 		if err != nil {
 			return nil, fmt.Errorf("RawAddCollateral: %v", err.Error())
 		}

@@ -10,7 +10,7 @@ import (
 
 // calculateTriangulation calculates the triangulated price and reports whether any
 // of the price-feeds is outdated, given a triangulation path and price data
-func calculateTriangulation(triang Triangulation, outDateOffChain, outDateOnChain int64, symToPrice map[string]PriceObs) (float64, bool, error) {
+func calculateTriangulation(triang Triangulation, outDateOffChain, outDateOnChain int64, symToPrice map[string]Price) (float64, bool, error) {
 	var price float64 = 1.0
 	timestampNow := time.Now().Unix()
 	var isFeedOutdated = false
