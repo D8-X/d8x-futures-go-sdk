@@ -22,6 +22,7 @@ type SdkRO struct {
 	Info        StaticExchangeInfo
 	Conn        BlockChainConnector
 	ChainConfig utils.ChainConfig
+	PxConfig    *utils.PriceFeedConfig
 }
 
 // Sdk is the read-write type
@@ -64,8 +65,9 @@ type PoolStaticInfo struct {
 }
 
 type PriceId struct {
-	Id   string
-	Type PriceTypeEnum
+	Id     string
+	Origin string
+	Type   PriceTypeEnum
 }
 
 type PerpetualStaticInfo struct {
@@ -506,6 +508,7 @@ func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
 		return err
 	}
 	sdkRo.ChainConfig = chConf
+	sdkRo.PxConfig = &pxConf
 
 	return nil
 }

@@ -336,6 +336,17 @@ func initPriceFeeds(pxConfig *utils.PriceFeedConfig, symbolSet utils.Set) Triang
 	return triangulations
 }
 
+func priceTypeStrToType(typeStr string) PriceTypeEnum {
+	if typeStr == PRICE_TYPE_ONCHAIN_STR {
+		return PX_ONCHAIN
+	} else if typeStr == PRICE_TYPE_PRDMKTS_STR {
+		return PX_PRDMKTS
+	} else if typeStr == PRICE_TYPE_PYTH_STR {
+		return PX_PYTH
+	}
+	return PX_TYPE_INVALID
+}
+
 func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStaticInfo, configPx *utils.PriceFeedConfig, symMap *map[string]string) (PerpetualStaticInfo, error) {
 	var poolId int32 = int32(pIn.Id.Int64()) / 100000
 	base := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
@@ -362,13 +373,9 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 			if v.Id != "0x"+priceIds[i].Id {
 				continue
 			}
-			if v.Type == PRICE_TYPE_ONCHAIN_STR {
-				priceIds[i].Type = PX_ONCHAIN
-			} else if v.Type == PRICE_TYPE_PRDMKTS_STR {
-				priceIds[i].Type = PX_PRDMKTS
-			} else if v.Type == PRICE_TYPE_PYTH_STR {
-				priceIds[i].Type = PX_PYTH
-			} else {
+			priceIds[i].Origin = v.Origin
+			priceIds[i].Type = priceTypeStrToType(v.Type)
+			if priceIds[i].Type == PX_TYPE_INVALID {
 				return PerpetualStaticInfo{}, fmt.Errorf("unknown price type %s in config", v.Type)
 			}
 			break

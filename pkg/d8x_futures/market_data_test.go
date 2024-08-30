@@ -2,7 +2,9 @@ package d8x_futures
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -21,16 +23,16 @@ import (
 func TestFetchPricesFromAPI(t *testing.T) {
 	priceIds := []PriceId{
 		{Id: "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
-			Type: PX_PYTH},
+			Type: PX_PYTH, Origin: ""},
 		{Id: "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
-			Type: PX_PYTH}}
+			Type: PX_PYTH, Origin: ""}}
 	data, _ := fetchPricesFromAPI(priceIds, "https://hermes.pyth.network/api", "", false)
 	fmt.Println(data)
 	priceIdsWrong := []PriceId{
 		{Id: "0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
-			Type: PX_PYTH},
+			Type: PX_PYTH, Origin: ""},
 		{Id: "0x01f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
-			Type: PX_PYTH},
+			Type: PX_PYTH, Origin: ""},
 	}
 	_, err := fetchPricesFromAPI(priceIdsWrong, "https://hermes.pyth.network/api", "", false)
 	if err == nil {
@@ -112,13 +114,58 @@ func TestFetchPythPrices(t *testing.T) {
 		t.FailNow()
 	}
 	r, err := fetchPythPrices([]PriceId{
-		{Id: pxConf.PriceFeedIds[0].Id, Type: PX_PYTH},
-		{Id: pxConf.PriceFeedIds[1].Id, Type: PX_PYTH}}, "https://hermes.pyth.network/", "")
+		{Id: pxConf.PriceFeedIds[0].Id, Type: PX_PYTH, Origin: ""},
+		{Id: pxConf.PriceFeedIds[1].Id, Type: PX_PYTH, Origin: ""}}, "https://hermes.pyth.network/", "")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
 	}
 	fmt.Print(r)
+}
+
+func TestFetchInfo(t *testing.T) {
+	var sdkRo SdkRO
+	//err := sdkRo.New("195") //xlayer testnet
+	err := sdkRo.New("421614")
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	p, err := sdkRo.IsPrdMktPerp("TRUMP24-USD-USDC")
+	if p == false || err != nil {
+		t.Fail()
+	}
+	id, err := sdkRo.GetPriceId("TRUMP24-USD")
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	fmt.Print(id.Origin)
+	url := "https://clob.polymarket.com/markets/" + id.Origin
+	var response *http.Response
+	response, err = http.Get(url)
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	defer response.Body.Close()
+
+	fmt.Print(response)
+	type ApiResponse struct {
+		EndDateISO string `json:"end_date_iso"`
+	}
+	// Read the response body
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.FailNow()
+	}
+
+	// Parse the JSON response
+	var apiResponse ApiResponse
+	err = json.Unmarshal(body, &apiResponse)
+	if err != nil {
+		t.FailNow()
+	}
 }
 
 func TestGetPoolShareTknBalance(t *testing.T) {

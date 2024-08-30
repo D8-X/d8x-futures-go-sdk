@@ -342,6 +342,18 @@ func (sdkRo *SdkRO) GetPoolShareTknPrice(poolIds []int, optRpc *ethclient.Client
 	return RawGetPoolShTknPrice(rpc, poolIds, sdkRo.Info)
 }
 
+// GetPriceId returns the price id information for the given index,
+// e.g BTC-USD
+func (sdkRo *SdkRO) GetPriceId(idxSymbol string) (PriceId, error) {
+	for _, info := range sdkRo.PxConfig.PriceFeedIds {
+		if info.Symbol == idxSymbol {
+			t := priceTypeStrToType(info.Type)
+			return PriceId{Id: info.Id, Origin: info.Origin, Type: t}, nil
+		}
+	}
+	return PriceId{}, fmt.Errorf("no price info found for index symbol %s", idxSymbol)
+}
+
 // Allowance checks the allowance of the given address to spend settlement tokens for the given
 // pool (via symbol) on the manager. Returns the value in decimals and the decimal-N value (big-int).
 // Symbol is a pool symbol like "USDC" (or perpetual symbol like ETH-USDC-USDC works too)
@@ -369,6 +381,17 @@ func (sdkRo *SdkRO) Allowance(symbol string, user common.Address, optRpc *ethcli
 	}
 	amt := utils.DecNToFloat(a, n)
 	return amt, a, nil
+}
+
+// IsPrdMktPerp returns true if perpetual with symbol of the form
+// BTC-USD-USDC is a prediction market perpetual
+func (sdkRo *SdkRO) IsPrdMktPerp(symbol string) (bool, error) {
+	j := GetPerpetualStaticInfoIdxFromSymbol(&sdkRo.Info, symbol)
+	if j == -1 {
+		return false, errors.New("IsPrdMktPerp: no perpetual " + symbol)
+	}
+	v := sdkRo.Info.Perpetuals[j]
+	return isPrdMktPerp(&v), nil
 }
 
 func RawGetMarginTknAddr(xInfo *StaticExchangeInfo, symbol string) (common.Address, error) {
