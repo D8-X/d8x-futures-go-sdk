@@ -2,3 +2,6 @@
 PK=a2132e17e715b58bcd44eaad84ecfc19959b8521ec507bc3acc1e3319049a5
 # PROXY_URL
 PROXY_URL=http://132.261.40.23:3128
+
+STORK_CREDENTIALS="d8x:basic-calendar-remote-sky"
+STORK_ENDPOINT="https://rest.jp.stork-oracle.network/"
