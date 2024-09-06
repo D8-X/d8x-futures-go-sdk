@@ -37,10 +37,11 @@ type PriceFeedConfig struct {
 }
 
 type PriceFeedId struct {
-	Symbol string `json:"symbol"`
-	Id     string `json:"id"`
-	Type   string `json:"type"`
-	Origin string `json:"origin"`
+	Symbol   string `json:"symbol"`
+	Id       string `json:"id"`
+	Type     string `json:"type"`
+	Origin   string `json:"origin"`
+	StorkSym string `json:"storkSym"`
 }
 
 type PriceFeedOnChainConfig struct {
