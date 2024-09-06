@@ -131,11 +131,11 @@ func TestFetchInfo(t *testing.T) {
 		t.Log(err.Error())
 		t.FailNow()
 	}
-	p, err := sdkRo.IsPrdMktPerp("TRUMP24-USD-USDC")
+	p, err := sdkRo.IsPrdMktPerp("BTLJ-USD-USDC")
 	if p == false || err != nil {
 		t.Fail()
 	}
-	id, err := sdkRo.GetPriceId("TRUMP24-USD")
+	id, err := sdkRo.GetPriceId("BTLJ-USD")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -299,7 +299,7 @@ func TestPerpetualPrice(t *testing.T) {
 		t.FailNow()
 	}
 	startTime := time.Now()
-	px, err := sdkRo.QueryPerpetualPrices("TRUMP24-USD-USDC", []float64{200, 2000}, nil)
+	px, err := sdkRo.QueryPerpetualPrices("BTLJ-USD-USDC", []float64{200, 2000}, nil)
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {
