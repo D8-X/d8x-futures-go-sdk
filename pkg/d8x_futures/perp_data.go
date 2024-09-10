@@ -214,6 +214,10 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		// after margin symbol is set correctly, we
 		// set the settlement currency.
 		// settlement currency is based on the flag of the first perpetual
+		if len(perpGetterStaticInfos) == 0 {
+			// no perps in pool
+			continue
+		}
 		err = setSettlementCurrencies(perpGetterStaticInfos[0].PerpFlags, &pools[i])
 		if err != nil {
 			return StaticExchangeInfo{}, err
@@ -358,33 +362,36 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 	if base3 != "" {
 		S3Symbol = base3 + "-" + quote3
 	}
+	isNormal := PerpetualStateEnum(pIn.PerpetualState) == NORMAL
 	priceIds := make([]PriceId, len(pIn.PriceIds))
-	for i, uint8Array := range pIn.PriceIds {
-		byteArray := make([]byte, len(uint8Array))
-		for j, v := range uint8Array {
-			byteArray[j] = byte(v)
-		}
-		priceIds[i] = PriceId{
-			Id:   hex.EncodeToString(byteArray),
-			Type: PX_TYPE_INVALID,
-		}
-		//find id in config
-		for _, v := range configPx.PriceFeedIds {
-			if v.Id != "0x"+priceIds[i].Id {
-				continue
+	if isNormal {
+		for i, uint8Array := range pIn.PriceIds {
+			byteArray := make([]byte, len(uint8Array))
+			for j, v := range uint8Array {
+				byteArray[j] = byte(v)
 			}
-			priceIds[i].Origin = v.Origin
-			priceIds[i].Type = priceTypeStrToType(v.Type)
+			priceIds[i] = PriceId{
+				Id:   hex.EncodeToString(byteArray),
+				Type: PX_TYPE_INVALID,
+			}
+			//find id in config
+			for _, v := range configPx.PriceFeedIds {
+				if v.Id != "0x"+priceIds[i].Id {
+					continue
+				}
+				priceIds[i].Origin = v.Origin
+				priceIds[i].Type = priceTypeStrToType(v.Type)
+				if priceIds[i].Type == PX_TYPE_INVALID {
+					return PerpetualStaticInfo{}, fmt.Errorf("unknown price type %s in config", v.Type)
+				}
+				break
+			}
 			if priceIds[i].Type == PX_TYPE_INVALID {
-				return PerpetualStaticInfo{}, fmt.Errorf("unknown price type %s in config", v.Type)
+				// no price type found
+				return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", priceIds[i].Id)
 			}
-			break
-		}
-		if priceIds[i].Type == PX_TYPE_INVALID {
-			// no price type found
-			return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", priceIds[i].Id)
-		}
 
+		}
 	}
 	var pOut = PerpetualStaticInfo{
 		Id:                     int32(pIn.Id.Int64()),
