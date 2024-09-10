@@ -284,6 +284,9 @@ func RawExecuteOrders(
 		if opts.TsMin == 0 {
 			break
 		}
+		if pxFeed.IsMarketClosedS2 || pxFeed.IsMarketClosedS3 {
+			return nil, errors.New("market closed for " + symbol)
+		}
 		// check whether prices are too old
 		var delta int64 = -10
 		for _, tsFeed := range pxFeed.PriceFeed.Prices {
@@ -318,7 +321,7 @@ func RawExecuteOrders(
 	postingWallet.UpdateNonceAndGasPx(opts.Rpc)
 	ob := CreateLimitOrderBookInstance(opts.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 
-	limit := 2_000_000 + 1_000_000*(len(digests)-1)
+	limit := 3_000_000 + 1_000_000*(len(digests)-1)
 	if opts.GasLimit != 0 {
 		limit = opts.GasLimit
 	}

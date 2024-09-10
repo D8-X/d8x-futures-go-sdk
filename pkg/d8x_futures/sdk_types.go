@@ -120,12 +120,13 @@ type OpenOrders struct {
 }
 
 type PriceObs struct {
-	Px         float64
-	Ema        float64
-	Conf       uint16
-	CLOBParams uint64
-	Ts         int64
-	IsOffChain bool
+	Px             float64
+	Ema            float64
+	Conf           uint16
+	CLOBParams     uint64
+	Ts             int64
+	IsOffChain     bool
+	IsClosedPrdMkt bool // only for prediction markets
 }
 
 type Price struct {
@@ -240,10 +241,11 @@ type Triangulation struct {
 type Triangulations map[string]Triangulation
 
 type ResponsePythLatestPriceFeed struct {
-	EmaPrice ResponsePythPrice `json:"ema_price"`
-	Id       string            `json:"id"`
-	Price    ResponsePythPrice `json:"price"`
-	Vaa      string            `json:"vaa"`
+	EmaPrice     ResponsePythPrice `json:"ema_price"`
+	Id           string            `json:"id"`
+	Price        ResponsePythPrice `json:"price"`
+	Vaa          string            `json:"vaa"`
+	PrdMktClosed bool              `json:"market_closed"` // applies to prediction mkts only
 }
 
 type PythLatestPxV2 struct {
@@ -263,6 +265,7 @@ type Metadata struct {
 	Slot               int64 `json:"slot"`
 	ProofAvailableTime int64 `json:"proof_available_time"`
 	PrevPublishTime    int64 `json:"prev_publish_time"`
+	MarketClosed       bool  `json:"market_closed"` // for prediction markets only
 }
 
 type ResponsePythPrice struct {

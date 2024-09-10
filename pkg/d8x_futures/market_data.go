@@ -1071,6 +1071,10 @@ func fetchPerpetualPriceInfo(xInfo *StaticExchangeInfo, j int, pxFeedEndpoint, p
 		return PerpetualPriceInfo{}, err
 	}
 	s2, s3, isMarketClosedS2, isMarketClosedS3, err := calculatePerpIdxPx(xInfo, pxMap, xInfo.Perpetuals[j].S2Symbol, xInfo.Perpetuals[j].S3Symbol)
+	for _, p := range feedData.Prices {
+		isMarketClosedS2 = isMarketClosedS2 || p.IsClosedPrdMkt
+	}
+
 	if err != nil {
 		return PerpetualPriceInfo{}, err
 	}
@@ -1196,23 +1200,25 @@ func fetchPricesFromAPI(priceIds []PriceId, priceFeedEndpoint, prdMktEndpoint st
 					}
 					params, _ := new(big.Int).SetString(d.EmaPrice.Conf, 10)
 					pxData.Prices[i] = PriceObs{
-						Px:         utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
-						Ema:        utils.PythNToFloat64(d.EmaPrice.Price, d.EmaPrice.Expo),
-						Conf:       uint16(conf),
-						CLOBParams: params.Uint64(),
-						Ts:         int64(d.Price.PublishTime),
-						IsOffChain: true,
+						Px:             utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
+						Ema:            utils.PythNToFloat64(d.EmaPrice.Price, d.EmaPrice.Expo),
+						Conf:           uint16(conf),
+						CLOBParams:     params.Uint64(),
+						Ts:             int64(d.Price.PublishTime),
+						IsOffChain:     true,
+						IsClosedPrdMkt: d.PrdMktClosed,
 					}
 				} else {
 					// regular markets: we set the S2 as EMA and set the parameters
 					// to zero
 					pxData.Prices[i] = PriceObs{
-						Px:         utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
-						Ema:        utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
-						Conf:       uint16(0),
-						CLOBParams: 0,
-						Ts:         int64(d.Price.PublishTime),
-						IsOffChain: true,
+						Px:             utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
+						Ema:            utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
+						Conf:           uint16(0),
+						CLOBParams:     0,
+						Ts:             int64(d.Price.PublishTime),
+						IsOffChain:     true,
+						IsClosedPrdMkt: false,
 					}
 				}
 				if !withVaa {
@@ -1255,10 +1261,11 @@ func fetchPythPrices(priceIds []PriceId, priceFeedEndpoint, prdMktEndpoint strin
 		select {
 		case result := <-resCh:
 			res[i] = ResponsePythLatestPriceFeed{
-				EmaPrice: result.Parsed[0].EmaPrice,
-				Id:       strings.TrimPrefix(result.Parsed[0].ID, "0x"),
-				Price:    result.Parsed[0].Price,
-				Vaa:      result.Binary.Data[0],
+				EmaPrice:     result.Parsed[0].EmaPrice,
+				Id:           strings.TrimPrefix(result.Parsed[0].ID, "0x"),
+				Price:        result.Parsed[0].Price,
+				Vaa:          result.Binary.Data[0],
+				PrdMktClosed: result.Parsed[0].Metadata.MarketClosed,
 			}
 		case err := <-errCh:
 			return nil, err

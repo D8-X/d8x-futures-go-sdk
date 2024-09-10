@@ -39,7 +39,7 @@ func TestSdkExec(t *testing.T) {
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
 	//err := sdk.New([]string{pk}, "80084") //bartio
-	perp := "TRUMP24-USD-USDC"
+	perp := "BTLJ-USD-USDC"
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
