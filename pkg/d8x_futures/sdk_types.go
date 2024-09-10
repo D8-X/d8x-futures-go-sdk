@@ -517,7 +517,10 @@ func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
 // networkname according to chainConfig or a chainId; rpcEndpoint and pythEndpoint can be ""
 func (sdk *Sdk) New(privateKeys []string, networkName string, opts ...optionFunc) error {
 
-	sdk.SdkRO.New(networkName, opts...)
+	err := sdk.SdkRO.New(networkName, opts...)
+	if err != nil {
+		return err
+	}
 	if sdk.Conn.Rpc == nil {
 		return errors.New("sdk.Conn.Rpc=nil; required")
 	}
