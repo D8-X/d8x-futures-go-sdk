@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"math"
 	"math/big"
 	"strconv"
@@ -118,4 +119,25 @@ func PythNToFloat64(price string, expo int32) float64 {
 		panic(err)
 	}
 	return res * sgn
+}
+
+func Dec2Hex(num string) (string, error) {
+	number := new(big.Int)
+	number, ok := number.SetString(num, 10)
+	if !ok {
+		return "", fmt.Errorf("converting number to BIG int")
+	}
+
+	return "0x" + number.Text(16), nil
+}
+
+func Hex2Dec(num string) (string, error) {
+	number := new(big.Int)
+	num = strings.TrimPrefix(num, "0x")
+	number, ok := number.SetString(num, 16)
+	if !ok {
+		return "", fmt.Errorf("converting number to BIG int")
+	}
+
+	return number.Text(10), nil
 }
