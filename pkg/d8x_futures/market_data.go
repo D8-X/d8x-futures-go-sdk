@@ -1143,7 +1143,7 @@ func calculatePerpIdxPx(xInfo *StaticExchangeInfo, pxMap map[string]Price, S2Sym
 		if len(triang.Symbol) == 0 {
 			return 0, 0, false, false, fmt.Errorf("no triangulation for symbol %s", S3Sym)
 		}
-		pxS3, isMarketClosedS3, err = calculateTriangulation(triang, th1, th2, pxMap)
+		pxS3, isMarketClosedS3, err = calculateTriangulation(triang, thOff, thOn, pxMap)
 		if err != nil {
 			return 0, 0, false, false, err
 		}
