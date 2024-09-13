@@ -353,10 +353,22 @@ func priceTypeStrToType(typeStr string) PriceTypeEnum {
 
 func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStaticInfo, configPx *utils.PriceFeedConfig, symMap *map[string]string) (PerpetualStaticInfo, error) {
 	var poolId int32 = int32(pIn.Id.Int64()) / 100000
-	base := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
-	quote := ContractSymbolToSymbol(pIn.S2QuoteCCY, symMap)
-	base3 := ContractSymbolToSymbol(pIn.S3BaseCCY, symMap)
-	quote3 := ContractSymbolToSymbol(pIn.S3QuoteCCY, symMap)
+	base, err := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
+	if err != nil {
+		return PerpetualStaticInfo{}, err
+	}
+	quote, err := ContractSymbolToSymbol(pIn.S2QuoteCCY, symMap)
+	if err != nil {
+		return PerpetualStaticInfo{}, err
+	}
+	base3, err := ContractSymbolToSymbol(pIn.S3BaseCCY, symMap)
+	if err != nil {
+		return PerpetualStaticInfo{}, err
+	}
+	quote3, err := ContractSymbolToSymbol(pIn.S3QuoteCCY, symMap)
+	if err != nil {
+		return PerpetualStaticInfo{}, err
+	}
 	S2Symbol := base + "-" + quote
 	S3Symbol := ""
 	if base3 != "" {
@@ -411,12 +423,20 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 	return pOut, nil
 }
 
-func ContractSymbolToSymbol(cSym [4]byte, symMap *map[string]string) string {
+func ContractSymbolToSymbol(cSym [4]byte, symMap *map[string]string) (string, error) {
 	sym := string(bytes.TrimRight(cSym[:], "\x00"))
 	if sym == "" {
-		return ""
+		return "", nil
 	}
-	return (*symMap)[sym]
+	res, exists := (*symMap)[sym]
+	if !exists {
+		if len(sym) <= 4 {
+			return sym, nil
+		}
+		return "", fmt.Errorf("missing mapping for %s in symbollist config", sym)
+	}
+
+	return res, nil
 }
 
 func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Address) contracts.IClientOrderClientOrder {

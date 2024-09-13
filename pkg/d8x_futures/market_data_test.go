@@ -174,7 +174,7 @@ func TestFetchPolymarket(t *testing.T) {
 func TestFetchInfo(t *testing.T) {
 	var sdkRo SdkRO
 	//err := sdkRo.New("195") //xlayer testnet
-	err := sdkRo.New("421614")
+	err := sdkRo.New("42161")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
