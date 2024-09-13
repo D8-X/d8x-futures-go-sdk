@@ -123,6 +123,54 @@ func TestFetchPythPrices(t *testing.T) {
 	fmt.Print(r)
 }
 
+func TestFetchPolymarket(t *testing.T) {
+	priceIds := []string{
+		"0x6710f215fe01867219fc338d0a68290f84c471d002b14b6decd92c2260d94cce",
+		"0x2f06f5a323466c1ad9a9a8afb19a21dd3fe0f39853a16ae58637086e8ff5838d",
+		"0x7eea0b94fc1916efdd031978918abba566b9aef7f12b3d5a5b0f7141fd8e0b33",
+		"0x6ec8114a0dba99a037c7122c93a68f2ab905c3e42e2b82e1ce659aef96de58f2",
+	}
+	for _, id := range priceIds {
+		idDec, _ := utils.Hex2Dec(id)
+		url := "https://clob.polymarket.com/midpoint?token_id=" + idDec
+		var response *http.Response
+		response, err := http.Get(url)
+		if err != nil {
+			t.Log(err.Error())
+			t.FailNow()
+		}
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.FailNow()
+		}
+		fmt.Print(string(body))
+		response.Body.Close()
+	}
+	originIds := []string{
+		"0x76dbb81a9fd937efa736aa23e6c0eb33aaf0f2ca4aa6c06da1d5529ed236ebfb",
+		"0x265366ede72d73e137b2b9095a6cdc9be6149290caa295738a95e3d881ad0865",
+		"0x67e68c5eee8ac767dd1177de8c653b20642fee48f0f2a56d784e4856b130749d",
+		"0x1ab07117f9f698f28490f57754d6fe5309374230c95867a7eba572892a11d710",
+	}
+	for _, id := range originIds {
+
+		url := "https://clob.polymarket.com/markets/" + id
+		var response *http.Response
+		response, err := http.Get(url)
+		if err != nil {
+			t.Log(err.Error())
+			t.FailNow()
+		}
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.FailNow()
+		}
+		fmt.Println(string(body))
+		fmt.Println("----")
+		response.Body.Close()
+	}
+}
+
 func TestFetchInfo(t *testing.T) {
 	var sdkRo SdkRO
 	//err := sdkRo.New("195") //xlayer testnet
