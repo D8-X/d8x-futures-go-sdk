@@ -32,14 +32,14 @@ func TestSdkExec(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	//err := sdk.New([]string{pk}, "42161") //arbitrum
-	err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
+	err := sdk.New([]string{pk}, "42161") //arbitrum
+	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
 	//err := sdk.New([]string{pk}, "195") //x-layer testnet
 	//err := sdk.New([]string{pk}, "196") //x-layer
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
 	//err := sdk.New([]string{pk}, "80084") //bartio
-	perp := "BTLJ-USD-USDC"
+	perp := "PENDLE-USD-STUSD"
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -63,17 +63,17 @@ func TestSdkExec(t *testing.T) {
 		}
 	}
 	if len(mktOrderIds) == 0 {
-		mktOrderIds = append(mktOrderIds, "23e50c73801fd4487f2c9d17f8781353717cf861a010c725bef73cb537e8e603")
-		/*
-			order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 0.001, 10, &OrderOptions{LimitPrice: 0})
-			orderId, _, err := sdk.PostOrder(order, nil)
-			if err != nil {
-				t.Log(err.Error())
-			}
-			fmt.Println("order id =", orderId)
-			//23e50c73801fd4487f2c9d17f8781353717cf861a010c725bef73cb537e8e603
-			mktOrderIds = append(mktOrderIds, orderId)
-		*/
+		//mktOrderIds = append(mktOrderIds, "f3e6741c2eefeb3c5e1c8539f15e5590b8b104ad6c8ed99a2f63151c315b0dd0")
+
+		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 0.001, 10, &OrderOptions{LimitPrice: 0})
+		orderId, _, err := sdk.PostOrder(order, nil)
+		if err != nil {
+			t.Log(err.Error())
+		}
+		fmt.Println("order id =", orderId)
+		//23e50c73801fd4487f2c9d17f8781353717cf861a010c725bef73cb537e8e603
+		mktOrderIds = append(mktOrderIds, orderId)
+
 	}
 	now := time.Now().Unix()
 	payoutAddr := common.Address{} // common.HexToAddress("0x98DfAFF5126836E339493a6021FD5B92Bf005F0D")

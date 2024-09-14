@@ -15,7 +15,7 @@
     "maxFeedAgeSec": 120
   },
   {
-    "name": "STUSD-USDC",
+    "name": "STUSD-USD",
     "rpcs": [
       "https://arbitrum-one.public.blastapi.io",
       "https://arbitrum.llamarpc.com",
