@@ -84,6 +84,7 @@ type PerpetualStaticInfo struct {
 	PriceIds               []PriceId //off-chain price feeds
 	OnChainSymbols         []string  //on-chain price feeds
 	PerpFlags              *big.Int
+	State                  PerpetualStateEnum
 }
 
 type PoolState struct {

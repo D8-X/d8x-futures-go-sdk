@@ -962,7 +962,7 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client, xInfo *StaticE
 	symSet := make(map[string]bool)
 	priceIds := make([]PriceId, 0, len(xInfo.Perpetuals))
 	for k, perp := range xInfo.Perpetuals {
-		if perp.PoolId != poolId {
+		if perp.PoolId != poolId || perp.State != NORMAL {
 			continue
 		}
 
@@ -1007,7 +1007,7 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client, xInfo *StaticE
 	// build multi-call
 	perpIds := make([]int32, 0, len(xInfo.Perpetuals))
 	for j := range xInfo.Perpetuals {
-		if xInfo.Perpetuals[j].PoolId != poolId {
+		if xInfo.Perpetuals[j].PoolId != poolId || xInfo.Perpetuals[j].State != NORMAL {
 			continue
 		}
 		S2Sym := xInfo.Perpetuals[j].S2Symbol
@@ -1248,16 +1248,19 @@ func fetchPythPrices(priceIds []PriceId, priceFeedEndpoint, prdMktEndpoint strin
 	errCh := make(chan error, len(priceIds))
 	query1 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", priceFeedEndpoint)
 	query2 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", prdMktEndpoint)
+	count := 0
 	for _, id := range priceIds {
 		if id.Type == PX_PYTH {
 			fetchPythPrice(query1+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
+			count++
 		} else if id.Type == PX_PRDMKTS {
 			fetchPythPrice(query2+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
+			count++
 		}
 	}
 	// collect the results and errors
-	res := make([]ResponsePythLatestPriceFeed, len(priceIds))
-	for i := 0; i < len(priceIds); i++ {
+	res := make([]ResponsePythLatestPriceFeed, count)
+	for i := 0; i < count; i++ {
 		select {
 		case result := <-resCh:
 			res[i] = ResponsePythLatestPriceFeed{

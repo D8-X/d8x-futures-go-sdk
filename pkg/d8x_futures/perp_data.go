@@ -419,6 +419,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		PriceIds:               priceIds,
 		OnChainSymbols:         make([]string, 0),
 		PerpFlags:              pIn.PerpFlags,
+		State:                  PerpetualStateEnum(pIn.PerpetualState),
 	}
 	return pOut, nil
 }
