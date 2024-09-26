@@ -173,17 +173,16 @@ func TestFetchPolymarket(t *testing.T) {
 
 func TestFetchInfo(t *testing.T) {
 	var sdkRo SdkRO
-	//err := sdkRo.New("195") //xlayer testnet
-	err := sdkRo.New("42161")
+	err := sdkRo.New("1101")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
 	}
-	p, err := sdkRo.IsPrdMktPerp("BTLJ-USD-USDC")
+	p, err := sdkRo.IsPrdMktPerp("TRUMP24-USD-USDC")
 	if p == false || err != nil {
-		t.Fail()
+		t.FailNow()
 	}
-	id, err := sdkRo.GetPriceId("BTLJ-USD")
+	id, err := sdkRo.GetPriceId("TRUMP24-USD")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
