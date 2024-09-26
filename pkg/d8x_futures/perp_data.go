@@ -156,7 +156,7 @@ func GetPerpetualStaticInfoIdxFromId(exchangeInfo *StaticExchangeInfo, perpId in
 	return -1
 }
 
-func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfig, nest *NestedPerpetualIds) (StaticExchangeInfo, error) {
+func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfig, configPx *utils.PriceFeedConfig, nest *NestedPerpetualIds) (StaticExchangeInfo, error) {
 	symbolsSet := make(utils.Set)
 
 	perpIds := nest.PerpetualIds
@@ -181,7 +181,10 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		}
 
 		for _, perpStatic := range perpGetterStaticInfos {
-			info := getterDataToPerpetualStaticInfo(&perpStatic, conn.SymbolMapping)
+			info, err := getterDataToPerpetualStaticInfo(&perpStatic, configPx, conn.SymbolMapping)
+			if err != nil {
+				return StaticExchangeInfo{}, err
+			}
 			perpetuals = append(perpetuals, info)
 			symbolsSet.Add(info.S2Symbol)
 			if info.S3Symbol != "" {
@@ -211,6 +214,10 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		// after margin symbol is set correctly, we
 		// set the settlement currency.
 		// settlement currency is based on the flag of the first perpetual
+		if len(perpGetterStaticInfos) == 0 {
+			// no perps in pool
+			continue
+		}
 		err = setSettlementCurrencies(perpGetterStaticInfos[0].PerpFlags, &pools[i])
 		if err != nil {
 			return StaticExchangeInfo{}, err
@@ -245,7 +252,7 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 			}
 			for _, symT := range triangulations[sym].Symbol {
 				id := conn.PriceFeedConfig.SymbolToPxId[symT]
-				if isOnChainId(id) {
+				if id.Type == PRICE_TYPE_ONCHAIN_STR {
 					p.OnChainSymbols = append(p.OnChainSymbols, symT)
 				}
 			}
@@ -287,8 +294,11 @@ func setSettlementCurrencies(flag *big.Int, pool *PoolStaticInfo) error {
 	return nil
 }
 
-func isOnChainId(id string) bool {
-	return len(id) < 64
+// isPrdMktPerp checks whether the prediction market flag
+// of the perpetual is set
+func isPrdMktPerp(perp *PerpetualStaticInfo) bool {
+	result := new(big.Int).And(big.NewInt(int64(FLAG_PREDICTION_MKT)), perp.PerpFlags)
+	return result.Cmp(big.NewInt(0)) != 0
 }
 
 // Store stores the StaticExchangeInfo in a file
@@ -330,24 +340,70 @@ func initPriceFeeds(pxConfig *utils.PriceFeedConfig, symbolSet utils.Set) Triang
 	return triangulations
 }
 
-func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStaticInfo, symMap *map[string]string) PerpetualStaticInfo {
+func priceTypeStrToType(typeStr string) PriceTypeEnum {
+	if typeStr == PRICE_TYPE_ONCHAIN_STR {
+		return PX_ONCHAIN
+	} else if typeStr == PRICE_TYPE_PRDMKTS_STR {
+		return PX_PRDMKTS
+	} else if typeStr == PRICE_TYPE_PYTH_STR {
+		return PX_PYTH
+	}
+	return PX_TYPE_INVALID
+}
+
+func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStaticInfo, configPx *utils.PriceFeedConfig, symMap *map[string]string) (PerpetualStaticInfo, error) {
 	var poolId int32 = int32(pIn.Id.Int64()) / 100000
-	base := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
-	quote := ContractSymbolToSymbol(pIn.S2QuoteCCY, symMap)
-	base3 := ContractSymbolToSymbol(pIn.S3BaseCCY, symMap)
-	quote3 := ContractSymbolToSymbol(pIn.S3QuoteCCY, symMap)
+	base, err := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
+	if err != nil {
+		return PerpetualStaticInfo{}, err
+	}
+	quote, err := ContractSymbolToSymbol(pIn.S2QuoteCCY, symMap)
+	if err != nil {
+		return PerpetualStaticInfo{}, err
+	}
+	base3, err := ContractSymbolToSymbol(pIn.S3BaseCCY, symMap)
+	if err != nil {
+		return PerpetualStaticInfo{}, err
+	}
+	quote3, err := ContractSymbolToSymbol(pIn.S3QuoteCCY, symMap)
+	if err != nil {
+		return PerpetualStaticInfo{}, err
+	}
 	S2Symbol := base + "-" + quote
 	S3Symbol := ""
 	if base3 != "" {
 		S3Symbol = base3 + "-" + quote3
 	}
-	priceIds := make([]string, len(pIn.PriceIds))
-	for i, uint8Array := range pIn.PriceIds {
-		byteArray := make([]byte, len(uint8Array))
-		for i, v := range uint8Array {
-			byteArray[i] = byte(v)
+	isNormal := PerpetualStateEnum(pIn.PerpetualState) == NORMAL
+	priceIds := make([]PriceId, len(pIn.PriceIds))
+	if isNormal {
+		for i, uint8Array := range pIn.PriceIds {
+			byteArray := make([]byte, len(uint8Array))
+			for j, v := range uint8Array {
+				byteArray[j] = byte(v)
+			}
+			priceIds[i] = PriceId{
+				Id:   hex.EncodeToString(byteArray),
+				Type: PX_TYPE_INVALID,
+			}
+			//find id in config
+			for _, v := range configPx.PriceFeedIds {
+				if v.Id != "0x"+priceIds[i].Id {
+					continue
+				}
+				priceIds[i].Origin = v.Origin
+				priceIds[i].Type = priceTypeStrToType(v.Type)
+				if priceIds[i].Type == PX_TYPE_INVALID {
+					return PerpetualStaticInfo{}, fmt.Errorf("unknown price type %s in config", v.Type)
+				}
+				break
+			}
+			if priceIds[i].Type == PX_TYPE_INVALID {
+				// no price type found
+				return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", priceIds[i].Id)
+			}
+
 		}
-		priceIds[i] = hex.EncodeToString(byteArray)
 	}
 	var pOut = PerpetualStaticInfo{
 		Id:                     int32(pIn.Id.Int64()),
@@ -363,16 +419,25 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		PriceIds:               priceIds,
 		OnChainSymbols:         make([]string, 0),
 		PerpFlags:              pIn.PerpFlags,
+		State:                  PerpetualStateEnum(pIn.PerpetualState),
 	}
-	return pOut
+	return pOut, nil
 }
 
-func ContractSymbolToSymbol(cSym [4]byte, symMap *map[string]string) string {
+func ContractSymbolToSymbol(cSym [4]byte, symMap *map[string]string) (string, error) {
 	sym := string(bytes.TrimRight(cSym[:], "\x00"))
 	if sym == "" {
-		return ""
+		return "", nil
 	}
-	return (*symMap)[sym]
+	res, exists := (*symMap)[sym]
+	if !exists {
+		if len(sym) <= 4 {
+			return sym, nil
+		}
+		return "", fmt.Errorf("missing mapping for %s in symbollist config", sym)
+	}
+
+	return res, nil
 }
 
 func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Address) contracts.IClientOrderClientOrder {

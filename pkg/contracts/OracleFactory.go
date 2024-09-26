@@ -37,7 +37,7 @@ type OracleFactoryOracleData struct {
 
 // OracleFactoryMetaData contains all meta data concerning the OracleFactory contract.
 var OracleFactoryMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_maxFeedTimeGapSec\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_pythFeedAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_onDemandfeedAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"OracleAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"OracleCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"oracle\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"isInverse\",\"type\":\"bool[]\"}],\"name\":\"RouteAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"marketClosed\",\"type\":\"bool\"}],\"name\":\"SetMarketClosed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"ShortRouteAdded\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_oracle\",\"type\":\"address\"}],\"name\":\"addOracle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"address[]\",\"name\":\"_oracles\",\"type\":\"address[]\"},{\"internalType\":\"bool[]\",\"name\":\"_isInverse\",\"type\":\"bool[]\"}],\"name\":\"addRoute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"uint16\",\"name\":\"_tradingBreakMins\",\"type\":\"uint16\"},{\"internalType\":\"address\",\"name\":\"_feedAddress\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_priceId\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_feedPeriod\",\"type\":\"uint256\"}],\"name\":\"createOracle\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"existsRoute\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"getRoute\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"isInverse\",\"type\":\"bool\"}],\"internalType\":\"structOracleFactory.OracleData[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuote\",\"type\":\"bytes4[2]\"}],\"name\":\"getRouteIds\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"},{\"internalType\":\"bool[]\",\"name\":\"\",\"type\":\"bool[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"getSpotPrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"onDemandFeed\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pyth\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bool\",\"name\":\"_marketClosed\",\"type\":\"bool\"}],\"name\":\"setMarketClosed\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"bytes32[]\",\"name\":\"_priceIds\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"},{\"internalType\":\"uint256\",\"name\":\"_maxAcceptableFeedAge\",\"type\":\"uint256\"}],\"name\":\"updatePriceFeeds\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_maxFeedTimeGapSec\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_pythFeedAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_onDemandfeedAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"OracleAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"OracleCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"oracle\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"isInverse\",\"type\":\"bool[]\"}],\"name\":\"RouteAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"marketClosed\",\"type\":\"bool\"}],\"name\":\"SetMarketClosed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"baseCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"quoteCurrency\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"ShortRouteAdded\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_oracle\",\"type\":\"address\"}],\"name\":\"addOracle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"address[]\",\"name\":\"_oracles\",\"type\":\"address[]\"},{\"internalType\":\"bool[]\",\"name\":\"_isInverse\",\"type\":\"bool[]\"}],\"name\":\"addRoute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"uint16\",\"name\":\"_tradingBreakMins\",\"type\":\"uint16\"},{\"internalType\":\"address\",\"name\":\"_feedAddress\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_priceId\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_feedPeriod\",\"type\":\"uint256\"}],\"name\":\"createOracle\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"existsRoute\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"getEmaPrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"getRoute\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"isInverse\",\"type\":\"bool\"}],\"internalType\":\"structOracleFactory.OracleData[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4[2]\",\"name\":\"_baseQuote\",\"type\":\"bytes4[2]\"}],\"name\":\"getRouteIds\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"id\",\"type\":\"bytes32[]\"},{\"internalType\":\"bool[]\",\"name\":\"isPyth\",\"type\":\"bool[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"}],\"name\":\"getSpotPrice\",\"outputs\":[{\"internalType\":\"int128\",\"name\":\"\",\"type\":\"int128\"},{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"onDemandFeed\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pyth\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_baseCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bytes4\",\"name\":\"_quoteCurrency\",\"type\":\"bytes4\"},{\"internalType\":\"bool\",\"name\":\"_marketClosed\",\"type\":\"bool\"}],\"name\":\"setMarketClosed\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"bytes32[]\",\"name\":\"_priceIds\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"},{\"internalType\":\"uint256\",\"name\":\"_maxAcceptableFeedAge\",\"type\":\"uint256\"}],\"name\":\"updatePriceFeeds\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
 }
 
 // OracleFactoryABI is the input ABI used to generate the binding from.
@@ -217,6 +217,39 @@ func (_OracleFactory *OracleFactoryCallerSession) ExistsRoute(_baseCurrency [4]b
 	return _OracleFactory.Contract.ExistsRoute(&_OracleFactory.CallOpts, _baseCurrency, _quoteCurrency)
 }
 
+// GetEmaPrice is a free data retrieval call binding the contract method 0xa0575a4c.
+//
+// Solidity: function getEmaPrice(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(int128, uint64, uint256)
+func (_OracleFactory *OracleFactoryCaller) GetEmaPrice(opts *bind.CallOpts, _baseCurrency [4]byte, _quoteCurrency [4]byte) (*big.Int, uint64, *big.Int, error) {
+	var out []interface{}
+	err := _OracleFactory.contract.Call(opts, &out, "getEmaPrice", _baseCurrency, _quoteCurrency)
+
+	if err != nil {
+		return *new(*big.Int), *new(uint64), *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+	out1 := *abi.ConvertType(out[1], new(uint64)).(*uint64)
+	out2 := *abi.ConvertType(out[2], new(*big.Int)).(**big.Int)
+
+	return out0, out1, out2, err
+
+}
+
+// GetEmaPrice is a free data retrieval call binding the contract method 0xa0575a4c.
+//
+// Solidity: function getEmaPrice(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(int128, uint64, uint256)
+func (_OracleFactory *OracleFactorySession) GetEmaPrice(_baseCurrency [4]byte, _quoteCurrency [4]byte) (*big.Int, uint64, *big.Int, error) {
+	return _OracleFactory.Contract.GetEmaPrice(&_OracleFactory.CallOpts, _baseCurrency, _quoteCurrency)
+}
+
+// GetEmaPrice is a free data retrieval call binding the contract method 0xa0575a4c.
+//
+// Solidity: function getEmaPrice(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(int128, uint64, uint256)
+func (_OracleFactory *OracleFactoryCallerSession) GetEmaPrice(_baseCurrency [4]byte, _quoteCurrency [4]byte) (*big.Int, uint64, *big.Int, error) {
+	return _OracleFactory.Contract.GetEmaPrice(&_OracleFactory.CallOpts, _baseCurrency, _quoteCurrency)
+}
+
 // GetRoute is a free data retrieval call binding the contract method 0xc35c334c.
 //
 // Solidity: function getRoute(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns((address,bool)[])
@@ -250,65 +283,79 @@ func (_OracleFactory *OracleFactoryCallerSession) GetRoute(_baseCurrency [4]byte
 
 // GetRouteIds is a free data retrieval call binding the contract method 0x9cbbe3f6.
 //
-// Solidity: function getRouteIds(bytes4[2] _baseQuote) view returns(bytes32[], bool[])
-func (_OracleFactory *OracleFactoryCaller) GetRouteIds(opts *bind.CallOpts, _baseQuote [2][4]byte) ([][32]byte, []bool, error) {
+// Solidity: function getRouteIds(bytes4[2] _baseQuote) view returns(bytes32[] id, bool[] isPyth)
+func (_OracleFactory *OracleFactoryCaller) GetRouteIds(opts *bind.CallOpts, _baseQuote [2][4]byte) (struct {
+	Id     [][32]byte
+	IsPyth []bool
+}, error) {
 	var out []interface{}
 	err := _OracleFactory.contract.Call(opts, &out, "getRouteIds", _baseQuote)
 
+	outstruct := new(struct {
+		Id     [][32]byte
+		IsPyth []bool
+	})
 	if err != nil {
-		return *new([][32]byte), *new([]bool), err
+		return *outstruct, err
 	}
 
-	out0 := *abi.ConvertType(out[0], new([][32]byte)).(*[][32]byte)
-	out1 := *abi.ConvertType(out[1], new([]bool)).(*[]bool)
+	outstruct.Id = *abi.ConvertType(out[0], new([][32]byte)).(*[][32]byte)
+	outstruct.IsPyth = *abi.ConvertType(out[1], new([]bool)).(*[]bool)
 
-	return out0, out1, err
+	return *outstruct, err
 
 }
 
 // GetRouteIds is a free data retrieval call binding the contract method 0x9cbbe3f6.
 //
-// Solidity: function getRouteIds(bytes4[2] _baseQuote) view returns(bytes32[], bool[])
-func (_OracleFactory *OracleFactorySession) GetRouteIds(_baseQuote [2][4]byte) ([][32]byte, []bool, error) {
+// Solidity: function getRouteIds(bytes4[2] _baseQuote) view returns(bytes32[] id, bool[] isPyth)
+func (_OracleFactory *OracleFactorySession) GetRouteIds(_baseQuote [2][4]byte) (struct {
+	Id     [][32]byte
+	IsPyth []bool
+}, error) {
 	return _OracleFactory.Contract.GetRouteIds(&_OracleFactory.CallOpts, _baseQuote)
 }
 
 // GetRouteIds is a free data retrieval call binding the contract method 0x9cbbe3f6.
 //
-// Solidity: function getRouteIds(bytes4[2] _baseQuote) view returns(bytes32[], bool[])
-func (_OracleFactory *OracleFactoryCallerSession) GetRouteIds(_baseQuote [2][4]byte) ([][32]byte, []bool, error) {
+// Solidity: function getRouteIds(bytes4[2] _baseQuote) view returns(bytes32[] id, bool[] isPyth)
+func (_OracleFactory *OracleFactoryCallerSession) GetRouteIds(_baseQuote [2][4]byte) (struct {
+	Id     [][32]byte
+	IsPyth []bool
+}, error) {
 	return _OracleFactory.Contract.GetRouteIds(&_OracleFactory.CallOpts, _baseQuote)
 }
 
 // GetSpotPrice is a free data retrieval call binding the contract method 0xd99454c3.
 //
-// Solidity: function getSpotPrice(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(int128, uint256)
-func (_OracleFactory *OracleFactoryCaller) GetSpotPrice(opts *bind.CallOpts, _baseCurrency [4]byte, _quoteCurrency [4]byte) (*big.Int, *big.Int, error) {
+// Solidity: function getSpotPrice(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(int128, uint64, uint256)
+func (_OracleFactory *OracleFactoryCaller) GetSpotPrice(opts *bind.CallOpts, _baseCurrency [4]byte, _quoteCurrency [4]byte) (*big.Int, uint64, *big.Int, error) {
 	var out []interface{}
 	err := _OracleFactory.contract.Call(opts, &out, "getSpotPrice", _baseCurrency, _quoteCurrency)
 
 	if err != nil {
-		return *new(*big.Int), *new(*big.Int), err
+		return *new(*big.Int), *new(uint64), *new(*big.Int), err
 	}
 
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
-	out1 := *abi.ConvertType(out[1], new(*big.Int)).(**big.Int)
+	out1 := *abi.ConvertType(out[1], new(uint64)).(*uint64)
+	out2 := *abi.ConvertType(out[2], new(*big.Int)).(**big.Int)
 
-	return out0, out1, err
+	return out0, out1, out2, err
 
 }
 
 // GetSpotPrice is a free data retrieval call binding the contract method 0xd99454c3.
 //
-// Solidity: function getSpotPrice(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(int128, uint256)
-func (_OracleFactory *OracleFactorySession) GetSpotPrice(_baseCurrency [4]byte, _quoteCurrency [4]byte) (*big.Int, *big.Int, error) {
+// Solidity: function getSpotPrice(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(int128, uint64, uint256)
+func (_OracleFactory *OracleFactorySession) GetSpotPrice(_baseCurrency [4]byte, _quoteCurrency [4]byte) (*big.Int, uint64, *big.Int, error) {
 	return _OracleFactory.Contract.GetSpotPrice(&_OracleFactory.CallOpts, _baseCurrency, _quoteCurrency)
 }
 
 // GetSpotPrice is a free data retrieval call binding the contract method 0xd99454c3.
 //
-// Solidity: function getSpotPrice(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(int128, uint256)
-func (_OracleFactory *OracleFactoryCallerSession) GetSpotPrice(_baseCurrency [4]byte, _quoteCurrency [4]byte) (*big.Int, *big.Int, error) {
+// Solidity: function getSpotPrice(bytes4 _baseCurrency, bytes4 _quoteCurrency) view returns(int128, uint64, uint256)
+func (_OracleFactory *OracleFactoryCallerSession) GetSpotPrice(_baseCurrency [4]byte, _quoteCurrency [4]byte) (*big.Int, uint64, *big.Int, error) {
 	return _OracleFactory.Contract.GetSpotPrice(&_OracleFactory.CallOpts, _baseCurrency, _quoteCurrency)
 }
 

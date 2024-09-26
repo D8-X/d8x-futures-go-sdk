@@ -11,16 +11,16 @@ import (
 func TestQueryNestedPerpetualInfo(t *testing.T) {
 	chConf, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
 	p, err := QueryNestedPerpetualInfo(conn)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	fmt.Println(p.PerpetualIds)
 }
@@ -28,7 +28,7 @@ func TestQueryNestedPerpetualInfo(t *testing.T) {
 func TestReadSymbolList(t *testing.T) {
 	symMap, err := config.GetSymbolList()
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	fmt.Println((symMap)["MATC"])
 
@@ -37,18 +37,18 @@ func TestReadSymbolList(t *testing.T) {
 func TestQueryPoolStaticInfo(t *testing.T) {
 	chConf, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
 	nest, err := QueryNestedPerpetualInfo(conn)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
-	info, _ := QueryExchangeStaticInfo(&conn, &chConf, &nest)
+	info, _ := QueryExchangeStaticInfo(&conn, &chConf, &pxConf, &nest)
 	fmt.Println(info)
 	info.Store("./tmpXchInfo.json")
 }
@@ -92,7 +92,7 @@ func TestTriangulate(t *testing.T) {
 func TestConfig(t *testing.T) {
 	addr, err := config.GetMultiPayAddr(42161)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 		t.FailNow()
 	}
 	fmt.Printf("addr = %s\n", addr)

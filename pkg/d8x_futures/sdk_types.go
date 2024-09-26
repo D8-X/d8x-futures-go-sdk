@@ -22,6 +22,7 @@ type SdkRO struct {
 	Info        StaticExchangeInfo
 	Conn        BlockChainConnector
 	ChainConfig utils.ChainConfig
+	PxConfig    *utils.PriceFeedConfig
 }
 
 // Sdk is the read-write type
@@ -63,6 +64,12 @@ type PoolStaticInfo struct {
 	ShareTokenAddr      common.Address
 }
 
+type PriceId struct {
+	Id     string
+	Origin string
+	Type   PriceTypeEnum
+}
+
 type PerpetualStaticInfo struct {
 	Id                     int32
 	PoolId                 int32
@@ -74,9 +81,10 @@ type PerpetualStaticInfo struct {
 	S3Symbol               string
 	LotSizeBC              float64
 	ReferralRebate         float64
-	PriceIds               []string //off-chain price feeds
-	OnChainSymbols         []string //on-chain price feeds
+	PriceIds               []PriceId //off-chain price feeds
+	OnChainSymbols         []string  //on-chain price feeds
 	PerpFlags              *big.Int
+	State                  PerpetualStateEnum
 }
 
 type PoolState struct {
@@ -113,10 +121,37 @@ type OpenOrders struct {
 }
 
 type PriceObs struct {
+	Px             float64
+	Ema            float64
+	Conf           uint16
+	CLOBParams     uint64
+	Ts             int64
+	IsOffChain     bool
+	IsClosedPrdMkt bool // only for prediction markets
+}
+
+type Price struct {
 	Px         float64
 	Ts         int64
 	IsOffChain bool
 }
+
+type PerpetualPriceInfo struct {
+	S2Price          float64
+	S3Price          float64
+	Ema              float64
+	Conf             uint16
+	CLOBParams       uint64
+	IsMarketClosedS2 bool
+	IsMarketClosedS3 bool
+	PriceFeed        PriceFeedData //off-chain price feeds
+}
+type PriceFeedData struct {
+	PriceIds []string
+	Prices   []PriceObs
+	Vaas     [][]byte
+}
+
 type CollateralCCY int8
 
 const (
@@ -170,6 +205,25 @@ var (
 	MASK_KEEP_POS_LEVERAGE uint32 = 0x08000000
 )
 
+var (
+	FLAG_PREDICTION_MKT = 0x2
+)
+
+const (
+	PRICE_TYPE_ONCHAIN_STR = "onchain"
+	PRICE_TYPE_PYTH_STR    = "pyth"
+	PRICE_TYPE_PRDMKTS_STR = "polymarket"
+)
+
+type PriceTypeEnum int8
+
+const (
+	PX_TYPE_INVALID PriceTypeEnum = iota
+	PX_ONCHAIN
+	PX_PYTH
+	PX_PRDMKTS
+)
+
 type BlockChainConnector struct {
 	Rpc               *ethclient.Client
 	ChainId           int64
@@ -180,14 +234,6 @@ type BlockChainConnector struct {
 	PriceFeedConfig   utils.PriceFeedConfig
 }
 
-type PerpetualPriceInfo struct {
-	S2Price          float64
-	S3Price          float64
-	IsMarketClosedS2 bool
-	IsMarketClosedS3 bool
-	PriceFeed        PriceFeedData //off-chain price feeds
-}
-
 type Triangulation struct {
 	IsInverse []bool   //[false, true]
 	Symbol    []string // [BTC-USD, USDC-USD]
@@ -195,18 +241,12 @@ type Triangulation struct {
 
 type Triangulations map[string]Triangulation
 
-type PriceFeedData struct {
-	PriceIds     []string
-	Prices       []float64
-	Vaas         [][]byte
-	PublishTimes []uint64
-}
-
 type ResponsePythLatestPriceFeed struct {
-	EmaPrice ResponsePythPrice `json:"ema_price"`
-	Id       string            `json:"id"`
-	Price    ResponsePythPrice `json:"price"`
-	Vaa      string            `json:"vaa"`
+	EmaPrice     ResponsePythPrice `json:"ema_price"`
+	Id           string            `json:"id"`
+	Price        ResponsePythPrice `json:"price"`
+	Vaa          string            `json:"vaa"`
+	PrdMktClosed bool              `json:"market_closed"` // applies to prediction mkts only
 }
 
 type PythLatestPxV2 struct {
@@ -226,6 +266,7 @@ type Metadata struct {
 	Slot               int64 `json:"slot"`
 	ProofAvailableTime int64 `json:"proof_available_time"`
 	PrevPublishTime    int64 `json:"prev_publish_time"`
+	MarketClosed       bool  `json:"market_closed"` // for prediction markets only
 }
 
 type ResponsePythPrice struct {
@@ -404,16 +445,18 @@ func (ps *BrokerPaySignatureReq) UnmarshalJSON(data []byte) error {
 type optionFunc func(*SdkOption)
 
 type SdkOption struct {
-	PriceFeedUrl string
-	RpcUrl       string
-	RpcClient    *ethclient.Client
+	PriceFeedUrl  string
+	PrdMktFeedUrl string
+	RpcUrl        string
+	RpcClient     *ethclient.Client
 }
 
 func defaultSdkOpts(chConf utils.ChainConfig) SdkOption {
 	return SdkOption{
-		PriceFeedUrl: chConf.PriceFeedEndpoint,
-		RpcUrl:       chConf.NodeURL,
-		RpcClient:    nil,
+		PriceFeedUrl:  chConf.PriceFeedEndpoint,
+		PrdMktFeedUrl: chConf.PrdMktFeedEndpoint,
+		RpcUrl:        chConf.NodeURL,
+		RpcClient:     nil,
 	}
 }
 
@@ -450,6 +493,7 @@ func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
 	}
 	chConf.NodeURL = o.RpcUrl
 	chConf.PriceFeedEndpoint = o.PriceFeedUrl
+	chConf.PrdMktFeedEndpoint = o.PrdMktFeedUrl
 	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
 		return err
@@ -463,11 +507,12 @@ func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
 		return err
 	}
 	sdkRo.Conn = conn
-	sdkRo.Info, err = QueryExchangeStaticInfo(&conn, &chConf, &nest)
+	sdkRo.Info, err = QueryExchangeStaticInfo(&conn, &chConf, &pxConf, &nest)
 	if err != nil {
 		return err
 	}
 	sdkRo.ChainConfig = chConf
+	sdkRo.PxConfig = &pxConf
 
 	return nil
 }
@@ -476,7 +521,10 @@ func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
 // networkname according to chainConfig or a chainId; rpcEndpoint and pythEndpoint can be ""
 func (sdk *Sdk) New(privateKeys []string, networkName string, opts ...optionFunc) error {
 
-	sdk.SdkRO.New(networkName, opts...)
+	err := sdk.SdkRO.New(networkName, opts...)
+	if err != nil {
+		return err
+	}
 	if sdk.Conn.Rpc == nil {
 		return errors.New("sdk.Conn.Rpc=nil; required")
 	}

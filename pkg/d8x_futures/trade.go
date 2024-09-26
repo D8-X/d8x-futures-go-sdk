@@ -90,8 +90,9 @@ func (sdk *Sdk) AddCollateral(symbol string, amountCC float64, overrides *OptsOv
 	if overrides != nil && overrides.GasLimit != 0 {
 		limit = overrides.GasLimit
 	}
+	prdMktEndpoint := sdk.ChainConfig.PrdMktFeedEndpoint
 	w.SetGasLimit(uint64(limit))
-	return RawAddCollateral(rpc, &sdk.Conn, &sdk.Info, priceFeedEndPt, w, symbol, amountCC)
+	return RawAddCollateral(rpc, &sdk.Conn, &sdk.Info, priceFeedEndPt, prdMktEndpoint, w, symbol, amountCC)
 }
 
 func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverrides) (*types.Transaction, error) {
@@ -105,7 +106,7 @@ func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverri
 	}
 	w.SetGasLimit(uint64(limit))
 
-	return RawCancelOrder(rpc, &sdk.Conn, &sdk.Info, priceFeedEndPt, w, symbol, orderId)
+	return RawCancelOrder(rpc, &sdk.Conn, &sdk.Info, priceFeedEndPt, sdk.ChainConfig.PrdMktFeedEndpoint, w, symbol, orderId)
 }
 
 func (sdk *Sdk) ExecuteOrders(
@@ -127,7 +128,7 @@ func (sdk *Sdk) ExecuteOrders(
 	widx, rpc, priceFeedEndPt := extractOverrides(sdk, op0)
 	o := OptsOverridesExec{OptsOverrides: OptsOverrides{Rpc: rpc, PriceFeedEndPt: priceFeedEndPt, WalletIdx: widx, GasLimit: gas}, TsMin: tsMin}
 
-	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.Wallets[widx], symbol, orderIds, &o)
+	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.Wallets[widx], symbol, orderIds, sdk.ChainConfig.PrdMktFeedEndpoint, &o)
 }
 
 // LiquidatePosition liquidates the position of traderAddr in perpetual with id perpId, given it is liquidatable. Liquidation
@@ -158,6 +159,7 @@ func (sdk *Sdk) LiquidatePosition(
 		perpId,
 		traderAddr,
 		optLiquidatorAddr,
+		sdk.ChainConfig.PrdMktFeedEndpoint,
 		&o)
 }
 
@@ -222,7 +224,7 @@ func RawPostOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Stati
 
 // RawCancelOrder cancels the existing order with the given id from the provided wallet
 func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *StaticExchangeInfo,
-	pythEndpoint string, postingWallet *Wallet, symbol string, orderId string) (*types.Transaction, error) {
+	pythEndpoint, prdMktFeedEndpoint string, postingWallet *Wallet, symbol string, orderId string) (*types.Transaction, error) {
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	// first get the corresponding order and sign
@@ -230,19 +232,23 @@ func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Sta
 	bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderId, "0x"))
 	copy(dig[:], bytesDigest)
 
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint, prdMktFeedEndpoint)
 	if err != nil {
 		return nil, errors.New("RawCancelOrder: failed fetching oracle prices " + err.Error())
 	}
 	var tx *types.Transaction
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
-	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
 
 	postingWallet.UpdateNonceAndGasPx(rpc)
 	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-	tx, err = ob.CancelOrder(postingWallet.Auth, dig, []byte{}, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
+	for k, p := range pxFeed.PriceFeed.Prices {
+		publishTimes[k] = uint64(p.Ts)
+	}
+	tx, err = ob.CancelOrder(postingWallet.Auth, dig, []byte{}, pxFeed.PriceFeed.Vaas, publishTimes)
 	if err != nil {
 		return nil, errors.New("RawCancelOrder:" + err.Error())
 	}
@@ -256,6 +262,7 @@ func RawExecuteOrders(
 	postingWallet *Wallet,
 	symbol string,
 	orderIds []string,
+	prdMktEndpoint string,
 	opts *OptsOverridesExec,
 ) (
 	*types.Transaction,
@@ -270,17 +277,20 @@ func RawExecuteOrders(
 	var err error
 	for {
 		// fetch prices
-		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt)
+		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt, prdMktEndpoint)
 		if err != nil {
 			return nil, errors.New("RawExecuteOrder: failed fetching oracle prices " + err.Error())
 		}
 		if opts.TsMin == 0 {
 			break
 		}
+		if pxFeed.IsMarketClosedS2 || pxFeed.IsMarketClosedS3 {
+			return nil, errors.New("market closed for " + symbol)
+		}
 		// check whether prices are too old
 		var delta int64 = -10
-		for _, tsFeed := range pxFeed.PriceFeed.PublishTimes {
-			delta = max(delta, int64(tsFeed)-int64(opts.TsMin))
+		for _, tsFeed := range pxFeed.PriceFeed.Prices {
+			delta = max(delta, int64(tsFeed.Ts)-int64(opts.TsMin))
 		}
 		if delta > 0 {
 			// price feed newer than submission timestamp,
@@ -302,7 +312,7 @@ func RawExecuteOrders(
 
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
-	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
 
 	g := postingWallet.Auth.GasLimit
@@ -311,7 +321,7 @@ func RawExecuteOrders(
 	postingWallet.UpdateNonceAndGasPx(opts.Rpc)
 	ob := CreateLimitOrderBookInstance(opts.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 
-	limit := 2_000_000 + 1_000_000*(len(digests)-1)
+	limit := 3_000_000 + 1_000_000*(len(digests)-1)
 	if opts.GasLimit != 0 {
 		limit = opts.GasLimit
 	}
@@ -320,7 +330,11 @@ func RawExecuteOrders(
 		// payout addr was not provided
 		opts.PayoutAddr = postingWallet.Address
 	}
-	return ob.ExecuteOrders(postingWallet.Auth, digests, opts.PayoutAddr, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
+	for k, p := range pxFeed.PriceFeed.Prices {
+		publishTimes[k] = uint64(p.Ts)
+	}
+	return ob.ExecuteOrders(postingWallet.Auth, digests, opts.PayoutAddr, pxFeed.PriceFeed.Vaas, publishTimes)
 }
 
 func RawLiquidatePosition(
@@ -329,6 +343,7 @@ func RawLiquidatePosition(
 	postingWallet *Wallet,
 	perpId int32,
 	traderAddr, liquidatorAddr *common.Address,
+	prdMktEndpoint string,
 	opts *OptsOverrides,
 ) (
 	*types.Transaction,
@@ -346,7 +361,7 @@ func RawLiquidatePosition(
 	postingWallet.UpdateNonceAndGasPx(opts.Rpc)
 
 	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt, prdMktEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("RawLiquidatePosition: failed fetching oracle prices %v", err.Error())
 	}
@@ -355,14 +370,18 @@ func RawLiquidatePosition(
 	}
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
-	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
 	limit := 3_000_000
 	if opts.GasLimit != 0 {
 		limit = opts.GasLimit
 	}
 	postingWallet.SetGasLimit(uint64(limit))
-	return perpCtrct.LiquidateByAMM(postingWallet.Auth, big.NewInt(int64(perpId)), *liquidatorAddr, *traderAddr, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
+	for k, p := range pxFeed.PriceFeed.Prices {
+		publishTimes[k] = uint64(p.Ts)
+	}
+	return perpCtrct.LiquidateByAMM(postingWallet.Auth, big.NewInt(int64(perpId)), *liquidatorAddr, *traderAddr, pxFeed.PriceFeed.Vaas, publishTimes)
 }
 
 // estimateGasLimit estimates the gaslimit
@@ -394,18 +413,22 @@ func RawUpdatePythPriceFeeds(priceUpdateFeeGwei int64, rpc *ethclient.Client, xI
 	}
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
-	val := priceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	val := priceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(1_000_000))
 
 	postingWallet.UpdateNonceAndGasPx(rpc)
-	return pyth.UpdatePriceFeedsIfNecessary(postingWallet.Auth, pxFeed.PriceFeed.Vaas, ids, pxFeed.PriceFeed.PublishTimes)
+	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
+	for k, p := range pxFeed.PriceFeed.Prices {
+		publishTimes[k] = uint64(p.Ts)
+	}
+	return pyth.UpdatePriceFeedsIfNecessary(postingWallet.Auth, pxFeed.PriceFeed.Vaas, ids, publishTimes)
 }
 
 // RawAddCollateral adds (amountCC>0) or removes (amountCC<0) collateral to/from the margin account of the given perpetual
-func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint string, postingWallet *Wallet, symbol string, amountCC float64) (*types.Transaction, error) {
+func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint, prdMktEndpoint string, postingWallet *Wallet, symbol string, amountCC float64) (*types.Transaction, error) {
 	if amountCC == 0 {
 		return nil, errors.New("RawAddCollateral: amount 0")
 	}
@@ -417,26 +440,31 @@ func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *S
 	if err != nil {
 		return nil, fmt.Errorf("RawAddCollateral: failed CreatePerpetualManagerInstance %v", err.Error())
 	}
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint, prdMktEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("RawAddCollateral: failed fetching oracle prices %v", err.Error())
 	}
 	var tx *types.Transaction
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
-	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.PublishTimes))
+	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
+
+	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
+	for k, p := range pxFeed.PriceFeed.Prices {
+		publishTimes[k] = uint64(p.Ts)
+	}
 
 	postingWallet.UpdateNonceAndGasPx(rpc)
 	if amountCC > 0 {
 		tx, err = perpCtrct.Deposit(postingWallet.Auth, big.NewInt(id),
-			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, publishTimes)
 		if err != nil {
 			return nil, fmt.Errorf("RawAddCollateral: %v", err.Error())
 		}
 	} else {
 		tx, err = perpCtrct.Withdraw(postingWallet.Auth, big.NewInt(id),
-			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, pxFeed.PriceFeed.PublishTimes)
+			postingWallet.Address, amount, pxFeed.PriceFeed.Vaas, publishTimes)
 		if err != nil {
 			return nil, fmt.Errorf("RawAddCollateral: %v", err.Error())
 		}

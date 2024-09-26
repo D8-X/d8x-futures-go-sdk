@@ -33,27 +33,27 @@ func TestSdkExec(t *testing.T) {
 		t.FailNow()
 	}
 	//err := sdk.New([]string{pk}, "42161") //arbitrum
-	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
-	err := sdk.New([]string{pk}, "195") //x-layer testnet
+	err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
+	//err := sdk.New([]string{pk}, "195") //x-layer testnet
 	//err := sdk.New([]string{pk}, "196") //x-layer
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
 	//err := sdk.New([]string{pk}, "80084") //bartio
-	perp := "BTC-USDC-USDC"
+	perp := "PENDLE-USD-STUSD"
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 		t.FailNow()
 	}
 	fmt.Printf("wallet addr =%s\n", sdk.Wallets[0].Address.Hex())
 	orderObj, err := sdk.QueryAllOpenOrders(perp, nil)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 		t.FailNow()
 	}
 	orders := orderObj.Orders
 	ids := orderObj.OrderHashes
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 		t.FailNow()
 	}
 	var mktOrderIds []string
@@ -63,20 +63,23 @@ func TestSdkExec(t *testing.T) {
 		}
 	}
 	if len(mktOrderIds) == 0 {
-		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 0.001, 10, &OrderOptions{LimitPrice: 2240})
+		//mktOrderIds = append(mktOrderIds, "f3e6741c2eefeb3c5e1c8539f15e5590b8b104ad6c8ed99a2f63151c315b0dd0")
+
+		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 0.001, 10, &OrderOptions{LimitPrice: 0})
 		orderId, _, err := sdk.PostOrder(order, nil)
 		if err != nil {
-			t.Logf(err.Error())
+			t.Log(err.Error())
 		}
 		fmt.Println("order id =", orderId)
-
+		//23e50c73801fd4487f2c9d17f8781353717cf861a010c725bef73cb537e8e603
 		mktOrderIds = append(mktOrderIds, orderId)
+
 	}
 	now := time.Now().Unix()
 	payoutAddr := common.Address{} // common.HexToAddress("0x98DfAFF5126836E339493a6021FD5B92Bf005F0D")
 	tx, err := sdk.ExecuteOrders(perp, []string{mktOrderIds[0]}, &OptsOverridesExec{TsMin: uint32(now), PayoutAddr: payoutAddr})
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 		t.FailNow()
 	}
 	fmt.Println("tx = ", tx.Hash())
@@ -91,15 +94,15 @@ func TestSdkLiquidatePosition(t *testing.T) {
 		t.FailNow()
 	}
 	//err := sdk.New([]string{pk}, "195") //x-layer testnet
-	err := sdk.New([]string{pk}, "196") //x-layer testnet
-	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
+	//err := sdk.New([]string{pk}, "196") //x-layer testnet
+	err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 		t.FailNow()
 	}
-	acc2, err := sdk.QueryLiquidatableAccountsInPool(2, nil)
+	acc2, err := sdk.QueryLiquidatableAccountsInPool(1, nil)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 		t.FailNow()
 	}
 	fmt.Println(acc2)
@@ -153,12 +156,12 @@ func TestTradingFunc(t *testing.T) {
 	}
 	err := sdk.New([]string{pk}, "testnet")
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 
 	orders, ids, err := sdk.QueryOpenOrders("BTC-USDC-USDC", sdk.Wallets[0].Address, nil)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	} else {
 		fmt.Println("order ids =", ids)
 		fmt.Println("orders =", orders)
@@ -166,21 +169,21 @@ func TestTradingFunc(t *testing.T) {
 	if len(ids) > 0 {
 		tx, err := sdk.CancelOrder("BTC-USDC-USDC", ids[0], nil)
 		if err != nil {
-			t.Logf(err.Error())
+			t.Log(err.Error())
 		} else {
 			fmt.Println("tx cancel order=", tx.Hash())
 		}
 	}
 	tx, err := sdk.AddCollateral("ETH-USD-MATIC", 100, nil)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	} else {
 		fmt.Println("tx hash adding collateral=", tx.Hash())
 	}
 
 	tx, err = sdk.ApproveTknSpending("ETH-USD-MATIC", nil, nil)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	} else {
 		fmt.Println("tx hash=", tx.Hash())
 	}
@@ -188,26 +191,26 @@ func TestTradingFunc(t *testing.T) {
 	order := NewOrder("BTC-USDC-USDC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
 	orderId, _, err := sdk.PostOrder(order, nil)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	} else {
 		fmt.Println("order id =", orderId)
 	}
 	tx, err = sdk.CancelOrder("BTC-USDC-USDC", orderId, nil)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	} else {
 		fmt.Println("tx cancel order=", tx.Hash())
 	}
 
 	status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallets[0].Address, orderId, nil)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	} else {
 		fmt.Println("order status =", status)
 	}
 	pr, err := sdk.GetPositionRisk("ETH-USD-MATIC", sdk.Wallets[0].Address, nil)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	} else {
 		fmt.Println("position risk =", pr)
 	}
@@ -288,16 +291,16 @@ func TestPostOrder(t *testing.T) {
 	}
 	chConfig, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	pxConf, err := config.GetDefaultPriceConfig(chConfig.ChainId)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	conn, _ := CreateBlockChainConnector(pxConf, chConfig, nil)
 	wallet, err := NewWallet(fmt.Sprintf("%x", execPk.D), conn.ChainId, conn.Rpc)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	var xInfo StaticExchangeInfo
 	xInfo.Load("./tmpXchInfo.json")
@@ -344,7 +347,7 @@ func TestBrokerSignature(t *testing.T) {
 	}
 	chConfig, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	var xInfo StaticExchangeInfo
 	xInfo.Load("./tmpXchInfo.json")
@@ -372,7 +375,7 @@ func TestPaymentSignature(t *testing.T) {
 	}
 	chConfig, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	wallet, err := NewWallet(fmt.Sprintf("%x", execPk.D), chConfig.ChainId, nil)
 	fmt.Printf("\nwallet addr %s\n", wallet.Address.String())
@@ -384,7 +387,7 @@ func TestPaymentSignature(t *testing.T) {
 
 	executorKey, err := crypto.GenerateKey()
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	tokenAddr := common.HexToAddress("0xeE53d536DFC355017147058a4197cAD3b4ac1964")
 	multiPayCtrct := common.HexToAddress("0x30b55550e02B663E15A95B50850ebD20363c2AD5")
@@ -399,16 +402,16 @@ func TestPaymentSignature(t *testing.T) {
 	ps.ChainId = chConfig.ChainId
 	dgst, sig, err := RawCreatePaymentBrokerSignature(&ps, wallet)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	fmt.Print(dgst, sig)
 	sigB, err := BytesFromHexString(sig)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	addr, err := RecoverPaymentSignatureAddr(sigB, &ps)
 	if err != nil {
-		t.Logf(err.Error())
+		t.Log(err.Error())
 	}
 	fmt.Printf("\nrecovered address %s", addr.String())
 	fmt.Printf("\nbroker address %s", wallet.Address.String())
@@ -421,7 +424,7 @@ func TestSignOrder(t *testing.T) {
 	// Generate a new private key
 	privateKey, err := crypto.GenerateKey()
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Log(err.Error())
 	}
 	// Derive the Ethereum address from the private key
 	addr := crypto.PubkeyToAddress(privateKey.PublicKey)
@@ -453,8 +456,8 @@ func TestSignOrder(t *testing.T) {
 	if err != nil {
 		t.Errorf("recovering address: %v", err)
 	} else {
-		t.Logf("recovered address")
-		t.Logf(addrRecovered.String())
+		t.Log("recovered address")
+		t.Log(addrRecovered.String())
 	}
 	t.Log("recovered addr = ", addrRecovered.String())
 	t.Log("signer    addr = ", addr.String())

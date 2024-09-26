@@ -1,6 +1,7 @@
 # d8x-futures-go-sdk
 
 Go SDK for D8X Perpetual Futures
+Fetches config files from `https://github.com/D8-X/sync-hub`
 
 # Read-Only (Public)
 
