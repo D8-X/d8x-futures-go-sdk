@@ -17,6 +17,7 @@ type ChainConfig struct {
 	PriceFeedNetwork   string         `json:"priceFeedNetwork"`
 	PriceFeedEndpoint  string         `json:"priceFeedEndpoint"`
 	PrdMktFeedEndpoint string         `json:"prdMktFeedEndpoint"`
+	LowLiqFeedEndpoint string         `json:"lowLiqFeedEndpoint"`
 	ChainId            int64          `json:"chainId"`
 	ProxyAddr          common.Address `json:"proxyAddr"`
 	MultiPayAddr       common.Address `json:"multipayAddr"`

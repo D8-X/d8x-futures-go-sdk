@@ -301,6 +301,13 @@ func isPrdMktPerp(perp *PerpetualStaticInfo) bool {
 	return result.Cmp(big.NewInt(0)) != 0
 }
 
+// isLowLiqPerp checks whether the loqliq market flag
+// of the perpetual is set
+func isLowLiqPerp(perp *PerpetualStaticInfo) bool {
+	result := new(big.Int).And(big.NewInt(int64(FLAG_LOWLIQ_MKT)), perp.PerpFlags)
+	return result.Cmp(big.NewInt(0)) != 0
+}
+
 // Store stores the StaticExchangeInfo in a file
 func (s *StaticExchangeInfo) Store(filename string) error {
 	jsonData, err := json.Marshal(s)
@@ -347,6 +354,8 @@ func priceTypeStrToType(typeStr string) PriceTypeEnum {
 		return PX_PRDMKTS
 	} else if typeStr == PRICE_TYPE_PYTH_STR {
 		return PX_PYTH
+	} else if typeStr == PRICE_TYPE_LOWLIQ {
+		return PX_LOWLIQ
 	}
 	return PX_TYPE_INVALID
 }

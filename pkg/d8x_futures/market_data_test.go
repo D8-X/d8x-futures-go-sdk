@@ -26,7 +26,7 @@ func TestFetchPricesFromAPI(t *testing.T) {
 			Type: PX_PYTH, Origin: ""},
 		{Id: "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
 			Type: PX_PYTH, Origin: ""}}
-	data, _ := fetchPricesFromAPI(priceIds, "https://hermes.pyth.network/api", "", false)
+	data, _ := fetchPricesFromAPI(priceIds, "https://hermes.pyth.network/api", "", "", false)
 	fmt.Println(data)
 	priceIdsWrong := []PriceId{
 		{Id: "0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
@@ -34,7 +34,7 @@ func TestFetchPricesFromAPI(t *testing.T) {
 		{Id: "0x01f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
 			Type: PX_PYTH, Origin: ""},
 	}
-	_, err := fetchPricesFromAPI(priceIdsWrong, "https://hermes.pyth.network/api", "", false)
+	_, err := fetchPricesFromAPI(priceIdsWrong, "https://hermes.pyth.network/api", "", "", false)
 	if err == nil {
 		slog.Error("Error: queried wrong price id but did not fail")
 		t.FailNow()
@@ -115,7 +115,7 @@ func TestFetchPythPrices(t *testing.T) {
 	}
 	r, err := fetchPythPrices([]PriceId{
 		{Id: pxConf.PriceFeedIds[0].Id, Type: PX_PYTH, Origin: ""},
-		{Id: pxConf.PriceFeedIds[1].Id, Type: PX_PYTH, Origin: ""}}, "https://hermes.pyth.network/", "")
+		{Id: pxConf.PriceFeedIds[1].Id, Type: PX_PYTH, Origin: ""}}, "https://hermes.pyth.network/", "", "")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -169,6 +169,36 @@ func TestFetchPolymarket(t *testing.T) {
 		fmt.Println("----")
 		response.Body.Close()
 	}
+}
+
+func TestFetchLowLiqPx(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("80084")
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	id, err := sdkRo.GetPriceId("DIRAC-HONEY")
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	fmt.Print(id.Origin)
+	for _, info := range sdkRo.Info.Perpetuals {
+		fmt.Printf("id: %d perpetual %s-'%s'\n", info.Id, info.S2Symbol, info.S3Symbol)
+	}
+	b, err := sdkRo.IsLowLiqPerp("DIRAC-HONEY-USDC")
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	fmt.Println(b)
+	px, err := sdkRo.QueryPerpetualPrices("DIRAC-HONEY-USDC", []float64{0}, nil)
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	fmt.Println(px)
 }
 
 func TestFetchInfo(t *testing.T) {
@@ -300,7 +330,7 @@ func TestQueryLiquidatableAccounts(t *testing.T) {
 	}
 	fmt.Println("Accounts =", acc)
 
-	accs, err := RawQueryLiquidatableAccountsInPool(sdkRo.Conn.Rpc, &sdkRo.Info, 1, "https://hermes.pyth.network/api", "")
+	accs, err := RawQueryLiquidatableAccountsInPool(sdkRo.Conn.Rpc, &sdkRo.Info, 1, "https://hermes.pyth.network/api", "", "")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -385,7 +415,7 @@ func TestPerpetualPriceTuple(t *testing.T) {
 	}
 	startTime := time.Now()
 	tradeAmt := []float64{-0.06, -0.05, -0.01, 0, 0.01, 0.05}
-	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoint, "", "ETH-USD-WEETH", tradeAmt)
+	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, sdkRo.ChainConfig.PriceFeedEndpoint, "", "ETH-USD-WEETH", "", tradeAmt)
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	if err != nil {
@@ -600,7 +630,7 @@ func TestFetchPricesForPerpetual(t *testing.T) {
 	if err != nil {
 		t.Log(err.Error())
 	}
-	pxBundle, err := RawFetchPricesForPerpetual(sdkRo.Info, "ETH-USDC-USDC", "https://hermes.pyth.network/api", "")
+	pxBundle, err := RawFetchPricesForPerpetual(sdkRo.Info, "ETH-USDC-USDC", "https://hermes.pyth.network/api", "", "")
 	if err != nil {
 		t.Log(err.Error())
 	}
@@ -623,7 +653,7 @@ func TestGetPositionRisk(t *testing.T) {
 	if err != nil {
 		t.Log(err.Error())
 	}
-	pRisk, err := RawGetPositionRisk(info, conn.Rpc, (*common.Address)(&traderAddr), "ETH-USD-MATIC", "https://hermes.pyth.network/api", "")
+	pRisk, err := RawGetPositionRisk(info, conn.Rpc, (*common.Address)(&traderAddr), "ETH-USD-MATIC", "https://hermes.pyth.network/api", "", "")
 	if err != nil {
 		t.Log(err.Error())
 	}
@@ -643,7 +673,7 @@ func TestQueryPerpetualState(t *testing.T) {
 	}
 	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
 	perpIds := []int32{100001, 100002}
-	perpState, err := RawQueryPerpetualState(conn.Rpc, info, perpIds, "https://hermes-beta.pyth.network/api", "")
+	perpState, err := RawQueryPerpetualState(conn.Rpc, info, perpIds, "https://hermes-beta.pyth.network/api", "", "")
 	if err != nil {
 		t.Log(err.Error())
 	}

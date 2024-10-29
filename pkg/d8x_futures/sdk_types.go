@@ -207,12 +207,14 @@ var (
 
 var (
 	FLAG_PREDICTION_MKT = 0x2
+	FLAG_LOWLIQ_MKT     = 0x4
 )
 
 const (
 	PRICE_TYPE_ONCHAIN_STR = "onchain"
 	PRICE_TYPE_PYTH_STR    = "pyth"
 	PRICE_TYPE_PRDMKTS_STR = "polymarket"
+	PRICE_TYPE_LOWLIQ      = "low-liq"
 )
 
 type PriceTypeEnum int8
@@ -222,6 +224,7 @@ const (
 	PX_ONCHAIN
 	PX_PYTH
 	PX_PRDMKTS
+	PX_LOWLIQ
 )
 
 type BlockChainConnector struct {

@@ -91,8 +91,9 @@ func (sdk *Sdk) AddCollateral(symbol string, amountCC float64, overrides *OptsOv
 		limit = overrides.GasLimit
 	}
 	prdMktEndpoint := sdk.ChainConfig.PrdMktFeedEndpoint
+	lowLiqEp := sdk.ChainConfig.LowLiqFeedEndpoint
 	w.SetGasLimit(uint64(limit))
-	return RawAddCollateral(rpc, &sdk.Conn, &sdk.Info, priceFeedEndPt, prdMktEndpoint, w, symbol, amountCC)
+	return RawAddCollateral(rpc, &sdk.Conn, &sdk.Info, priceFeedEndPt, prdMktEndpoint, lowLiqEp, w, symbol, amountCC)
 }
 
 func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverrides) (*types.Transaction, error) {
@@ -106,7 +107,17 @@ func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverri
 	}
 	w.SetGasLimit(uint64(limit))
 
-	return RawCancelOrder(rpc, &sdk.Conn, &sdk.Info, priceFeedEndPt, sdk.ChainConfig.PrdMktFeedEndpoint, w, symbol, orderId)
+	return RawCancelOrder(
+		rpc,
+		&sdk.Conn,
+		&sdk.Info,
+		priceFeedEndPt,
+		sdk.ChainConfig.PrdMktFeedEndpoint,
+		sdk.ChainConfig.LowLiqFeedEndpoint,
+		w,
+		symbol,
+		orderId,
+	)
 }
 
 func (sdk *Sdk) ExecuteOrders(
@@ -128,7 +139,14 @@ func (sdk *Sdk) ExecuteOrders(
 	widx, rpc, priceFeedEndPt := extractOverrides(sdk, op0)
 	o := OptsOverridesExec{OptsOverrides: OptsOverrides{Rpc: rpc, PriceFeedEndPt: priceFeedEndPt, WalletIdx: widx, GasLimit: gas}, TsMin: tsMin}
 
-	return RawExecuteOrders(&sdk.Conn, &sdk.Info, sdk.Wallets[widx], symbol, orderIds, sdk.ChainConfig.PrdMktFeedEndpoint, &o)
+	return RawExecuteOrders(&sdk.Conn,
+		&sdk.Info,
+		sdk.Wallets[widx],
+		symbol,
+		orderIds,
+		sdk.ChainConfig.PrdMktFeedEndpoint,
+		sdk.ChainConfig.LowLiqFeedEndpoint,
+		&o)
 }
 
 // LiquidatePosition liquidates the position of traderAddr in perpetual with id perpId, given it is liquidatable. Liquidation
@@ -160,6 +178,7 @@ func (sdk *Sdk) LiquidatePosition(
 		traderAddr,
 		optLiquidatorAddr,
 		sdk.ChainConfig.PrdMktFeedEndpoint,
+		sdk.ChainConfig.LowLiqFeedEndpoint,
 		&o)
 }
 
@@ -223,8 +242,17 @@ func RawPostOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Stati
 }
 
 // RawCancelOrder cancels the existing order with the given id from the provided wallet
-func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *StaticExchangeInfo,
-	pythEndpoint, prdMktFeedEndpoint string, postingWallet *Wallet, symbol string, orderId string) (*types.Transaction, error) {
+func RawCancelOrder(
+	rpc *ethclient.Client,
+	conn *BlockChainConnector,
+	xInfo *StaticExchangeInfo,
+	pythEndpoint string,
+	prdMktFeedEndpoint string,
+	lowLiqFeedEndpoint string,
+	postingWallet *Wallet,
+	symbol string,
+	orderId string,
+) (*types.Transaction, error) {
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	// first get the corresponding order and sign
@@ -232,7 +260,7 @@ func RawCancelOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Sta
 	bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderId, "0x"))
 	copy(dig[:], bytesDigest)
 
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint, prdMktFeedEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint, prdMktFeedEndpoint, lowLiqFeedEndpoint)
 	if err != nil {
 		return nil, errors.New("RawCancelOrder: failed fetching oracle prices " + err.Error())
 	}
@@ -263,6 +291,7 @@ func RawExecuteOrders(
 	symbol string,
 	orderIds []string,
 	prdMktEndpoint string,
+	lowLiqEndpoint string,
 	opts *OptsOverridesExec,
 ) (
 	*types.Transaction,
@@ -277,7 +306,7 @@ func RawExecuteOrders(
 	var err error
 	for {
 		// fetch prices
-		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt, prdMktEndpoint)
+		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt, prdMktEndpoint, lowLiqEndpoint)
 		if err != nil {
 			return nil, errors.New("RawExecuteOrder: failed fetching oracle prices " + err.Error())
 		}
@@ -342,8 +371,10 @@ func RawLiquidatePosition(
 	xInfo *StaticExchangeInfo,
 	postingWallet *Wallet,
 	perpId int32,
-	traderAddr, liquidatorAddr *common.Address,
+	traderAddr *common.Address,
+	liquidatorAddr *common.Address,
 	prdMktEndpoint string,
+	lowLiqEndpoint string,
 	opts *OptsOverrides,
 ) (
 	*types.Transaction,
@@ -361,7 +392,7 @@ func RawLiquidatePosition(
 	postingWallet.UpdateNonceAndGasPx(opts.Rpc)
 
 	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt, prdMktEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt, prdMktEndpoint, lowLiqEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("RawLiquidatePosition: failed fetching oracle prices %v", err.Error())
 	}
@@ -428,7 +459,18 @@ func RawUpdatePythPriceFeeds(priceUpdateFeeGwei int64, rpc *ethclient.Client, xI
 }
 
 // RawAddCollateral adds (amountCC>0) or removes (amountCC<0) collateral to/from the margin account of the given perpetual
-func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *StaticExchangeInfo, pythEndpoint, prdMktEndpoint string, postingWallet *Wallet, symbol string, amountCC float64) (*types.Transaction, error) {
+func RawAddCollateral(
+	rpc *ethclient.Client,
+	conn *BlockChainConnector,
+	xInfo *StaticExchangeInfo,
+	pythEndpoint string,
+	prdMktEndpoint string,
+	lowLiqEndpoint string,
+	postingWallet *Wallet,
+	symbol string,
+	amountCC float64,
+) (*types.Transaction, error) {
+
 	if amountCC == 0 {
 		return nil, errors.New("RawAddCollateral: amount 0")
 	}
@@ -440,7 +482,7 @@ func RawAddCollateral(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *S
 	if err != nil {
 		return nil, fmt.Errorf("RawAddCollateral: failed CreatePerpetualManagerInstance %v", err.Error())
 	}
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint, prdMktEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint, prdMktEndpoint, lowLiqEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("RawAddCollateral: failed fetching oracle prices %v", err.Error())
 	}
