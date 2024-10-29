@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	SYNC_HUB_URL = "https://raw.githubusercontent.com/D8-X/sync-hub/dev/d8x-futures-go-sdk/"
+	SYNC_HUB_URL = "https://raw.githubusercontent.com/D8-X/sync-hub/main/d8x-futures-go-sdk/"
 )
 
 //go:embed embedded/*
