@@ -67,7 +67,7 @@
   {
     "name": "bartio",
     "priceFeedNetwork": "PythEVMStable",
-    "priceFeedEndpoint": "https://hermes.pyth.network",
+    "priceFeedEndpoint": "https://odin.d8x.xyz/",
     "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
     "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
     "chainId": 80084,
