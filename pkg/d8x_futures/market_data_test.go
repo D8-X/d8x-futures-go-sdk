@@ -23,16 +23,16 @@ import (
 func TestFetchPricesFromAPI(t *testing.T) {
 	priceIds := []PriceId{
 		{Id: "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
-			Type: PX_PYTH, Origin: ""},
+			Type: utils.PXTYPE_PYTH, Origin: ""},
 		{Id: "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
-			Type: PX_PYTH, Origin: ""}}
+			Type: utils.PXTYPE_PYTH, Origin: ""}}
 	data, _ := fetchPricesFromAPI(priceIds, "https://hermes.pyth.network/api", "", "", false)
 	fmt.Println(data)
 	priceIdsWrong := []PriceId{
 		{Id: "0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
-			Type: PX_PYTH, Origin: ""},
+			Type: utils.PXTYPE_PYTH, Origin: ""},
 		{Id: "0x01f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
-			Type: PX_PYTH, Origin: ""},
+			Type: utils.PXTYPE_PYTH, Origin: ""},
 	}
 	_, err := fetchPricesFromAPI(priceIdsWrong, "https://hermes.pyth.network/api", "", "", false)
 	if err == nil {
@@ -113,9 +113,18 @@ func TestFetchPythPrices(t *testing.T) {
 		t.Log(err.Error())
 		t.FailNow()
 	}
+	idx := make([]int, 0, 2)
+	for j := range pxConf.PriceFeedIds {
+		if pxConf.PriceFeedIds[j].Type == utils.PXTYPE_PYTH {
+			idx = append(idx, j)
+		}
+		if len(idx) == 2 {
+			break
+		}
+	}
 	r, err := fetchPythPrices([]PriceId{
-		{Id: pxConf.PriceFeedIds[0].Id, Type: PX_PYTH, Origin: ""},
-		{Id: pxConf.PriceFeedIds[1].Id, Type: PX_PYTH, Origin: ""}}, "https://hermes.pyth.network/", "", "")
+		{Id: pxConf.PriceFeedIds[idx[0]].Id, Type: utils.PXTYPE_PYTH, Origin: ""},
+		{Id: pxConf.PriceFeedIds[idx[1]].Id, Type: utils.PXTYPE_PYTH, Origin: ""}}, "https://hermes.pyth.network/", "", "")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()

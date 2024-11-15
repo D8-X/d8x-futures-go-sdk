@@ -37,12 +37,59 @@ type PriceFeedConfig struct {
 	PxIdToSymbols                 map[string][]string    //map the symbol price id 0x382738927... to one or more symbols
 }
 
+type PriceType int
+
+const (
+	PXTYPE_POLYMARKET PriceType = iota
+	PXTYPE_PYTH
+	PXTYPE_V2
+	PXTYPE_V3
+	PXTYPE_ONCHAIN
+	PXTYPE_UNKNOWN
+)
+
+// Map to convert strings to AssetType. needs to align with
+// priceFeedConfig on https://github.com/D8-X/sync-hub
+var PriceTypeMap = map[string]PriceType{
+	"polymarket": PXTYPE_POLYMARKET,
+	"pyth":       PXTYPE_PYTH,
+	"low-liq":    PXTYPE_V3, //legacy
+	"univ2":      PXTYPE_V2,
+	"univ3":      PXTYPE_V3,
+	"onchain":    PXTYPE_ONCHAIN,
+	"unknown":    PXTYPE_UNKNOWN,
+}
+
+// PriceType to string
+func (p PriceType) ToString() string {
+	for name, t := range PriceTypeMap {
+		if t == p {
+			return name
+		}
+	}
+	return "unknown"
+}
+
+// UnmarshalJSON implements custom unmarshaling for PriceType
+func (p *PriceType) UnmarshalJSON(data []byte) error {
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	val, ok := PriceTypeMap[str]
+	if !ok {
+		return errors.New("invalid asset type: " + str)
+	}
+	*p = val
+	return nil
+}
+
 type PriceFeedId struct {
-	Symbol   string `json:"symbol"`
-	Id       string `json:"id"`
-	Type     string `json:"type"`
-	Origin   string `json:"origin"`
-	StorkSym string `json:"storkSym"`
+	Symbol   string    `json:"symbol"`
+	Id       string    `json:"id"`
+	Type     PriceType `json:"type"`
+	Origin   string    `json:"origin"`
+	StorkSym string    `json:"storkSym"`
 }
 
 type PriceFeedOnChainConfig struct {
