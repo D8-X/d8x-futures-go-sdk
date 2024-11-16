@@ -61,13 +61,39 @@ var PriceTypeMap = map[string]PriceType{
 }
 
 // PriceType to string
-func (p PriceType) ToString() string {
+func (p PriceType) String() string {
 	for name, t := range PriceTypeMap {
 		if t == p {
 			return name
 		}
 	}
 	return "unknown"
+}
+
+type AssetClass int
+
+const (
+	ACLASS_CRYPTO AssetClass = iota //Crypto & Crypto.Index, https://www.pyth.network/price-feeds/crypto-index-gmci30-usd
+	ACLASS_POLYMKT
+	ACLASS_FX
+	ACLASS_EQUITY    // equity and ETF
+	ACLASS_METAL     // Metal.XAG/USD
+	ACLASS_COMMODITY //	Commodities.USOILSPOT
+	ACLASS_RATES     //	Rates.US1M
+	ACLASS_UNKNOWN
+)
+
+// Map to convert strings to AssetType. needs to align with
+// priceFeedConfig on https://github.com/D8-X/sync-hub
+var AssetClassMap = map[string]AssetClass{
+	"crypto":      ACLASS_CRYPTO,
+	"polymarket":  ACLASS_POLYMKT,
+	"fx":          ACLASS_FX,
+	"equity":      ACLASS_EQUITY,
+	"metal":       ACLASS_METAL,
+	"commodities": ACLASS_COMMODITY,
+	"rates":       ACLASS_RATES,
+	"unknown":     ACLASS_UNKNOWN,
 }
 
 // UnmarshalJSON implements custom unmarshaling for PriceType
@@ -78,18 +104,49 @@ func (p *PriceType) UnmarshalJSON(data []byte) error {
 	}
 	val, ok := PriceTypeMap[str]
 	if !ok {
-		return errors.New("invalid asset type: " + str)
+		val = PXTYPE_UNKNOWN
 	}
 	*p = val
 	return nil
 }
 
+func OriginToAssetClass(origin string) AssetClass {
+	if origin == "" {
+		return ACLASS_CRYPTO
+	}
+	if len(origin) < 2 {
+		return ACLASS_UNKNOWN
+	}
+	if origin[0:2] == "0x" {
+		return ACLASS_POLYMKT
+	}
+
+	origin = strings.ToLower(origin)
+	origin = strings.Split(origin, ".")[0]
+	val, ok := AssetClassMap[origin]
+	if !ok {
+		return ACLASS_UNKNOWN
+	}
+	return val
+}
+
+// AssetClass to string
+func (a AssetClass) String() string {
+	for name, t := range AssetClassMap {
+		if t == a {
+			return name
+		}
+	}
+	return "unknown"
+}
+
 type PriceFeedId struct {
-	Symbol   string    `json:"symbol"`
-	Id       string    `json:"id"`
-	Type     PriceType `json:"type"`
-	Origin   string    `json:"origin"`
-	StorkSym string    `json:"storkSym"`
+	Symbol     string     `json:"symbol"`
+	Id         string     `json:"id"`
+	Type       PriceType  `json:"type"`
+	Origin     string     `json:"origin"`
+	StorkSym   string     `json:"storkSym"`
+	AssetClass AssetClass //based on origin
 }
 
 type PriceFeedOnChainConfig struct {
@@ -159,12 +216,14 @@ func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, er
 	//SymbolToId
 	config := configuration[j]
 	config.SymbolToPxId = make(map[string]PriceFeedId)
-	for _, feed := range config.PriceFeedIds {
+	for j, feed := range config.PriceFeedIds {
+		config.PriceFeedIds[j].AssetClass = OriginToAssetClass(feed.Origin)
 		config.SymbolToPxId[feed.Symbol] = PriceFeedId{
-			Symbol: feed.Symbol,
-			Id:     strings.TrimPrefix(feed.Id, "0x"),
-			Type:   feed.Type,
-			Origin: feed.Origin,
+			Symbol:     feed.Symbol,
+			Id:         strings.TrimPrefix(feed.Id, "0x"),
+			Type:       feed.Type,
+			Origin:     feed.Origin,
+			AssetClass: OriginToAssetClass(feed.Origin),
 		}
 	}
 	//PxIdToSymbols

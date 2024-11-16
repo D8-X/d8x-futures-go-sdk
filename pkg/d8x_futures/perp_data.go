@@ -389,7 +389,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 				}
 				priceIds[i].Origin = v.Origin
 				if priceIds[i].Type == utils.PXTYPE_UNKNOWN {
-					return PerpetualStaticInfo{}, fmt.Errorf("unknown price type %s in config", v.Type.ToString())
+					return PerpetualStaticInfo{}, fmt.Errorf("unknown price type %s in config", v.Type.String())
 				}
 				break
 			}
