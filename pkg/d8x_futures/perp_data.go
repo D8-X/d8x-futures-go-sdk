@@ -252,7 +252,7 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 			}
 			for _, symT := range triangulations[sym].Symbol {
 				id := conn.PriceFeedConfig.SymbolToPxId[symT]
-				if id.Type == PRICE_TYPE_ONCHAIN_STR {
+				if id.Type == utils.PXTYPE_ONCHAIN {
 					p.OnChainSymbols = append(p.OnChainSymbols, symT)
 				}
 			}
@@ -347,19 +347,6 @@ func initPriceFeeds(pxConfig *utils.PriceFeedConfig, symbolSet utils.Set) Triang
 	return triangulations
 }
 
-func priceTypeStrToType(typeStr string) PriceTypeEnum {
-	if typeStr == PRICE_TYPE_ONCHAIN_STR {
-		return PX_ONCHAIN
-	} else if typeStr == PRICE_TYPE_PRDMKTS_STR {
-		return PX_PRDMKTS
-	} else if typeStr == PRICE_TYPE_PYTH_STR {
-		return PX_PYTH
-	} else if typeStr == PRICE_TYPE_LOWLIQ {
-		return PX_LOWLIQ
-	}
-	return PX_TYPE_INVALID
-}
-
 func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStaticInfo, configPx *utils.PriceFeedConfig, symMap *map[string]string) (PerpetualStaticInfo, error) {
 	var poolId int32 = int32(pIn.Id.Int64()) / 100000
 	base, err := ContractSymbolToSymbol(pIn.S2BaseCCY, symMap)
@@ -393,7 +380,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 			}
 			priceIds[i] = PriceId{
 				Id:   hex.EncodeToString(byteArray),
-				Type: PX_TYPE_INVALID,
+				Type: utils.PXTYPE_UNKNOWN,
 			}
 			//find id in config
 			for _, v := range configPx.PriceFeedIds {
@@ -401,13 +388,12 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 					continue
 				}
 				priceIds[i].Origin = v.Origin
-				priceIds[i].Type = priceTypeStrToType(v.Type)
-				if priceIds[i].Type == PX_TYPE_INVALID {
-					return PerpetualStaticInfo{}, fmt.Errorf("unknown price type %s in config", v.Type)
+				if priceIds[i].Type == utils.PXTYPE_UNKNOWN {
+					return PerpetualStaticInfo{}, fmt.Errorf("unknown price type %s in config", v.Type.String())
 				}
 				break
 			}
-			if priceIds[i].Type == PX_TYPE_INVALID {
+			if priceIds[i].Type == utils.PXTYPE_UNKNOWN {
 				// no price type found
 				return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", priceIds[i].Id)
 			}

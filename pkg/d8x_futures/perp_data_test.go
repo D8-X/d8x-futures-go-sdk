@@ -80,6 +80,7 @@ func TestTriangulate(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
+
 	triangs := Triangulate("CHF-USDC", pxConf.PriceFeedIds)
 	fmt.Println("Triangulate")
 	fmt.Println(triangs)

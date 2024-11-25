@@ -368,14 +368,13 @@ func (sdkRo *SdkRO) GetPoolShareTknPrice(poolIds []int, optRpc *ethclient.Client
 
 // GetPriceId returns the price id information for the given index,
 // e.g BTC-USD
-func (sdkRo *SdkRO) GetPriceId(idxSymbol string) (PriceId, error) {
+func (sdkRo *SdkRO) GetPriceId(idxSymbol string) (utils.PriceFeedId, error) {
 	for _, info := range sdkRo.PxConfig.PriceFeedIds {
 		if info.Symbol == idxSymbol {
-			t := priceTypeStrToType(info.Type)
-			return PriceId{Id: info.Id, Origin: info.Origin, Type: t}, nil
+			return info, nil
 		}
 	}
-	return PriceId{}, fmt.Errorf("no price info found for index symbol %s", idxSymbol)
+	return utils.PriceFeedId{}, fmt.Errorf("no price info found for index symbol %s", idxSymbol)
 }
 
 // Allowance checks the allowance of the given address to spend settlement tokens for the given
@@ -1254,7 +1253,19 @@ func fetchPricesFromAPI(priceIds []PriceId, priceFeedEndpoint, prdMktEndpoint, l
 			if id.Id == d.Id {
 
 				pxData.PriceIds[i] = d.Id
-				if id.Type == PX_PRDMKTS || id.Type == PX_LOWLIQ {
+				if id.Type == utils.PXTYPE_PYTH {
+					// regular markets: we set the S2 as EMA and set the parameters
+					// to zero
+					pxData.Prices[i] = PriceObs{
+						Px:             utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
+						Ema:            utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
+						Conf:           uint16(0),
+						CLOBParams:     0,
+						Ts:             int64(d.Price.PublishTime),
+						IsOffChain:     true,
+						IsClosedPrdMkt: false,
+					}
+				} else {
 					// lowliq & prediction markets: set ema and parameters
 					conf, err := strconv.Atoi(d.Price.Conf)
 					if err != nil {
@@ -1269,18 +1280,6 @@ func fetchPricesFromAPI(priceIds []PriceId, priceFeedEndpoint, prdMktEndpoint, l
 						Ts:             int64(d.Price.PublishTime),
 						IsOffChain:     true,
 						IsClosedPrdMkt: d.PrdMktClosed,
-					}
-				} else {
-					// regular markets: we set the S2 as EMA and set the parameters
-					// to zero
-					pxData.Prices[i] = PriceObs{
-						Px:             utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
-						Ema:            utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
-						Conf:           uint16(0),
-						CLOBParams:     0,
-						Ts:             int64(d.Price.PublishTime),
-						IsOffChain:     true,
-						IsClosedPrdMkt: false,
 					}
 				}
 				if !withVaa {
@@ -1313,13 +1312,13 @@ func fetchPythPrices(priceIds []PriceId, priceFeedEndpoint, prdMktEndpoint, lowL
 	query3 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", lowLiqEndpoint)
 	count := 0
 	for _, id := range priceIds {
-		if id.Type == PX_PYTH {
+		if id.Type == utils.PXTYPE_PYTH {
 			fetchPythPrice(query1+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
 			count++
-		} else if id.Type == PX_PRDMKTS {
+		} else if id.Type == utils.PXTYPE_POLYMARKET {
 			fetchPythPrice(query2+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
 			count++
-		} else if id.Type == PX_LOWLIQ {
+		} else if id.Type == utils.PXTYPE_V2 || id.Type == utils.PXTYPE_V3 {
 			fetchPythPrice(query3+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
 			count++
 		}

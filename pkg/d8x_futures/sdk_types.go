@@ -67,7 +67,7 @@ type PoolStaticInfo struct {
 type PriceId struct {
 	Id     string
 	Origin string
-	Type   PriceTypeEnum
+	Type   utils.PriceType
 }
 
 type PerpetualStaticInfo struct {
