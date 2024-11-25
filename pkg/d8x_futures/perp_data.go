@@ -486,13 +486,13 @@ func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Add
 
 func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo *StaticExchangeInfo) Order {
 	perpId := int32(scOrder.IPerpetualId.Int64())
-	var side string
+	var side Side
 	if scOrder.FAmount.Sign() > 0 {
 		side = SIDE_BUY
 	} else {
 		side = SIDE_SELL
 	}
-	var orderType string
+	var orderType OrderType
 	if scOrder.Flags&MASK_LIMIT_ORDER == MASK_LIMIT_ORDER {
 		if scOrder.Flags&MASK_STOP_ORDER == MASK_STOP_ORDER {
 			orderType = ORDER_TYPE_STOP_LIMIT

@@ -171,31 +171,75 @@ const (
 	CLEARED
 )
 
-var (
-	SIDE_CLOSED = "CLOSED"
-	SIDE_BUY    = "BUY"
-	SIDE_SELL   = "SELL"
-)
-var (
-	ORDER_TYPE_LIMIT       = "LIMIT"
-	ORDER_TYPE_MARKET      = "MARKET"
-	ORDER_TYPE_STOP_MARKET = "STOP_MARKET"
-	ORDER_TYPE_STOP_LIMIT  = "STOP_LIMIT"
-)
+type Side uint8
 
 const (
-	ENUM_ORDER_STATUS_CANCELED = iota
-	ENUM_ORDER_STATUS_EXECUTED
-	ENUM_ORDER_STATUS_OPEN
-	ENUM_ORDER_STATUS_UNKNOWN
+	SIDE_CLOSED Side = iota
+	SIDE_BUY
+	SIDE_SELL
 )
 
-var (
-	ORDER_STATUS_CANCELED = "CANCELED"
-	ORDER_STATUS_EXECUTED = "EXECUTED"
-	ORDER_STATUS_OPEN     = "OPEN"
-	ORDER_STATUS_UNKNOWN  = "UNKNOWN"
+func (t Side) String() string {
+	switch t {
+	case SIDE_CLOSED:
+		return "CLOSED"
+	case SIDE_BUY:
+		return "BUY"
+	case SIDE_SELL:
+		return "SELL"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+type OrderType uint8
+
+const (
+	ORDER_TYPE_LIMIT OrderType = iota
+	ORDER_TYPE_MARKET
+	ORDER_TYPE_STOP_MARKET
+	ORDER_TYPE_STOP_LIMIT
 )
+
+func (t OrderType) String() string {
+	switch t {
+	case ORDER_TYPE_LIMIT:
+		return "LIMIT"
+	case ORDER_TYPE_MARKET:
+		return "MARKET"
+	case ORDER_TYPE_STOP_MARKET:
+		return "STOP_MARKET"
+	case ORDER_TYPE_STOP_LIMIT:
+		return "STOP_LIMIT"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+type OrderStatus uint8
+
+// same order as in contracts
+const (
+	ORDER_STATUS_CANCELED OrderStatus = iota
+	ORDER_STATUS_EXECUTED
+	ORDER_STATUS_OPEN
+	ORDER_STATUS_UNKNOWN
+)
+
+func (os OrderStatus) String() string {
+	switch os {
+	case ORDER_STATUS_CANCELED:
+		return "CANCELED"
+	case ORDER_STATUS_EXECUTED:
+		return "EXECUTED"
+	case ORDER_STATUS_OPEN:
+		return "OPEN"
+	case ORDER_STATUS_UNKNOWN:
+		return "UNKNOWN"
+	default:
+		return "NIL"
+	}
+}
 
 var (
 	MASK_CLOSE_ONLY        uint32 = 0x80000000
@@ -208,13 +252,6 @@ var (
 var (
 	FLAG_PREDICTION_MKT = 0x2
 	FLAG_LOWLIQ_MKT     = 0x4
-)
-
-const (
-	PRICE_TYPE_ONCHAIN_STR = "onchain"
-	PRICE_TYPE_PYTH_STR    = "pyth"
-	PRICE_TYPE_PRDMKTS_STR = "polymarket"
-	PRICE_TYPE_LOWLIQ      = "low-liq"
 )
 
 type PriceTypeEnum int8
@@ -283,8 +320,8 @@ type Keccak256Hash [32]byte
 
 type Order struct {
 	Symbol              string //symbol of the form ETH-USD-MATIC
-	Side                string
-	Type                string
+	Side                Side
+	Type                OrderType
 	Quantity            float64
 	ReduceOnly          bool
 	LimitPrice          float64
@@ -304,7 +341,7 @@ type Order struct {
 type PositionRisk struct {
 	Symbol                         string
 	PositionNotionalBaseCCY        float64
-	Side                           string
+	Side                           Side
 	EntryPrice                     float64
 	Leverage                       float64
 	MarkPrice                      float64
@@ -354,9 +391,9 @@ type OrderOptions struct {
 }
 
 // NewOrder creates a new order allowing for minimal specification (function accepts nil for pointers)
-func NewOrder(symbol, side, orderType string, quantity float64, leverage float64, options *OrderOptions) *Order {
+func NewOrder(symbol string, side Side, orderType OrderType, quantity float64, leverage float64, options *OrderOptions) *Order {
 	if side != SIDE_BUY && side != SIDE_SELL {
-		slog.Error("side must be either " + SIDE_BUY + " or " + SIDE_SELL + " but was " + side)
+		slog.Error("side must be either " + SIDE_BUY.String() + " or " + SIDE_SELL.String() + " but was " + side.String())
 		return nil
 	}
 	if options == nil {

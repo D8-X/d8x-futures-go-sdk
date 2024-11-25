@@ -221,7 +221,7 @@ func (sdkRo *SdkRO) QueryOpenOrderRange(symbol string, from, to int, optRpc *eth
 	return RawQueryOpenOrderRange(optRpc, sdkRo.Info, symbol, from, to)
 }
 
-func (sdkRo *SdkRO) QueryOrderStatus(symbol string, traderAddr common.Address, orderDigest string, optRpc *ethclient.Client) (string, error) {
+func (sdkRo *SdkRO) QueryOrderStatus(symbol string, traderAddr common.Address, orderDigest string, optRpc *ethclient.Client) (OrderStatus, error) {
 	if optRpc == nil {
 		optRpc = sdkRo.Conn.Rpc
 	}
@@ -510,7 +510,7 @@ func RawGetPositionRisk(
 	S2Liq = math.Max(0, S2Liq)
 	S3Liq = math.Max(0, S3Liq)
 
-	var side string
+	var side Side
 	if posBC == 0 {
 		side = SIDE_CLOSED
 	} else if posBC < 0 {
@@ -735,6 +735,7 @@ outerLoop:
 		big.NewInt(int64(0)),
 		big.NewInt(int64(len(clientOrders))),
 	)
+
 	// format digests into strings
 	strDigests := make([]string, len(digests))
 	// format ClientOrders into orders
@@ -749,10 +750,10 @@ outerLoop:
 	return orders, strDigests, nil
 }
 
-func RawQueryOrderStatus(rpc *ethclient.Client, xInfo StaticExchangeInfo, traderAddr common.Address, orderDigest string, symbol string) (string, error) {
+func RawQueryOrderStatus(rpc *ethclient.Client, xInfo StaticExchangeInfo, traderAddr common.Address, orderDigest string, symbol string) (OrderStatus, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
-		return "", fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return ORDER_STATUS_UNKNOWN, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
 	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	// convert digest string to bytes 32
@@ -761,20 +762,9 @@ func RawQueryOrderStatus(rpc *ethclient.Client, xInfo StaticExchangeInfo, trader
 	copy(orderDigest32[:], bytesDigest)
 	status, err := lob.GetOrderStatus(nil, orderDigest32)
 	if err != nil {
-		return "", err
+		return ORDER_STATUS_UNKNOWN, err
 	}
-	var statusStr string
-	switch status {
-	case ENUM_ORDER_STATUS_CANCELED:
-		statusStr = ORDER_STATUS_CANCELED
-	case ENUM_ORDER_STATUS_EXECUTED:
-		statusStr = ORDER_STATUS_EXECUTED
-	case ENUM_ORDER_STATUS_OPEN:
-		statusStr = ORDER_STATUS_OPEN
-	case ENUM_ORDER_STATUS_UNKNOWN:
-		statusStr = ORDER_STATUS_UNKNOWN
-	}
-	return statusStr, nil
+	return OrderStatus(status), nil
 }
 
 // RawQueryPerpetualPriceTuple queries prices for different trade amounts for the given perpetual. The perpetual
