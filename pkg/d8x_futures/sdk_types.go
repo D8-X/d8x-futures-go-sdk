@@ -199,6 +199,7 @@ const (
 	ORDER_TYPE_MARKET
 	ORDER_TYPE_STOP_MARKET
 	ORDER_TYPE_STOP_LIMIT
+	ORDER_TYPE_UNKNOWN
 )
 
 func (t OrderType) String() string {

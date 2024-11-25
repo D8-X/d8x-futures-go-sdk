@@ -484,6 +484,23 @@ func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Add
 	return cOrder
 }
 
+func OrderTypeFromFlag(flags uint32) OrderType {
+	if flags&MASK_LIMIT_ORDER == MASK_LIMIT_ORDER {
+		if flags&MASK_STOP_ORDER == MASK_STOP_ORDER {
+			return ORDER_TYPE_STOP_LIMIT
+		} else {
+			return ORDER_TYPE_LIMIT
+		}
+	} else if flags&MASK_MARKET_ORDER == MASK_MARKET_ORDER {
+		if flags&MASK_STOP_ORDER == MASK_STOP_ORDER {
+			return ORDER_TYPE_STOP_MARKET
+		} else {
+			return ORDER_TYPE_MARKET
+		}
+	}
+	return ORDER_TYPE_UNKNOWN
+}
+
 func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo *StaticExchangeInfo) Order {
 	perpId := int32(scOrder.IPerpetualId.Int64())
 	var side Side
@@ -492,20 +509,7 @@ func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo *StaticExch
 	} else {
 		side = SIDE_SELL
 	}
-	var orderType OrderType
-	if scOrder.Flags&MASK_LIMIT_ORDER == MASK_LIMIT_ORDER {
-		if scOrder.Flags&MASK_STOP_ORDER == MASK_STOP_ORDER {
-			orderType = ORDER_TYPE_STOP_LIMIT
-		} else {
-			orderType = ORDER_TYPE_LIMIT
-		}
-	} else if scOrder.Flags&MASK_MARKET_ORDER == MASK_MARKET_ORDER {
-		if scOrder.Flags&MASK_STOP_ORDER == MASK_STOP_ORDER {
-			orderType = ORDER_TYPE_STOP_MARKET
-		} else {
-			orderType = ORDER_TYPE_MARKET
-		}
-	}
+	orderType := OrderTypeFromFlag(scOrder.Flags)
 	var reduceOnly, keepPositionLvg = false, false
 	if scOrder.Flags&MASK_CLOSE_ONLY == MASK_CLOSE_ONLY {
 		reduceOnly = true
