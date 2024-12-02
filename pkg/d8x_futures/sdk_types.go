@@ -115,6 +115,7 @@ type LiquidatableAccounts struct {
 
 type OpenOrders struct {
 	Orders      []Order
+	RawOrders   []contracts.IClientOrderClientOrder
 	OrderHashes []string
 	SubmittedTs []uint32
 	HashIndex   map[string]int // Map to store OrderHash indices

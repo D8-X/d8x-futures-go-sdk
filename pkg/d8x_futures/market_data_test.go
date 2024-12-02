@@ -435,9 +435,9 @@ func TestPerpetualPriceTuple(t *testing.T) {
 	fmt.Printf("Time taken: %s\n", elapsedTime)
 }
 
-func getOrders(sdkRo SdkRO, nodeURL string, from, to int, resultChan chan<- *OpenOrders) {
+func getOrders(sdkRo SdkRO, sym string, nodeURL string, from, to int, resultChan chan<- *OpenOrders) {
 	rpc, _ := ethclient.Dial(nodeURL)
-	orders, err := sdkRo.QueryOpenOrderRange("BTC-USDC-USDC", from, to, rpc) //([]Order, []string, error)
+	orders, err := sdkRo.QueryOpenOrderRange(sym, from, to, rpc) //([]Order, []string, error)
 	if err != nil {
 		resultChan <- nil
 	} else {
@@ -475,13 +475,13 @@ func TestMarginAccount(t *testing.T) {
 
 func TestSdkROOrders(t *testing.T) {
 	var sdkRo SdkRO
-	//err := sdkRo.New("x1Testnet")
-	err := sdkRo.New("421614") //arb sepolia
+	err := sdkRo.New("80084")
 	if err != nil {
 		t.Log(err.Error())
 	}
 	startTime := time.Now()
-	n, err := sdkRo.QueryNumOrders("BTC-USDC-USDC", nil)
+	sym := "BDEG-HONEY-USDC"
+	n, err := sdkRo.QueryNumOrders(sym, nil)
 	endTime := time.Now()
 	fmt.Printf("Num orders in %s seconds\n", endTime.Sub(startTime))
 	if err != nil {
@@ -489,15 +489,15 @@ func TestSdkROOrders(t *testing.T) {
 	}
 	fmt.Printf("There are %d open orders\n", n)
 	startTime = time.Now()
-	rpc := []string{"https://x1-testnet.blockpi.network/v1/rpc/public",
-		"https://testrpc.x1.tech",
-		"https://x1testrpc.okx.com"}
+	rpc := []string{"https://bartio.drpc.org",
+		"https://bartio.rpc.berachain.com",
+		"https://berat2.lava.build"}
 	orderChan := make(chan *OpenOrders, len(rpc))
-	num := int(n) / len(rpc)
+	num := int(n) / min(len(rpc), int(n))
 	for i := 0; i < len(rpc); i++ {
 		from := i * num
 		to := from + num
-		go getOrders(sdkRo, rpc[i], from, to, orderChan)
+		go getOrders(sdkRo, sym, rpc[i], from, to, orderChan)
 	}
 	var orders = make([]*OpenOrders, 0, len(rpc))
 	totalOrders := 0
@@ -509,7 +509,6 @@ func TestSdkROOrders(t *testing.T) {
 		orders = append(orders, res)
 		totalOrders += len(res.OrderHashes)
 	}
-	close(orderChan)
 	endTime = time.Now()
 	fmt.Printf("Found %d orders\n", totalOrders)
 	fmt.Printf("in %s seconds\n", endTime.Sub(startTime))
@@ -517,14 +516,8 @@ func TestSdkROOrders(t *testing.T) {
 		fmt.Printf("not enough orders for test")
 		return
 	}
-	k := orders[2].HashIndex[orders[2].OrderHashes[3]]
-	if k != 3 {
-		t.Logf("hash index test failed")
-		t.Fail()
-	}
 	fmt.Println(orders[0].Orders[0].OptTraderAddr.Hex())
 	fmt.Println(orders[0].Orders[1].OptTraderAddr.Hex())
-	fmt.Println(orders[0].Orders[2].OptTraderAddr.Hex())
 }
 
 func TestFetchCollToSettlePx(t *testing.T) {

@@ -694,6 +694,7 @@ func RawQueryOpenOrderRange(rpc *ethclient.Client, xInfo StaticExchangeInfo, sym
 	var orders OpenOrders
 	orders.HashIndex = make(map[string]int)
 	for k, scOrder := range ooSc.Orders {
+		orders.RawOrders = append(orders.RawOrders, scOrder)
 		orders.Orders = append(orders.Orders, FromChainType(&scOrder, &xInfo))
 		strDigests := "0x" + common.Bytes2Hex(ooSc.OrderHashes[k][:])
 		orders.HashIndex[strDigests] = k
