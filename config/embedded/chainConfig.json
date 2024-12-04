@@ -91,15 +91,15 @@
     "priceUpdateFeeGwei": 1
   },
   {
-    "name": "europaTestnet",
+    "name": "base",
     "priceFeedNetwork": "PythEVMStable",
-    "priceFeedEndpoint": "https://odin.d8x.xyz",
+    "priceFeedEndpoint": "https://hermes.pyth.network",
     "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
     "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
-    "chainId": 1444673419,
-    "proxyAddr": "0xDF2406f251766747148F8aDE8EF2BB5fa343Db93",
-    "multipayAddr": "0xe964eD9B2548ef63ffD71f7293166ed6a1E8C28E",
-    "nodeURL": "https://testnet.skalenodes.com/v1/juicy-low-small-testnet",
+    "chainId": 8453,
+    "proxyAddr": "0x7F3A4A9e5BB469F0F4977AA390760aF9EFCCd406",
+    "multipayAddr": "0x00e7B648E6AD5CEfAeB0b423eEC6a7c3f0aA52dd",
+    "nodeURL": "https://mainnet.base.org",
     "postOrderGasLimit": 3000000,
     "priceUpdateFeeGwei": 1
   }

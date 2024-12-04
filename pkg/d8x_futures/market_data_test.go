@@ -182,12 +182,12 @@ func TestFetchPolymarket(t *testing.T) {
 
 func TestFetchLowLiqPx(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("80084")
+	err := sdkRo.New("8453")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
 	}
-	id, err := sdkRo.GetPriceId("DIRAC-HONEY")
+	id, err := sdkRo.GetPriceId("BRETT-USDC")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -196,13 +196,13 @@ func TestFetchLowLiqPx(t *testing.T) {
 	for _, info := range sdkRo.Info.Perpetuals {
 		fmt.Printf("id: %d perpetual %s-'%s'\n", info.Id, info.S2Symbol, info.S3Symbol)
 	}
-	b, err := sdkRo.IsLowLiqPerp("DIRAC-HONEY-USDC")
+	b, err := sdkRo.IsLowLiqPerp("BRETT-USDC-USDC")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
 	}
 	fmt.Println(b)
-	px, err := sdkRo.QueryPerpetualPrices("DIRAC-HONEY-USDC", []float64{0}, nil)
+	px, err := sdkRo.QueryPerpetualPrices("BRETT-USDC-USDC", []float64{0}, nil)
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
