@@ -480,7 +480,7 @@ func TestSdkROOrders(t *testing.T) {
 		t.Log(err.Error())
 	}
 	startTime := time.Now()
-	sym := "BDEG-HONEY-USDC"
+	sym := "IBGT-HONEY-USDC"
 	n, err := sdkRo.QueryNumOrders(sym, nil)
 	endTime := time.Now()
 	fmt.Printf("Num orders in %s seconds\n", endTime.Sub(startTime))

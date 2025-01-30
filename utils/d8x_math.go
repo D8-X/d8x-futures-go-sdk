@@ -79,10 +79,12 @@ func Float64ToABDK(x float64) *big.Int {
 	return intVal
 }
 
-func ABDKToFloat64(x *big.Int) float64 {
-	if x.Cmp(big.NewInt(0)) == 0 {
+func ABDKToFloat64(xIn *big.Int) float64 {
+	if xIn.Cmp(big.NewInt(0)) == 0 {
 		return float64(0)
 	}
+	x := new(big.Int).Set(xIn)
+	x.Abs(x)
 	var sgn float64 = float64(x.Sign())
 	x.Abs(x)
 	var xInt, xRemainder, xDec big.Int
