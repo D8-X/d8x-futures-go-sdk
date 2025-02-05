@@ -3027,7 +3027,7 @@
           },
           {
             "internalType": "uint16",
-            "name": "minimalSpreadTbps",
+            "name": "minimalSpreadBps",
             "type": "uint16"
           },
           {
