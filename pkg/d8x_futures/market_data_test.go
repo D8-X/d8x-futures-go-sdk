@@ -358,7 +358,8 @@ func TestGetPerpetualData(t *testing.T) {
 	//err := sdkRo.New("421614") //arbitrum sepolia
 	//err := sdkRo.New("195") //x1
 	//err := sdkRo.New("196") //xlayer
-	err := sdkRo.New("80084") //bartio
+	//err := sdkRo.New("80084") //bartio
+	err := sdkRo.New("80094") //bera
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()

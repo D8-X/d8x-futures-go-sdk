@@ -13,32 +13,6 @@
     "priceUpdateFeeGwei": 1
   },
   {
-    "name": "x1Testnet",
-    "priceFeedNetwork": "PythEVMStable",
-    "priceFeedEndpoint": "https://odin.d8x.xyz",
-    "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
-    "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
-    "chainId": 195,
-    "proxyAddr": "0x2971f469685C93812449B755ed7D1EC105E21Cd8",
-    "multipayAddr": "0x3594D0eAAaC82D3AFA7347d098bc4a39A71e918c",
-    "nodeURL": "https://testrpc.x1.tech",
-    "postOrderGasLimit": 3000000,
-    "priceUpdateFeeGwei": 1
-  },
-  {
-    "name": "cardona",
-    "priceFeedNetwork": "PythEVMStable",
-    "priceFeedEndpoint": "https://odin.d8x.xyz",
-    "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
-    "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
-    "chainId": 2442,
-    "proxyAddr": "0x36ce59a9cC9b0cBc68B19143240357a0b51E70c6",
-    "multipayAddr": "0xF08A1E0d5E5a0b90D082e218f5CA2416916C5e8c",
-    "nodeURL": "https://rpc.cardona.zkevm-rpc.com",
-    "postOrderGasLimit": 3000000,
-    "priceUpdateFeeGwei": 1
-  },
-  {
     "name": "arbitrumSepolia",
     "priceFeedNetwork": "PythEVMStable",
     "priceFeedEndpoint": "https://hermes.pyth.network",
@@ -78,15 +52,28 @@
     "priceUpdateFeeGwei": 1
   },
   {
-    "name": "xlayer",
+    "name": "bartio",
     "priceFeedNetwork": "PythEVMStable",
-    "priceFeedEndpoint": "https://odin.d8x.xyz",
+    "priceFeedEndpoint": "https://odin.d8x.xyz/",
     "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
     "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
-    "chainId": 196,
-    "proxyAddr": "0xb24dB543749277E8625a59C061aE7574C8235475",
-    "multipayAddr": "0x66D1B11B519b060FE2afa4Ba81c0c8e63061eB6C",
-    "nodeURL": "https://xlayerrpc.okx.com",
+    "chainId": 80084,
+    "proxyAddr": "0xf922A26375967130aeaB637cB3eE59f498CB2d24",
+    "multipayAddr": "0x0115dBc1eF289BbDC906b2f7be2bdB6cb8952670",
+    "nodeURL": "https://bartio.rpc.berachain.com",
+    "postOrderGasLimit": 3000000,
+    "priceUpdateFeeGwei": 1
+  },
+  {
+    "name": "bera",
+    "priceFeedNetwork": "PythEVMStable",
+    "priceFeedEndpoint": "https://odin.d8x.xyz/",
+    "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
+    "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
+    "chainId": 80094,
+    "proxyAddr": "0xb6329c7168b255Eca8e5c627b0CCe7A5289C8b7F",
+    "multipayAddr": "0xDe16D4841C88c6bcFfA10476F926957C2977A49d",
+    "nodeURL": "https://rpc.berachain.com",
     "postOrderGasLimit": 3000000,
     "priceUpdateFeeGwei": 1
   },
