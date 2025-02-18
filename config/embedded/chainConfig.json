@@ -67,7 +67,7 @@
   {
     "name": "bera",
     "priceFeedNetwork": "PythEVMStable",
-    "priceFeedEndpoint": "https://odin.d8x.xyz/",
+    "priceFeedEndpoint": "https://hermes.pyth.network",
     "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
     "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
     "chainId": 80094,

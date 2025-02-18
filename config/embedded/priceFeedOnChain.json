@@ -12,7 +12,8 @@
     "type": "redstone",
     "pxFeedAddress": "0x119A190b510c9c0D5Ec301b60B2fE70A50356aE9",
     "decimals": 8,
-    "maxFeedAgeSec": 120
+    "maxFeedAgeSec": 120,
+    "relevantChains": [42161]
   },
   {
     "name": "STUSD-USD",
@@ -25,6 +26,21 @@
       "https://arbitrum.blockpi.network/v1/rpc/public"
     ],
     "type": "angle",
-    "maxFeedAgeSec": 120
+    "maxFeedAgeSec": 120,
+    "relevantChains": [42161]
+  },
+  {
+    "name": "BUSD-USD",
+    "rpcs": [
+      "https://rpc.berachain.com",
+      "https://berachain.blockpi.network/v1/rpc/public",
+      "https://berachain-rpc.publicnode.com",
+      "https://berachain.drpc.org"
+    ],
+    "type": "redstone",
+    "pxFeedAddress": "0xA8655EF2354d679E2553C10b2d59a61C4345aF51",
+    "decimals": 6,
+    "maxFeedAgeSec": 120,
+    "relevantChains": [80094]
   }
 ]
