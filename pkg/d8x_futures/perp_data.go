@@ -258,7 +258,7 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 			}
 		}
 	}
-	chainOracles, err := NewChainOracles()
+	chainOracles, err := NewChainOracles(int(config.ChainId))
 	if err != nil {
 		return StaticExchangeInfo{}, err
 	}

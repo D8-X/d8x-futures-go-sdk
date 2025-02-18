@@ -38,8 +38,9 @@ func TestSdkExec(t *testing.T) {
 	//err := sdk.New([]string{pk}, "196") //x-layer
 	//err := sdk.New([]string{pk}, "2442") //cardona
 	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
-	err := sdk.New([]string{pk}, "80084") //bartio
-	perp := "DIRAC-HONEY-USDC"
+	// err := sdk.New([]string{pk}, "80084") //bartio
+	err := sdk.New([]string{pk}, "80094") //bera
+	perp := "BERA-USD-BUSD"
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -65,13 +66,13 @@ func TestSdkExec(t *testing.T) {
 	if len(mktOrderIds) == 0 {
 		//mktOrderIds = append(mktOrderIds, "f3e6741c2eefeb3c5e1c8539f15e5590b8b104ad6c8ed99a2f63151c315b0dd0")
 
-		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 0.001, 10, &OrderOptions{LimitPrice: 0})
+		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 2, 5, &OrderOptions{LimitPrice: 0})
 		orderId, _, err := sdk.PostOrder(order, nil)
 		if err != nil {
 			t.Log(err.Error())
 		}
 		fmt.Println("order id =", orderId)
-		//23e50c73801fd4487f2c9d17f8781353717cf861a010c725bef73cb537e8e603
+		//92d891d3ae6d8695c8732d67fff2b59d309496796e1f369f8d5e0b4ab2a17cd4
 		mktOrderIds = append(mktOrderIds, orderId)
 
 	}

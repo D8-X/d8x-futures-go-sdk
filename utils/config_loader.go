@@ -150,12 +150,13 @@ type PriceFeedId struct {
 }
 
 type PriceFeedOnChainConfig struct {
-	Name          string   `json:"name"`
-	RPCs          []string `json:"rpcs"`
-	PxFeedAddress string   `json:"pxFeedAddress"`
-	Decimals      int      `json:"decimals"`
-	MaxFeedAgeSec int64    `json:"maxFeedAgeSec"`
-	Type          string   `json:"type"`
+	Name           string   `json:"name"`
+	RPCs           []string `json:"rpcs"`
+	PxFeedAddress  string   `json:"pxFeedAddress"`
+	Decimals       int      `json:"decimals"`
+	MaxFeedAgeSec  int64    `json:"maxFeedAgeSec"`
+	Type           string   `json:"type"`
+	RelevantChains []int    `json:"relevantChains"`
 }
 
 type SettlementConfig struct {

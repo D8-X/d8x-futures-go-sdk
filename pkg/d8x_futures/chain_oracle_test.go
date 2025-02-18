@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetWEETHPrice(t *testing.T) {
-	oracles, err := NewChainOracles()
+	oracles, err := NewChainOracles(42161)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
@@ -25,7 +25,7 @@ func TestGetWEETHPrice(t *testing.T) {
 }
 
 func TestGetSTUSDPrice(t *testing.T) {
-	oracles, err := NewChainOracles()
+	oracles, err := NewChainOracles(42161)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()

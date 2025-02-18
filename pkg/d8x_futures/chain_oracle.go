@@ -3,6 +3,7 @@ package d8x_futures
 import (
 	"fmt"
 	"math/big"
+	"slices"
 	"sync"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 type ChainOracles struct {
 	Config     []utils.PriceFeedOnChainConfig
 	LastResult map[string]*OracleObs
+	ChainId    int
 }
 
 type OracleObs struct {
@@ -28,16 +30,22 @@ type OracleObs struct {
 	muChain     *sync.Mutex
 }
 
-func NewChainOracles() (*ChainOracles, error) {
+func NewChainOracles(chainId int) (*ChainOracles, error) {
 	var oracles ChainOracles
 	var err error
 	oracles.Config, err = config.GetPriceFeedOnChain()
 	if err != nil {
 		return nil, err
 	}
+	oracles.ChainId = chainId
 	oracles.LastResult = make(map[string]*OracleObs)
 	var wg sync.WaitGroup
 	for _, c := range oracles.Config {
+		if !slices.Contains(c.RelevantChains, chainId) {
+			// only add oracles to the slice if we
+			// are on a "relevantChain"
+			continue
+		}
 		oracles.LastResult[c.Name] = &OracleObs{
 			Px:          0,
 			Ts:          0,
@@ -131,8 +139,9 @@ func (ch *ChainOracles) fetchPrice(j int, doLog bool) (float64, int64, error) {
 	var err error
 	var rpc *ethclient.Client
 	rpcIdx := -1
-	for trial := 0; trial < len(ch.Config[j].RPCs); trial++ {
-		rpcIdx++
+	maxTrial := 10
+	for trial := 0; trial < maxTrial; trial++ {
+		rpcIdx = (rpcIdx + 1) % len(ch.Config[j].RPCs)
 		rpc, err = ethclient.Dial(ch.Config[j].RPCs[rpcIdx])
 		if err != nil {
 			if doLog {
@@ -146,20 +155,24 @@ func (ch *ChainOracles) fetchPrice(j int, doLog bool) (float64, int64, error) {
 				if doLog {
 					fmt.Printf("FetchPrice: could not get price rpc %s: %s. Retrying", ch.Config[j].RPCs[rpcIdx], err.Error())
 				}
+				time.Sleep(100 * time.Millisecond)
 				continue
 			}
 			return px, ts, nil
-		} else {
+		} else if ch.Config[j].Type == "angle" {
 			// angle
 			px, err := STUSDToUSDC(rpc)
 			if err != nil {
 				if doLog {
 					fmt.Printf("FetchPrice: could not get angle price with rpc %s: %s. Retrying", ch.Config[j].RPCs[rpcIdx], err.Error())
 				}
+				time.Sleep(100 * time.Millisecond)
 				continue
 			}
 			ts := time.Now().Unix()
 			return px, ts, nil
+		} else {
+			return 0, 0, fmt.Errorf("unknown type %s", ch.Config[j].Type)
 		}
 	}
 	return 0, 0, fmt.Errorf("no working call for token %s", ch.Config[j].Name)
