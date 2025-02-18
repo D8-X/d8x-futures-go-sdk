@@ -75,7 +75,7 @@ status, err := sdk.QueryOrderStatus("ETH-USDC-USDC", sdk.Wallets[0].Address, ord
 ```
 Example 4: Query position risk
 ```
-pr, err := sdk.GetPositionRisk("ETH-USDC-MAUSDCTIC", sdk.Wallets[0].Address)
+pr, err := sdk.GetPositionRisk("ETH-USDC-USDT", sdk.Wallets[0].Address)
 ```
 Example 5: Cancel order
 
@@ -107,6 +107,7 @@ Generate the ABI for the network it should compile to:
 `abigen --abi abi/IPyth.json --pkg contracts --type IPyth --out IPyth.go`
 
 `abigen --abi abi/OracleFactory.json --pkg contracts --type OracleFactory --out OracleFactory.go`
+`abigen --abi abi/CompositeToken.json --pkg contracts --type CompositeToken --out CompositeToken.go`
 
 `go build` -> Remove duplicated structs
 
