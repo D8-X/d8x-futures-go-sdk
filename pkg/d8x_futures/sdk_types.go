@@ -172,6 +172,23 @@ const (
 	CLEARED
 )
 
+func (s PerpetualStateEnum) String() string {
+	switch s {
+	case INVALID:
+		return "INVALID"
+	case INITIALIZING:
+		return "INITIALIZING"
+	case NORMAL:
+		return "NORMAL"
+	case EMERGENCY:
+		return "EMERGENCY"
+	case SETTLE:
+		return "SETTLE"
+	default:
+		return "UNKNOWN"
+	}
+}
+
 type Side uint8
 
 const (
