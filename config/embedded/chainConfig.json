@@ -13,19 +13,6 @@
     "priceUpdateFeeGwei": 1
   },
   {
-    "name": "arbitrumSepolia",
-    "priceFeedNetwork": "PythEVMStable",
-    "priceFeedEndpoint": "https://hermes.pyth.network",
-    "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
-    "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
-    "chainId": 421614,
-    "proxyAddr": "0x2163cf2f1B7c331C0C757E068D00eFC9A707A1D7",
-    "multipayAddr": "0x35672963523bc874f13da5CeED024249794E6a16",
-    "nodeURL": "https://sepolia-rollup.arbitrum.io/rpc",
-    "postOrderGasLimit": 3000000,
-    "priceUpdateFeeGwei": 1
-  },
-  {
     "name": "arbitrum",
     "priceFeedNetwork": "PythEVMStable",
     "priceFeedEndpoint": "https://hermes.pyth.network",
@@ -35,32 +22,6 @@
     "proxyAddr": "0x8f8BccE4c180B699F81499005281fA89440D1e95",
     "multipayAddr": "0x7A75327f5758884bF05966bfDad8C8af63646dc3",
     "nodeURL": "https://arbitrum-one-rpc.publicnode.com",
-    "postOrderGasLimit": 3000000,
-    "priceUpdateFeeGwei": 1
-  },
-  {
-    "name": "bartio",
-    "priceFeedNetwork": "PythEVMStable",
-    "priceFeedEndpoint": "https://odin.d8x.xyz/",
-    "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
-    "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
-    "chainId": 80084,
-    "proxyAddr": "0xf922A26375967130aeaB637cB3eE59f498CB2d24",
-    "multipayAddr": "0x0115dBc1eF289BbDC906b2f7be2bdB6cb8952670",
-    "nodeURL": "https://bartio.rpc.berachain.com",
-    "postOrderGasLimit": 3000000,
-    "priceUpdateFeeGwei": 1
-  },
-  {
-    "name": "bartio",
-    "priceFeedNetwork": "PythEVMStable",
-    "priceFeedEndpoint": "https://odin.d8x.xyz/",
-    "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
-    "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
-    "chainId": 80084,
-    "proxyAddr": "0xf922A26375967130aeaB637cB3eE59f498CB2d24",
-    "multipayAddr": "0x0115dBc1eF289BbDC906b2f7be2bdB6cb8952670",
-    "nodeURL": "https://bartio.rpc.berachain.com",
     "postOrderGasLimit": 3000000,
     "priceUpdateFeeGwei": 1
   },
