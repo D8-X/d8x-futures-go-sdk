@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
@@ -157,6 +158,66 @@ func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, op
 func (sdkRo *SdkRO) QueryPerpetualState(perpetualIds []int32, optEndPt *OptEndPoints) ([]PerpetualState, error) {
 	optRpc, optPyth := extractEndpoints(sdkRo, optEndPt)
 	return RawQueryPerpetualState(optRpc, sdkRo.Info, perpetualIds, optPyth, sdkRo.ChainConfig.PrdMktFeedEndpoint, sdkRo.ChainConfig.LowLiqFeedEndpoint)
+}
+
+func (sdkRo *SdkRO) ApproximateOrderBook(symbol string, optEndPt *OptEndPoints) (*OrderBook, error) {
+	optRpc, optPyth := extractEndpoints(sdkRo, optEndPt)
+	// example: https://api.binance.com/api/v1/depth?symbol=BTCUSDC&limit=5000
+	j := GetPerpetualStaticInfoIdxFromSymbol(&sdkRo.Info, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+	}
+	m := sdkRo.Info.Perpetuals[j].LotSizeBC * 10
+	tradeAmt := []float64{-1000 * m, -250 * m, -100 * m, -1 * m, 1 * m, 100 * m, 250 * m, 1000 * m}
+	prices, err := RawQueryPerpetualPriceTuple(optRpc,
+		&sdkRo.Info,
+		optPyth,
+		sdkRo.ChainConfig.PrdMktFeedEndpoint,
+		sdkRo.ChainConfig.LowLiqFeedEndpoint,
+		symbol,
+		tradeAmt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	// we want 50 samples per side
+	N := 50
+	inc := (500 - 1) * m / float64(N)
+	var ob OrderBook
+	ob.Asks = make([]OrderBookLevel, N)
+	ob.Bids = make([]OrderBookLevel, N)
+	for j := 0; j < N; j++ {
+		//ask side
+		q := (m + float64(j)*inc)
+		ob.Asks[N-1-j].Price = interpolate(q, tradeAmt, prices)
+		ob.Asks[N-1-j].Quantity = q
+		//bid side
+		q = -q
+		ob.Bids[j].Price = interpolate(q, tradeAmt, prices)
+		ob.Bids[j].Quantity = ob.Asks[N-1-j].Quantity
+	}
+	ob.TimestampMs = time.Now().UnixMilli()
+
+	return &ob, nil
+}
+
+// interpolate interpolates linearly at s for the function
+// represented by (x, y)
+func interpolate(s float64, x, y []float64) float64 {
+	if s < x[0] {
+		return y[0]
+	}
+	if s > x[len(x)-1] {
+		return y[len(y)-1]
+	}
+	var j int
+	for j = 1; j < len(x); j++ {
+		if s < x[j] {
+			break
+		}
+	}
+	dx := s - x[j-1]
+	return y[j-1] + dx*(y[j]-y[j-1])/(x[j]-x[j-1])
 }
 
 func (sdkRo *SdkRO) QueryPerpetualPrices(symbol string, tradeAmt []float64, optEndPt *OptEndPoints) ([]float64, error) {

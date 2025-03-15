@@ -600,3 +600,19 @@ func (sdk *Sdk) New(privateKeys []string, networkName string, opts ...optionFunc
 
 	return nil
 }
+
+type OrderBookLevel struct {
+	Price    float64
+	Quantity float64
+}
+
+type OrderBook struct {
+	TimestampMs int64            `json:"timestamp"`
+	Bids        []OrderBookLevel `json:"bids"`
+	Asks        []OrderBookLevel `json:"asks"`
+}
+
+// Custom MarshalJSON to serialize the struct as an array
+func (o OrderBookLevel) MarshalJSON() ([]byte, error) {
+	return json.Marshal([]float64{o.Price, o.Quantity})
+}

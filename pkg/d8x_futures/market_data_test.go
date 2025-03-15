@@ -802,3 +802,22 @@ func TestQueryMaxTradeAmount(t *testing.T) {
 	}
 	fmt.Println("Max Trade buy (0.01 ETH-USD-MATIC) = ", trade)
 }
+
+func TestApproximateOrderBook(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("80094")
+	if err != nil {
+		t.Log(err.Error())
+	}
+	ob, err := sdkRo.ApproximateOrderBook("RAMEN-USD-BUSD", nil)
+	if err != nil {
+		fmt.Println(err.Error())
+		t.FailNow()
+	}
+	jason, err := json.Marshal(ob)
+	if err != nil {
+		fmt.Println(err.Error())
+		t.FailNow()
+	}
+	fmt.Println(string(jason))
+}
