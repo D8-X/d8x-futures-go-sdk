@@ -820,4 +820,11 @@ func TestApproximateOrderBook(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Println(string(jason))
+
+	var nob OrderBook
+	err = json.Unmarshal([]byte(jason), &nob)
+	if err != nil {
+		fmt.Println(err.Error())
+		t.FailNow()
+	}
 }
