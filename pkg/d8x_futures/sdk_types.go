@@ -616,3 +616,13 @@ type OrderBook struct {
 func (o OrderBookLevel) MarshalJSON() ([]byte, error) {
 	return json.Marshal([]float64{o.Price, o.Quantity})
 }
+
+func (o *OrderBookLevel) UnmarshalJSON(data []byte) error {
+	var arr [2]float64 // Expecting an array with exactly two elements
+	if err := json.Unmarshal(data, &arr); err != nil {
+		return err
+	}
+	o.Price = arr[0]
+	o.Quantity = arr[1]
+	return nil
+}
