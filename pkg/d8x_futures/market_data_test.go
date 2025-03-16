@@ -809,7 +809,7 @@ func TestApproximateOrderBook(t *testing.T) {
 	if err != nil {
 		t.Log(err.Error())
 	}
-	ob, err := sdkRo.ApproximateOrderBook("RAMEN-USD-BUSD", nil)
+	ob, err := sdkRo.ApproximateOrderBook("HENLO.1000-USD-BUSD", nil)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()

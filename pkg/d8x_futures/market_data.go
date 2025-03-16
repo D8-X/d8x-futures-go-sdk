@@ -167,8 +167,54 @@ func (sdkRo *SdkRO) ApproximateOrderBook(symbol string, optEndPt *OptEndPoints) 
 	if j == -1 {
 		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
 	}
-	m := sdkRo.Info.Perpetuals[j].LotSizeBC * 10
-	tradeAmt := []float64{-1000 * m, -250 * m, -100 * m, -1 * m, 1 * m, 100 * m, 250 * m, 1000 * m}
+	if isLowLiqPerp(&sdkRo.Info.Perpetuals[j]) {
+		// we calculate off-chain
+		return sdkRo.approximateOrderBookOffChain(&sdkRo.Info.Perpetuals[j])
+	} else {
+		return sdkRo.approximateOrderBookOnChain(&sdkRo.Info.Perpetuals[j], symbol, optRpc, optPyth)
+	}
+}
+
+func (sdkRo *SdkRO) approximateOrderBookOffChain(pinfo *PerpetualStaticInfo) (*OrderBook, error) {
+	m := pinfo.LotSizeBC * 10
+	N := 50
+	mx := m * 5000
+	inc := float64(mx-m) / float64(N)
+	var ob OrderBook
+	ob.Asks = make([]OrderBookLevel, N)
+	ob.Bids = make([]OrderBookLevel, N)
+	p, err := fetchPythPrices(pinfo.PriceIds, "", "", sdkRo.ChainConfig.LowLiqFeedEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	mid, halfBa, encBk, err := extractLowLiqParams(p[0])
+	if err != nil {
+		return nil, err
+	}
+	a0, m0, a1, m1 := decodeOrderBook(encBk)
+	var lastQ float64
+	for j := 0; j < N; j++ {
+		//ask side
+		q := m + float64(j)*inc
+		ob.Asks[N-1-j].Price = mid + halfBa + math.Exp(a1+m1*q)
+		ob.Asks[N-1-j].Quantity = q - lastQ
+		lastQ = q
+		//bid side
+		ob.Bids[j].Price = mid - halfBa - math.Exp(a0+m0*q)
+		ob.Bids[j].Quantity = ob.Asks[N-1-j].Quantity
+	}
+	ob.TimestampMs = time.Now().UnixMilli()
+	return &ob, nil
+}
+
+func (sdkRo *SdkRO) approximateOrderBookOnChain(pinfo *PerpetualStaticInfo, symbol string, optRpc *ethclient.Client, optPyth string) (*OrderBook, error) {
+	m := pinfo.LotSizeBC * 10
+	samples := []float64{1, 100, 250, 2500, 5000}
+	tradeAmt := make([]float64, len(samples)*2)
+	for j := range samples {
+		tradeAmt[len(samples)+j] = m * samples[j]
+		tradeAmt[len(samples)-1-j] = -m * samples[j]
+	}
 	prices, err := RawQueryPerpetualPriceTuple(optRpc,
 		&sdkRo.Info,
 		optPyth,
@@ -182,19 +228,22 @@ func (sdkRo *SdkRO) ApproximateOrderBook(symbol string, optEndPt *OptEndPoints) 
 	}
 	// we want 50 samples per side
 	N := 50
-	inc := (500 - 1) * m / float64(N)
+	inc := (samples[len(samples)-1] - samples[0]) * m / float64(N)
 	var ob OrderBook
 	ob.Asks = make([]OrderBookLevel, N)
 	ob.Bids = make([]OrderBookLevel, N)
+	var lastQ float64
 	for j := 0; j < N; j++ {
 		//ask side
 		q := (m + float64(j)*inc)
 		ob.Asks[N-1-j].Price = interpolate(q, tradeAmt, prices)
-		ob.Asks[N-1-j].Quantity = q
+		ob.Asks[N-1-j].Quantity = q - lastQ
+		lastQ = q
 		//bid side
 		q = -q
 		ob.Bids[j].Price = interpolate(q, tradeAmt, prices)
 		ob.Bids[j].Quantity = ob.Asks[N-1-j].Quantity
+
 	}
 	ob.TimestampMs = time.Now().UnixMilli()
 
