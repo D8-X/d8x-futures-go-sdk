@@ -21,6 +21,21 @@ type Wallet struct {
 	IsPostLondon bool
 }
 
+type GasOptions struct {
+	BaseFeeMultiplier int
+	TipCapMultiplier  int
+}
+
+type GasOption func(*GasOptions)
+
+func WithBaseFeeMultiplier(m int) GasOption {
+	return func(o *GasOptions) { o.BaseFeeMultiplier = m }
+}
+
+func WithTipCapMultiplier(m int) GasOption {
+	return func(o *GasOptions) { o.TipCapMultiplier = m }
+}
+
 // NewWallet constructs a new wallet. ChainId must be provided and privatekey must be of the form "abcdef012" (no 0x)
 // rpc can be nil
 func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wallet, error) {
@@ -57,7 +72,7 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 			return nil, err
 		}
 		w.Auth.GasTipCap = tip
-		w.updateGasFeeCap(rpc)
+		w.updateGasFeeCap(rpc, GasOptions{BaseFeeMultiplier: 5, TipCapMultiplier: 2})
 	} else {
 		w.Auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			chainID := big.NewInt(chainId)
@@ -102,7 +117,7 @@ func (w *Wallet) GetLastGasPrice() *big.Int {
 
 // UpdateNonceAndGasPx updates nonce and gas price, or nonce and
 // gas fee cap if w.IsPostLondon
-func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client) error {
+func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client, opts ...GasOption) error {
 	err := w.UpdateNonce(rpc)
 	if err != nil {
 		return err
@@ -110,18 +125,30 @@ func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client) error {
 	if !w.IsPostLondon {
 		return w.UpdateGasPrice(rpc)
 	}
-	return w.updateGasFeeCap(rpc)
+
+	// defaults for post london
+	options := GasOptions{BaseFeeMultiplier: 5, TipCapMultiplier: 2}
+	for _, opt := range opts {
+		opt(&options)
+	}
+	return w.updateGasFeeCap(rpc, options)
 }
 
-func (w *Wallet) updateGasFeeCap(rpc *ethclient.Client) error {
+func (w *Wallet) updateGasFeeCap(rpc *ethclient.Client, opts GasOptions) error {
+	ctx := context.Background()
+
+	tipCap, err := rpc.SuggestGasTipCap(ctx)
+	if err != nil {
+		return fmt.Errorf("updateGasFeeCap: failed to get tip cap: %v", err)
+	}
+	w.Auth.GasTipCap = new(big.Int).Mul(tipCap, big.NewInt(int64(opts.TipCapMultiplier)))
 	head, err := rpc.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		return errors.New("updateGasFeeCap: rpc could not get BaseFee; " + err.Error())
+		return fmt.Errorf("updateGasFeeCap: rpc could not get BaseFee: %v", err)
 	}
-	const basefeeWiggleMultiplier = 2
 	w.Auth.GasFeeCap = new(big.Int).Add(
 		w.Auth.GasTipCap,
-		new(big.Int).Mul(head.BaseFee, big.NewInt(basefeeWiggleMultiplier)),
+		new(big.Int).Mul(head.BaseFee, big.NewInt(int64(opts.BaseFeeMultiplier))),
 	)
 	return nil
 }
