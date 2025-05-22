@@ -53,11 +53,11 @@ const (
 var PriceTypeMap = map[string]PriceType{
 	"polymarket": PXTYPE_POLYMARKET,
 	"pyth":       PXTYPE_PYTH,
-	"low-liq":    PXTYPE_V3, //legacy
-	"univ2":      PXTYPE_V2,
-	"univ3":      PXTYPE_V3,
-	"onchain":    PXTYPE_ONCHAIN,
-	"unknown":    PXTYPE_UNKNOWN,
+	//"low-liq":    PXTYPE_V3, //legacy
+	"univ2":   PXTYPE_V2,
+	"univ3":   PXTYPE_V3,
+	"onchain": PXTYPE_ONCHAIN,
+	"unknown": PXTYPE_UNKNOWN,
 }
 
 // PriceType to string
