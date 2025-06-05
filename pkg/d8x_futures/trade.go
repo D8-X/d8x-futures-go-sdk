@@ -25,7 +25,7 @@ import (
 
 type OptsOverrides struct {
 	Rpc            *ethclient.Client
-	PriceFeedEndPt string //not all functions require it
+	PriceFeedEndPt string // not all functions require it
 	WalletIdx      int
 	GasLimit       int // pre London
 }
@@ -33,7 +33,7 @@ type OptsOverrides struct {
 // overrides for order execution
 type OptsOverridesExec struct {
 	OptsOverrides
-	TsMin      uint32         //minimal timestamp we require for the off-chain price sources
+	TsMin      uint32         // minimal timestamp we require for the off-chain price sources
 	PayoutAddr common.Address // address we want to payout the referral fee
 }
 
@@ -51,7 +51,7 @@ func (sdk *Sdk) PostOrder(order *Order, overrides *OptsOverrides, gasOpts ...Gas
 		}
 		w.SetGasLimit(uint64(limit))
 	}
-	return RawPostOrder(rpc, &sdk.Conn, &sdk.Info, w, []byte{}, order, w.Address, gasOpts...)
+	return RawPostOrder(rpc, int(sdk.Conn.ChainId), &sdk.Info, w, []byte{}, order, w.Address, gasOpts...)
 }
 
 func (sdk *Sdk) CreateOrderBrokerSignature(iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32, optWalletIdx int) (string, string, error) {
@@ -234,7 +234,7 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int, overrides *Op
 // It needs the private key for the wallet
 // paying the gas fees. If the trader-address is not the address corresponding to the postingWallet, the func
 // also needs signature from the trader
-func RawPostOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *StaticExchangeInfo, postingWallet *Wallet, traderSig []byte, order *Order, trader common.Address, gasOpts ...GasOption) (string, string, error) {
+func RawPostOrder(rpc *ethclient.Client, chainId int, xInfo *StaticExchangeInfo, postingWallet *Wallet, traderSig []byte, order *Order, trader common.Address, gasOpts ...GasOption) (string, string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	scOrder := order.ToChainType(xInfo, trader)
 	scOrders := []contracts.IClientOrderClientOrder{scOrder}
@@ -244,7 +244,7 @@ func RawPostOrder(rpc *ethclient.Client, conn *BlockChainConnector, xInfo *Stati
 	if err != nil {
 		return "", "", fmt.Errorf("rawPostOrder: %v", err)
 	}
-	dgst, err := CreateOrderDigest(scOrder, int(conn.ChainId), true, xInfo.ProxyAddr.Hex())
+	dgst, err := CreateOrderDigest(scOrder, chainId, true, xInfo.ProxyAddr.Hex())
 	if err != nil {
 		return "", "", err
 	}
@@ -270,7 +270,6 @@ func RawCancelOrder(
 	orderId string,
 	gasOpts ...GasOption,
 ) (*types.Transaction, error) {
-
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	// first get the corresponding order and sign
 	var dig [32]byte
@@ -440,7 +439,6 @@ func RawLiquidatePosition(
 
 // estimateGasLimit estimates the gaslimit
 func EstimateGasLimit(rpc *ethclient.Client, msg ethereum.CallMsg, defaultLimit int) (int, error) {
-
 	gasLimit, err := rpc.EstimateGas(context.Background(), msg)
 	if err != nil {
 		return defaultLimit, fmt.Errorf("failed to estimate gas: %v. Using default value", err)
@@ -499,7 +497,6 @@ func RawAddCollateral(
 	amountCC float64,
 	optGas ...GasOption,
 ) (*types.Transaction, error) {
-
 	if amountCC == 0 {
 		return nil, errors.New("RawAddCollateral: amount 0")
 	}
@@ -700,7 +697,8 @@ func getDomainHash(name string, chainId int64, contractAddr string) [32]byte {
 func CreateOrderDigest(order contracts.IClientOrderClientOrder, chainId int, isNewOrder bool, proxyAddress string) (string, error) {
 	DomainSeparatorHashBytes32 := getDomainHash("Perpetual Trade Manager", int64(chainId), proxyAddress)
 	tradeOrderTypeHash := Keccak256FromString("Order(uint24 iPerpetualId,uint16 brokerFeeTbps,address traderAddr,address brokerAddr,int128 fAmount,int128 fLimitPrice,int128 fTriggerPrice,uint32 iDeadline,uint32 flags,uint16 leverageTDR,uint32 executionTimestamp)")
-	types := []string{"bytes32",
+	types := []string{
+		"bytes32",
 		"uint24",
 		"uint16",
 		"address",
@@ -711,7 +709,8 @@ func CreateOrderDigest(order contracts.IClientOrderClientOrder, chainId int, isN
 		"uint32",
 		"uint32",
 		"uint16",
-		"uint32"}
+		"uint32",
+	}
 	values := []interface{}{
 		tradeOrderTypeHash,
 		order.IPerpetualId,
@@ -799,7 +798,6 @@ func AbiEncode(types []string, values ...interface{}) ([]byte, error) {
 		return []byte{}, fmt.Errorf("failed to encode arguments: %v", err)
 	}
 	return bytes, nil
-
 }
 
 func BytesFromHexString(hexNumber string) ([]byte, error) {

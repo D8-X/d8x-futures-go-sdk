@@ -25,21 +25,20 @@ func loadPk() string {
 }
 
 func TestSdkExec(t *testing.T) {
-
 	var sdk Sdk
 	pk := loadPk()
 	if pk == "" {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	//err := sdk.New([]string{pk}, "42161") //arbitrum
-	//err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
-	//err := sdk.New([]string{pk}, "195") //x-layer testnet
-	//err := sdk.New([]string{pk}, "196") //x-layer
-	//err := sdk.New([]string{pk}, "2442") //cardona
-	//err := sdk.New([]string{pk}, "1442") //zkevm testnet
+	// err := sdk.New([]string{pk}, "42161") //arbitrum
+	// err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
+	// err := sdk.New([]string{pk}, "195") //x-layer testnet
+	// err := sdk.New([]string{pk}, "196") //x-layer
+	// err := sdk.New([]string{pk}, "2442") //cardona
+	// err := sdk.New([]string{pk}, "1442") //zkevm testnet
 	// err := sdk.New([]string{pk}, "80084") //bartio
-	err := sdk.New([]string{pk}, "80094") //bera
+	err := sdk.New([]string{pk}, "80094") // bera
 	perp := "BERA-USD-BUSD"
 	if err != nil {
 		t.Log(err.Error())
@@ -64,7 +63,7 @@ func TestSdkExec(t *testing.T) {
 		}
 	}
 	if len(mktOrderIds) == 0 {
-		//mktOrderIds = append(mktOrderIds, "f3e6741c2eefeb3c5e1c8539f15e5590b8b104ad6c8ed99a2f63151c315b0dd0")
+		// mktOrderIds = append(mktOrderIds, "f3e6741c2eefeb3c5e1c8539f15e5590b8b104ad6c8ed99a2f63151c315b0dd0")
 
 		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 2, 5, &OrderOptions{LimitPrice: 0})
 		orderId, _, err := sdk.PostOrder(order, nil)
@@ -72,7 +71,7 @@ func TestSdkExec(t *testing.T) {
 			t.Log(err.Error())
 		}
 		fmt.Println("order id =", orderId)
-		//92d891d3ae6d8695c8732d67fff2b59d309496796e1f369f8d5e0b4ab2a17cd4
+		// 92d891d3ae6d8695c8732d67fff2b59d309496796e1f369f8d5e0b4ab2a17cd4
 		mktOrderIds = append(mktOrderIds, orderId)
 
 	}
@@ -87,16 +86,15 @@ func TestSdkExec(t *testing.T) {
 }
 
 func TestSdkLiquidatePosition(t *testing.T) {
-
 	var sdk Sdk
 	pk := loadPk()
 	if pk == "" {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	//err := sdk.New([]string{pk}, "195") //x-layer testnet
-	//err := sdk.New([]string{pk}, "196") //x-layer testnet
-	err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
+	// err := sdk.New([]string{pk}, "195") //x-layer testnet
+	// err := sdk.New([]string{pk}, "196") //x-layer testnet
+	err := sdk.New([]string{pk}, "421614") // arbitrum sepolia
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -130,15 +128,15 @@ func TestAddCollateral(t *testing.T) {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	//err := sdk.New([]string{pk}, "421614")
+	// err := sdk.New([]string{pk}, "421614")
 	err := sdk.New([]string{pk}, "195")
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
 	}
 	fmt.Println("wallet = " + sdk.Wallets[0].Address.Hex())
-	//opts := nil //OptsOverrides{GasLimit: }
-	//tx, err := sdk.AddCollateral("ETH-USD-WEETH", 0.0001, nil)
+	// opts := nil //OptsOverrides{GasLimit: }
+	// tx, err := sdk.AddCollateral("ETH-USD-WEETH", 0.0001, nil)
 	tx, err := sdk.AddCollateral("BTC-USDC-USDC", -0.0001, nil)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -219,11 +217,11 @@ func TestTradingFunc(t *testing.T) {
 
 func TestABI(t *testing.T) {
 	types := []string{"uint256", "address", "int128", "bytes32"}
-	//domainBuf := []byte("EIP712Domain(string name,uint256 chainId,address verifyingContract)")
+	// domainBuf := []byte("EIP712Domain(string name,uint256 chainId,address verifyingContract)")
 	domainHash := Keccak256FromString("EIP712Domain(string name,uint256 chainId,address verifyingContract)")
-	//v := "0x" + hex.EncodeToString(hash)
-	//var hashArray [32]byte
-	//copy(hashArray[:], hash)
+	// v := "0x" + hex.EncodeToString(hash)
+	// var hashArray [32]byte
+	// copy(hashArray[:], hash)
 	values := []interface{}{
 		big.NewInt(123),
 		common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05"),
@@ -238,7 +236,7 @@ func TestABI(t *testing.T) {
 	}
 
 	fmt.Println("Encoded data:", result)
-	var resExpected = "0x000000000000000000000000000000000000000000000000000000000000007b0000000000000000000000009d5aab428e98678d0e645ea4aebd25f744341a05fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffb458cad95687ba82c2ce50e74f7b754645e5117c3a5bec8151c0726d5857980a866"
+	resExpected := "0x000000000000000000000000000000000000000000000000000000000000007b0000000000000000000000009d5aab428e98678d0e645ea4aebd25f744341a05fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffb458cad95687ba82c2ce50e74f7b754645e5117c3a5bec8151c0726d5857980a866"
 	if resExpected != result {
 		panic("wrong encoding")
 	}
@@ -282,7 +280,6 @@ func TestOrderHash(t *testing.T) {
 	if dgst != "625da4b5a8ccc7a093e88b5908b3019b3272c30058bc17d420e1b0e2a60ce0f5" {
 		panic("wrong dgst result")
 	}
-
 }
 
 func TestPostOrder(t *testing.T) {
@@ -325,7 +322,7 @@ func TestPostOrder(t *testing.T) {
 		ParentChildOrderId1: emptyArray,
 		ParentChildOrderId2: emptyArray,
 	}
-	_, txHash, _ := RawPostOrder(conn.Rpc, &conn, &xInfo, wallet, []byte{}, &order, traderAddr)
+	_, txHash, _ := RawPostOrder(conn.Rpc, int(conn.ChainId), &xInfo, wallet, []byte{}, &order, traderAddr)
 	fmt.Println("Tx hash = ", txHash)
 }
 
@@ -338,7 +335,6 @@ func TestPostOrder2(t *testing.T) {
 	}
 	var sdk Sdk
 	sdk.New([]string{pk}, "testnet")
-
 }
 
 func TestBrokerSignature(t *testing.T) {
