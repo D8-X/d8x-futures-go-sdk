@@ -211,6 +211,29 @@ func (t Side) String() string {
 	}
 }
 
+func (s Side) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.String())
+}
+
+func (s *Side) UnmarshalJSON(data []byte) error {
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+
+	switch str {
+	case "CLOSED":
+		*s = SIDE_CLOSED
+	case "BUY":
+		*s = SIDE_BUY
+	case "SELL":
+		*s = SIDE_SELL
+	default:
+		return fmt.Errorf("invalid side: %s", str)
+	}
+	return nil
+}
+
 type OrderType uint8
 
 const (
