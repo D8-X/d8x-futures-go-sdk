@@ -172,7 +172,7 @@ func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, op
 // GetPositionRisks uses multicall to query traderState and constructs an array of position risks
 func (sdkRo *SdkRO) GetPositionRisks(symbols []string, traderAddr common.Address, optEndPt *OptEndPoints) ([]PositionRisk, error) {
 	optRpc, optPyth := extractEndpoints(sdkRo, optEndPt)
-	chunks := 2
+	chunks := 10
 	pos := make([]PositionRisk, 0, len(symbols))
 	start := 0
 	end := min(len(symbols), chunks)
