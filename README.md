@@ -24,6 +24,8 @@ The most relevant functions for the read-only SDK are as follows, ignoring the e
 trader := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 broker := common.HexToAddress("0xB0CBeeC370Af6ca2ed541F6a2264bc95b991F6E1")
 pr, err := sdkRo.GetPositionRisk("BTC-USDT-USDT", trader)
+symbols := []string{"BTC-USD-BUSD", "BERA-USD-BUSD", "BTC-USD-BUSD", "XAU-USD-BUSD", "ETH-USD-BUSD"}
+pRisk, err := sdkRo.GetPositionRisks(symbols, trader, &OptEndPoints{Rpc: client})
 perpState, err := sdkRo.QueryPerpetualState([]int32{100000, 100001, 200002})
 px, err := sdkRo.QueryPerpetualPrices("BTC-USDT-USDT", []float{0.01}, nil, nil)
 poolState, err := sdkRo.QueryPoolStates(nil)

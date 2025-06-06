@@ -22,17 +22,26 @@ import (
 
 func TestFetchPricesFromAPI(t *testing.T) {
 	priceIds := []PriceId{
-		{Id: "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
-			Type: utils.PXTYPE_PYTH, Origin: ""},
-		{Id: "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
-			Type: utils.PXTYPE_PYTH, Origin: ""}}
+		{
+			Id:   "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
+			Type: utils.PXTYPE_PYTH, Origin: "",
+		},
+		{
+			Id:   "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
+			Type: utils.PXTYPE_PYTH, Origin: "",
+		},
+	}
 	data, _ := fetchPricesFromAPI(priceIds, "https://hermes.pyth.network/api", "", "", false)
 	fmt.Println(data)
 	priceIdsWrong := []PriceId{
-		{Id: "0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
-			Type: utils.PXTYPE_PYTH, Origin: ""},
-		{Id: "0x01f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
-			Type: utils.PXTYPE_PYTH, Origin: ""},
+		{
+			Id:   "0x796d24444ff50728b58e94b1f53dc3a406b2f1ba9d0d0b91d4406c37491a6feb",
+			Type: utils.PXTYPE_PYTH, Origin: "",
+		},
+		{
+			Id:   "0x01f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
+			Type: utils.PXTYPE_PYTH, Origin: "",
+		},
 	}
 	_, err := fetchPricesFromAPI(priceIdsWrong, "https://hermes.pyth.network/api", "", "", false)
 	if err == nil {
@@ -40,7 +49,6 @@ func TestFetchPricesFromAPI(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Println(err.Error())
-
 }
 
 func CreateProxiedRpc(proxyRawUrl, rpcRawUrl string) (*ethclient.Client, error) {
@@ -124,7 +132,8 @@ func TestFetchPythPrices(t *testing.T) {
 	}
 	r, err := fetchPythPrices([]PriceId{
 		{Id: pxConf.PriceFeedIds[idx[0]].Id, Type: utils.PXTYPE_PYTH, Origin: ""},
-		{Id: pxConf.PriceFeedIds[idx[1]].Id, Type: utils.PXTYPE_PYTH, Origin: ""}}, "https://hermes.pyth.network/", "", "")
+		{Id: pxConf.PriceFeedIds[idx[1]].Id, Type: utils.PXTYPE_PYTH, Origin: ""},
+	}, "https://hermes.pyth.network/", "", "")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -256,10 +265,10 @@ func TestFetchInfo(t *testing.T) {
 
 func TestGetPoolShareTknBalance(t *testing.T) {
 	var sdkRo SdkRO
-	//err := sdkRo.New("195") //xlayer testnet
+	// err := sdkRo.New("195") //xlayer testnet
 	err := sdkRo.New("421614",
 		WithPriceFeedEndpoint("https://hermes.pyth.network"),
-		WithRpcUrl("https://rpc.ankr.com/arbitrum/")) //arbitrum sepolia
+		WithRpcUrl("https://rpc.ankr.com/arbitrum/")) // arbitrum sepolia
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -279,7 +288,7 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 
 func TestSettlementToken(t *testing.T) {
 	var sdkRo SdkRO
-	err := sdkRo.New("42161") //arbitrum
+	err := sdkRo.New("42161") // arbitrum
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -321,13 +330,12 @@ func TestSettlementToken(t *testing.T) {
 		fmt.Printf("incorrect settlement token address for WEETH pool")
 		t.FailNow()
 	}
-
 }
 
 func TestQueryLiquidatableAccounts(t *testing.T) {
 	var sdkRo SdkRO
-	//err := sdkRo.New("195") //xlayer testnet
-	err := sdkRo.New("421614") //arbitrum sepolia
+	// err := sdkRo.New("195") //xlayer testnet
+	err := sdkRo.New("421614") // arbitrum sepolia
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -355,11 +363,11 @@ func TestQueryLiquidatableAccounts(t *testing.T) {
 
 func TestGetPerpetualData(t *testing.T) {
 	var sdkRo SdkRO
-	//err := sdkRo.New("421614") //arbitrum sepolia
-	//err := sdkRo.New("195") //x1
-	//err := sdkRo.New("196") //xlayer
-	//err := sdkRo.New("80084") //bartio
-	err := sdkRo.New("80094") //bera
+	// err := sdkRo.New("421614") //arbitrum sepolia
+	// err := sdkRo.New("195") //x1
+	// err := sdkRo.New("196") //xlayer
+	// err := sdkRo.New("80084") //bartio
+	err := sdkRo.New("80094") // bera
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -382,8 +390,8 @@ func TestGetPerpetualData(t *testing.T) {
 
 func TestPerpetualPrice(t *testing.T) {
 	var sdkRo SdkRO
-	//err := sdkRo.New("196")
-	err := sdkRo.New("421614") //arbitrum sepolia
+	// err := sdkRo.New("196")
+	err := sdkRo.New("421614") // arbitrum sepolia
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -401,10 +409,9 @@ func TestPerpetualPrice(t *testing.T) {
 }
 
 func TestAllowance(t *testing.T) {
-
 	var sdkRo SdkRO
-	//err := sdkRo.New("196")
-	err := sdkRo.New("42161") //arbitrum
+	// err := sdkRo.New("196")
+	err := sdkRo.New("42161") // arbitrum
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -418,10 +425,9 @@ func TestAllowance(t *testing.T) {
 }
 
 func TestPerpetualPriceTuple(t *testing.T) {
-
 	var sdkRo SdkRO
-	//err := sdkRo.New("196")
-	err := sdkRo.New("421614") //arbitrum sepolia
+	// err := sdkRo.New("196")
+	err := sdkRo.New("421614") // arbitrum sepolia
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -493,9 +499,11 @@ func TestSdkROOrders(t *testing.T) {
 	}
 	fmt.Printf("There are %d open orders\n", n)
 	startTime = time.Now()
-	rpc := []string{"https://bartio.drpc.org",
+	rpc := []string{
+		"https://bartio.drpc.org",
 		"https://bartio.rpc.berachain.com",
-		"https://berat2.lava.build"}
+		"https://berat2.lava.build",
+	}
 	orderChan := make(chan *OpenOrders, len(rpc))
 	num := int(n) / min(len(rpc), int(n))
 	for i := 0; i < len(rpc); i++ {
@@ -503,7 +511,7 @@ func TestSdkROOrders(t *testing.T) {
 		to := from + num
 		go getOrders(sdkRo, sym, rpc[i], from, to, orderChan)
 	}
-	var orders = make([]*OpenOrders, 0, len(rpc))
+	orders := make([]*OpenOrders, 0, len(rpc))
 	totalOrders := 0
 	for i := 0; i < len(rpc); i++ {
 		res := <-orderChan
@@ -627,7 +635,6 @@ func TestSdkRO(t *testing.T) {
 	} else {
 		fmt.Println(minpos)
 	}
-
 }
 
 func TestFetchPricesForPerpetual(t *testing.T) {
@@ -641,6 +648,22 @@ func TestFetchPricesForPerpetual(t *testing.T) {
 		t.Log(err.Error())
 	}
 	fmt.Println(pxBundle)
+}
+
+func TestGetPositionRisks(t *testing.T) {
+	var sdkRo SdkRO
+	err := sdkRo.New("bera")
+	if err != nil {
+		t.Log(err.Error())
+	}
+	traderAddr := common.HexToAddress("0x52b42598ADbCF70B36ECAdEEE87f33Cdf12992B4")
+	symbols := []string{"BTC-USD-BUSD", "BERA-USD-BUSD", "BTC-USD-BUSD", "XAU-USD-BUSD", "ETH-USD-BUSD"}
+	client, _ := ethclient.Dial("https://berachain.blockpi.network/v1/rpc/public")
+	pRisk, err := sdkRo.GetPositionRisks(symbols, traderAddr, &OptEndPoints{Rpc: client})
+	if err != nil {
+		t.Log(err.Error())
+	}
+	fmt.Println(pRisk)
 }
 
 func TestGetPositionRisk(t *testing.T) {
@@ -711,7 +734,6 @@ func TestQueryPoolStates(t *testing.T) {
 		fmt.Println("TotalSupplyShareToken=", p.TotalSupplyShareToken)
 		fmt.Println("TotalTargetAMMFundSizeCC=", p.TotalTargetAMMFundSizeCC)
 	}
-
 }
 
 func TestQueryOpenOrders(t *testing.T) {
