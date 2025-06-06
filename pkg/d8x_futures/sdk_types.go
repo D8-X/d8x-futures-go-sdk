@@ -81,8 +81,8 @@ type PerpetualStaticInfo struct {
 	S3Symbol               string
 	LotSizeBC              float64
 	ReferralRebate         float64
-	PriceIds               []PriceId //off-chain price feeds
-	OnChainSymbols         []string  //on-chain price feeds
+	PriceIds               []PriceId // off-chain price feeds
+	OnChainSymbols         []string  // on-chain price feeds
 	PerpFlags              *big.Int
 	State                  PerpetualStateEnum
 }
@@ -145,8 +145,9 @@ type PerpetualPriceInfo struct {
 	CLOBParams       uint64
 	IsMarketClosedS2 bool
 	IsMarketClosedS3 bool
-	PriceFeed        PriceFeedData //off-chain price feeds
+	PriceFeed        PriceFeedData // off-chain price feeds
 }
+
 type PriceFeedData struct {
 	PriceIds []string
 	Prices   []PriceObs
@@ -287,9 +288,9 @@ type BlockChainConnector struct {
 	Rpc               *ethclient.Client
 	ChainId           int64
 	PerpetualManager  *contracts.IPerpetualManager
-	SymbolMapping     *map[string]string //chain-symbol (MATC) to long format (MATIC)
-	PriceFeedNetwork  string             //PythEVMBeta or PythEVMStable
-	PostOrderGasLimit int64              //gas limit for posting orders
+	SymbolMapping     *map[string]string // chain-symbol (MATC) to long format (MATIC)
+	PriceFeedNetwork  string             // PythEVMBeta or PythEVMStable
+	PostOrderGasLimit int64              // gas limit for posting orders
 	PriceFeedConfig   utils.PriceFeedConfig
 }
 
@@ -338,7 +339,7 @@ type ResponsePythPrice struct {
 type Keccak256Hash [32]byte
 
 type Order struct {
-	Symbol              string //symbol of the form ETH-USD-MATIC
+	Symbol              string // symbol of the form ETH-USD-MATIC
 	Side                Side
 	Type                OrderType
 	Quantity            float64
@@ -358,18 +359,18 @@ type Order struct {
 }
 
 type PositionRisk struct {
-	Symbol                         string
-	PositionNotionalBaseCCY        float64
-	Side                           Side
-	EntryPrice                     float64
-	Leverage                       float64
-	MarkPrice                      float64
-	UnrealizedPnlQuoteCCY          float64
-	UnrealizedFundingCollateralCCY float64
-	CollateralCC                   float64
-	LiquidationPrice               [2]float64
-	LiquidationLvg                 float64
-	CollToQuoteConversion          float64
+	Symbol                         string     `json:"symbol"`
+	PositionNotionalBaseCCY        float64    `json:"positionNotionalBaseCCY"`
+	Side                           Side       `json:"side"`
+	EntryPrice                     float64    `json:"entryPrice"`
+	Leverage                       float64    `json:"leverage"`
+	MarkPrice                      float64    `json:"markPrice"`
+	UnrealizedPnlQuoteCCY          float64    `json:"unrealizedPnlQuoteCCY"`
+	UnrealizedFundingCollateralCCY float64    `json:"unrealizedFundingCollateralCCY"`
+	CollateralCC                   float64    `json:"collateralCC"`
+	LiquidationPrice               [2]float64 `json:"liquidationPrice"`
+	LiquidationLvg                 float64    `json:"liquidationLvg"`
+	CollToQuoteConversion          float64    `json:"collToQuoteConversion"`
 }
 
 type MarginAccount struct {
@@ -434,7 +435,7 @@ func NewOrder(symbol string, side Side, orderType OrderType, quantity float64, l
 		// set to immediate execution
 		options.ExecutionTs = uint32(ts) - 5
 	}
-	var pcoId = &[32]byte{}
+	pcoId := &[32]byte{}
 	if options.parentChildOrderId1 == nil {
 		options.parentChildOrderId1 = pcoId
 	}
@@ -579,7 +580,6 @@ func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
 // New creates a new read/write Sdk instance
 // networkname according to chainConfig or a chainId; rpcEndpoint and pythEndpoint can be ""
 func (sdk *Sdk) New(privateKeys []string, networkName string, opts ...optionFunc) error {
-
 	err := sdk.SdkRO.New(networkName, opts...)
 	if err != nil {
 		return err
