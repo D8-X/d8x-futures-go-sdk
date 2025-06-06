@@ -664,6 +664,12 @@ func TestGetPositionRisks(t *testing.T) {
 		t.Log(err.Error())
 	}
 	fmt.Println(pRisk)
+
+	pRisk, err = sdkRo.GetPositionRiskAll(traderAddr, &OptEndPoints{Rpc: client})
+	if err != nil {
+		t.Log(err.Error())
+	}
+	fmt.Println(pRisk)
 }
 
 func TestGetPositionRisk(t *testing.T) {

@@ -169,6 +169,19 @@ func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, op
 	return RawGetPositionRisk(sdkRo.Info, optRpc, &traderAddr, symbol, optPyth, sdkRo.ChainConfig.PrdMktFeedEndpoint, sdkRo.ChainConfig.LowLiqFeedEndpoint)
 }
 
+// GetPositionRiskAll gets Position Risks for all perpetuals.
+// It uses multicall to query traderState and constructs an array of position risks
+func (sdkRo *SdkRO) GetPositionRiskAll(traderAddr common.Address, optEndPt *OptEndPoints) ([]PositionRisk, error) {
+	syms := make([]string, 0, len(sdkRo.Info.PerpetualSymbolToId))
+	for _, perp := range sdkRo.Info.Perpetuals {
+		if perp.State == NORMAL {
+			sym := sdkRo.Info.PerpetualIdToSymbol[perp.Id]
+			syms = append(syms, sym)
+		}
+	}
+	return sdkRo.GetPositionRisks(syms, traderAddr, optEndPt)
+}
+
 // GetPositionRisks uses multicall to query traderState and constructs an array of position risks
 func (sdkRo *SdkRO) GetPositionRisks(symbols []string, traderAddr common.Address, optEndPt *OptEndPoints) ([]PositionRisk, error) {
 	optRpc, optPyth := extractEndpoints(sdkRo, optEndPt)
