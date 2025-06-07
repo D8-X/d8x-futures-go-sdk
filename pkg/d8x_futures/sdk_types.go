@@ -215,6 +215,19 @@ func (s Side) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String())
 }
 
+func ParseSide(s string) (Side, error) {
+	switch s {
+	case "CLOSED":
+		return SIDE_CLOSED, nil
+	case "BUY":
+		return SIDE_BUY, nil
+	case "SELL":
+		return SIDE_SELL, nil
+	default:
+		return SIDE_CLOSED, fmt.Errorf("invalid side: %s", s)
+	}
+}
+
 func (s *Side) UnmarshalJSON(data []byte) error {
 	var str string
 	if err := json.Unmarshal(data, &str); err != nil {
@@ -256,6 +269,21 @@ func (t OrderType) String() string {
 		return "STOP_LIMIT"
 	default:
 		return "UNKNOWN"
+	}
+}
+
+func ParseOrderType(ot string) OrderType {
+	switch ot {
+	case "LIMIT":
+		return ORDER_TYPE_LIMIT
+	case "MARKET":
+		return ORDER_TYPE_MARKET
+	case "STOP_MARKET":
+		return ORDER_TYPE_STOP_MARKET
+	case "STOP_LIMIT":
+		return ORDER_TYPE_STOP_LIMIT
+	default:
+		return ORDER_TYPE_UNKNOWN
 	}
 }
 
