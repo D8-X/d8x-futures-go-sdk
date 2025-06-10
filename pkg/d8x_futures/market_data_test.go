@@ -656,20 +656,30 @@ func TestGetPositionRisks(t *testing.T) {
 	if err != nil {
 		t.Log(err.Error())
 	}
-	traderAddr := common.HexToAddress("0x52b42598ADbCF70B36ECAdEEE87f33Cdf12992B4")
-	symbols := []string{"BTC-USD-BUSD", "BERA-USD-BUSD", "BTC-USD-BUSD", "XAU-USD-BUSD", "ETH-USD-BUSD"}
+	traderAddr := common.HexToAddress("0x28Fc58AC8dD6B1e3db146741F37EC7d8Cfdb9977")
+	symbols := []string{"BERA-USD-BUSD"}
 	client, _ := ethclient.Dial("https://berachain.blockpi.network/v1/rpc/public")
 	pRisk, err := sdkRo.GetPositionRisks(symbols, traderAddr, &OptEndPoints{Rpc: client})
 	if err != nil {
 		t.Log(err.Error())
 	}
-	fmt.Println(pRisk)
+	jason, err := json.MarshalIndent(pRisk, "", " ")
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	fmt.Println(string(jason))
 
 	pRisk, err = sdkRo.GetPositionRiskAll(traderAddr, &OptEndPoints{Rpc: client})
 	if err != nil {
 		t.Log(err.Error())
 	}
-	fmt.Println(pRisk)
+	jason, err = json.MarshalIndent(pRisk, "", " ")
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	fmt.Println(string(jason))
 }
 
 func TestGetPositionRisk(t *testing.T) {
