@@ -24,6 +24,7 @@ type Wallet struct {
 type GasOptions struct {
 	BaseFeeMultiplier int
 	TipCapMultiplier  int
+	GasLimit          uint64
 }
 
 type GasOption func(*GasOptions)
@@ -34,6 +35,10 @@ func WithBaseFeeMultiplier(m int) GasOption {
 
 func WithTipCapMultiplier(m int) GasOption {
 	return func(o *GasOptions) { o.TipCapMultiplier = m }
+}
+
+func WithGasLimit(m uint64) GasOption {
+	return func(o *GasOptions) { o.GasLimit = m }
 }
 
 // NewWallet constructs a new wallet. ChainId must be provided and privatekey must be of the form "abcdef012" (no 0x)
@@ -72,7 +77,7 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 			return nil, err
 		}
 		w.Auth.GasTipCap = tip
-		w.updateGasFeeCap(rpc, GasOptions{BaseFeeMultiplier: 5, TipCapMultiplier: 2})
+		w.updateGasOptions(rpc, GasOptions{BaseFeeMultiplier: 5, TipCapMultiplier: 2})
 	} else {
 		w.Auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			chainID := big.NewInt(chainId)
@@ -131,10 +136,10 @@ func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client, opts ...GasOption) e
 	for _, opt := range opts {
 		opt(&options)
 	}
-	return w.updateGasFeeCap(rpc, options)
+	return w.updateGasOptions(rpc, options)
 }
 
-func (w *Wallet) updateGasFeeCap(rpc *ethclient.Client, opts GasOptions) error {
+func (w *Wallet) updateGasOptions(rpc *ethclient.Client, opts GasOptions) error {
 	ctx := context.Background()
 
 	tipCap, err := rpc.SuggestGasTipCap(ctx)
@@ -150,6 +155,9 @@ func (w *Wallet) updateGasFeeCap(rpc *ethclient.Client, opts GasOptions) error {
 		w.Auth.GasTipCap,
 		new(big.Int).Mul(head.BaseFee, big.NewInt(int64(opts.BaseFeeMultiplier))),
 	)
+	if opts.GasLimit != 0 {
+		w.Auth.GasLimit = opts.GasLimit
+	}
 	return nil
 }
 

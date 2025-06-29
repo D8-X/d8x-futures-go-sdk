@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-func (sdk *Sdk) PurchaseBrokerLots(numLots int, symbol string, opts *OptsOverrides) (*types.Transaction, error) {
+func (sdk *Sdk) PurchaseBrokerLots(numLots int, symbol string, opts *OptsOverrides, gasOpts ...GasOption) (*types.Transaction, error) {
 	var w *Wallet
 	var rpc *ethclient.Client
 	if opts == nil {
@@ -20,7 +20,7 @@ func (sdk *Sdk) PurchaseBrokerLots(numLots int, symbol string, opts *OptsOverrid
 	if rpc == nil {
 		rpc = sdk.Conn.Rpc
 	}
-	return RawPurchaseBrokerLots(rpc, &sdk.Info, w, symbol, numLots)
+	return RawPurchaseBrokerLots(rpc, &sdk.Info, w, symbol, numLots, gasOpts...)
 }
 
 // QueryBrokerLots queries the number of lots that the given address purchased in the pool with symbol
@@ -50,7 +50,7 @@ func RawQueryBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbol
 	return int(lots), nil
 }
 
-func RawPurchaseBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, postingWallet *Wallet, symbol string, numLots int) (*types.Transaction, error) {
+func RawPurchaseBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, postingWallet *Wallet, symbol string, numLots int, gasOpts ...GasOption) (*types.Transaction, error) {
 	j := GetPoolStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
 		return nil, errors.New("Could not find pool for symbol " + symbol)
@@ -64,7 +64,7 @@ func RawPurchaseBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, pos
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(1_000_000))
-	postingWallet.UpdateNonceAndGasPx(rpc)
+	postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...)
 	tx, err := perpCtrct.DepositBrokerLots(postingWallet.Auth, uint8(poolId), uint32(numLots))
 	if err != nil {
 		return nil, errors.New("RawPurchaseBrokerLots:" + err.Error())
