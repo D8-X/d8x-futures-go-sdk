@@ -67,15 +67,15 @@ func Float64ToABDK(x float64) *big.Int {
 		return big.NewInt(0)
 	}
 	y := new(big.Float).SetFloat64(x)
-	//fmt.Println(y.Float64())
+	// fmt.Println(y.Float64())
 	one64x64 := new(big.Int)
 	one64x64.SetString(ONE_64x64, 10)
 	y64 := new(big.Float).Mul(y, new(big.Float).SetInt(one64x64))
 	// convert to Int
 	intVal := new(big.Int)
-	//fmt.Println(y64)
+	// fmt.Println(y64)
 	y64.Int(intVal)
-	//fmt.Println(intVal)
+	// fmt.Println(intVal)
 	return intVal
 }
 
@@ -84,7 +84,6 @@ func ABDKToFloat64(xIn *big.Int) float64 {
 		return float64(0)
 	}
 	x := new(big.Int).Set(xIn)
-	x.Abs(x)
 	var sgn float64 = float64(x.Sign())
 	x.Abs(x)
 	var xInt, xRemainder, xDec big.Int
@@ -107,7 +106,7 @@ func ABDKToFloat64(xIn *big.Int) float64 {
 func PythNToFloat64(price string, expo int32) float64 {
 	var x big.Int
 	x.SetString(price, 10)
-	var dec = new(big.Int).Exp(big.NewInt(10), big.NewInt(-int64(expo)), nil)
+	dec := new(big.Int).Exp(big.NewInt(10), big.NewInt(-int64(expo)), nil)
 	var sgn float64 = float64(x.Sign())
 	x.Abs(&x)
 	var xInt, xRemainder big.Int

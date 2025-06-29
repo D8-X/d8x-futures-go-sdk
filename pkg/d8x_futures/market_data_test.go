@@ -656,7 +656,7 @@ func TestGetPositionRisks(t *testing.T) {
 	if err != nil {
 		t.Log(err.Error())
 	}
-	traderAddr := common.HexToAddress("0x28Fc58AC8dD6B1e3db146741F37EC7d8Cfdb9977")
+	traderAddr := common.HexToAddress("0x65bB2DC83402d0Ed6b86afE72A9E5726427690BE")
 	symbols := []string{"BERA-USD-BUSD"}
 	client, _ := ethclient.Dial("https://berachain.blockpi.network/v1/rpc/public")
 	pRisk, err := sdkRo.GetPositionRisks(symbols, traderAddr, &OptEndPoints{Rpc: client})
