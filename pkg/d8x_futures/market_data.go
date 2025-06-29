@@ -1197,15 +1197,16 @@ func RawCalculateLiquidationPrice(ccy CollateralCCY, lockedInValue float64, posi
 	if positionBC == 0 {
 		return float64(0)
 	}
-	if ccy == QUANTO {
+	switch ccy {
+	case QUANTO:
 		numerator := -lockedInValue + cashCC*S3*(1-utils.Sign(positionBC))
 		denominator := tau*math.Abs(positionBC) - positionBC - (cashCC*S3*utils.Sign(positionBC))/Sm
 		return numerator / denominator
-	} else if ccy == BASE {
+	case BASE:
 		numerator := -lockedInValue + cashCC
 		denominator := tau*math.Abs(positionBC) - positionBC
 		return numerator / denominator
-	} else {
+	default:
 		return lockedInValue / (positionBC - tau*math.Abs(positionBC) + cashCC)
 	}
 }
@@ -1545,13 +1546,14 @@ func fetchPythPrices(priceIds []PriceId, priceFeedEndpoint, prdMktEndpoint, lowL
 	query3 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", lowLiqEndpoint)
 	count := 0
 	for _, id := range priceIds {
-		if id.Type == utils.PXTYPE_PYTH {
+		switch id.Type {
+		case utils.PXTYPE_PYTH:
 			fetchPythPrice(query1+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
 			count++
-		} else if id.Type == utils.PXTYPE_POLYMARKET {
+		case utils.PXTYPE_POLYMARKET:
 			fetchPythPrice(query2+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
 			count++
-		} else if id.Type == utils.PXTYPE_V2 || id.Type == utils.PXTYPE_V3 {
+		case utils.PXTYPE_V2, utils.PXTYPE_V3:
 			fetchPythPrice(query3+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
 			count++
 		}
