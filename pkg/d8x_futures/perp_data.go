@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
@@ -75,7 +76,7 @@ func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.Chai
 		return BlockChainConnector{}, err
 	}
 	priceFeedNetwork := chConf.PriceFeedNetwork
-	var b = BlockChainConnector{
+	b := BlockChainConnector{
 		Rpc:               rpc,
 		ChainId:           chConf.ChainId,
 		PerpetualManager:  proxy,
@@ -89,10 +90,9 @@ func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.Chai
 }
 
 func QueryNestedPerpetualInfo(conn BlockChainConnector) (NestedPerpetualIds, error) {
-
 	var idxFrom uint8 = 1
 	const queryLen uint8 = 5
-	var lenReceived = queryLen
+	lenReceived := queryLen
 	var nestedPerpetualIds [][]*big.Int
 	var poolShareTokenAddr []common.Address
 	var poolMarginTokenAddr []common.Address
@@ -115,7 +115,7 @@ func QueryNestedPerpetualInfo(conn BlockChainConnector) (NestedPerpetualIds, err
 		idxFrom = idxFrom + lenReceived
 	}
 
-	var p = NestedPerpetualIds{
+	p := NestedPerpetualIds{
 		PerpetualIds:        nestedPerpetualIds,
 		PoolShareTokenAddr:  poolShareTokenAddr,
 		PoolMarginTokenAddr: poolMarginTokenAddr,
@@ -308,6 +308,54 @@ func isLowLiqPerp(perp *PerpetualStaticInfo) bool {
 	return result.Cmp(big.NewInt(0)) != 0
 }
 
+func isTradFiMkt(perp *PerpetualStaticInfo) bool {
+	result := new(big.Int).And(big.NewInt(int64(FLAG_TRADFI_MKT)), perp.PerpFlags)
+	return result.Cmp(big.NewInt(0)) != 0
+}
+
+func (perp *PerpetualStaticInfo) GetInitialMarginRate() float64 {
+	if !isTradFiMkt(perp) {
+		return perp.InitialMarginRate
+	}
+	t := time.Now().Unix() % 86400
+	openSec, closeSec := decodeMarketOpenCloseSeconds(perp.FAMMTargetDD)
+	isOpen := (t > openSec) != (t > closeSec) != (openSec > closeSec)
+	if isOpen {
+		return perp.InitialMarginRate
+	}
+	return 0.2 // 5x
+}
+
+func (perp *PerpetualStaticInfo) GetMaintenanceMarginRate() float64 {
+	if !isTradFiMkt(perp) {
+		return perp.MaintenanceMarginRate
+	}
+	t := time.Now().Unix() % 86400
+	openSec, closeSec := decodeMarketOpenCloseSeconds(perp.FAMMTargetDD)
+	isOpen := (t > openSec) != (t > closeSec) != (openSec > closeSec)
+	if isOpen {
+		return perp.MaintenanceMarginRate
+	}
+	return 0.1 // 10x
+}
+
+// decodeMarketOpenCloseSeconds decodes the open/close times
+// and returns them in seconds
+func decodeMarketOpenCloseSeconds(packed *big.Int) (int64, int64) {
+	mask := big.NewInt(0x7F) // 7-bit mask (127)
+	// closeSlot = packed & 0x7F
+	closeSlot := new(big.Int).And(packed, mask)
+
+	// openSlot = (packed >> 7) & 0x7F
+	openSlot := new(big.Int).Rsh(packed, 7)
+	openSlot.And(openSlot, mask)
+
+	// openSec = openSlot * 900
+	openSec := new(big.Int).Mul(openSlot, big.NewInt(900)).Int64()
+	closeSec := new(big.Int).Mul(closeSlot, big.NewInt(900)).Int64()
+	return openSec, closeSec
+}
+
 // Store stores the StaticExchangeInfo in a file
 func (s *StaticExchangeInfo) Store(filename string) error {
 	jsonData, err := json.Marshal(s)
@@ -315,7 +363,7 @@ func (s *StaticExchangeInfo) Store(filename string) error {
 		return err
 	}
 	// Saving JSON to a file
-	err = os.WriteFile(filename, jsonData, 0644)
+	err = os.WriteFile(filename, jsonData, 0o644)
 	if err != nil {
 		return err
 	}
@@ -382,7 +430,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 				Id:   hex.EncodeToString(byteArray),
 				Type: utils.PXTYPE_UNKNOWN,
 			}
-			//find id in config
+			// find id in config
 			for _, v := range configPx.PriceFeedIds {
 				if v.Id != "0x"+priceIds[i].Id {
 					continue
@@ -398,7 +446,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 
 		}
 	}
-	var pOut = PerpetualStaticInfo{
+	pOut := PerpetualStaticInfo{
 		Id:                     int32(pIn.Id.Int64()),
 		PoolId:                 poolId,
 		LimitOrderBookAddr:     pIn.LimitOrderBookAddr,
@@ -413,6 +461,7 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		OnChainSymbols:         make([]string, 0),
 		PerpFlags:              pIn.PerpFlags,
 		State:                  PerpetualStateEnum(pIn.PerpetualState),
+		FAMMTargetDD:           pIn.FAMMTargetDD,
 	}
 	return pOut, nil
 }
@@ -510,7 +559,7 @@ func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo *StaticExch
 		side = SIDE_SELL
 	}
 	orderType := OrderTypeFromFlag(scOrder.Flags)
-	var reduceOnly, keepPositionLvg = false, false
+	reduceOnly, keepPositionLvg := false, false
 	if scOrder.Flags&MASK_CLOSE_ONLY == MASK_CLOSE_ONLY {
 		reduceOnly = true
 	}

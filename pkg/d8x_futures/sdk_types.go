@@ -85,6 +85,7 @@ type PerpetualStaticInfo struct {
 	OnChainSymbols         []string  // on-chain price feeds
 	PerpFlags              *big.Int
 	State                  PerpetualStateEnum
+	FAMMTargetDD           *big.Int
 }
 
 type PoolState struct {
@@ -323,6 +324,7 @@ var (
 var (
 	FLAG_PREDICTION_MKT = 0x2
 	FLAG_LOWLIQ_MKT     = 0x4
+	FLAG_TRADFI_MKT     = 0x8
 )
 
 type PriceTypeEnum int8

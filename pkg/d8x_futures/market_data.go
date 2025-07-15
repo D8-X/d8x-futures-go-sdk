@@ -673,7 +673,15 @@ func traderStateToPositionRisk(sym string, pInfo *PerpetualStaticInfo, s2, s3 fl
 	S3 := utils.ABDKToFloat64(traderState[idxS3])
 	unpaidFundingCC := utils.ABDKToFloat64(traderState[idxAvailableCashCC]) - cashCC
 	unpaidFundingQC := unpaidFundingCC
-	S2Liq := RawCalculateLiquidationPrice(pInfo.CollateralCurrencyType, lockedInValue, posBC, cashCC, pInfo.MaintenanceMarginRate, S3, Sm)
+	S2Liq := RawCalculateLiquidationPrice(
+		pInfo.CollateralCurrencyType,
+		lockedInValue,
+		posBC,
+		cashCC,
+		pInfo.GetMaintenanceMarginRate(),
+		S3,
+		Sm,
+	)
 	switch pInfo.CollateralCurrencyType {
 	case BASE:
 		// convert CC to quote
@@ -700,7 +708,7 @@ func traderStateToPositionRisk(sym string, pInfo *PerpetualStaticInfo, s2, s3 fl
 		entryPrice = math.Abs(lockedInValue / posBC)
 		leverage = utils.ABDKToFloat64(traderState[idxLvg])
 		pnl = posBC*Sm - lockedInValue + unpaidFundingQC
-		liqLeverage = 1 / pInfo.MaintenanceMarginRate
+		liqLeverage = 1 / pInfo.GetMaintenanceMarginRate()
 	} else {
 		S3Liq = 0
 	}

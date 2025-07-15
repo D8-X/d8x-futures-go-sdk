@@ -81,7 +81,7 @@ func initialModel() Model {
 	if err != nil {
 		panic(err)
 	}
-	var m = Model{
+	m := Model{
 		chainConfigNames: names,
 		screen:           0,
 		choices:          make([]ScreenChoices, 2),
@@ -105,7 +105,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd = nil
 
 	switch msg := msg.(type) {
-
 	// Is it a key press?
 	case tea.KeyMsg:
 
@@ -250,10 +249,10 @@ func (m *Model) perpDetailsView() string {
 	perp := " Perp " + strconv.Itoa(int(m.selectedPerpId)) + " " + sym
 
 	s := topBarStatus(screen+"Connected to "+m.selectedNetworkName+pool+" "+m.traderAddr.Hex()) + "\n\n"
-	var styleA = lipgloss.NewStyle().
+	styleA := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#0A0A0A")).
 		Background(green)
-	var styleB = lipgloss.NewStyle().
+	styleB := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#0A0A0A")).
 		Background(red)
 	var mkt string = perp + " "
@@ -265,7 +264,7 @@ func (m *Model) perpDetailsView() string {
 	s += mkt + "\n"
 	const width = 78
 
-	var style = lipgloss.NewStyle().
+	style := lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderForeground(blue)
 
@@ -404,13 +403,12 @@ func (m *Model) setPositionRisk(symbol string) error {
 }
 
 func createPositionTable(pos d8x_futures.PositionRisk) string {
-
 	size := pos.PositionNotionalBaseCCY
 	if size != 0 && pos.Side != d8x_futures.SIDE_BUY {
 		size = size * -1
 	}
 	syms := strings.Split(pos.Symbol, "-")
-	//margin := (size*(pos.MarkPrice-pos.EntryPrice)+pos.UnrealizedPnlQuoteCCY)*
+	// margin := (size*(pos.MarkPrice-pos.EntryPrice)+pos.UnrealizedPnlQuoteCCY)*
 	//	1/pos.CollToQuoteConversion + pos.CollateralCC
 	margin := pos.CollateralCC
 	rows := [][]string{
@@ -502,7 +500,7 @@ func createPerpTable(info d8x_futures.StaticExchangeInfo, poolId int32) table.Mo
 		id := strconv.Itoa(int(p.Id))
 		sym := info.PerpetualIdToSymbol[p.Id]
 		lot := fmt.Sprintf("%.4f", p.LotSizeBC)
-		lvg := fmt.Sprintf("%.0f", 1/p.InitialMarginRate)
+		lvg := fmt.Sprintf("%.0f", 1/p.GetInitialMarginRate())
 		rows = append(rows, table.Row{
 			id, sym, lvg, lot,
 		})
