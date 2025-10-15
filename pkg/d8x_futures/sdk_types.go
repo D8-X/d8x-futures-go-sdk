@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
 	"math"
 	"math/big"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/D8-X/d8x-futures-go-sdk/config"
@@ -23,6 +23,14 @@ type SdkRO struct {
 	Conn        BlockChainConnector
 	ChainConfig utils.ChainConfig
 	PxConfig    *utils.PriceFeedConfig
+	Sport       *SportsData
+}
+
+type SportsData struct {
+	Slots           map[string]SlotAssignment // contract-id --> slot assignment
+	SlotnameToCtrct map[string]string         // slot name --> contract-id
+	SlotsMux        sync.RWMutex
+	LastUpdateTs    int64 // last slot update in unix timestamp
 }
 
 // Sdk is the read-write type
@@ -464,10 +472,14 @@ type OrderOptions struct {
 }
 
 // NewOrder creates a new order allowing for minimal specification (function accepts nil for pointers)
-func NewOrder(symbol string, side Side, orderType OrderType, quantity float64, leverage float64, options *OrderOptions) *Order {
+func (sdk SdkRO) NewOrder(symbol string, side Side, orderType OrderType, quantity float64, leverage float64, options *OrderOptions) (*Order, error) {
+	var err error
+	symbol, err = sdk.symbolToInternal(symbol)
+	if err != nil {
+		return nil, err
+	}
 	if side != SIDE_BUY && side != SIDE_SELL {
-		slog.Error("side must be either " + SIDE_BUY.String() + " or " + SIDE_SELL.String() + " but was " + side.String())
-		return nil
+		return nil, fmt.Errorf("side must be either %s or %s but was %s", SIDE_BUY.String(), SIDE_SELL.String(), side.String())
 	}
 	if options == nil {
 		var op OrderOptions
@@ -513,7 +525,7 @@ func NewOrder(symbol string, side Side, orderType OrderType, quantity float64, l
 		ParentChildOrderId1: *options.parentChildOrderId1,
 		ParentChildOrderId2: *options.parentChildOrderId1,
 	}
-	return order
+	return order, nil
 }
 
 func (ps *BrokerPaySignatureReq) UnmarshalJSON(data []byte) error {
@@ -595,10 +607,15 @@ func WithRpcUrl(url string) optionFunc {
 // endpoints contain an rpc endpoint and a pyth Endpoint in this order
 // use New("network", "", "pythendpoint") to provide a pyth endpoint
 // but no RPC
-func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
+func NewSdkRO(networkNameOrId string, opts ...optionFunc) (*SdkRO, error) {
+	var sdk SdkRO
+	sdk.Sport = &SportsData{
+		Slots:    nil,
+		SlotsMux: sync.RWMutex{},
+	}
 	chConf, err := config.GetDefaultChainConfig(networkNameOrId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	o := defaultSdkOpts(chConf)
 	for _, fn := range opts {
@@ -609,36 +626,41 @@ func (sdkRo *SdkRO) New(networkNameOrId string, opts ...optionFunc) error {
 	chConf.PrdMktFeedEndpoint = o.PrdMktFeedUrl
 	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	conn, err := CreateBlockChainConnector(pxConf, chConf, o.RpcClient)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	nest, err := QueryNestedPerpetualInfo(conn)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	sdkRo.Conn = conn
-	sdkRo.Info, err = QueryExchangeStaticInfo(&conn, &chConf, &pxConf, &nest)
+	sdk.Conn = conn
+	sdk.Info, err = QueryExchangeStaticInfo(&conn, &chConf, &pxConf, &nest)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	sdkRo.ChainConfig = chConf
-	sdkRo.PxConfig = &pxConf
+	sdk.ChainConfig = chConf
+	sdk.PxConfig = &pxConf
 
-	return nil
+	if err := sdk.refreshSlotAssignment(); err != nil {
+		return nil, err
+	}
+	return &sdk, nil
 }
 
-// New creates a new read/write Sdk instance
+// NewSdk creates a new read/write Sdk instance
 // networkname according to chainConfig or a chainId; rpcEndpoint and pythEndpoint can be ""
-func (sdk *Sdk) New(privateKeys []string, networkName string, opts ...optionFunc) error {
-	err := sdk.SdkRO.New(networkName, opts...)
+func NewSdk(privateKeys []string, networkName string, opts ...optionFunc) (*Sdk, error) {
+	var sdk Sdk
+	sdkRo, err := NewSdkRO(networkName, opts...)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	sdk.SdkRO = *sdkRo
 	if sdk.Conn.Rpc == nil {
-		return errors.New("sdk.Conn.Rpc=nil; required")
+		return nil, errors.New("sdk.Conn.Rpc=nil; required")
 	}
 
 	sdk.Wallets = make([]*Wallet, 0, len(privateKeys))
@@ -646,12 +668,12 @@ func (sdk *Sdk) New(privateKeys []string, networkName string, opts ...optionFunc
 		privateKey, _ = strings.CutPrefix(privateKey, "0x")
 		w, err := NewWallet(privateKey, sdk.ChainConfig.ChainId, sdk.Conn.Rpc)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		sdk.Wallets = append(sdk.Wallets, w)
 	}
 
-	return nil
+	return &sdk, nil
 }
 
 type OrderBookLevel struct {
@@ -678,4 +700,11 @@ func (o *OrderBookLevel) UnmarshalJSON(data []byte) error {
 	o.Price = arr[0]
 	o.Quantity = arr[1]
 	return nil
+}
+
+type PriceFeedEndpoints struct {
+	PriceFeedEndpoint  string `json:"priceFeedEndpoint"`
+	PrdMktFeedEndpoint string `json:"prdMktFeedEndpoint"`
+	LowLiqFeedEndpoint string `json:"lowLiqFeedEndpoint"`
+	SportFeedEndpoint  string `json:"sportFeedEndpoint"`
 }

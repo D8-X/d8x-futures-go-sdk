@@ -11,8 +11,7 @@ import (
 
 func TestQueryBrokerLots(t *testing.T) {
 	addr := common.HexToAddress("B0CBeeC370Af6ca2ed541F6a2264bc95b991F6E1")
-	var sdkRo SdkRO
-	err := sdkRo.New("testnet")
+	sdkRo, err := NewSdkRO("testnet")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -26,13 +25,12 @@ func TestQueryBrokerLots(t *testing.T) {
 }
 
 func TestPurchaseBrokerLots(t *testing.T) {
-	var sdk Sdk
 	pk := loadPk()
 	if pk == "" {
 		fmt.Println("provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New([]string{pk}, "42161")
+	sdk, err := NewSdk([]string{pk}, "42161")
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()

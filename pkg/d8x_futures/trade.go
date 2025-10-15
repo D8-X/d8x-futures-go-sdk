@@ -81,6 +81,11 @@ func extractOverrides(sdk *Sdk, overrides *OptsOverrides) (int, *ethclient.Clien
 }
 
 func (sdk *Sdk) AddCollateral(symbol string, amountCC float64, overrides *OptsOverrides, gasOpts ...GasOption) (*types.Transaction, error) {
+	var err error
+	symbol, err = sdk.symbolToInternal(symbol)
+	if err != nil {
+		return nil, err
+	}
 	widx, rpc, priceFeedEndPt := extractOverrides(sdk, overrides)
 	w := sdk.Wallets[widx]
 	if !w.IsPostLondon {
@@ -90,12 +95,17 @@ func (sdk *Sdk) AddCollateral(symbol string, amountCC float64, overrides *OptsOv
 		limit := 3_000_000
 		w.SetGasLimit(uint64(limit))
 	}
-	prdMktEndpoint := sdk.ChainConfig.PrdMktFeedEndpoint
-	lowLiqEp := sdk.ChainConfig.LowLiqFeedEndpoint
-	return RawAddCollateral(rpc, &sdk.Conn, &sdk.Info, priceFeedEndPt, prdMktEndpoint, lowLiqEp, w, symbol, amountCC, gasOpts...)
+	ep := sdk.defaultPxFeedEndpoints()
+	ep.PriceFeedEndpoint = priceFeedEndPt
+	return RawAddCollateral(rpc, &sdk.Conn, &sdk.Info, ep, w, symbol, amountCC, gasOpts...)
 }
 
 func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverrides, gasOpts ...GasOption) (*types.Transaction, error) {
+	var err error
+	symbol, err = sdk.symbolToInternal(symbol)
+	if err != nil {
+		return nil, err
+	}
 	widx, rpc, priceFeedEndPt := extractOverrides(sdk, overrides)
 	w := sdk.Wallets[widx]
 	if !w.IsPostLondon {
@@ -104,14 +114,14 @@ func (sdk *Sdk) CancelOrder(symbol string, orderId string, overrides *OptsOverri
 		limit := 15_000_000
 		w.SetGasLimit(uint64(limit))
 	}
+	ep := sdk.defaultPxFeedEndpoints()
+	ep.PriceFeedEndpoint = priceFeedEndPt
 
 	return RawCancelOrder(
 		rpc,
 		&sdk.Conn,
 		&sdk.Info,
-		priceFeedEndPt,
-		sdk.ChainConfig.PrdMktFeedEndpoint,
-		sdk.ChainConfig.LowLiqFeedEndpoint,
+		ep,
 		w,
 		symbol,
 		orderId,
@@ -128,6 +138,11 @@ func (sdk *Sdk) ExecuteOrders(
 	*types.Transaction,
 	error,
 ) {
+	var err error
+	symbol, err = sdk.symbolToInternal(symbol)
+	if err != nil {
+		return nil, err
+	}
 	var op0 *OptsOverrides
 	var tsMin uint32
 	if opts != nil {
@@ -136,14 +151,14 @@ func (sdk *Sdk) ExecuteOrders(
 	}
 	widx, rpc, priceFeedEndPt := extractOverrides(sdk, op0)
 	o := OptsOverridesExec{OptsOverrides: OptsOverrides{Rpc: rpc, PriceFeedEndPt: priceFeedEndPt, WalletIdx: widx}, TsMin: tsMin}
-
+	ep := sdk.defaultPxFeedEndpoints()
+	ep.PriceFeedEndpoint = priceFeedEndPt
 	return RawExecuteOrders(&sdk.Conn,
 		&sdk.Info,
 		sdk.Wallets[widx],
 		symbol,
 		orderIds,
-		sdk.ChainConfig.PrdMktFeedEndpoint,
-		sdk.ChainConfig.LowLiqFeedEndpoint,
+		ep,
 		&o,
 		gasOpts...,
 	)
@@ -167,7 +182,8 @@ func (sdk *Sdk) LiquidatePosition(
 	if optLiquidatorAddr == nil {
 		optLiquidatorAddr = &(sdk.Wallets[o.WalletIdx].Address)
 	}
-
+	ep := sdk.defaultPxFeedEndpoints()
+	ep.PriceFeedEndpoint = priceFeedEndPt
 	return RawLiquidatePosition(
 		&sdk.Conn,
 		&sdk.Info,
@@ -175,8 +191,7 @@ func (sdk *Sdk) LiquidatePosition(
 		perpId,
 		traderAddr,
 		optLiquidatorAddr,
-		sdk.ChainConfig.PrdMktFeedEndpoint,
-		sdk.ChainConfig.LowLiqFeedEndpoint,
+		ep,
 		&o,
 		gasOpts...,
 	)
@@ -186,6 +201,11 @@ func (sdk *Sdk) LiquidatePosition(
 // pool (via symbol), if amount = nil, max approval. Symbol is a pool symbol like "USDC"
 // (or perpetual symbol like MATIC-USDC-USDC works too)
 func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int, overrides *OptsOverrides, gasOpts ...GasOption) (*types.Transaction, error) {
+	var err error
+	symbol, err = sdk.symbolToInternal(symbol)
+	if err != nil {
+		return nil, err
+	}
 	tknAddr, err := RawGetSettleTknAddr(&sdk.Info, symbol)
 	if err != nil {
 		return nil, err
@@ -235,7 +255,6 @@ func RawPostOrder(rpc *ethclient.Client, chainId int, xInfo *StaticExchangeInfo,
 	id := CreateOrderId(dgst)
 	tx, err := ob.PostOrders(postingWallet.Auth, scOrders, tsigs)
 	if err != nil {
-		fmt.Println(err)
 		return "", "", err
 	}
 	return id, tx.Hash().Hex(), nil
@@ -246,9 +265,7 @@ func RawCancelOrder(
 	rpc *ethclient.Client,
 	conn *BlockChainConnector,
 	xInfo *StaticExchangeInfo,
-	pythEndpoint string,
-	prdMktFeedEndpoint string,
-	lowLiqFeedEndpoint string,
+	pxEp PriceFeedEndpoints,
 	postingWallet *Wallet,
 	symbol string,
 	orderId string,
@@ -260,7 +277,7 @@ func RawCancelOrder(
 	bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderId, "0x"))
 	copy(dig[:], bytesDigest)
 
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint, prdMktFeedEndpoint, lowLiqFeedEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pxEp)
 	if err != nil {
 		return nil, errors.New("RawCancelOrder: failed fetching oracle prices " + err.Error())
 	}
@@ -293,8 +310,7 @@ func RawExecuteOrders(
 	postingWallet *Wallet,
 	symbol string,
 	orderIds []string,
-	prdMktEndpoint string,
-	lowLiqEndpoint string,
+	pxEp PriceFeedEndpoints,
 	opts *OptsOverridesExec,
 	gasOpts ...GasOption,
 ) (
@@ -304,13 +320,15 @@ func RawExecuteOrders(
 	if opts == nil {
 		return nil, errors.New("opts cannot be nil")
 	}
-
+	if opts.PriceFeedEndPt != "" {
+		pxEp.PriceFeedEndpoint = opts.PriceFeedEndPt
+	}
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	var pxFeed PerpetualPriceInfo
 	var err error
 	for {
 		// fetch prices
-		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt, prdMktEndpoint, lowLiqEndpoint)
+		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, pxEp)
 		if err != nil {
 			return nil, errors.New("RawExecuteOrder: failed fetching oracle prices " + err.Error())
 		}
@@ -372,8 +390,7 @@ func RawLiquidatePosition(
 	perpId int32,
 	traderAddr *common.Address,
 	liquidatorAddr *common.Address,
-	prdMktEndpoint string,
-	lowLiqEndpoint string,
+	pxEp PriceFeedEndpoints,
 	opts *OptsOverrides,
 	gasOpts ...GasOption,
 ) (
@@ -388,7 +405,7 @@ func RawLiquidatePosition(
 		return nil, fmt.Errorf("RawLiquidatePosition: failed fetching oracle prices %v", err.Error())
 	}
 	j := GetPerpetualStaticInfoIdxFromId(xInfo, perpId)
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, opts.PriceFeedEndPt, prdMktEndpoint, lowLiqEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pxEp)
 	if err != nil {
 		return nil, fmt.Errorf("RawLiquidatePosition: failed fetching oracle prices %v", err.Error())
 	}
@@ -463,9 +480,7 @@ func RawAddCollateral(
 	rpc *ethclient.Client,
 	conn *BlockChainConnector,
 	xInfo *StaticExchangeInfo,
-	pythEndpoint string,
-	prdMktEndpoint string,
-	lowLiqEndpoint string,
+	pxEp PriceFeedEndpoints,
 	postingWallet *Wallet,
 	symbol string,
 	amountCC float64,
@@ -482,7 +497,7 @@ func RawAddCollateral(
 	if err != nil {
 		return nil, fmt.Errorf("RawAddCollateral: failed CreatePerpetualManagerInstance %v", err.Error())
 	}
-	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pythEndpoint, prdMktEndpoint, lowLiqEndpoint)
+	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pxEp)
 	if err != nil {
 		return nil, fmt.Errorf("RawAddCollateral: failed fetching oracle prices %v", err.Error())
 	}

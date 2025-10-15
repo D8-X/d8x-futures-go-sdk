@@ -17,6 +17,7 @@ type ChainConfig struct {
 	PriceFeedNetwork   string         `json:"priceFeedNetwork"`
 	PriceFeedEndpoint  string         `json:"priceFeedEndpoint"`
 	PrdMktFeedEndpoint string         `json:"prdMktFeedEndpoint"`
+	SportFeedEndpoint  string         `json:"sportFeedEndpoint"`
 	LowLiqFeedEndpoint string         `json:"lowLiqFeedEndpoint"`
 	ChainId            int64          `json:"chainId"`
 	ProxyAddr          common.Address `json:"proxyAddr"`
@@ -33,8 +34,8 @@ type PriceFeedConfig struct {
 	ThreshOnChainFeedOutdatedSec  int32         `json:"threshOnChainFeedOutdatedSec"`
 	ThreshOffChainFeedOutdatedSec int32         `json:"threshOffChainFeedOutdatedSec"`
 	PriceUpdateFeeGwei            int64
-	SymbolToPxId                  map[string]PriceFeedId //map the symbol (BTC-USD) to PriceFeedId data
-	PxIdToSymbols                 map[string][]string    //map the symbol price id 0x382738927... to one or more symbols
+	SymbolToPxId                  map[string]PriceFeedId // map the symbol (BTC-USD) to PriceFeedId data
+	PxIdToSymbols                 map[string][]string    // map the symbol price id 0x382738927... to one or more symbols
 }
 
 type PriceType int
@@ -45,6 +46,7 @@ const (
 	PXTYPE_V2
 	PXTYPE_V3
 	PXTYPE_ONCHAIN
+	PXTYPE_SPORT
 	PXTYPE_UNKNOWN
 )
 
@@ -53,11 +55,11 @@ const (
 var PriceTypeMap = map[string]PriceType{
 	"polymarket": PXTYPE_POLYMARKET,
 	"pyth":       PXTYPE_PYTH,
-	//"low-liq":    PXTYPE_V3, //legacy
-	"univ2":   PXTYPE_V2,
-	"univ3":   PXTYPE_V3,
-	"onchain": PXTYPE_ONCHAIN,
-	"unknown": PXTYPE_UNKNOWN,
+	"univ2":      PXTYPE_V2,
+	"univ3":      PXTYPE_V3,
+	"sport":      PXTYPE_SPORT,
+	"onchain":    PXTYPE_ONCHAIN,
+	"unknown":    PXTYPE_UNKNOWN,
 }
 
 // PriceType to string
@@ -73,13 +75,14 @@ func (p PriceType) String() string {
 type AssetClass int
 
 const (
-	ACLASS_CRYPTO AssetClass = iota //Crypto & Crypto.Index, https://www.pyth.network/price-feeds/crypto-index-gmci30-usd
+	ACLASS_CRYPTO AssetClass = iota // Crypto & Crypto.Index, https://www.pyth.network/price-feeds/crypto-index-gmci30-usd
 	ACLASS_POLYMKT
 	ACLASS_FX
 	ACLASS_EQUITY    // equity and ETF
 	ACLASS_METAL     // Metal.XAG/USD
 	ACLASS_COMMODITY //	Commodities.USOILSPOT
 	ACLASS_RATES     //	Rates.US1M
+	ACLASS_SPORT
 	ACLASS_UNKNOWN
 )
 
@@ -88,6 +91,7 @@ const (
 var AssetClassMap = map[string]AssetClass{
 	"crypto":      ACLASS_CRYPTO,
 	"polymarket":  ACLASS_POLYMKT,
+	"sport":       ACLASS_SPORT,
 	"fx":          ACLASS_FX,
 	"equity":      ACLASS_EQUITY,
 	"metal":       ACLASS_METAL,
@@ -110,7 +114,10 @@ func (p *PriceType) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func OriginToAssetClass(origin string) AssetClass {
+func OriginToAssetClass(origin string, feedType PriceType) AssetClass {
+	if feedType == PXTYPE_SPORT {
+		return ACLASS_SPORT
+	}
 	if origin == "" {
 		return ACLASS_CRYPTO
 	}
@@ -146,7 +153,7 @@ type PriceFeedId struct {
 	Type       PriceType  `json:"type"`
 	Origin     string     `json:"origin"`
 	StorkSym   string     `json:"storkSym"`
-	AssetClass AssetClass //based on origin
+	AssetClass AssetClass // based on origin
 }
 
 type PriceFeedOnChainConfig struct {
@@ -196,7 +203,7 @@ func (s *SettlementConfig) UnmarshalJSON(data []byte) error {
 // LoadPriceFeedConfig loads the price feed config file
 // data into struct PriceFeedConfig for the network called configNetwork
 // for example LoadPriceFeedConfig("config/priceFeedConfig.json", "PythEVMStable")
-func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, error) {
+func LoadPriceFeedConfig(data []byte, chainId int, configNetwork string) (PriceFeedConfig, error) {
 	var configuration []PriceFeedConfig
 	// Unmarshal the JSON data into the Configuration struct
 	err := json.Unmarshal(data, &configuration)
@@ -214,26 +221,43 @@ func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, er
 	if j == -1 {
 		return PriceFeedConfig{}, errors.New("config not found")
 	}
-	//SymbolToId
+	// SymbolToId
 	config := configuration[j]
 	config.SymbolToPxId = make(map[string]PriceFeedId)
+	feedIds2 := make([]PriceFeedId, 0, len(config.PriceFeedIds))
 	for j, feed := range config.PriceFeedIds {
-		config.PriceFeedIds[j].AssetClass = OriginToAssetClass(feed.Origin)
-		config.SymbolToPxId[feed.Symbol] = PriceFeedId{
-			Symbol:     feed.Symbol,
+		assetClass := OriginToAssetClass(feed.Origin, feed.Type)
+		sym := feed.Symbol
+		if assetClass == ACLASS_SPORT {
+			// symbol of the form "NHL0-USD:84532", with the number = chainId
+			// we cut off the chain id if it's the right chain, otherwise we skip
+			sp := strings.Split(feed.Symbol, ":")
+			if sp[1] != strconv.Itoa(chainId) {
+				// skip
+				continue
+			}
+			sym = sp[0]
+		}
+		config.PriceFeedIds[j].AssetClass = assetClass
+		config.PriceFeedIds[j].Symbol = sym
+		feedIds2 = append(feedIds2, config.PriceFeedIds[j])
+		config.SymbolToPxId[sym] = PriceFeedId{
+			Symbol:     sym,
 			Id:         strings.TrimPrefix(feed.Id, "0x"),
 			Type:       feed.Type,
 			Origin:     feed.Origin,
-			AssetClass: OriginToAssetClass(feed.Origin),
+			AssetClass: OriginToAssetClass(feed.Origin, feed.Type),
 		}
 	}
-	//PxIdToSymbols
+	config.PriceFeedIds = feedIds2
+	// PxIdToSymbols
 	config.PxIdToSymbols = make(map[string][]string)
 	for _, feed := range config.PriceFeedIds {
 		id := strings.TrimPrefix(feed.Id, "0x")
 		if _, exists := config.PxIdToSymbols[id]; !exists {
 			config.PxIdToSymbols[id] = make([]string, 0)
 		}
+
 		config.PxIdToSymbols[id] = append(config.PxIdToSymbols[id], feed.Symbol)
 	}
 	return config, nil
@@ -242,7 +266,6 @@ func LoadPriceFeedConfig(data []byte, configNetwork string) (PriceFeedConfig, er
 // LoadChainConfig loads the chain-config from data into ChainConfig struct
 // for the given network name or chain id
 func LoadChainConfig(data []byte, configNameOrChainId string) (ChainConfig, error) {
-
 	var configuration []ChainConfig
 	// Unmarshal the JSON data into the Configuration struct
 	err := json.Unmarshal(data, &configuration)
@@ -269,7 +292,6 @@ func LoadChainConfig(data []byte, configNameOrChainId string) (ChainConfig, erro
 // LoadChainConfig loads the chain-config from data into ChainConfig struct
 // for network with chain id chainId
 func LoadChainConfigFromId(data []byte, chainId int64) (ChainConfig, error) {
-
 	var configuration []ChainConfig
 	// Unmarshal the JSON data into the Configuration struct
 	err := json.Unmarshal(data, &configuration)
@@ -288,7 +310,6 @@ func LoadChainConfigFromId(data []byte, chainId int64) (ChainConfig, error) {
 // LoadChainConfig loads the chain-config from data into ChainConfig struct
 // for network configName
 func LoadChainConfigNames(data []byte) ([]string, error) {
-
 	var configuration []ChainConfig
 	// Unmarshal the JSON data into the Configuration struct
 	err := json.Unmarshal(data, &configuration)

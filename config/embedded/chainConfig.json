@@ -44,13 +44,13 @@
     "priceFeedEndpoint": "https://hermes.pyth.network",
     "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
     "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
-    "sportsEndpoint": "https://odin-sport.quantena.org/",
+    "sportFeedEndpoint": "https://odin-sport.quantena.org/",
     "chainId": 84532,
     "proxyAddr": "0xa7868558E094E58251c6D12f407294c11522E88D",
     "multipayAddr": "0x00e7B648E6AD5CEfAeB0b423eEC6a7c3f0aA52dd",
     "nodeURL": "https://sepolia.base.org",
     "postOrderGasLimit": 3000000,
-    "priceUpdateFeeGwei": 1
+    "priceUpdateFeeGwei": 10
   },
   {
     "name": "base",
@@ -58,6 +58,7 @@
     "priceFeedEndpoint": "https://hermes.pyth.network",
     "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
     "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
+    "sportFeedEndpoint": "https://odin-sport.quantena.org/",
     "chainId": 8453,
     "proxyAddr": "0x7F3A4A9e5BB469F0F4977AA390760aF9EFCCd406",
     "multipayAddr": "0x00e7B648E6AD5CEfAeB0b423eEC6a7c3f0aA52dd",

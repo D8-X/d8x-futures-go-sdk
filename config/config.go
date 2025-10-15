@@ -141,7 +141,6 @@ func GetDefaultChainConfigFromId(chainId int64) (utils.ChainConfig, error) {
 }
 
 func GetDefaultPriceConfig(chainId int64) (utils.PriceFeedConfig, error) {
-
 	data, err := fetchConfigFromRepo("priceFeedConfig.json")
 	if err != nil {
 		return utils.PriceFeedConfig{}, fmt.Errorf("unable to fetch priceFeedConfig.json:" + err.Error())
@@ -150,15 +149,7 @@ func GetDefaultPriceConfig(chainId int64) (utils.PriceFeedConfig, error) {
 	if err != nil {
 		return utils.PriceFeedConfig{}, err
 	}
-	return utils.LoadPriceFeedConfig(data, ch.PriceFeedNetwork)
-}
-
-func GetDefaultPriceConfigByName(configNetwork string) (utils.PriceFeedConfig, error) {
-	data, err := fetchConfigFromRepo("priceFeedConfig.json")
-	if err != nil {
-		return utils.PriceFeedConfig{}, fmt.Errorf("unable to fetch priceFeedConfig.json:" + err.Error())
-	}
-	return utils.LoadPriceFeedConfig(data, configNetwork)
+	return utils.LoadPriceFeedConfig(data, int(chainId), ch.PriceFeedNetwork)
 }
 
 // GetPriceFeedOnChain loads priceFeedOnChain into the corresponding structure

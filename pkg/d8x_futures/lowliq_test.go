@@ -23,8 +23,7 @@ func TestGetLowLiqPrices(t *testing.T) {
 		tradeAmt[len(samples)-1-j] = -m * samples[j]
 	}
 	// onchain
-	var sdkRo SdkRO
-	err := sdkRo.New("80094")
+	sdkRo, err := NewSdkRO("84532")
 	if err != nil {
 		t.Log(err.Error())
 	}
@@ -34,10 +33,8 @@ func TestGetLowLiqPrices(t *testing.T) {
 		t.FailNow()
 	}
 	// directly from odin
-	priceFeedEndpoint := "https://hermes.pyth.network"
-	prdMktEndpoint := ""
-	lowLiqEndpoint := "https://odin-lowliq.d8x.xyz"
-	p, err := fetchPythPrices(priceIds, priceFeedEndpoint, prdMktEndpoint, lowLiqEndpoint)
+	pxEp := PriceFeedEndpoints{PriceFeedEndpoint: "https://hermes.pyth.network", LowLiqFeedEndpoint: "https://odin-lowliq.d8x.xyz"}
+	p, err := fetchOraclePrices(priceIds, pxEp)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
@@ -51,5 +48,4 @@ func TestGetLowLiqPrices(t *testing.T) {
 	for k := 0; k < len(tradeAmt); k++ {
 		fmt.Printf("%f, %f, %f\n", tradeAmt[k], px[k], px0[k])
 	}
-
 }

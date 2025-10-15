@@ -6,7 +6,6 @@ import (
 	"log"
 	"log/slog"
 	"math/big"
-	"os"
 	"testing"
 	"time"
 
@@ -25,21 +24,13 @@ func loadPk() string {
 }
 
 func TestSdkExec(t *testing.T) {
-	var sdk Sdk
 	pk := loadPk()
 	if pk == "" {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	// err := sdk.New([]string{pk}, "42161") //arbitrum
-	// err := sdk.New([]string{pk}, "421614") //arbitrum sepolia
-	// err := sdk.New([]string{pk}, "195") //x-layer testnet
-	// err := sdk.New([]string{pk}, "196") //x-layer
-	// err := sdk.New([]string{pk}, "2442") //cardona
-	// err := sdk.New([]string{pk}, "1442") //zkevm testnet
-	// err := sdk.New([]string{pk}, "80084") //bartio
-	err := sdk.New([]string{pk}, "80094") // bera
-	perp := "BERA-USD-BUSD"
+	sdk, err := NewSdk([]string{pk}, "84532")
+	perp := "NHL_FLA_DET_251015"
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -65,10 +56,22 @@ func TestSdkExec(t *testing.T) {
 	if len(mktOrderIds) == 0 {
 		// mktOrderIds = append(mktOrderIds, "f3e6741c2eefeb3c5e1c8539f15e5590b8b104ad6c8ed99a2f63151c315b0dd0")
 
-		order := NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 2, 5, &OrderOptions{LimitPrice: 0})
+		/*tx, err := sdk.ApproveTknSpending(perp, nil, nil)
+		if err != nil {
+			fmt.Println(err)
+			t.FailNow()
+		}
+		fmt.Println(tx.Hash())
+		*/
+		order, err := sdk.NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 2, 5, &OrderOptions{LimitPrice: 0})
+		if err != nil {
+			t.Log(err.Error())
+			t.FailNow()
+		}
 		orderId, _, err := sdk.PostOrder(order, nil)
 		if err != nil {
 			t.Log(err.Error())
+			t.FailNow()
 		}
 		fmt.Println("order id =", orderId)
 		// 92d891d3ae6d8695c8732d67fff2b59d309496796e1f369f8d5e0b4ab2a17cd4
@@ -86,7 +89,6 @@ func TestSdkExec(t *testing.T) {
 }
 
 func TestSdkLiquidatePosition(t *testing.T) {
-	var sdk Sdk
 	pk := loadPk()
 	if pk == "" {
 		fmt.Println("Provide private key for testnet as environment variable PK")
@@ -94,7 +96,7 @@ func TestSdkLiquidatePosition(t *testing.T) {
 	}
 	// err := sdk.New([]string{pk}, "195") //x-layer testnet
 	// err := sdk.New([]string{pk}, "196") //x-layer testnet
-	err := sdk.New([]string{pk}, "421614") // arbitrum sepolia
+	sdk, err := NewSdk([]string{pk}, "421614") // arbitrum sepolia
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -122,14 +124,13 @@ func TestSdkLiquidatePosition(t *testing.T) {
 }
 
 func TestAddCollateral(t *testing.T) {
-	var sdk Sdk
 	pk := loadPk()
 	if pk == "" {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
 	// err := sdk.New([]string{pk}, "421614")
-	err := sdk.New([]string{pk}, "195")
+	sdk, err := NewSdk([]string{pk}, "195")
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
@@ -147,13 +148,12 @@ func TestAddCollateral(t *testing.T) {
 }
 
 func TestTradingFunc(t *testing.T) {
-	var sdk Sdk
 	pk := loadPk()
 	if pk == "" {
 		fmt.Println("Provide private key for testnet as environment variable PK")
 		t.FailNow()
 	}
-	err := sdk.New([]string{pk}, "testnet")
+	sdk, err := NewSdk([]string{pk}, "testnet")
 	if err != nil {
 		t.Log(err.Error())
 	}
@@ -187,7 +187,11 @@ func TestTradingFunc(t *testing.T) {
 		fmt.Println("tx hash=", tx.Hash())
 	}
 
-	order := NewOrder("BTC-USDC-USDC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
+	order, err := sdk.NewOrder("BTC-USDC-USDC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
 	orderId, _, err := sdk.PostOrder(order, nil)
 	if err != nil {
 		t.Log(err.Error())
@@ -324,17 +328,6 @@ func TestPostOrder(t *testing.T) {
 	}
 	_, txHash, _ := RawPostOrder(conn.Rpc, int(conn.ChainId), &xInfo, wallet, []byte{}, &order, traderAddr)
 	fmt.Println("Tx hash = ", txHash)
-}
-
-func TestPostOrder2(t *testing.T) {
-	pk := os.Getenv("PK")
-	if pk == "" {
-		t.Logf("Provide privatekey as environment variable PK")
-		t.Fail()
-		return
-	}
-	var sdk Sdk
-	sdk.New([]string{pk}, "testnet")
 }
 
 func TestBrokerSignature(t *testing.T) {
