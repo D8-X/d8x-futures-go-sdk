@@ -152,6 +152,16 @@ func GetDefaultPriceConfig(chainId int64) (utils.PriceFeedConfig, error) {
 	return utils.LoadPriceFeedConfig(data, int(chainId), ch.PriceFeedNetwork)
 }
 
+// GetDefaultPriceConfigByName gets pricefeedConfig with that name
+// Chain Id is relevant for sports perpetuals
+func GetDefaultPriceConfigByName(configNetwork string, chainId int) (utils.PriceFeedConfig, error) {
+	data, err := fetchConfigFromRepo("priceFeedConfig.json")
+	if err != nil {
+		return utils.PriceFeedConfig{}, fmt.Errorf("unable to fetch priceFeedConfig.json:" + err.Error())
+	}
+	return utils.LoadPriceFeedConfig(data, chainId, configNetwork)
+}
+
 // GetPriceFeedOnChain loads priceFeedOnChain into the corresponding structure
 func GetPriceFeedOnChain() ([]utils.PriceFeedOnChainConfig, error) {
 	fs, err := EmbededConfigs.Open("embedded/priceFeedOnChain.json")
