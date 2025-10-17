@@ -335,6 +335,7 @@ var (
 	FLAG_TRADFI_MKT     = 0x8
 )
 
+/*
 type PriceTypeEnum int8
 
 const (
@@ -343,7 +344,7 @@ const (
 	PX_PYTH
 	PX_PRDMKTS
 	PX_LOWLIQ
-)
+)*/
 
 type BlockChainConnector struct {
 	Rpc               *ethclient.Client
