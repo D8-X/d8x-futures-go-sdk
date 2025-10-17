@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
@@ -368,18 +369,23 @@ func RawExecuteOrders(
 			return nil, errors.New("market closed for " + symbol)
 		}
 		// check whether prices are too old
-		var delta int64 = -10
+		redo := false
+		now := time.Now().Unix()
 		for _, tsFeed := range pxFeed.PriceFeed.Prices {
-			delta = max(delta, int64(tsFeed.Ts)-int64(opts.TsMin))
+			if tsFeed.Ts <= int64(opts.TsMin) {
+				sleepSec := min(3, int64(opts.TsMin)-tsFeed.Ts)
+				time.Sleep(time.Duration(sleepSec) * time.Second)
+				redo = true
+				break
+			}
+			if now-tsFeed.Ts > 6 {
+				return nil, fmt.Errorf("feed price too old %d sec difference to order ts", now-tsFeed.Ts)
+			}
 		}
-		if delta > 0 {
-			// price feed newer than submission timestamp,
-			// we can execute
-			break
+		if redo {
+			continue
 		}
-		if delta < -5 {
-			return nil, fmt.Errorf("feed price too old %d sec difference to order ts", delta)
-		}
+		break
 	}
 
 	v := postingWallet.Auth.Value
