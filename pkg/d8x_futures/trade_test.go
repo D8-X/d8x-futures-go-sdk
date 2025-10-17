@@ -1,6 +1,7 @@
 package d8x_futures
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"fmt"
 	"log"
@@ -10,8 +11,10 @@ import (
 	"time"
 
 	"github.com/D8-X/d8x-futures-go-sdk/config"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/viper"
 )
 
@@ -30,7 +33,17 @@ func TestSdkExec(t *testing.T) {
 		t.FailNow()
 	}
 	sdk, err := NewSdk([]string{pk}, "84532")
-	perp := "NHL_FLA_DET_251015"
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	rpc, err := ethclient.Dial("https://sepolia.base.org")
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	// https://sports.quantena.org/slots-info/84532
+	perp := "MLB_TOR_SEA_251017"
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
@@ -68,12 +81,17 @@ func TestSdkExec(t *testing.T) {
 			t.Log(err.Error())
 			t.FailNow()
 		}
-		orderId, _, err := sdk.PostOrder(order, nil)
+		orderId, tx, err := sdk.PostOrder(order, nil)
 		if err != nil {
 			t.Log(err.Error())
 			t.FailNow()
 		}
 		fmt.Println("order id =", orderId)
+		_, err = bind.WaitMined(context.Background(), rpc, tx)
+		if err != nil {
+			t.Log(err.Error())
+			t.FailNow()
+		}
 		// 92d891d3ae6d8695c8732d67fff2b59d309496796e1f369f8d5e0b4ab2a17cd4
 		mktOrderIds = append(mktOrderIds, orderId)
 
@@ -86,6 +104,7 @@ func TestSdkExec(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Println("tx = ", tx.Hash())
+	fmt.Println("done")
 }
 
 func TestSdkLiquidatePosition(t *testing.T) {

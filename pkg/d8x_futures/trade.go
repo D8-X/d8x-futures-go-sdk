@@ -38,7 +38,7 @@ type OptsOverridesExec struct {
 
 // PostOrder posts an order to the corresponding limit order book.
 // Returns orderId, tx hash, error
-func (sdk *Sdk) PostOrder(order *Order, overrides *OptsOverrides, gasOpts ...GasOption) (string, string, error) {
+func (sdk *Sdk) PostOrder(order *Order, overrides *OptsOverrides, gasOpts ...GasOption) (string, *types.Transaction, error) {
 	widx, rpc, _ := extractOverrides(sdk, overrides)
 	w := sdk.Wallets[widx]
 	if !w.IsPostLondon {
@@ -238,7 +238,16 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int, overrides *Op
 // It needs the private key for the wallet
 // paying the gas fees. If the trader-address is not the address corresponding to the postingWallet, the func
 // also needs signature from the trader
-func RawPostOrder(rpc *ethclient.Client, chainId int, xInfo *StaticExchangeInfo, postingWallet *Wallet, traderSig []byte, order *Order, trader common.Address, gasOpts ...GasOption) (string, string, error) {
+func RawPostOrder(
+	rpc *ethclient.Client,
+	chainId int,
+	xInfo *StaticExchangeInfo,
+	postingWallet *Wallet,
+	traderSig []byte,
+	order *Order,
+	trader common.Address,
+	gasOpts ...GasOption,
+) (string, *types.Transaction, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
 	scOrder := order.ToChainType(xInfo, trader)
 	scOrders := []contracts.IClientOrderClientOrder{scOrder}
@@ -246,18 +255,18 @@ func RawPostOrder(rpc *ethclient.Client, chainId int, xInfo *StaticExchangeInfo,
 	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	err := postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...)
 	if err != nil {
-		return "", "", fmt.Errorf("rawPostOrder: %v", err)
+		return "", nil, fmt.Errorf("rawPostOrder: %v", err)
 	}
 	dgst, err := CreateOrderDigest(scOrder, chainId, true, xInfo.ProxyAddr.Hex())
 	if err != nil {
-		return "", "", err
+		return "", nil, err
 	}
 	id := CreateOrderId(dgst)
 	tx, err := ob.PostOrders(postingWallet.Auth, scOrders, tsigs)
 	if err != nil {
-		return "", "", err
+		return "", nil, err
 	}
-	return id, tx.Hash().Hex(), nil
+	return id, tx, nil
 }
 
 // RawCancelOrder cancels the existing order with the given id from the provided wallet
@@ -324,8 +333,28 @@ func RawExecuteOrders(
 		pxEp.PriceFeedEndpoint = opts.PriceFeedEndPt
 	}
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+
+	var digests [][32]byte
+	for _, orderId := range orderIds {
+		var dig [32]byte
+		bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderId, "0x"))
+		copy(dig[:], bytesDigest)
+		digests = append(digests, dig)
+	}
+
+	err := postingWallet.UpdateNonceAndGasPx(opts.Rpc, gasOpts...)
+	if err != nil {
+		return nil, fmt.Errorf("RawExecuteOrders: unable to update nonce and gas: %v", err)
+	}
+	ob := CreateLimitOrderBookInstance(opts.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
+
+	if opts.PayoutAddr == (common.Address{}) {
+		// payout addr was not provided
+		opts.PayoutAddr = postingWallet.Address
+	}
+
+	// prices
 	var pxFeed PerpetualPriceInfo
-	var err error
 	for {
 		// fetch prices
 		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, pxEp)
@@ -353,29 +382,11 @@ func RawExecuteOrders(
 		}
 	}
 
-	var digests [][32]byte
-	for _, orderId := range orderIds {
-		var dig [32]byte
-		bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderId, "0x"))
-		copy(dig[:], bytesDigest)
-		digests = append(digests, dig)
-	}
-
 	v := postingWallet.Auth.Value
 	defer func() { postingWallet.Auth.Value = v }()
 	val := conn.PriceFeedConfig.PriceUpdateFeeGwei * int64(len(pxFeed.PriceFeed.Prices))
 	postingWallet.Auth.Value = big.NewInt(val)
 
-	err = postingWallet.UpdateNonceAndGasPx(opts.Rpc, gasOpts...)
-	if err != nil {
-		return nil, fmt.Errorf("RawExecuteOrders: unable to update nonce and gas: %v", err)
-	}
-	ob := CreateLimitOrderBookInstance(opts.Rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-
-	if opts.PayoutAddr == (common.Address{}) {
-		// payout addr was not provided
-		opts.PayoutAddr = postingWallet.Address
-	}
 	publishTimes := make([]uint64, len(pxFeed.PriceFeed.Prices))
 	for k, p := range pxFeed.PriceFeed.Prices {
 		publishTimes[k] = uint64(p.Ts)
