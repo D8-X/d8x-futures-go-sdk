@@ -60,9 +60,23 @@ func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 	return contractId + "-USD-" + slot.PoolSym, nil
 }
 
+// SportSlot checks whether the contractId (NFL_ATL_SF_251019)
+// is assigned to a perpetual slot. Returns the slot name
+// (e.g. NFL0-USD-PUSD) and true if found, "" and false otherwise
+func (sdk *SdkRO) SportSlot(contractId string) (string, bool) {
+	if contractId[3] != '_' {
+		return "", false
+	}
+	sym, err := sdk.symbolToInternal(contractId)
+	if err != nil {
+		return "", false
+	}
+	return strings.Split(sym, "-")[0], true
+}
+
 // symbolToInternal converts sports symbols
 // to the currently assigned perpetual symbol
-// E.g., MLB_TOR_NYY_251009 -> MLB1-USD
+// E.g., MLB_TOR_NYY_251009 -> MLB1-USD-<poolsym>
 // Returns the symbol unchanged if not a long-form
 // sports symbol
 func (sdk *SdkRO) symbolToInternal(sym string) (string, error) {
