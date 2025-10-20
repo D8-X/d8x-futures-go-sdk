@@ -8,6 +8,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/ethereum/go-ethereum v1.14.3
 	github.com/forta-network/go-multicall v0.0.0-20230701154355-9467c4ddaa83
+	github.com/joho/godotenv v1.5.1
 	github.com/miguelmota/go-solidity-sha3 v0.1.1
 	github.com/spf13/viper v1.18.2
 )
@@ -32,7 +33,6 @@ require (
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/holiman/uint256 v1.2.4 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
