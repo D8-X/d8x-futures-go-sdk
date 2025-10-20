@@ -32,9 +32,30 @@ func IsSportsSymbol(sym string) bool {
 	return sym[3] == '_'
 }
 
+// SportSlotAssignment takes a slot (SP01, MLB0,...) and
+// returns the perpetual of the assigned slot and a boolean
+// whether there is an assignment.
+// For regular contracts (e.g. BTC) the function returns the
+// input and TRUE
+func (sdk *SdkRO) SportSlotAssignment(slot string) (string, bool) {
+	if len(slot) < 4 {
+		return slot, true
+	}
+	prfx := slot[0:3]
+	sportP := SportsPrefix()
+	if !slices.Contains(sportP, prfx) {
+		return slot, true
+	}
+	sym, err := sdk.internalToSymbol(slot)
+	if err != nil {
+		return "", false
+	}
+	return sym, true
+}
+
 // InternalToSymbol is the inversion to SymbolToInternal
 // Converts an internal symbol of the form MLB0 to its current
-// contract id -USD
+// contract id -USD-<collateral>
 func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 	league := symInt[0:3]
 	leagues := SportsPrefix()

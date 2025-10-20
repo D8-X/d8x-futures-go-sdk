@@ -25,6 +25,19 @@ func TestInternalToSymbol(t *testing.T) {
 	fmt.Println(c)
 }
 
+func TestSportSlotAssignment(t *testing.T) {
+	sdk, err := NewSdkRO("84532")
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	// https://sports.quantena.org/slots-info/84532
+	c, exists := sdk.SportSlotAssignment("SP00")
+	fmt.Println(exists, c)
+	c, exists = sdk.SportSlotAssignment("NHL0")
+	fmt.Println(exists, c)
+}
+
 func TestSportSlot(t *testing.T) {
 	sdk, err := NewSdkRO("84532")
 	if err != nil {
