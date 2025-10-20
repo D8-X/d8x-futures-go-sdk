@@ -5080,6 +5080,13 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "sponsor",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "components": [
