@@ -22,7 +22,9 @@ type SlotAssignment struct {
 	Slot       string    `json:"slot"`
 }
 
-func GetLeagues() []string {
+// SportsPrefix returns the 'slots' for sports perpetuals.
+// CFB, MLB, NFL, NHL are legacy, SP is generic
+func SportsPrefix() []string {
 	return []string{"SP0", "SP1", "SP2", "CFB", "MLB", "NFL", "NHL"}
 }
 
@@ -35,7 +37,7 @@ func IsSportsSymbol(sym string) bool {
 // contract id -USD
 func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 	league := symInt[0:3]
-	leagues := GetLeagues()
+	leagues := SportsPrefix()
 	if !slices.Contains(leagues, league) {
 		return symInt, nil
 	}
