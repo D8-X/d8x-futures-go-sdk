@@ -23,7 +23,7 @@ type SlotAssignment struct {
 }
 
 func GetLeagues() []string {
-	return []string{"CFB", "MLB", "NFL", "NHL"}
+	return []string{"SP0", "SP1", "SP2", "CFB", "MLB", "NFL", "NHL"}
 }
 
 func IsSportsSymbol(sym string) bool {
