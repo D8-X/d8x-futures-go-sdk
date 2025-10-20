@@ -368,7 +368,7 @@ func TestGetPerpetualData(t *testing.T) {
 		t.FailNow()
 	}
 	for _, p := range sdkRo.Info.Perpetuals {
-		fmt.Printf("%d s2=%s s3=%s state=%s\n", p.Id, p.S2Symbol, p.S3Symbol, p.State.String())
+		fmt.Printf("%d s2=%s s3=%s state=%s\n", p.Id, p.S2Symbol, p.S3Symbol, p.State().String())
 	}
 	startTime := time.Now()
 	d, err := RawGetPerpetualData(sdkRo.Conn.Rpc, &sdkRo.Info, "BERA-USD-BUSD")

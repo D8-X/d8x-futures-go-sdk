@@ -92,8 +92,21 @@ type PerpetualStaticInfo struct {
 	PriceIds               []PriceId // off-chain price feeds
 	OnChainSymbols         []string  // on-chain price feeds
 	PerpFlags              *big.Int
-	State                  PerpetualStateEnum
+	state                  PerpetualStateEnum
 	FAMMTargetDD           *big.Int
+	MuxState               *sync.RWMutex
+}
+
+func (p *PerpetualStaticInfo) State() PerpetualStateEnum {
+	p.MuxState.RLock()
+	defer p.MuxState.RUnlock()
+	return p.state
+}
+
+func (p *PerpetualStaticInfo) setState(s PerpetualStateEnum) {
+	p.MuxState.Lock()
+	defer p.MuxState.Unlock()
+	p.state = s
 }
 
 type PoolState struct {

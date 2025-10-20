@@ -302,6 +302,34 @@ func (sdk *SdkRO) QueryPerpetualStateEnum(symbol string, optRpc *ethclient.Clien
 	return PerpetualStateEnum(perp.State), nil
 }
 
+// RefreshPerpetualStateEnum queries the onchain state of the perpetual
+// and updates the internal state in a thread-safe way, returns the new/current state
+func (sdk *Sdk) RefreshPerpetualStateEnum(symbol string, optRpc *ethclient.Client) (PerpetualStateEnum, error) {
+	var err error
+	symbol, err = sdk.symbolToInternal(symbol)
+	if err != nil {
+		return 10, err
+	}
+	if optRpc == nil {
+		optRpc = sdk.Conn.Rpc
+	}
+	j := GetPerpetualStaticInfoIdxFromSymbol(&sdk.Info, symbol)
+	if j == -1 {
+		return 10, fmt.Errorf("no perpetual id for symbol %s", symbol)
+	}
+	id := int64(sdk.Info.Perpetuals[j].Id)
+	proxy, err := CreatePerpetualManagerInstance(optRpc, sdk.Info.ProxyAddr)
+	if err != nil {
+		return 10, err
+	}
+	perp, err := proxy.GetPerpetual(nil, big.NewInt(id))
+	if err != nil {
+		return 10, err
+	}
+	sdk.Info.Perpetuals[j].setState(PerpetualStateEnum(perp.State))
+	return PerpetualStateEnum(perp.State), nil
+}
+
 func (sdk *Sdk) ActivatePerpetual(symbol string, optRpc *ethclient.Client, gasOpts ...GasOption) (*types.Transaction, error) {
 	var err error
 	symbol, err = sdk.symbolToInternal(symbol)

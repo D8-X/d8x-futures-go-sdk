@@ -48,6 +48,39 @@ func TestQueryPerpetualStateEnum(t *testing.T) {
 	fmt.Println(state.String())
 }
 
+func TestRefreshPerpetualStateEnum(t *testing.T) {
+	pk := os.Getenv("PK")
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	sdk, err := NewSdk([]string{pk}, "84532")
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	url := os.Getenv("RPC")
+	rpc, err := ethclient.Dial(url)
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	sym, err := sdk.internalToSymbol("NHL0-USD")
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	state, err := sdk.RefreshPerpetualStateEnum(sym, rpc)
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	fmt.Println(state.String())
+	for _, p := range sdk.Info.Perpetuals {
+		fmt.Println(p.S2Symbol, p.State().String())
+	}
+}
+
 func TestSettlement(t *testing.T) {
 	pk := os.Getenv("PK")
 	if pk == "" {

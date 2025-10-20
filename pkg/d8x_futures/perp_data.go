@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/D8-X/d8x-futures-go-sdk/config"
@@ -460,9 +461,10 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		PriceIds:               priceIds,
 		OnChainSymbols:         make([]string, 0),
 		PerpFlags:              pIn.PerpFlags,
-		State:                  PerpetualStateEnum(pIn.PerpetualState),
 		FAMMTargetDD:           pIn.FAMMTargetDD,
+		MuxState:               &sync.RWMutex{},
 	}
+	pOut.setState(PerpetualStateEnum(pIn.PerpetualState))
 	return pOut, nil
 }
 

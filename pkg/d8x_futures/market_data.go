@@ -180,7 +180,7 @@ func (sdkRo *SdkRO) GetPositionRisk(symbol string, traderAddr common.Address, op
 func (sdkRo *SdkRO) GetPositionRiskAll(traderAddr common.Address, optEndPt *OptEndPoints) ([]PositionRisk, error) {
 	syms := make([]string, 0, len(sdkRo.Info.PerpetualSymbolToId))
 	for _, perp := range sdkRo.Info.Perpetuals {
-		if perp.State == NORMAL {
+		if perp.State() == NORMAL {
 			sym := sdkRo.Info.PerpetualIdToSymbol[perp.Id]
 			syms = append(syms, sym)
 		}
@@ -1352,7 +1352,7 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 	symSet := make(map[string]bool)
 	priceIds := make([]PriceId, 0, len(xInfo.Perpetuals))
 	for k, perp := range xInfo.Perpetuals {
-		if perp.PoolId != poolId || perp.State != NORMAL {
+		if perp.PoolId != poolId || perp.State() != NORMAL {
 			continue
 		}
 
@@ -1398,7 +1398,7 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 	// build multi-call
 	perpIds := make([]int32, 0, len(xInfo.Perpetuals))
 	for j := range xInfo.Perpetuals {
-		if xInfo.Perpetuals[j].PoolId != poolId || xInfo.Perpetuals[j].State != NORMAL {
+		if xInfo.Perpetuals[j].PoolId != poolId || xInfo.Perpetuals[j].State() != NORMAL {
 			continue
 		}
 		S2Sym := xInfo.Perpetuals[j].S2Symbol
