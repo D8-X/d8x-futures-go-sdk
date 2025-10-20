@@ -83,7 +83,7 @@ func (sdk *SdkRO) symbolToInternal(sym string) (string, error) {
 	if sym[3] != '_' {
 		return sym, nil
 	}
-	sym, _ = strings.CutSuffix(sym, "-USD")
+	sym = strings.Split(sym, "-")[0]
 	sdk.Sport.SlotsMux.RLock()
 	slot, exists := sdk.Sport.Slots[sym]
 	ts := sdk.Sport.LastUpdateTs
