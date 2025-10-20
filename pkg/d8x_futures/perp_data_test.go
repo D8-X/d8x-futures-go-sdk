@@ -8,6 +8,18 @@ import (
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 )
 
+func TestPerpetualStaticInfo(t *testing.T) {
+	sdk, err := NewSdkRO("84532")
+	if err != nil {
+		t.Log(err.Error())
+	}
+	info, err := sdk.GetPerpetualStaticInfo("NHL_BUF_MTL_251020")
+	if err != nil {
+		t.Log(err.Error())
+	}
+	fmt.Println(info)
+}
+
 func TestQueryNestedPerpetualInfo(t *testing.T) {
 	chConf, err := config.GetDefaultChainConfig("testnet")
 	if err != nil {
@@ -31,7 +43,6 @@ func TestReadSymbolList(t *testing.T) {
 		t.Log(err.Error())
 	}
 	fmt.Println((symMap)["MATC"])
-
 }
 
 func TestQueryPoolStaticInfo(t *testing.T) {
@@ -60,7 +71,6 @@ func TestFindPath(t *testing.T) {
 
 	paths := findPath(append(ccyBase, ccyQuote...), append(ccyQuote, ccyBase...), pair)
 	fmt.Println(paths)
-
 }
 
 func TestPythNToFloat64(t *testing.T) {
@@ -71,7 +81,7 @@ func TestPythNToFloat64(t *testing.T) {
 func TestABDKToFloat64(t *testing.T) {
 	num := -1.370863664871871
 	v := utils.Float64ToABDK(num)
-	//25265520445871489912
+	// 25265520445871489912
 	fmt.Println("v=", v)
 }
 

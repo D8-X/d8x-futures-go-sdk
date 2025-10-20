@@ -21,6 +21,21 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+// GetPerpetualStaticInfo returns PerpetualStaticInfo from memory given the perpetual
+// symbol
+func (sdk *SdkRO) GetPerpetualStaticInfo(symbol string) (PerpetualStaticInfo, error) {
+	var err error
+	symbol, err = sdk.symbolToInternal(symbol)
+	if err != nil {
+		return PerpetualStaticInfo{}, err
+	}
+	j := GetPerpetualStaticInfoIdxFromSymbol(&sdk.Info, symbol)
+	if j == -1 {
+		return PerpetualStaticInfo{}, fmt.Errorf("perpetual %s not found", symbol)
+	}
+	return sdk.Info.Perpetuals[j], nil
+}
+
 // CreatePerpetualManagerInstance creates an instance of the Perpetual Contract.
 //
 // It takes an rpc and proxyAddr as argument
