@@ -3,9 +3,11 @@ package d8x_futures
 import (
 	"context"
 	"fmt"
+	"math"
 	"math/big"
 	"time"
 
+	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -58,23 +60,46 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 			}
 			fmt.Println("Emergency state set")
 		case EMERGENCY:
+			var tx *types.Transaction
 			if err := tryOnchainCall(optRpc,
 				func() (*types.Transaction, error) {
-					return sdk.SetSettlementPrice(symbol, pxS2, pxS3, optRpc, optGas...)
+					var err error
+					tx, err = sdk.SetSettlementPrice(symbol, pxS2, pxS3, optRpc, optGas...)
+					return tx, err
 				},
 			); err != nil {
 				return err
 			}
+			if _, err := bind.WaitMined(context.Background(), optRpc, tx); err != nil {
+				return fmt.Errorf("failed to mine settlement price transaction: %w", err)
+			}
+
 			fmt.Println("Settlement price set")
 			if err := tryOnchainCall(optRpc,
 				func() (*types.Transaction, error) {
-					return sdk.ToggleEmergencyState(symbol, optRpc, optGas...)
+					var err error
+					tx, err = sdk.ToggleEmergencyState(symbol, optRpc, optGas...)
+					return tx, err
 				},
 			); err != nil {
 				return err
 			}
+			if _, err := bind.WaitMined(context.Background(), optRpc, tx); err != nil {
+				return fmt.Errorf("failed to mine toggle emergency state transaction: %w", err)
+			}
 			fmt.Println("Enter settle state")
 		case SETTLE:
+			praw, err := sdk.QueryPerpetualRawData(symbol, optRpc)
+			if err != nil {
+				return fmt.Errorf("unable to query state: %w", err)
+			}
+			pxS2approx := utils.ABDKToFloat64(praw.FSettlementS2PriceData)
+			if math.Abs(pxS2approx-pxS2) > 0.01 {
+				fmt.Printf("settlement price is out of range: S2 onchain=%f, S2=%f", pxS2approx, pxS2)
+				time.Sleep(1 * time.Second)
+				state = EMERGENCY
+				continue
+			}
 			if err := sdk.ClearTradersInPoolOfPerp(symbol, optRpc, optGas...); err != nil {
 				return err
 			}
@@ -273,6 +298,33 @@ func (sdk *Sdk) DeactivatePerp(symbol string, optRpc *ethclient.Client, optGas .
 		return nil, fmt.Errorf("perpetual state must be 'CLEARED'")
 	}
 	return RawDeactivatePerp(&sdk.Conn, optRpc, id, &sdk.Info, sdk.Wallets[0])
+}
+
+// QueryPerpetualStateEnum queries the onchain state of the perpetual
+// Internal state no longer correct after calling this function
+func (sdk *SdkRO) QueryPerpetualRawData(symbol string, optRpc *ethclient.Client) (*contracts.PerpStoragePerpetualData, error) {
+	var err error
+	symbol, err = sdk.symbolToInternal(symbol)
+	if err != nil {
+		return nil, err
+	}
+	if optRpc == nil {
+		optRpc = sdk.Conn.Rpc
+	}
+	j := GetPerpetualStaticInfoIdxFromSymbol(&sdk.Info, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("no perpetual id for symbol %s", symbol)
+	}
+	id := int64(sdk.Info.Perpetuals[j].Id)
+	proxy, err := CreatePerpetualManagerInstance(optRpc, sdk.Info.ProxyAddr)
+	if err != nil {
+		return nil, err
+	}
+	perp, err := proxy.GetPerpetual(nil, big.NewInt(id))
+	if err != nil {
+		return nil, err
+	}
+	return &perp, nil
 }
 
 // QueryPerpetualStateEnum queries the onchain state of the perpetual
