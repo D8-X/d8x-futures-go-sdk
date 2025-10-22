@@ -58,7 +58,7 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 			); err != nil {
 				return err
 			}
-			fmt.Println("Emergency state set")
+			fmt.Printf("%s: emergency state set\n", symbol)
 		case EMERGENCY:
 			var tx *types.Transaction
 			if err := tryOnchainCall(optRpc,
@@ -71,10 +71,10 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 				return err
 			}
 			if _, err := bind.WaitMined(context.Background(), optRpc, tx); err != nil {
-				return fmt.Errorf("failed to mine settlement price transaction: %w", err)
+				return fmt.Errorf("%s: failed to mine settlement price transaction: %w", symbol, err)
 			}
 
-			fmt.Println("Settlement price set")
+			fmt.Printf("%s: settlement price set\n", symbol)
 			state, err := sdk.QueryPerpetualStateEnum(symbol, optRpc)
 			if err != nil {
 				return err
@@ -90,18 +90,18 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 					return err
 				}
 				if _, err := bind.WaitMined(context.Background(), optRpc, tx); err != nil {
-					return fmt.Errorf("failed to mine toggle emergency state transaction: %w", err)
+					return fmt.Errorf("%s: failed to mine toggle emergency state transaction: %w", symbol, err)
 				}
 			}
-			fmt.Println("Enter settle state")
+			fmt.Printf("%s: enter settle state\n", symbol)
 		case SETTLE:
 			praw, err := sdk.QueryPerpetualRawData(symbol, optRpc)
 			if err != nil {
-				return fmt.Errorf("unable to query state: %w", err)
+				return fmt.Errorf("%s unable to query state: %w", symbol, err)
 			}
 			pxS2approx := utils.ABDKToFloat64(praw.FSettlementS2PriceData)
 			if math.Abs(pxS2approx-pxS2) > 0.01 {
-				fmt.Printf("settlement price is out of range: S2 onchain=%f, S2=%f\n", pxS2approx, pxS2)
+				fmt.Printf("%s: settlement price is out of range: S2 onchain=%f, S2=%f\n", symbol, pxS2approx, pxS2)
 				time.Sleep(1 * time.Second)
 				state = EMERGENCY
 				continue
@@ -109,7 +109,7 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 			if err := sdk.ClearTradersInPoolOfPerp(symbol, optRpc, optGas...); err != nil {
 				return err
 			}
-			fmt.Println("Enter cleared state")
+			fmt.Printf("%s: enter cleared state\n", symbol)
 			time.Sleep(3 * time.Second)
 		case CLEARED:
 			state, err = sdk.QueryPerpetualStateEnum(symbol, optRpc)
@@ -123,15 +123,15 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 			if err := sdk.SettleTraders(symbol, optRpc, optGas...); err != nil {
 				return err
 			}
-			fmt.Println("Finished cleared state")
+			fmt.Printf("%s: finished cleared state\n", symbol)
 		}
-		time.Sleep(time.Second) // rpc cooloff
+		time.Sleep(3 * time.Second) // rpc cooloff
 		state, err = sdk.QueryPerpetualStateEnum(symbol, optRpc)
 		if err != nil {
 			return err
 		}
 		if state == INVALID {
-			fmt.Printf("%s settlement completed", symbol)
+			fmt.Printf("%s settlement completed\n", symbol)
 			break
 		}
 	}
