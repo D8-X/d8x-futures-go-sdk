@@ -44,7 +44,7 @@ func (sdk *SdkRO) SportSlotAssignment(slot string) (string, bool) {
 	prfx := slot[0:3]
 	sportP := SportsPrefix()
 	if !slices.Contains(sportP, prfx) {
-		return "", false
+		return slot, true
 	}
 	sym, err := sdk.internalToSymbol(slot)
 	if err != nil {
