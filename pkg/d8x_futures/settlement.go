@@ -101,7 +101,7 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 			}
 			pxS2approx := utils.ABDKToFloat64(praw.FSettlementS2PriceData)
 			if math.Abs(pxS2approx-pxS2) > 0.01 {
-				fmt.Printf("settlement price is out of range: S2 onchain=%f, S2=%f", pxS2approx, pxS2)
+				fmt.Printf("settlement price is out of range: S2 onchain=%f, S2=%f\n", pxS2approx, pxS2)
 				time.Sleep(1 * time.Second)
 				state = EMERGENCY
 				continue
@@ -110,7 +110,16 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 				return err
 			}
 			fmt.Println("Enter cleared state")
+			time.Sleep(3 * time.Second)
 		case CLEARED:
+			state, err = sdk.QueryPerpetualStateEnum(symbol, optRpc)
+			if err != nil {
+				return err
+			}
+			if state != CLEARED {
+				fmt.Printf("%s: state not CLEARED by current rpc but %s\n", symbol, state.String())
+				continue
+			}
 			if err := sdk.SettleTraders(symbol, optRpc, optGas...); err != nil {
 				return err
 			}
@@ -122,7 +131,7 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 			return err
 		}
 		if state == INVALID {
-			fmt.Println("settlement completed")
+			fmt.Printf("%s settlement completed", symbol)
 			break
 		}
 	}
