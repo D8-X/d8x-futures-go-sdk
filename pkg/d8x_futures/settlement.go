@@ -75,17 +75,23 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 			}
 
 			fmt.Println("Settlement price set")
-			if err := tryOnchainCall(optRpc,
-				func() (*types.Transaction, error) {
-					var err error
-					tx, err = sdk.ToggleEmergencyState(symbol, optRpc, optGas...)
-					return tx, err
-				},
-			); err != nil {
+			state, err := sdk.QueryPerpetualStateEnum(symbol, optRpc)
+			if err != nil {
 				return err
 			}
-			if _, err := bind.WaitMined(context.Background(), optRpc, tx); err != nil {
-				return fmt.Errorf("failed to mine toggle emergency state transaction: %w", err)
+			if state == EMERGENCY {
+				if err := tryOnchainCall(optRpc,
+					func() (*types.Transaction, error) {
+						var err error
+						tx, err = sdk.ToggleEmergencyState(symbol, optRpc, optGas...)
+						return tx, err
+					},
+				); err != nil {
+					return err
+				}
+				if _, err := bind.WaitMined(context.Background(), optRpc, tx); err != nil {
+					return fmt.Errorf("failed to mine toggle emergency state transaction: %w", err)
+				}
 			}
 			fmt.Println("Enter settle state")
 		case SETTLE:
