@@ -32,7 +32,7 @@ func TestSportSlotAssignment(t *testing.T) {
 		t.FailNow()
 	}
 	// https://sports.quantena.org/slots-info/84532
-	c, exists := sdk.SportSlotAssignment("SP00")
+	c, exists := sdk.SportSlotAssignment("XP00")
 	fmt.Println(exists, c)
 	c, exists = sdk.SportSlotAssignment("NHL0")
 	fmt.Println(exists, c)
