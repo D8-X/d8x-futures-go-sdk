@@ -29,7 +29,7 @@ func SportsPrefix() []string {
 }
 
 func IsSportsSymbol(sym string) bool {
-	return sym[3] == '_'
+	return len(sym) > 4 && sym[3] == '_'
 }
 
 // SportSlotAssignment takes a slot (SP01, MLB0,...) and
