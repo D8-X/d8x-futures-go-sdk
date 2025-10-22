@@ -371,7 +371,7 @@ func (sdk *SdkRO) QueryPerpetualStateEnum(symbol string, optRpc *ethclient.Clien
 
 // RefreshPerpetualStateEnum queries the onchain state of the perpetual
 // and updates the internal state in a thread-safe way, returns the new/current state
-func (sdk *Sdk) RefreshPerpetualStateEnum(symbol string, optRpc *ethclient.Client) (PerpetualStateEnum, error) {
+func (sdk *SdkRO) RefreshPerpetualStateEnum(symbol string, optRpc *ethclient.Client) (PerpetualStateEnum, error) {
 	var err error
 	symbol, err = sdk.symbolToInternal(symbol)
 	if err != nil {
