@@ -1,10 +1,13 @@
 package d8x_futures
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/joho/godotenv"
 )
@@ -46,6 +49,40 @@ func TestQueryPerpetualStateEnum(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Println(state.String())
+}
+
+func TestSetter(t *testing.T) {
+	pk := os.Getenv("PK")
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	sdk, err := NewSdk([]string{pk}, "84532")
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	url := os.Getenv("RPC")
+	rpc, err := ethclient.Dial(url)
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	for _, p := range sdk.Info.Perpetuals {
+		if p.state == SETTLE {
+			sym := p.S2Symbol + "-" + strings.Split(p.S3Symbol, "-")[0]
+			tx, err := sdk.SetSettlementPrice(sym, 1.0, 1.0, rpc)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			if _, err := bind.WaitMined(context.Background(), rpc, tx); err != nil {
+				fmt.Println(err)
+				continue
+			}
+			fmt.Println("tx=", tx.Hash())
+		}
+	}
 }
 
 func TestRefreshPerpetualStateEnum(t *testing.T) {
