@@ -151,11 +151,11 @@ func (sdk *SdkRO) refreshSlotAssignment() error {
 // fetchSlotsInfo queries the betting-lifecycle API to get
 // current slot assignments
 func fetchSlotsInfo(chainId int) ([]SlotAssignment, error) {
-	url := fmt.Sprintf("%s%s/%d", BETTING_LIFECYCLE_URL, "slots-info", chainId)
+	url := fmt.Sprintf("%s/slots-info/%d", strings.TrimRight(BETTING_LIFECYCLE_URL, "/"), chainId)
 	client := &http.Client{Timeout: 3 * time.Second}
 	resp, err := client.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("fetch failed: %w", err)
+		return nil, fmt.Errorf("fetch failed:%T %w", err, err)
 	}
 	defer resp.Body.Close()
 
