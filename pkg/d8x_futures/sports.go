@@ -69,7 +69,7 @@ func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 	contractId, exists := sdk.Sport.SlotnameToCtrct[symInt]
 	slot := sdk.Sport.Slots[contractId]
 	sdk.Sport.SlotsMux.RUnlock()
-	if (!exists && now-ts > 5*60) || slot.Expiry.Before(time.Now()) {
+	if (!exists && now-ts > 5*60) || (exists && slot.Expiry.Before(time.Now())) {
 		if err := sdk.refreshSlotAssignment(); err != nil {
 			return "", fmt.Errorf("unable to refresh slot assignment: %w", err)
 		}
@@ -113,7 +113,7 @@ func (sdk *SdkRO) symbolToInternal(sym string) (string, error) {
 	sdk.Sport.SlotsMux.RUnlock()
 
 	now := time.Now().Unix()
-	if (!exists && now-ts > 5*60) || slot.Expiry.Before(time.Now()) {
+	if (!exists && now-ts > 5*60) || (exists && slot.Expiry.Before(time.Now())) {
 		if err := sdk.refreshSlotAssignment(); err != nil {
 			return "", fmt.Errorf("unable to refresh slot assignment: %w", err)
 		}

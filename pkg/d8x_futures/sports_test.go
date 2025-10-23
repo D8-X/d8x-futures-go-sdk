@@ -11,7 +11,7 @@ func TestInternalToSymbol(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	c, err := sdk.internalToSymbol("NHL0-USD")
+	c, err := sdk.internalToSymbol("SP00-USD")
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
