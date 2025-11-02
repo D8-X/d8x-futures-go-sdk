@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-const (
-	BETTING_LIFECYCLE_URL = "https://sports.quantena.org/"
-)
-
 type SlotAssignment struct {
 	ContractID string    `json:"contract_id"`
 	YYMMDD     string    `json:"yymmdd"`
@@ -38,7 +34,7 @@ func IsSportsSymbol(sym string) bool {
 // For regular contracts (e.g. BTC) the function returns the
 // input and TRUE
 func (sdk *SdkRO) SportSlotAssignment(slot string) (string, bool) {
-	if len(slot) < 4 {
+	if len(slot) < 4 || sdk.ChainConfig.BettingLifecycleUrl == "" {
 		return slot, true
 	}
 	prfx := slot[0:3]
@@ -57,6 +53,9 @@ func (sdk *SdkRO) SportSlotAssignment(slot string) (string, bool) {
 // Converts an internal symbol of the form MLB0 to its current
 // contract id -USD-<collateral>
 func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
+	if sdk.ChainConfig.BettingLifecycleUrl == "" {
+		return symInt, nil
+	}
 	league := symInt[0:3]
 	leagues := SportsPrefix()
 	if !slices.Contains(leagues, league) {
@@ -132,7 +131,10 @@ func (sdk *SdkRO) symbolToInternal(sym string) (string, error) {
 // refreshSlotAssignment updates sdk.Sport.Slots from
 // the sport api
 func (sdk *SdkRO) refreshSlotAssignment() error {
-	info, err := fetchSlotsInfo(int(sdk.ChainConfig.ChainId))
+	if sdk.ChainConfig.BettingLifecycleUrl == "" {
+		return nil
+	}
+	info, err := fetchSlotsInfo(sdk.ChainConfig.BettingLifecycleUrl, int(sdk.ChainConfig.ChainId))
 	if err != nil {
 		return err
 	}
@@ -152,8 +154,8 @@ func (sdk *SdkRO) refreshSlotAssignment() error {
 
 // fetchSlotsInfo queries the betting-lifecycle API to get
 // current slot assignments
-func fetchSlotsInfo(chainId int) ([]SlotAssignment, error) {
-	url := fmt.Sprintf("%s/slots-info/%d", strings.TrimRight(BETTING_LIFECYCLE_URL, "/"), chainId)
+func fetchSlotsInfo(bettingEp string, chainId int) ([]SlotAssignment, error) {
+	url := fmt.Sprintf("%s/slots-info/%d", strings.TrimRight(bettingEp, "/"), chainId)
 	client := &http.Client{Timeout: 3 * time.Second}
 	resp, err := client.Get(url)
 	if err != nil {

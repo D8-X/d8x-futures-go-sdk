@@ -13,18 +13,19 @@ import (
 )
 
 type ChainConfig struct {
-	Name               string         `json:"name"`
-	PriceFeedNetwork   string         `json:"priceFeedNetwork"`
-	PriceFeedEndpoint  string         `json:"priceFeedEndpoint"`
-	PrdMktFeedEndpoint string         `json:"prdMktFeedEndpoint"`
-	SportFeedEndpoint  string         `json:"sportFeedEndpoint"`
-	LowLiqFeedEndpoint string         `json:"lowLiqFeedEndpoint"`
-	ChainId            int64          `json:"chainId"`
-	ProxyAddr          common.Address `json:"proxyAddr"`
-	MultiPayAddr       common.Address `json:"multipayAddr"`
-	NodeURL            string         `json:"nodeURL"`
-	PostOrderGasLimit  int64          `json:"postOrderGasLimit"`
-	PriceUpdateFeeGwei int64          `json:"priceUpdateFeeGwei"`
+	Name                string         `json:"name"`
+	PriceFeedNetwork    string         `json:"priceFeedNetwork"`
+	PriceFeedEndpoint   string         `json:"priceFeedEndpoint"`
+	PrdMktFeedEndpoint  string         `json:"prdMktFeedEndpoint"`
+	SportFeedEndpoint   string         `json:"sportFeedEndpoint"`
+	LowLiqFeedEndpoint  string         `json:"lowLiqFeedEndpoint"`
+	BettingLifecycleUrl string         `json:"bettingLifecycleUrl"`
+	ChainId             int64          `json:"chainId"`
+	ProxyAddr           common.Address `json:"proxyAddr"`
+	MultiPayAddr        common.Address `json:"multipayAddr"`
+	NodeURL             string         `json:"nodeURL"`
+	PostOrderGasLimit   int64          `json:"postOrderGasLimit"`
+	PriceUpdateFeeGwei  int64          `json:"priceUpdateFeeGwei"`
 }
 
 type PriceFeedConfig struct {
