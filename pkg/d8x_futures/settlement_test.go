@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/joho/godotenv"
@@ -114,13 +115,17 @@ func TestSettlement(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	symbol := "NFL_WAS_DAL_251019-USD-PUSD"
-	s2 := float64(2)
-	s3 := float64(1)
-	err = sdk.RunSettlementProcess(symbol, s2, s3, rpc)
-	if err != nil {
-		fmt.Println(err)
-		t.FailNow()
+	symbols := []string{"SP0E", "SP0F", "SP0G", "SP0H", "SP0I", "SP0J", "SP0K", "SP0L", "SP0M", "SP0N"}
+	for _, s := range symbols {
+		symbol := s + "-USD-PUSD"
+		s2 := float64(2)
+		s3 := float64(1)
+		err = sdk.RunSettlementProcess(symbol, s2, s3, rpc)
+		if err != nil {
+			fmt.Println(err)
+			t.FailNow()
+		}
+		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -141,7 +146,7 @@ func TestEnable(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	symbol := "NFL_WAS_DAL_251019-USD-PUSD"
+	symbol := "NHL2-USD-PUSD"
 	tx, err := sdk.ActivatePerpetual(symbol, rpc)
 	if err != nil {
 		fmt.Println(err)
