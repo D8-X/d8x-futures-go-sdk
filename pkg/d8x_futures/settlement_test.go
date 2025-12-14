@@ -99,25 +99,31 @@ func TestRefreshPerpetualStateEnum(t *testing.T) {
 }
 
 func TestSettlement(t *testing.T) {
-	pk := os.Getenv("PK")
-	if pk == "" {
-		fmt.Println("Provide private key for testnet as environment variable PK")
-		t.FailNow()
-	}
-	sdk, err := NewSdk([]string{pk}, "84532")
-	if err != nil {
-		fmt.Println(err)
-		t.FailNow()
-	}
 	url := os.Getenv("RPC")
 	rpc, err := ethclient.Dial(url)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	symbols := []string{"SP0E", "SP0F", "SP0G", "SP0H", "SP0I", "SP0J", "SP0K", "SP0L", "SP0M", "SP0N"}
+	pk := os.Getenv("PK")
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	sdk, err := NewSdk([]string{pk}, "84532", WithRpcClient(rpc))
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	symbols := make([]string, 0)
+	for _, p := range sdk.Info.Perpetuals {
+		fmt.Printf("%s -> %s\n", p.S2Symbol, p.state.String())
+		if p.state.String() == EMERGENCY.String() {
+			symbols = append(symbols, p.S2Symbol)
+		}
+	}
 	for _, s := range symbols {
-		symbol := s + "-USD-PUSD"
+		symbol := s + "-PUSD"
 		s2 := float64(2)
 		s3 := float64(1)
 		err = sdk.RunSettlementProcess(symbol, s2, s3, rpc)
