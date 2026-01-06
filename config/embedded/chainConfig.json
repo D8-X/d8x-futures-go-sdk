@@ -48,7 +48,7 @@
     "sportFeedEndpoint": "https://odin-sport.quantena.org/",
 	  "bettingLifecycleUrl": "https://sports.quantena.org/",
     "chainId": 84532,
-    "proxyAddr": "0xa7868558E094E58251c6D12f407294c11522E88D",
+    "proxyAddr": "0xfaC638d51B769D060aFC5953C41bF35595620b1c",
     "multipayAddr": "0x00e7B648E6AD5CEfAeB0b423eEC6a7c3f0aA52dd",
     "nodeURL": "https://sepolia.base.org",
     "postOrderGasLimit": 3000000,

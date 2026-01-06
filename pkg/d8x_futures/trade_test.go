@@ -43,11 +43,7 @@ func TestSdkExec(t *testing.T) {
 		t.FailNow()
 	}
 	// https://sports.quantena.org/slots-info/84532
-	perp := "MLB_TOR_SEA_251017"
-	if err != nil {
-		t.Log(err.Error())
-		t.FailNow()
-	}
+	perp := "NHL0-USD-PUSD"
 	fmt.Printf("wallet addr =%s\n", sdk.Wallets[0].Address.Hex())
 	orderObj, err := sdk.QueryAllOpenOrders(perp, nil)
 	if err != nil {
@@ -56,10 +52,6 @@ func TestSdkExec(t *testing.T) {
 	}
 	orders := orderObj.Orders
 	ids := orderObj.OrderHashes
-	if err != nil {
-		t.Log(err.Error())
-		t.FailNow()
-	}
 	var mktOrderIds []string
 	for k, order := range orders {
 		if order.Type == ORDER_TYPE_MARKET {
@@ -76,7 +68,7 @@ func TestSdkExec(t *testing.T) {
 		}
 		fmt.Println(tx.Hash())
 		*/
-		order, err := sdk.NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 2, 5, &OrderOptions{LimitPrice: 0})
+		order, err := sdk.NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 20, 1, &OrderOptions{LimitPrice: 0})
 		if err != nil {
 			t.Log(err.Error())
 			t.FailNow()
