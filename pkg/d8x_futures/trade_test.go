@@ -99,6 +99,72 @@ func TestSdkExec(t *testing.T) {
 	fmt.Println("done")
 }
 
+func TestSdkExecWithBroker(t *testing.T) {
+	pk := loadPk()
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	sdk, err := NewSdk([]string{pk}, "84532")
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	rpc, err := ethclient.Dial("https://sepolia.base.org")
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	// https://sports.quantena.org/slots-info/84532
+	perp := "NHL0-USD-PUSD"
+	fmt.Printf("wallet addr =%s\n", sdk.Wallets[0].Address.Hex())
+	order, err := sdk.NewOrder(perp, SIDE_SELL, ORDER_TYPE_MARKET, 20, 1, &OrderOptions{LimitPrice: 0})
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	const url = "https://broker-84532.d8x.xyz"
+	order.BrokerAddr, err = GetBrokerAddress(url)
+	fmt.Println("broker=", order.BrokerAddr.String())
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	order.OptTraderAddr = sdk.Wallets[0].Address
+	order.BrokerFeeTbps, err = GetBrokerFeeTbps(sdk.Wallets[0].Address, int(sdk.ChainConfig.ChainId), url)
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	err = sdk.SignOrder(order, url)
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	orderId, tx, err := sdk.PostOrder(order, nil)
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+
+	fmt.Println("order id =", orderId)
+	_, err = bind.WaitMined(context.Background(), rpc, tx)
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+
+	now := time.Now().Unix()
+	payoutAddr := common.Address{} // common.HexToAddress("0x98DfAFF5126836E339493a6021FD5B92Bf005F0D")
+	tx, err = sdk.ExecuteOrders(perp, []string{orderId}, &OptsOverridesExec{TsMin: uint32(now), PayoutAddr: payoutAddr})
+	if err != nil {
+		t.Log(err.Error())
+		t.FailNow()
+	}
+	fmt.Println("tx = ", tx.Hash())
+	fmt.Println("done")
+}
+
 func TestSdkLiquidatePosition(t *testing.T) {
 	pk := loadPk()
 	if pk == "" {
