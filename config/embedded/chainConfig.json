@@ -45,7 +45,7 @@
     "priceFeedEndpoint": "https://hermes.pyth.network",
     "prdMktFeedEndpoint": "https://odin-poly.d8x.xyz/",
     "lowLiqFeedEndpoint": "https://odin-lowliq.d8x.xyz/",
-    "sportFeedEndpoint": "https://odin-sport.quantena.org/",
+    "sportFeedEndpoint": "https://odin-sport-v2.quantena.org/",
 	  "bettingLifecycleUrl": "https://sports-v2.quantena.org/",
     "chainId": 84532,
     "proxyAddr": "0xfaC638d51B769D060aFC5953C41bF35595620b1c",
