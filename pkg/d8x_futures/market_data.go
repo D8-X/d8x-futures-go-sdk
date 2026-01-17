@@ -1642,7 +1642,7 @@ func fetchOraclePrices(priceIds []PriceId, ep PriceFeedEndpoints) ([]ResponsePyt
 	query1 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", priceFeedEndpoint)
 	query2 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", prdMktEndpoint)
 	query3 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", lowLiqEndpoint)
-	query4 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", sportFeedEndpoint)
+	query4 := fmt.Sprintf("%s/v3/updates/price/latest?encoding=base64&ids[]=", sportFeedEndpoint)
 	count := 0
 	for _, id := range priceIds {
 		switch id.Type {
