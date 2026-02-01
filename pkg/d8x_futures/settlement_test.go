@@ -114,13 +114,27 @@ func TestSettlement(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	symbol := "NFL_WAS_DAL_251019-USD-PUSD"
-	s2 := float64(2)
-	s3 := float64(1)
-	err = sdk.RunSettlementProcess(symbol, s2, s3, rpc)
-	if err != nil {
-		fmt.Println(err)
-		t.FailNow()
+	for _, p := range sdk.Info.Perpetuals {
+		if p.State() == NORMAL || p.State() == INVALID {
+			continue
+		}
+
+		symbol := p.S2Symbol + "-PUSD"
+		px, err := sdk.FetchPricesForPerpetualId(p.Id, "")
+		if err != nil {
+			fmt.Println(err)
+			t.FailNow()
+		}
+
+		fmt.Println(symbol, "s2=", px.S2Price, "s3=", px.S3Price, p.State().String(), p.Id)
+		if p.state != CLEARED {
+			continue
+		}
+		err = sdk.RunSettlementProcess(symbol, max(1, px.S2Price), px.S3Price, rpc)
+		if err != nil {
+			fmt.Println(err)
+			t.FailNow()
+		}
 	}
 }
 
