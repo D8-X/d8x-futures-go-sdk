@@ -1334,7 +1334,7 @@ func RawQueryLiquidatableAccounts(
 
 func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 	xInfo *StaticExchangeInfo,
-	poolId int32,
+	poolID int32,
 	pxEp PriceFeedEndpoints,
 ) ([]LiquidatableAccounts, error) {
 	caller, err := multicall.New(client)
@@ -1348,20 +1348,20 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 	// get perpetuals in the pool and gather all symbols in
 	// a first loop to query all prices at once
 	symbols := make([]string, 0, len(xInfo.Perpetuals))
-	priceIdSet := make(map[string]bool)
+	priceIDSet := make(map[string]bool)
 	symSet := make(map[string]bool)
 	priceIds := make([]PriceId, 0, len(xInfo.Perpetuals))
 	for k, perp := range xInfo.Perpetuals {
-		if perp.PoolId != poolId || perp.State() != NORMAL {
+		if perp.PoolId != poolID || perp.State() != NORMAL {
 			continue
 		}
 
-		for _, pxId := range xInfo.Perpetuals[k].PriceIds {
-			if priceIdSet[pxId.Id] {
+		for _, pxID := range xInfo.Perpetuals[k].PriceIds {
+			if priceIDSet[pxID.Id] {
 				continue
 			}
-			priceIdSet[pxId.Id] = true
-			priceIds = append(priceIds, pxId)
+			priceIDSet[pxID.Id] = true
+			priceIds = append(priceIds, pxID)
 		}
 		for _, sym := range xInfo.Perpetuals[k].OnChainSymbols {
 			if symSet[sym] {
@@ -1398,7 +1398,7 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 	// build multi-call
 	perpIds := make([]int32, 0, len(xInfo.Perpetuals))
 	for j := range xInfo.Perpetuals {
-		if xInfo.Perpetuals[j].PoolId != poolId || xInfo.Perpetuals[j].State() != NORMAL {
+		if xInfo.Perpetuals[j].PoolId != poolID || xInfo.Perpetuals[j].State() != NORMAL {
 			continue
 		}
 		S2Sym := xInfo.Perpetuals[j].S2Symbol
@@ -1411,35 +1411,49 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 			// skip
 			continue
 		}
-		perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
+		perpID := big.NewInt(int64(xInfo.Perpetuals[j].Id))
 		pricesAbdk := [2]*big.Int{utils.Float64ToABDK(s2), utils.Float64ToABDK(s3)}
-		c := contract.NewCall(new(liqOutput), "getLiquidatableAccounts", perpId, pricesAbdk)
+		c := contract.NewCall(new(liqOutput), "getLiquidatableAccounts", perpID, pricesAbdk)
 
 		perpIds = append(perpIds, xInfo.Perpetuals[j].Id)
 		calls = append(calls, c)
 	}
-	res, err := caller.Call(nil, calls...)
-	if err != nil {
-		return nil, err
-	}
 	liqAccs := make([]LiquidatableAccounts, 0, len(calls))
-	for k, call := range res {
-		addr := call.Outputs.(*liqOutput)
-		if len(addr.LiqAccount) == 0 {
-			continue
+	const batchSize = 10
+	for i := 0; i < len(calls); i += batchSize {
+		end := min(len(calls), i+batchSize)
+		batch := calls[i:end]
+		res, err := caller.Call(nil, batch...)
+		if err != nil {
+			return nil, err
 		}
-		liqAccs = append(liqAccs,
-			LiquidatableAccounts{PerpId: perpIds[k], LiqAccounts: addr.LiqAccount})
+
+		for k, call := range res {
+			addr := call.Outputs.(*liqOutput)
+			if len(addr.LiqAccount) == 0 {
+				continue
+			}
+			liqAccs = append(liqAccs,
+				LiquidatableAccounts{PerpId: perpIds[i+k], LiqAccounts: addr.LiqAccount})
+		}
+		// Sleep before next batch, but not after the last one
+		if end < len(calls) {
+			time.Sleep(250 * time.Millisecond)
+		}
 	}
 	return liqAccs, nil
 }
 
-func RawFetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, pxEp PriceFeedEndpoints) (PerpetualPriceInfo, error) {
-	j := GetPerpetualStaticInfoIdxFromId(&exchangeInfo, id)
+func RawFetchPricesForPerpetualId(
+	xInfo StaticExchangeInfo,
+	id int32,
+	pxEp PriceFeedEndpoints,
+) (PerpetualPriceInfo, error) {
+	j := GetPerpetualStaticInfoIdxFromId(&xInfo, id)
 	if j == -1 {
 		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
-	return fetchPerpetualPriceInfo(&exchangeInfo, j, pxEp)
+	return fetchPerpetualPriceInfo(&xInfo, j, pxEp)
 }
 
 // FetchPricesForPerpetual queries the REST-endpoints/onchain oracles and calculates S2,S3
@@ -1642,7 +1656,7 @@ func fetchOraclePrices(priceIds []PriceId, ep PriceFeedEndpoints) ([]ResponsePyt
 	query1 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", priceFeedEndpoint)
 	query2 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", prdMktEndpoint)
 	query3 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", lowLiqEndpoint)
-	query4 := fmt.Sprintf("%s/v2/updates/price/latest?encoding=base64&ids[]=", sportFeedEndpoint)
+	query4 := fmt.Sprintf("%s/v3/updates/price/latest?encoding=base64&ids[]=", sportFeedEndpoint)
 	count := 0
 	for _, id := range priceIds {
 		switch id.Type {

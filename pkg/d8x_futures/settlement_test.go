@@ -105,15 +105,32 @@ func TestSettlement(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	pk := os.Getenv("PK")
-	if pk == "" {
-		fmt.Println("Provide private key for testnet as environment variable PK")
-		t.FailNow()
-	}
-	sdk, err := NewSdk([]string{pk}, "84532", WithRpcClient(rpc))
+	sdk, err := NewSdk([]string{os.Getenv("PK")}, "84532", WithRpcClient(rpc))
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
+	}
+	for _, p := range sdk.Info.Perpetuals {
+		if p.State() == NORMAL || p.State() == INVALID {
+			continue
+		}
+
+		symbol := p.S2Symbol + "-PUSD"
+		px, err := sdk.FetchPricesForPerpetualId(p.Id, "")
+		if err != nil {
+			fmt.Println(err)
+			t.FailNow()
+		}
+
+		fmt.Println(symbol, "s2=", px.S2Price, "s3=", px.S3Price, p.State().String(), p.Id)
+		if p.state != CLEARED {
+			continue
+		}
+		err = sdk.RunSettlementProcess(symbol, max(1, px.S2Price), px.S3Price, rpc)
+		if err != nil {
+			fmt.Println(err)
+			t.FailNow()
+		}
 	}
 	symbols := make([]string, 0)
 	for _, p := range sdk.Info.Perpetuals {
