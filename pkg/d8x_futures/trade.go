@@ -170,7 +170,8 @@ func (sdk *Sdk) ExecuteOrders(
 // can be provided via OptsOverrides.
 func (sdk *Sdk) LiquidatePosition(
 	perpId int32,
-	traderAddr, optLiquidatorAddr *common.Address,
+	traderAddr []common.Address,
+	optLiquidatorAddr *common.Address,
 	opts *OptsOverrides,
 	gasOpts ...GasOption,
 ) (
@@ -405,7 +406,7 @@ func RawLiquidatePosition(
 	xInfo *StaticExchangeInfo,
 	postingWallet *Wallet,
 	perpId int32,
-	traderAddr *common.Address,
+	traderAddr []common.Address,
 	liquidatorAddr *common.Address,
 	pxEp PriceFeedEndpoints,
 	opts *OptsOverrides,
@@ -442,7 +443,13 @@ func RawLiquidatePosition(
 	for k, p := range pxFeed.PriceFeed.Prices {
 		publishTimes[k] = uint64(p.Ts)
 	}
-	return perpCtrct.LiquidateByAMM(postingWallet.Auth, big.NewInt(int64(perpId)), *liquidatorAddr, *traderAddr, pxFeed.PriceFeed.Vaas, publishTimes)
+	return perpCtrct.LiquidateByAMM(postingWallet.Auth,
+		big.NewInt(int64(perpId)),
+		*liquidatorAddr,
+		traderAddr,
+		pxFeed.PriceFeed.Vaas,
+		publishTimes,
+	)
 }
 
 // estimateGasLimit estimates the gaslimit

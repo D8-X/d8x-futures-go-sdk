@@ -557,12 +557,8 @@ func TestSdkRO(t *testing.T) {
 	}
 	oo := orders.Orders
 	dgsts := orders.OrderHashes
-	if err != nil {
-		t.Log(err.Error())
-	} else {
-		fmt.Println(oo)
-		fmt.Println(dgsts)
-	}
+	fmt.Println(oo)
+	fmt.Println(dgsts)
 
 	trader := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	broker := common.HexToAddress("0xB0CBeeC370Af6ca2ed541F6a2264bc95b991F6E1")
