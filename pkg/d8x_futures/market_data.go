@@ -1345,91 +1345,103 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 	if err != nil {
 		return nil, err
 	}
-	// get perpetuals in the pool and gather all symbols in
-	// a first loop to query all prices at once
-	symbols := make([]string, 0, len(xInfo.Perpetuals))
-	priceIdSet := make(map[string]bool)
-	symSet := make(map[string]bool)
-	priceIds := make([]PriceId, 0, len(xInfo.Perpetuals))
+
+	// extract all normal perpetuals
+	perpIdx := make([]int, 0, len(xInfo.Perpetuals))
 	for k, perp := range xInfo.Perpetuals {
 		if perp.PoolId != poolId || perp.State() != NORMAL {
 			continue
 		}
-
-		for _, pxId := range xInfo.Perpetuals[k].PriceIds {
-			if priceIdSet[pxId.Id] {
-				continue
-			}
-			priceIdSet[pxId.Id] = true
-			priceIds = append(priceIds, pxId)
-		}
-		for _, sym := range xInfo.Perpetuals[k].OnChainSymbols {
-			if symSet[sym] {
-				continue
-			}
-			symSet[sym] = true
-			symbols = append(symbols, sym)
-		}
+		perpIdx = append(perpIdx, k)
 	}
-	feedData, err := fetchPricesFromAPI(priceIds, pxEp, false)
-	if err != nil {
-		return nil, err
-	}
-	pxMap, err := fetchPricesFromChain(symbols, xInfo.ChainOracles)
-	if err != nil {
-		return nil, err
-	}
-	for k, id := range feedData.PriceIds {
-		syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
-		for _, sym := range syms {
-			pxMap[sym] = Price{
-				// use EMA (=S2 if regular market)
-				Px:         feedData.Prices[k].Ema,
-				Ts:         int64(feedData.Prices[k].Ts),
-				IsOffChain: true,
-			}
-		}
-	}
-	// now that we have all prices, we build the multi-call
-	calls := make([]*multicall.Call, 0, len(xInfo.Perpetuals))
+	batchSize := 5
 	type liqOutput struct {
 		LiqAccount []common.Address
 	}
-	// build multi-call
-	perpIds := make([]int32, 0, len(xInfo.Perpetuals))
-	for j := range xInfo.Perpetuals {
-		if xInfo.Perpetuals[j].PoolId != poolId || xInfo.Perpetuals[j].State() != NORMAL {
-			continue
+	liqAccs := make([]LiquidatableAccounts, 0)
+
+	for batchStart := 0; batchStart < len(perpIdx); batchStart += batchSize {
+		batchEnd := batchStart + batchSize
+		if batchEnd > len(perpIdx) {
+			batchEnd = len(perpIdx)
 		}
-		S2Sym := xInfo.Perpetuals[j].S2Symbol
-		S3Sym := xInfo.Perpetuals[j].S3Symbol
-		s2, s3, isMarketClosedS2, isMarketClosedS3, err := calculatePerpIdxPx(xInfo, pxMap, S2Sym, S3Sym)
+		batch := perpIdx[batchStart:batchEnd]
+
+		// gather symbols and price IDs for this batch
+		symbols := make([]string, 0, len(batch)*2)
+		priceIdSet := make(map[string]bool)
+		symSet := make(map[string]bool)
+		priceIds := make([]PriceId, 0, len(batch)*2)
+		for _, k := range batch {
+			for _, pxId := range xInfo.Perpetuals[k].PriceIds {
+				if priceIdSet[pxId.Id] {
+					continue
+				}
+				priceIdSet[pxId.Id] = true
+				priceIds = append(priceIds, pxId)
+			}
+			for _, sym := range xInfo.Perpetuals[k].OnChainSymbols {
+				if symSet[sym] {
+					continue
+				}
+				symSet[sym] = true
+				symbols = append(symbols, sym)
+			}
+		}
+		feedData, err := fetchPricesFromAPI(priceIds, pxEp, false)
 		if err != nil {
 			return nil, err
 		}
-		if isMarketClosedS2 || isMarketClosedS3 {
-			// skip
-			continue
+		pxMap, err := fetchPricesFromChain(symbols, xInfo.ChainOracles)
+		if err != nil {
+			return nil, err
 		}
-		perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
-		pricesAbdk := [2]*big.Int{utils.Float64ToABDK(s2), utils.Float64ToABDK(s3)}
-		c := contract.NewCall(new(liqOutput), "getLiquidatableAccounts", perpId, pricesAbdk)
+		for k, id := range feedData.PriceIds {
+			syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
+			for _, sym := range syms {
+				pxMap[sym] = Price{
+					// use EMA (=S2 if regular market)
+					Px:         feedData.Prices[k].Ema,
+					Ts:         int64(feedData.Prices[k].Ts),
+					IsOffChain: true,
+				}
+			}
+		}
 
-		perpIds = append(perpIds, xInfo.Perpetuals[j].Id)
-		calls = append(calls, c)
-	}
-	res, err := caller.Call(nil, calls...)
-	if err != nil {
-		return nil, err
-	}
-	liqAccs := make([]LiquidatableAccounts, 0, len(calls))
-	for k, call := range res {
-		addr := call.Outputs.(*liqOutput)
-		if len(addr.LiqAccount) == 0 {
+		// build multicall for this batch
+		calls := make([]*multicall.Call, 0, len(batch))
+		perpIds := make([]int32, 0, len(batch))
+		for _, j := range batch {
+			S2Sym := xInfo.Perpetuals[j].S2Symbol
+			S3Sym := xInfo.Perpetuals[j].S3Symbol
+			s2, s3, isMarketClosedS2, isMarketClosedS3, err := calculatePerpIdxPx(xInfo, pxMap, S2Sym, S3Sym)
+			if err != nil {
+				return nil, err
+			}
+			if isMarketClosedS2 || isMarketClosedS3 {
+				continue
+			}
+			perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
+			pricesAbdk := [2]*big.Int{utils.Float64ToABDK(s2), utils.Float64ToABDK(s3)}
+			c := contract.NewCall(new(liqOutput), "getLiquidatableAccounts", perpId, pricesAbdk)
+			perpIds = append(perpIds, xInfo.Perpetuals[j].Id)
+			calls = append(calls, c)
+		}
+		if len(calls) == 0 {
 			continue
 		}
-		liqAccs = append(liqAccs,
-			LiquidatableAccounts{PerpId: perpIds[k], LiqAccounts: addr.LiqAccount})
+		res, err := caller.Call(nil, calls...)
+		if err != nil {
+			return nil, err
+		}
+		for k, call := range res {
+			addr := call.Outputs.(*liqOutput)
+			if len(addr.LiqAccount) == 0 {
+				continue
+			}
+			liqAccs = append(liqAccs,
+				LiquidatableAccounts{PerpId: perpIds[k], LiqAccounts: addr.LiqAccount})
+		}
 	}
 	return liqAccs, nil
 }

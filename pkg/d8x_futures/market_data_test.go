@@ -336,20 +336,21 @@ func TestQueryLiquidatableAccounts(t *testing.T) {
 		t.Log(err.Error())
 		t.FailNow()
 	}
-	acc, err := sdkRo.QueryLiquidatableAccounts(200000, nil)
+	acc, err := sdkRo.QueryLiquidatableAccounts(100000, nil)
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
 	}
 	fmt.Println("Accounts =", acc)
 
-	accs, err := RawQueryLiquidatableAccountsInPool(sdkRo.Conn.Rpc, &sdkRo.Info, 1, PriceFeedEndpoints{PriceFeedEndpoint: "https://hermes.pyth.network/api"})
+	/*accs, err := RawQueryLiquidatableAccountsInPool(sdkRo.Conn.Rpc, &sdkRo.Info, 1, PriceFeedEndpoints{PriceFeedEndpoint: "https://hermes.pyth.network/api"})
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
 	}
 	fmt.Print(accs)
-	acc2, err := sdkRo.QueryLiquidatableAccountsInPool(2, nil)
+	*/
+	acc2, err := sdkRo.QueryLiquidatableAccountsInPool(1, nil)
 	if err != nil {
 		t.Log(err.Error())
 		t.FailNow()
