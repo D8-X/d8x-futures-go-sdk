@@ -751,6 +751,19 @@
                 "internalType": "uint24",
                 "name": "perpetualId",
                 "type": "uint24"
+            }
+        ],
+        "name": "SettleState",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint24",
+                "name": "perpetualId",
+                "type": "uint24"
             },
             {
                 "indexed": true,
@@ -763,22 +776,15 @@
                 "internalType": "int256",
                 "name": "amount",
                 "type": "int256"
-            }
-        ],
-        "name": "Settle",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
+            },
             {
-                "indexed": true,
-                "internalType": "uint24",
-                "name": "perpetualId",
-                "type": "uint24"
+                "indexed": false,
+                "internalType": "int128",
+                "name": "cash",
+                "type": "int128"
             }
         ],
-        "name": "SettleState",
+        "name": "SettleV2",
         "type": "event"
     },
     {
@@ -1064,6 +1070,24 @@
             {
                 "indexed": false,
                 "internalType": "int128",
+                "name": "fLockedInValueQC",
+                "type": "int128"
+            },
+            {
+                "indexed": false,
+                "internalType": "int128",
+                "name": "fCashCC",
+                "type": "int128"
+            },
+            {
+                "indexed": false,
+                "internalType": "int128",
+                "name": "fPositionBC",
+                "type": "int128"
+            },
+            {
+                "indexed": false,
+                "internalType": "int128",
                 "name": "fFundingPaymentCC",
                 "type": "int128"
             }
@@ -1154,55 +1178,6 @@
         "name": "adjustSettlementPrice",
         "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "int128[2]",
-                "name": "_fK2AMM",
-                "type": "int128[2]"
-            },
-            {
-                "internalType": "int128",
-                "name": "_fk2Trader",
-                "type": "int128"
-            },
-            {
-                "internalType": "int128",
-                "name": "_fCoverN",
-                "type": "int128"
-            },
-            {
-                "internalType": "int128[2]",
-                "name": "fStressRet2",
-                "type": "int128[2]"
-            },
-            {
-                "internalType": "int128[2]",
-                "name": "fStressRet3",
-                "type": "int128[2]"
-            },
-            {
-                "internalType": "int128[2]",
-                "name": "fIndexPrices",
-                "type": "int128[2]"
-            },
-            {
-                "internalType": "enum AMMPerpLogic.CollateralCurrency",
-                "name": "_eCCY",
-                "type": "uint8"
-            }
-        ],
-        "name": "calculateDefaultFundSize",
-        "outputs": [
-            {
-                "internalType": "int128",
-                "name": "",
-                "type": "int128"
-            }
-        ],
-        "stateMutability": "pure",
         "type": "function"
     },
     {
@@ -5229,91 +5204,6 @@
     {
         "inputs": [
             {
-                "components": [
-                    {
-                        "internalType": "uint16",
-                        "name": "leverageTDR",
-                        "type": "uint16"
-                    },
-                    {
-                        "internalType": "uint16",
-                        "name": "brokerFeeTbps",
-                        "type": "uint16"
-                    },
-                    {
-                        "internalType": "uint24",
-                        "name": "iPerpetualId",
-                        "type": "uint24"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "traderAddr",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint32",
-                        "name": "executionTimestamp",
-                        "type": "uint32"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "brokerAddr",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint32",
-                        "name": "submittedTimestamp",
-                        "type": "uint32"
-                    },
-                    {
-                        "internalType": "uint32",
-                        "name": "flags",
-                        "type": "uint32"
-                    },
-                    {
-                        "internalType": "uint32",
-                        "name": "iDeadline",
-                        "type": "uint32"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "executorAddr",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fAmount",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fLimitPrice",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "int128",
-                        "name": "fTriggerPrice",
-                        "type": "int128"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "brokerSignature",
-                        "type": "bytes"
-                    }
-                ],
-                "internalType": "struct IPerpetualOrder.Order",
-                "name": "_order",
-                "type": "tuple"
-            }
-        ],
-        "name": "testTradeEvent",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "uint24",
                 "name": "_perpetualId",
                 "type": "uint24"
@@ -5501,19 +5391,6 @@
             }
         ],
         "name": "updateAMMTargetFundSize",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint24",
-                "name": "_iPerpetualId",
-                "type": "uint24"
-            }
-        ],
-        "name": "updateDefaultFundTargetSize",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
