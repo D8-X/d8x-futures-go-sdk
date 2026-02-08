@@ -97,6 +97,23 @@ func TestRefreshPerpetualStateEnum(t *testing.T) {
 	}
 }
 
+func TestInfo(t *testing.T) {
+	pk := os.Getenv("PK")
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	sdk, err := NewSdk([]string{pk}, "84532")
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	for _, p := range sdk.Info.Perpetuals {
+		symbol := p.S2Symbol + "-PUSD"
+		fmt.Println(symbol, p.Id)
+	}
+}
+
 func TestSettlement(t *testing.T) {
 	pk := os.Getenv("PK")
 	if pk == "" {
@@ -114,27 +131,11 @@ func TestSettlement(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	for _, p := range sdk.Info.Perpetuals {
-		if p.State() == NORMAL || p.State() == INVALID {
-			continue
-		}
-
-		symbol := p.S2Symbol + "-PUSD"
-		px, err := sdk.FetchPricesForPerpetualId(p.Id, "")
-		if err != nil {
-			fmt.Println(err)
-			t.FailNow()
-		}
-
-		fmt.Println(symbol, "s2=", px.S2Price, "s3=", px.S3Price, p.State().String(), p.Id)
-		if p.state != CLEARED {
-			continue
-		}
-		err = sdk.RunSettlementProcess(symbol, max(1, px.S2Price), px.S3Price, rpc)
-		if err != nil {
-			fmt.Println(err)
-			t.FailNow()
-		}
+	symbol := "SP07-USD-PUSD"
+	err = sdk.RunSettlementProcess(symbol, 1.5, 1, rpc)
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
 	}
 }
 
