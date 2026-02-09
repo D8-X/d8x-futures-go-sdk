@@ -327,7 +327,7 @@ func TestQueryLiquidatableAccounts(t *testing.T) {
 	if err != nil {
 		t.Fatalf("QueryLiquidatableAccountsInPool: %v", err)
 	}
-	t.Log(acc2)
+	t.Log(acc2)*/
 }
 
 func TestGetPerpetualData(t *testing.T) {
