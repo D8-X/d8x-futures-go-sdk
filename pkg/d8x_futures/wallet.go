@@ -62,6 +62,10 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 	if err != nil {
 		return nil, err
 	}
+	w.Auth.Value = big.NewInt(0)
+	if rpc == nil {
+		return &w, nil
+	}
 	// determine the type of RPC (post London EIP-1559 or pre)
 	head, err := rpc.HeaderByNumber(context.Background(), nil)
 	w.IsPostLondon = err == nil && head.BaseFee != nil
@@ -84,10 +88,6 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 			return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
 		}
 		w.UpdateGasPrice(rpc)
-	}
-	w.Auth.Value = big.NewInt(0)
-	if rpc == nil {
-		return &w, nil
 	}
 	return &w, nil
 }
