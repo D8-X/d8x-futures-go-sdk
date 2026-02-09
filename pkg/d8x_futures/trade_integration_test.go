@@ -215,7 +215,7 @@ func TestPostOrder(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateBlockChainConnector: %v", err)
 	}
-	wallet, err := NewWallet(fmt.Sprintf("%x", execPk.D), conn.ChainId)
+	wallet, err := NewWallet(fmt.Sprintf("%064x", execPk.D), conn.ChainId)
 	if err != nil {
 		t.Fatalf("NewWallet: %v", err)
 	}
@@ -261,7 +261,7 @@ func TestBrokerSignature(t *testing.T) {
 		t.Fatalf("Load tmpXchInfo.json: %v", err)
 	}
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
-	wallet, err := NewWallet(fmt.Sprintf("%x", execPk.D), chConfig.ChainId)
+	wallet, err := NewWallet(fmt.Sprintf("%064x", execPk.D), chConfig.ChainId)
 	if err != nil {
 		t.Fatalf("NewWallet: %v", err)
 	}

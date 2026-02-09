@@ -85,7 +85,7 @@ func TestPaymentSignature(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetDefaultChainConfig: %v", err)
 	}
-	wallet, err := NewWallet(fmt.Sprintf("%x", execPk.D), chConfig.ChainId)
+	wallet, err := NewWallet(fmt.Sprintf("%064x", execPk.D), chConfig.ChainId)
 	if err != nil {
 		t.Fatalf("NewWallet: %v", err)
 	}
@@ -136,7 +136,7 @@ func TestSignOrder(t *testing.T) {
 	}
 	// Derive the Ethereum address from the private key
 	addr := crypto.PubkeyToAddress(privateKey.PublicKey)
-	pk := fmt.Sprintf("%x", privateKey.D)
+	pk := fmt.Sprintf("%064x", privateKey.D)
 	wallet, err := NewWallet(pk, int64(chainId))
 	if err != nil {
 		t.Fatalf("NewWallet: %v", err)
