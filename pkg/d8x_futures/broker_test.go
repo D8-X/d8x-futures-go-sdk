@@ -33,7 +33,7 @@ func TestPurchaseBrokerLots(t *testing.T) {
 	if pk == "" {
 		t.Fatal("provide private key for testnet as environment variable PK")
 	}
-	sdk, err := NewSdk([]string{pk}, "42161")
+	sdk, err := NewSdk([]string{pk}, "84532")
 	if err != nil {
 		t.Fatalf("NewSdk: %v", err)
 	}

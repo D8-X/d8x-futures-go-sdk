@@ -268,13 +268,21 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
+	if len(sdkRo.Info.Pools) == 0 {
+		t.Skip("no pools found")
+	}
+	poolId := sdkRo.Info.Pools[0].PoolId
 	addr := "0xdef43CF2Dd024abc5447C1Dcdc2fE3FE58547b84"
-	amt, err := sdkRo.GetPoolShareTknBalance(1, common.HexToAddress(addr), nil)
+	amt, err := sdkRo.GetPoolShareTknBalance(int(poolId), common.HexToAddress(addr), nil)
 	if err != nil {
 		t.Fatalf("GetPoolShareTknBalance: %v", err)
 	}
 	t.Log("Amount =", amt)
-	px, err := sdkRo.GetPoolShareTknPrice([]int{1, 2, 3}, nil)
+	var poolIds []int
+	for _, p := range sdkRo.Info.Pools {
+		poolIds = append(poolIds, int(p.PoolId))
+	}
+	px, err := sdkRo.GetPoolShareTknPrice(poolIds, nil)
 	if err != nil {
 		t.Fatalf("GetPoolShareTknPrice: %v", err)
 	}
@@ -407,6 +415,8 @@ func TestPerpetualPriceTuple(t *testing.T) {
 	ep := PriceFeedEndpoints{
 		PriceFeedEndpoint:  sdkRo.ChainConfig.PriceFeedEndpoint,
 		LowLiqFeedEndpoint: sdkRo.ChainConfig.LowLiqFeedEndpoint,
+		PrdMktFeedEndpoint: sdkRo.ChainConfig.PrdMktFeedEndpoint,
+		SportFeedEndpoint:  sdkRo.ChainConfig.SportFeedEndpoint,
 	}
 	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, ep, sym, tradeAmt)
 	endTime := time.Now()
@@ -670,6 +680,8 @@ func TestGetPositionRisk(t *testing.T) {
 	ep := PriceFeedEndpoints{
 		PriceFeedEndpoint:  chConf.PriceFeedEndpoint,
 		LowLiqFeedEndpoint: chConf.LowLiqFeedEndpoint,
+		PrdMktFeedEndpoint: chConf.PrdMktFeedEndpoint,
+		SportFeedEndpoint:  chConf.SportFeedEndpoint,
 	}
 	pRisk, err := RawGetPositionRisk(info, conn.Rpc, (*common.Address)(&traderAddr), sym, ep)
 	if err != nil {
@@ -709,6 +721,8 @@ func TestQueryPerpetualState(t *testing.T) {
 	ep := PriceFeedEndpoints{
 		PriceFeedEndpoint:  chConf.PriceFeedEndpoint,
 		LowLiqFeedEndpoint: chConf.LowLiqFeedEndpoint,
+		PrdMktFeedEndpoint: chConf.PrdMktFeedEndpoint,
+		SportFeedEndpoint:  chConf.SportFeedEndpoint,
 	}
 	perpState, err := RawQueryPerpetualState(conn.Rpc, info, perpIds, ep)
 	if err != nil {

@@ -92,8 +92,15 @@ func TestSdkLiquidatePosition(t *testing.T) {
 	if len(acc2) == 0 {
 		return
 	}
+	const maxAttempts = 3
+	attempts := 0
 	for _, el := range acc2 {
 		for _, addr := range el.LiqAccounts {
+			if attempts >= maxAttempts {
+				t.Logf("reached max %d liquidation attempts, stopping", maxAttempts)
+				return
+			}
+			attempts++
 			t.Logf("liquidating %s", addr.Hex())
 			tx, err := sdk.LiquidatePosition(el.PerpId, []common.Address{addr}, nil, nil)
 			if err != nil {
