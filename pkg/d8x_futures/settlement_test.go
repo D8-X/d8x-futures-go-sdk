@@ -5,6 +5,7 @@ package d8x_futures
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -201,9 +202,26 @@ func TestEnable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ethclient.Dial: %v", err)
 	}
-	symbol := "NHL2-USD-PUSD"
+	
+	var symbol string
+	for _, p := range sdk.Info.Perpetuals {
+		if p.State() == INVALID {
+			sym, ok := sdk.Info.PerpetualIdToSymbol[p.Id]
+			if ok {
+				symbol = sym
+				break
+			}
+		}
+	}
+	if symbol == "" {
+		t.Skip("no INVALID perpetual found to activate")
+	}
+	t.Logf("activating %s", symbol)
 	tx, err := sdk.ActivatePerpetual(symbol, rpc)
 	if err != nil {
+		if strings.Contains(err.Error(), "only maintainer") {
+			t.Skipf("wallet lacks maintainer role: %v", err)
+		}
 		t.Fatalf("ActivatePerpetual: %v", err)
 	}
 	t.Log(tx.Hash())
