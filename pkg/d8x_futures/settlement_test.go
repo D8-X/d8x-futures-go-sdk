@@ -122,6 +122,23 @@ func TestRefreshPerpetualStateEnum(t *testing.T) {
 	}
 }
 
+func TestInfo(t *testing.T) {
+	pk := os.Getenv("PK")
+	if pk == "" {
+		fmt.Println("Provide private key for testnet as environment variable PK")
+		t.FailNow()
+	}
+	sdk, err := NewSdk([]string{pk}, "84532")
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	for _, p := range sdk.Info.Perpetuals {
+		symbol := p.S2Symbol + "-PUSD"
+		fmt.Println(symbol, p.Id)
+	}
+}
+
 func TestSettlement(t *testing.T) {
 	url := os.Getenv("RPC")
 	rpc, err := ethclient.Dial(url)
@@ -135,6 +152,12 @@ func TestSettlement(t *testing.T) {
 	sdk, err := NewSdk([]string{pk}, "84532", WithRpcClient(rpc))
 	if err != nil {
 		t.Fatalf("NewSdk: %v", err)
+	}
+	symbol := "SP07-USD-PUSD"
+	err = sdk.RunSettlementProcess(symbol, 1.5, 1, rpc)
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
 	}
 	symbols := make([]string, 0)
 	for _, p := range sdk.Info.Perpetuals {

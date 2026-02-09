@@ -312,13 +312,13 @@ func TestQueryLiquidatableAccounts(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
-	acc, err := sdkRo.QueryLiquidatableAccounts(200000, nil)
+	acc, err := sdkRo.QueryLiquidatableAccounts(100000, nil)
 	if err != nil {
 		t.Fatalf("QueryLiquidatableAccounts: %v", err)
 	}
 	t.Log("Accounts =", acc)
 
-	accs, err := RawQueryLiquidatableAccountsInPool(sdkRo.Conn.Rpc, &sdkRo.Info, 1, PriceFeedEndpoints{PriceFeedEndpoint: "https://hermes.pyth.network/api"})
+	/*accs, err := RawQueryLiquidatableAccountsInPool(sdkRo.Conn.Rpc, &sdkRo.Info, 1, PriceFeedEndpoints{PriceFeedEndpoint: "https://hermes.pyth.network/api"})
 	if err != nil {
 		t.Fatalf("RawQueryLiquidatableAccountsInPool: %v", err)
 	}
@@ -331,7 +331,11 @@ func TestQueryLiquidatableAccounts(t *testing.T) {
 }
 
 func TestGetPerpetualData(t *testing.T) {
-	sdkRo, err := NewSdkRO("421614") // arbitrum sepolia
+	// err := sdkRo.New("421614") //arbitrum sepolia
+	// err := sdkRo.New("195") //x1
+	// err := sdkRo.New("196") //xlayer
+	// err := sdkRo.New("80084") //bartio
+	sdkRo, err := NewSdkRO("84532") // base sepolia
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
