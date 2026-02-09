@@ -514,14 +514,15 @@ func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Add
 	if order.KeepPositionLvg {
 		flags = flags | MASK_KEEP_POS_LEVERAGE
 	}
-	if order.Type == ORDER_TYPE_LIMIT {
+	switch order.Type {
+	case ORDER_TYPE_LIMIT:
 		flags = flags | MASK_LIMIT_ORDER
-	} else if order.Type == ORDER_TYPE_MARKET {
+	case ORDER_TYPE_MARKET:
 		flags = flags | MASK_MARKET_ORDER
-	} else if order.Type == ORDER_TYPE_STOP_LIMIT {
+	case ORDER_TYPE_STOP_LIMIT:
 		flags = flags | MASK_STOP_ORDER
 		flags = flags | MASK_LIMIT_ORDER
-	} else if order.Type == ORDER_TYPE_STOP_MARKET {
+	case ORDER_TYPE_STOP_MARKET:
 		flags = flags | MASK_STOP_ORDER
 		flags = flags | MASK_MARKET_ORDER
 	}

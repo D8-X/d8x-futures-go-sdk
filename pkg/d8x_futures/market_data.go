@@ -1334,7 +1334,7 @@ func RawQueryLiquidatableAccounts(
 
 func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 	xInfo *StaticExchangeInfo,
-	poolID int32,
+	poolId int32,
 	pxEp PriceFeedEndpoints,
 ) ([]LiquidatableAccounts, error) {
 	caller, err := multicall.New(client)
@@ -1345,115 +1345,113 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 	if err != nil {
 		return nil, err
 	}
-	// get perpetuals in the pool and gather all symbols in
-	// a first loop to query all prices at once
-	symbols := make([]string, 0, len(xInfo.Perpetuals))
-	priceIDSet := make(map[string]bool)
-	symSet := make(map[string]bool)
-	priceIds := make([]PriceId, 0, len(xInfo.Perpetuals))
+
+	// extract all normal perpetuals
+	perpIdx := make([]int, 0, len(xInfo.Perpetuals))
 	for k, perp := range xInfo.Perpetuals {
-		if perp.PoolId != poolID || perp.State() != NORMAL {
+		if perp.PoolId != poolId || perp.State() != NORMAL {
 			continue
 		}
-
-		for _, pxID := range xInfo.Perpetuals[k].PriceIds {
-			if priceIDSet[pxID.Id] {
-				continue
-			}
-			priceIDSet[pxID.Id] = true
-			priceIds = append(priceIds, pxID)
-		}
-		for _, sym := range xInfo.Perpetuals[k].OnChainSymbols {
-			if symSet[sym] {
-				continue
-			}
-			symSet[sym] = true
-			symbols = append(symbols, sym)
-		}
+		perpIdx = append(perpIdx, k)
 	}
-	feedData, err := fetchPricesFromAPI(priceIds, pxEp, false)
-	if err != nil {
-		return nil, err
-	}
-	pxMap, err := fetchPricesFromChain(symbols, xInfo.ChainOracles)
-	if err != nil {
-		return nil, err
-	}
-	for k, id := range feedData.PriceIds {
-		syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
-		for _, sym := range syms {
-			pxMap[sym] = Price{
-				// use EMA (=S2 if regular market)
-				Px:         feedData.Prices[k].Ema,
-				Ts:         int64(feedData.Prices[k].Ts),
-				IsOffChain: true,
-			}
-		}
-	}
-	// now that we have all prices, we build the multi-call
-	calls := make([]*multicall.Call, 0, len(xInfo.Perpetuals))
+	batchSize := 5
 	type liqOutput struct {
 		LiqAccount []common.Address
 	}
-	// build multi-call
-	perpIds := make([]int32, 0, len(xInfo.Perpetuals))
-	for j := range xInfo.Perpetuals {
-		if xInfo.Perpetuals[j].PoolId != poolID || xInfo.Perpetuals[j].State() != NORMAL {
-			continue
+	liqAccs := make([]LiquidatableAccounts, 0)
+
+	for batchStart := 0; batchStart < len(perpIdx); batchStart += batchSize {
+		batchEnd := batchStart + batchSize
+		if batchEnd > len(perpIdx) {
+			batchEnd = len(perpIdx)
 		}
-		S2Sym := xInfo.Perpetuals[j].S2Symbol
-		S3Sym := xInfo.Perpetuals[j].S3Symbol
-		s2, s3, isMarketClosedS2, isMarketClosedS3, err := calculatePerpIdxPx(xInfo, pxMap, S2Sym, S3Sym)
+		batch := perpIdx[batchStart:batchEnd]
+
+		// gather symbols and price IDs for this batch
+		symbols := make([]string, 0, len(batch)*2)
+		priceIdSet := make(map[string]bool)
+		symSet := make(map[string]bool)
+		priceIds := make([]PriceId, 0, len(batch)*2)
+		for _, k := range batch {
+			for _, pxId := range xInfo.Perpetuals[k].PriceIds {
+				if priceIdSet[pxId.Id] {
+					continue
+				}
+				priceIdSet[pxId.Id] = true
+				priceIds = append(priceIds, pxId)
+			}
+			for _, sym := range xInfo.Perpetuals[k].OnChainSymbols {
+				if symSet[sym] {
+					continue
+				}
+				symSet[sym] = true
+				symbols = append(symbols, sym)
+			}
+		}
+		feedData, err := fetchPricesFromAPI(priceIds, pxEp, false)
 		if err != nil {
 			return nil, err
 		}
-		if isMarketClosedS2 || isMarketClosedS3 {
-			// skip
-			continue
-		}
-		perpID := big.NewInt(int64(xInfo.Perpetuals[j].Id))
-		pricesAbdk := [2]*big.Int{utils.Float64ToABDK(s2), utils.Float64ToABDK(s3)}
-		c := contract.NewCall(new(liqOutput), "getLiquidatableAccounts", perpID, pricesAbdk)
-
-		perpIds = append(perpIds, xInfo.Perpetuals[j].Id)
-		calls = append(calls, c)
-	}
-	liqAccs := make([]LiquidatableAccounts, 0, len(calls))
-	const batchSize = 10
-	for i := 0; i < len(calls); i += batchSize {
-		end := min(len(calls), i+batchSize)
-		batch := calls[i:end]
-		res, err := caller.Call(nil, batch...)
+		pxMap, err := fetchPricesFromChain(symbols, xInfo.ChainOracles)
 		if err != nil {
 			return nil, err
 		}
+		for k, id := range feedData.PriceIds {
+			syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
+			for _, sym := range syms {
+				pxMap[sym] = Price{
+					// use EMA (=S2 if regular market)
+					Px:         feedData.Prices[k].Ema,
+					Ts:         int64(feedData.Prices[k].Ts),
+					IsOffChain: true,
+				}
+			}
+		}
 
+		// build multicall for this batch
+		calls := make([]*multicall.Call, 0, len(batch))
+		perpIds := make([]int32, 0, len(batch))
+		for _, j := range batch {
+			S2Sym := xInfo.Perpetuals[j].S2Symbol
+			S3Sym := xInfo.Perpetuals[j].S3Symbol
+			s2, s3, isMarketClosedS2, isMarketClosedS3, err := calculatePerpIdxPx(xInfo, pxMap, S2Sym, S3Sym)
+			if err != nil {
+				return nil, err
+			}
+			if isMarketClosedS2 || isMarketClosedS3 {
+				continue
+			}
+			perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
+			pricesAbdk := [2]*big.Int{utils.Float64ToABDK(s2), utils.Float64ToABDK(s3)}
+			c := contract.NewCall(new(liqOutput), "getLiquidatableAccounts", perpId, pricesAbdk)
+			perpIds = append(perpIds, xInfo.Perpetuals[j].Id)
+			calls = append(calls, c)
+		}
+		if len(calls) == 0 {
+			continue
+		}
+		res, err := caller.Call(nil, calls...)
+		if err != nil {
+			return nil, err
+		}
 		for k, call := range res {
 			addr := call.Outputs.(*liqOutput)
 			if len(addr.LiqAccount) == 0 {
 				continue
 			}
 			liqAccs = append(liqAccs,
-				LiquidatableAccounts{PerpId: perpIds[i+k], LiqAccounts: addr.LiqAccount})
-		}
-		// Sleep before next batch, but not after the last one
-		if end < len(calls) {
-			time.Sleep(250 * time.Millisecond)
+				LiquidatableAccounts{PerpId: perpIds[k], LiqAccounts: addr.LiqAccount})
 		}
 	}
 	return liqAccs, nil
 }
 
-func RawFetchPricesForPerpetualId(
-	xInfo StaticExchangeInfo,
-	id int32,
-	pxEp PriceFeedEndpoints,
-) (PerpetualPriceInfo, error) {
-	j := GetPerpetualStaticInfoIdxFromId(&xInfo, id)
+func RawFetchPricesForPerpetualId(exchangeInfo StaticExchangeInfo, id int32, pxEp PriceFeedEndpoints) (PerpetualPriceInfo, error) {
+	j := GetPerpetualStaticInfoIdxFromId(&exchangeInfo, id)
 	if j == -1 {
 		return PerpetualPriceInfo{}, errors.New("symbol does not exist in static perpetual info")
 	}
-	return fetchPerpetualPriceInfo(&xInfo, j, pxEp)
+	return fetchPerpetualPriceInfo(&exchangeInfo, j, pxEp)
 }
 
 // FetchPricesForPerpetual queries the REST-endpoints/onchain oracles and calculates S2,S3

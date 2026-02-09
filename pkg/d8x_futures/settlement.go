@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"strconv"
 	"time"
 
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -116,6 +118,12 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 			if err != nil {
 				return err
 			}
+			txs, err := sdk.ResetOrders(symbol, optRpc)
+			if err != nil {
+				fmt.Printf("failed to reset order book: %v\n", err)
+			} else {
+				fmt.Printf("order book reset %d transactions\n", len(txs))
+			}
 			if state != CLEARED {
 				fmt.Printf("%s: state not CLEARED by current rpc but %s\n", symbol, state.String())
 				continue
@@ -124,6 +132,7 @@ func (sdk *Sdk) RunSettlementProcess(symbol string, pxS2, pxS3 float64, optRpc *
 				return err
 			}
 			fmt.Printf("%s: finished cleared state\n", symbol)
+
 		}
 		time.Sleep(3 * time.Second) // rpc cooloff
 		state, err = sdk.QueryPerpetualStateEnum(symbol, optRpc)
@@ -289,6 +298,71 @@ func (sdk *Sdk) SettleTraders(symbol string, optRpc *ethclient.Client, optGas ..
 		return fmt.Errorf("failed to mine (deactivate perp): %w", err)
 	}
 	return nil
+}
+
+// ResetOrders clears orders from the order book of a non-NORMAL perpetual
+func (sdk *Sdk) ResetOrders(symbol string, optRpc *ethclient.Client, optGas ...GasOption) ([]*types.Transaction, error) {
+	symbol, err := sdk.symbolToInternal(symbol)
+	if err != nil {
+		return nil, err
+	}
+	if optRpc == nil {
+		optRpc = sdk.Conn.Rpc
+	}
+	j := GetPerpetualStaticInfoIdxFromSymbol(&sdk.Info, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("no perpetual index found for symbol %s", symbol)
+	}
+	addr := sdk.Info.Perpetuals[j].LimitOrderBookAddr
+	return RawResetOrders(addr, optRpc, 250*time.Millisecond, sdk.Wallets[0], optGas...)
+}
+
+// RawResetOrders resets all orders for a given limit order book. Delay is time time waited between the batches
+func RawResetOrders(
+	lo common.Address,
+	rpc *ethclient.Client,
+	delay time.Duration,
+	postingWallet *Wallet,
+	gasOpts ...GasOption,
+) ([]*types.Transaction, error) {
+	ob := CreateLimitOrderBookInstance(rpc, lo) // xInfo.Perpetuals[j].LimitOrderBookAddr)
+	num, err := ob.OrderCount(nil)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get order count: %w", err)
+	}
+	N, err := strconv.ParseInt(num.String(), 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse order count: %s %w", num.String(), err)
+	}
+	if N == 0 {
+		return nil, nil
+	}
+	const batch = 20
+	txs := make([]*types.Transaction, 0)
+	j := 0
+	for {
+		err = postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...)
+		if err != nil {
+			return nil, fmt.Errorf("reset orders: %w", err)
+		}
+		tx, err := ob.ResetOrders(postingWallet.Auth, big.NewInt(batch))
+		if err != nil {
+			return nil, err
+		}
+		txs = append(txs, tx)
+		j += batch
+		if j > int(N) {
+			break
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+		_, err = bind.WaitMined(ctx, rpc, tx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to mine (reset orders): %w", err)
+		}
+		time.Sleep(delay)
+	}
+	return txs, nil
 }
 
 func (sdk *Sdk) DeactivatePerp(symbol string, optRpc *ethclient.Client, optGas ...GasOption) (*types.Transaction, error) {

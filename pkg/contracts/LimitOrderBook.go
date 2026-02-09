@@ -50,7 +50,7 @@ type IClientOrderClientOrder struct {
 
 // LimitOrderBookMetaData contains all meta data concerning the LimitOrderBook contract.
 var LimitOrderBookMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"callbackTarget\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"gasLimit\",\"type\":\"uint32\"}],\"name\":\"Callback\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"digest\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"reason\",\"type\":\"string\"}],\"name\":\"ExecutionFailed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"indexed\":false,\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"order\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"digest\",\"type\":\"bytes32\"}],\"name\":\"PerpetualLimitOrderCreated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"CALLBACK_GAS_LIMIT\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"actvDigestPos\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"callbackFunctions\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_digest\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"_signature\",\"type\":\"bytes\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"cancelOrder\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"digestsOfTrader\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"_digests\",\"type\":\"bytes32[]\"},{\"internalType\":\"address\",\"name\":\"_executorAddr\",\"type\":\"address\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"executeOrders\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_digest\",\"type\":\"bytes32\"}],\"name\":\"getOrderStatus\",\"outputs\":[{\"internalType\":\"enumLimitOrderBook.OrderStatus\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"offset\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"getOrders\",\"outputs\":[{\"components\":[{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest1\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest2\",\"type\":\"bytes32\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"callbackTarget\",\"type\":\"address\"}],\"internalType\":\"structIClientOrder.ClientOrder[]\",\"name\":\"orders\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"digest\",\"type\":\"bytes32\"}],\"name\":\"getTrader\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_perpetualManagerAddr\",\"type\":\"address\"},{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"uint8\",\"name\":\"_iCancelDelaySec\",\"type\":\"uint8\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastOrderHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"page\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"limitDigestsOfTrader\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"marketCloseSwitchTimestamp\",\"outputs\":[{\"internalType\":\"int64\",\"name\":\"\",\"type\":\"int64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"}],\"name\":\"numberOfDigestsOfTrader\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"orderCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"orderDependency\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest1\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest2\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"orderOfDigest\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"perpManager\",\"outputs\":[{\"internalType\":\"contractIPerpetualManager\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"perpetualId\",\"outputs\":[{\"internalType\":\"uint24\",\"name\":\"\",\"type\":\"uint24\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_from\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_numElements\",\"type\":\"uint256\"}],\"name\":\"pollRange\",\"outputs\":[{\"components\":[{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest1\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest2\",\"type\":\"bytes32\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"callbackTarget\",\"type\":\"address\"}],\"internalType\":\"structIClientOrder.ClientOrder[]\",\"name\":\"orders\",\"type\":\"tuple[]\"},{\"internalType\":\"bytes32[]\",\"name\":\"orderHashes\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint32[]\",\"name\":\"submittedTs\",\"type\":\"uint32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest1\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest2\",\"type\":\"bytes32\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"callbackTarget\",\"type\":\"address\"}],\"internalType\":\"structIClientOrder.ClientOrder[]\",\"name\":\"_orders\",\"type\":\"tuple[]\"},{\"internalType\":\"bytes[]\",\"name\":\"_signatures\",\"type\":\"bytes[]\"}],\"name\":\"postOrders\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"callbackTarget\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"gasLimit\",\"type\":\"uint32\"}],\"name\":\"Callback\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"digest\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"reason\",\"type\":\"string\"}],\"name\":\"ExecutionFailed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"indexed\":false,\"internalType\":\"structIPerpetualOrder.Order\",\"name\":\"order\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"digest\",\"type\":\"bytes32\"}],\"name\":\"PerpetualLimitOrderCreated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"CALLBACK_GAS_LIMIT\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"actvDigestPos\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"callbackFunctions\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_digest\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"_signature\",\"type\":\"bytes\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"cancelOrder\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"digestsOfTrader\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"_digests\",\"type\":\"bytes32[]\"},{\"internalType\":\"address\",\"name\":\"_executorAddr\",\"type\":\"address\"},{\"internalType\":\"bytes[]\",\"name\":\"_updateData\",\"type\":\"bytes[]\"},{\"internalType\":\"uint64[]\",\"name\":\"_publishTimes\",\"type\":\"uint64[]\"}],\"name\":\"executeOrders\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_digest\",\"type\":\"bytes32\"}],\"name\":\"getOrderStatus\",\"outputs\":[{\"internalType\":\"enumLimitOrderBook.OrderStatus\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"offset\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"getOrders\",\"outputs\":[{\"components\":[{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest1\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest2\",\"type\":\"bytes32\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"callbackTarget\",\"type\":\"address\"}],\"internalType\":\"structIClientOrder.ClientOrder[]\",\"name\":\"orders\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"digest\",\"type\":\"bytes32\"}],\"name\":\"getTrader\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_perpetualManagerAddr\",\"type\":\"address\"},{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"},{\"internalType\":\"uint8\",\"name\":\"_iCancelDelaySec\",\"type\":\"uint8\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastOrderHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"page\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"limitDigestsOfTrader\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"marketCloseSwitchTimestamp\",\"outputs\":[{\"internalType\":\"int64\",\"name\":\"\",\"type\":\"int64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trader\",\"type\":\"address\"}],\"name\":\"numberOfDigestsOfTrader\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"orderCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"orderDependency\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest1\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest2\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"orderOfDigest\",\"outputs\":[{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"submittedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"executorAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"perpManager\",\"outputs\":[{\"internalType\":\"contractIPerpetualManager\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"perpetualId\",\"outputs\":[{\"internalType\":\"uint24\",\"name\":\"\",\"type\":\"uint24\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_from\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_numElements\",\"type\":\"uint256\"}],\"name\":\"pollRange\",\"outputs\":[{\"components\":[{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest1\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest2\",\"type\":\"bytes32\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"callbackTarget\",\"type\":\"address\"}],\"internalType\":\"structIClientOrder.ClientOrder[]\",\"name\":\"orders\",\"type\":\"tuple[]\"},{\"internalType\":\"bytes32[]\",\"name\":\"orderHashes\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint32[]\",\"name\":\"submittedTs\",\"type\":\"uint32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint24\",\"name\":\"iPerpetualId\",\"type\":\"uint24\"},{\"internalType\":\"int128\",\"name\":\"fLimitPrice\",\"type\":\"int128\"},{\"internalType\":\"uint16\",\"name\":\"leverageTDR\",\"type\":\"uint16\"},{\"internalType\":\"uint32\",\"name\":\"executionTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"flags\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"iDeadline\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"brokerAddr\",\"type\":\"address\"},{\"internalType\":\"int128\",\"name\":\"fTriggerPrice\",\"type\":\"int128\"},{\"internalType\":\"int128\",\"name\":\"fAmount\",\"type\":\"int128\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest1\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"traderAddr\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"parentChildDigest2\",\"type\":\"bytes32\"},{\"internalType\":\"uint16\",\"name\":\"brokerFeeTbps\",\"type\":\"uint16\"},{\"internalType\":\"bytes\",\"name\":\"brokerSignature\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"callbackTarget\",\"type\":\"address\"}],\"internalType\":\"structIClientOrder.ClientOrder[]\",\"name\":\"_orders\",\"type\":\"tuple[]\"},{\"internalType\":\"bytes[]\",\"name\":\"_signatures\",\"type\":\"bytes[]\"}],\"name\":\"postOrders\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_n\",\"type\":\"uint256\"}],\"name\":\"resetOrders\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // LimitOrderBookABI is the input ABI used to generate the binding from.
@@ -205,7 +205,6 @@ func (_LimitOrderBook *LimitOrderBookTransactorRaw) Transact(opts *bind.Transact
 func (_LimitOrderBook *LimitOrderBookCaller) CALLBACKGASLIMIT(opts *bind.CallOpts) (uint32, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "CALLBACK_GAS_LIMIT")
-
 	if err != nil {
 		return *new(uint32), err
 	}
@@ -213,7 +212,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) CALLBACKGASLIMIT(opts *bind.CallOpt
 	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
 
 	return out0, err
-
 }
 
 // CALLBACKGASLIMIT is a free data retrieval call binding the contract method 0x33d608f1.
@@ -236,7 +234,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) CALLBACKGASLIMIT() (uint32, 
 func (_LimitOrderBook *LimitOrderBookCaller) ActvDigestPos(opts *bind.CallOpts, arg0 [32]byte) (*big.Int, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "actvDigestPos", arg0)
-
 	if err != nil {
 		return *new(*big.Int), err
 	}
@@ -244,7 +241,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) ActvDigestPos(opts *bind.CallOpts, 
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
-
 }
 
 // ActvDigestPos is a free data retrieval call binding the contract method 0x82227d87.
@@ -267,7 +263,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) ActvDigestPos(arg0 [32]byte)
 func (_LimitOrderBook *LimitOrderBookCaller) CallbackFunctions(opts *bind.CallOpts, arg0 [32]byte) (common.Address, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "callbackFunctions", arg0)
-
 	if err != nil {
 		return *new(common.Address), err
 	}
@@ -275,7 +270,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) CallbackFunctions(opts *bind.CallOp
 	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
 
 	return out0, err
-
 }
 
 // CallbackFunctions is a free data retrieval call binding the contract method 0x67be6a64.
@@ -298,7 +292,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) CallbackFunctions(arg0 [32]b
 func (_LimitOrderBook *LimitOrderBookCaller) DigestsOfTrader(opts *bind.CallOpts, arg0 common.Address, arg1 *big.Int) ([32]byte, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "digestsOfTrader", arg0, arg1)
-
 	if err != nil {
 		return *new([32]byte), err
 	}
@@ -306,7 +299,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) DigestsOfTrader(opts *bind.CallOpts
 	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
 
 	return out0, err
-
 }
 
 // DigestsOfTrader is a free data retrieval call binding the contract method 0x79b8783c.
@@ -329,7 +321,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) DigestsOfTrader(arg0 common.
 func (_LimitOrderBook *LimitOrderBookCaller) GetOrderStatus(opts *bind.CallOpts, _digest [32]byte) (uint8, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "getOrderStatus", _digest)
-
 	if err != nil {
 		return *new(uint8), err
 	}
@@ -337,7 +328,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) GetOrderStatus(opts *bind.CallOpts,
 	out0 := *abi.ConvertType(out[0], new(uint8)).(*uint8)
 
 	return out0, err
-
 }
 
 // GetOrderStatus is a free data retrieval call binding the contract method 0x46423aa7.
@@ -360,7 +350,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) GetOrderStatus(_digest [32]b
 func (_LimitOrderBook *LimitOrderBookCaller) GetOrders(opts *bind.CallOpts, trader common.Address, offset *big.Int, limit *big.Int) ([]IClientOrderClientOrder, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "getOrders", trader, offset, limit)
-
 	if err != nil {
 		return *new([]IClientOrderClientOrder), err
 	}
@@ -368,7 +357,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) GetOrders(opts *bind.CallOpts, trad
 	out0 := *abi.ConvertType(out[0], new([]IClientOrderClientOrder)).(*[]IClientOrderClientOrder)
 
 	return out0, err
-
 }
 
 // GetOrders is a free data retrieval call binding the contract method 0x27b62ad9.
@@ -391,7 +379,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) GetOrders(trader common.Addr
 func (_LimitOrderBook *LimitOrderBookCaller) GetTrader(opts *bind.CallOpts, digest [32]byte) (common.Address, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "getTrader", digest)
-
 	if err != nil {
 		return *new(common.Address), err
 	}
@@ -399,7 +386,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) GetTrader(opts *bind.CallOpts, dige
 	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
 
 	return out0, err
-
 }
 
 // GetTrader is a free data retrieval call binding the contract method 0xda5c2078.
@@ -422,7 +408,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) GetTrader(digest [32]byte) (
 func (_LimitOrderBook *LimitOrderBookCaller) LastOrderHash(opts *bind.CallOpts) ([32]byte, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "lastOrderHash")
-
 	if err != nil {
 		return *new([32]byte), err
 	}
@@ -430,7 +415,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) LastOrderHash(opts *bind.CallOpts) 
 	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
 
 	return out0, err
-
 }
 
 // LastOrderHash is a free data retrieval call binding the contract method 0xcccc2ede.
@@ -453,7 +437,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) LastOrderHash() ([32]byte, e
 func (_LimitOrderBook *LimitOrderBookCaller) LimitDigestsOfTrader(opts *bind.CallOpts, trader common.Address, page *big.Int, limit *big.Int) ([][32]byte, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "limitDigestsOfTrader", trader, page, limit)
-
 	if err != nil {
 		return *new([][32]byte), err
 	}
@@ -461,7 +444,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) LimitDigestsOfTrader(opts *bind.Cal
 	out0 := *abi.ConvertType(out[0], new([][32]byte)).(*[][32]byte)
 
 	return out0, err
-
 }
 
 // LimitDigestsOfTrader is a free data retrieval call binding the contract method 0x95fafddb.
@@ -484,7 +466,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) LimitDigestsOfTrader(trader 
 func (_LimitOrderBook *LimitOrderBookCaller) MarketCloseSwitchTimestamp(opts *bind.CallOpts) (int64, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "marketCloseSwitchTimestamp")
-
 	if err != nil {
 		return *new(int64), err
 	}
@@ -492,7 +473,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) MarketCloseSwitchTimestamp(opts *bi
 	out0 := *abi.ConvertType(out[0], new(int64)).(*int64)
 
 	return out0, err
-
 }
 
 // MarketCloseSwitchTimestamp is a free data retrieval call binding the contract method 0x1a604cba.
@@ -515,7 +495,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) MarketCloseSwitchTimestamp()
 func (_LimitOrderBook *LimitOrderBookCaller) NumberOfDigestsOfTrader(opts *bind.CallOpts, trader common.Address) (*big.Int, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "numberOfDigestsOfTrader", trader)
-
 	if err != nil {
 		return *new(*big.Int), err
 	}
@@ -523,7 +502,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) NumberOfDigestsOfTrader(opts *bind.
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
-
 }
 
 // NumberOfDigestsOfTrader is a free data retrieval call binding the contract method 0x0ee27e34.
@@ -546,7 +524,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) NumberOfDigestsOfTrader(trad
 func (_LimitOrderBook *LimitOrderBookCaller) OrderCount(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "orderCount")
-
 	if err != nil {
 		return *new(*big.Int), err
 	}
@@ -554,7 +531,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) OrderCount(opts *bind.CallOpts) (*b
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
-
 }
 
 // OrderCount is a free data retrieval call binding the contract method 0x2453ffa8.
@@ -577,7 +553,8 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) OrderCount() (*big.Int, erro
 func (_LimitOrderBook *LimitOrderBookCaller) OrderDependency(opts *bind.CallOpts, arg0 [32]byte) (struct {
 	ParentChildDigest1 [32]byte
 	ParentChildDigest2 [32]byte
-}, error) {
+}, error,
+) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "orderDependency", arg0)
 
@@ -593,7 +570,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) OrderDependency(opts *bind.CallOpts
 	outstruct.ParentChildDigest2 = *abi.ConvertType(out[1], new([32]byte)).(*[32]byte)
 
 	return *outstruct, err
-
 }
 
 // OrderDependency is a free data retrieval call binding the contract method 0x1e8dd78a.
@@ -602,7 +578,8 @@ func (_LimitOrderBook *LimitOrderBookCaller) OrderDependency(opts *bind.CallOpts
 func (_LimitOrderBook *LimitOrderBookSession) OrderDependency(arg0 [32]byte) (struct {
 	ParentChildDigest1 [32]byte
 	ParentChildDigest2 [32]byte
-}, error) {
+}, error,
+) {
 	return _LimitOrderBook.Contract.OrderDependency(&_LimitOrderBook.CallOpts, arg0)
 }
 
@@ -612,7 +589,8 @@ func (_LimitOrderBook *LimitOrderBookSession) OrderDependency(arg0 [32]byte) (st
 func (_LimitOrderBook *LimitOrderBookCallerSession) OrderDependency(arg0 [32]byte) (struct {
 	ParentChildDigest1 [32]byte
 	ParentChildDigest2 [32]byte
-}, error) {
+}, error,
+) {
 	return _LimitOrderBook.Contract.OrderDependency(&_LimitOrderBook.CallOpts, arg0)
 }
 
@@ -634,7 +612,8 @@ func (_LimitOrderBook *LimitOrderBookCaller) OrderOfDigest(opts *bind.CallOpts, 
 	FLimitPrice        *big.Int
 	FTriggerPrice      *big.Int
 	BrokerSignature    []byte
-}, error) {
+}, error,
+) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "orderOfDigest", arg0)
 
@@ -674,7 +653,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) OrderOfDigest(opts *bind.CallOpts, 
 	outstruct.BrokerSignature = *abi.ConvertType(out[13], new([]byte)).(*[]byte)
 
 	return *outstruct, err
-
 }
 
 // OrderOfDigest is a free data retrieval call binding the contract method 0x9023dc5b.
@@ -695,7 +673,8 @@ func (_LimitOrderBook *LimitOrderBookSession) OrderOfDigest(arg0 [32]byte) (stru
 	FLimitPrice        *big.Int
 	FTriggerPrice      *big.Int
 	BrokerSignature    []byte
-}, error) {
+}, error,
+) {
 	return _LimitOrderBook.Contract.OrderOfDigest(&_LimitOrderBook.CallOpts, arg0)
 }
 
@@ -717,7 +696,8 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) OrderOfDigest(arg0 [32]byte)
 	FLimitPrice        *big.Int
 	FTriggerPrice      *big.Int
 	BrokerSignature    []byte
-}, error) {
+}, error,
+) {
 	return _LimitOrderBook.Contract.OrderOfDigest(&_LimitOrderBook.CallOpts, arg0)
 }
 
@@ -727,7 +707,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) OrderOfDigest(arg0 [32]byte)
 func (_LimitOrderBook *LimitOrderBookCaller) PerpManager(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "perpManager")
-
 	if err != nil {
 		return *new(common.Address), err
 	}
@@ -735,7 +714,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) PerpManager(opts *bind.CallOpts) (c
 	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
 
 	return out0, err
-
 }
 
 // PerpManager is a free data retrieval call binding the contract method 0x99578534.
@@ -758,7 +736,6 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) PerpManager() (common.Addres
 func (_LimitOrderBook *LimitOrderBookCaller) PerpetualId(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "perpetualId")
-
 	if err != nil {
 		return *new(*big.Int), err
 	}
@@ -766,7 +743,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) PerpetualId(opts *bind.CallOpts) (*
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
-
 }
 
 // PerpetualId is a free data retrieval call binding the contract method 0x20ef8157.
@@ -790,7 +766,8 @@ func (_LimitOrderBook *LimitOrderBookCaller) PollRange(opts *bind.CallOpts, _fro
 	Orders      []IClientOrderClientOrder
 	OrderHashes [][32]byte
 	SubmittedTs []uint32
-}, error) {
+}, error,
+) {
 	var out []interface{}
 	err := _LimitOrderBook.contract.Call(opts, &out, "pollRange", _from, _numElements)
 
@@ -808,7 +785,6 @@ func (_LimitOrderBook *LimitOrderBookCaller) PollRange(opts *bind.CallOpts, _fro
 	outstruct.SubmittedTs = *abi.ConvertType(out[2], new([]uint32)).(*[]uint32)
 
 	return *outstruct, err
-
 }
 
 // PollRange is a free data retrieval call binding the contract method 0x61fe71c6.
@@ -818,7 +794,8 @@ func (_LimitOrderBook *LimitOrderBookSession) PollRange(_from *big.Int, _numElem
 	Orders      []IClientOrderClientOrder
 	OrderHashes [][32]byte
 	SubmittedTs []uint32
-}, error) {
+}, error,
+) {
 	return _LimitOrderBook.Contract.PollRange(&_LimitOrderBook.CallOpts, _from, _numElements)
 }
 
@@ -829,7 +806,8 @@ func (_LimitOrderBook *LimitOrderBookCallerSession) PollRange(_from *big.Int, _n
 	Orders      []IClientOrderClientOrder
 	OrderHashes [][32]byte
 	SubmittedTs []uint32
-}, error) {
+}, error,
+) {
 	return _LimitOrderBook.Contract.PollRange(&_LimitOrderBook.CallOpts, _from, _numElements)
 }
 
@@ -917,6 +895,27 @@ func (_LimitOrderBook *LimitOrderBookTransactorSession) PostOrders(_orders []ICl
 	return _LimitOrderBook.Contract.PostOrders(&_LimitOrderBook.TransactOpts, _orders, _signatures)
 }
 
+// ResetOrders is a paid mutator transaction binding the contract method 0x755fbbe3.
+//
+// Solidity: function resetOrders(uint256 _n) returns()
+func (_LimitOrderBook *LimitOrderBookTransactor) ResetOrders(opts *bind.TransactOpts, _n *big.Int) (*types.Transaction, error) {
+	return _LimitOrderBook.contract.Transact(opts, "resetOrders", _n)
+}
+
+// ResetOrders is a paid mutator transaction binding the contract method 0x755fbbe3.
+//
+// Solidity: function resetOrders(uint256 _n) returns()
+func (_LimitOrderBook *LimitOrderBookSession) ResetOrders(_n *big.Int) (*types.Transaction, error) {
+	return _LimitOrderBook.Contract.ResetOrders(&_LimitOrderBook.TransactOpts, _n)
+}
+
+// ResetOrders is a paid mutator transaction binding the contract method 0x755fbbe3.
+//
+// Solidity: function resetOrders(uint256 _n) returns()
+func (_LimitOrderBook *LimitOrderBookTransactorSession) ResetOrders(_n *big.Int) (*types.Transaction, error) {
+	return _LimitOrderBook.Contract.ResetOrders(&_LimitOrderBook.TransactOpts, _n)
+}
+
 // LimitOrderBookCallbackIterator is returned from FilterCallback and is used to iterate over the raw logs and unpacked data for Callback events raised by the LimitOrderBook contract.
 type LimitOrderBookCallbackIterator struct {
 	Event *LimitOrderBookCallback // Event containing the contract specifics and raw log
@@ -996,7 +995,6 @@ type LimitOrderBookCallback struct {
 //
 // Solidity: event Callback(address callbackTarget, bool success, uint32 gasLimit)
 func (_LimitOrderBook *LimitOrderBookFilterer) FilterCallback(opts *bind.FilterOpts) (*LimitOrderBookCallbackIterator, error) {
-
 	logs, sub, err := _LimitOrderBook.contract.FilterLogs(opts, "Callback")
 	if err != nil {
 		return nil, err
@@ -1008,7 +1006,6 @@ func (_LimitOrderBook *LimitOrderBookFilterer) FilterCallback(opts *bind.FilterO
 //
 // Solidity: event Callback(address callbackTarget, bool success, uint32 gasLimit)
 func (_LimitOrderBook *LimitOrderBookFilterer) WatchCallback(opts *bind.WatchOpts, sink chan<- *LimitOrderBookCallback) (event.Subscription, error) {
-
 	logs, sub, err := _LimitOrderBook.contract.WatchLogs(opts, "Callback")
 	if err != nil {
 		return nil, err
@@ -1133,7 +1130,6 @@ type LimitOrderBookExecutionFailed struct {
 //
 // Solidity: event ExecutionFailed(uint24 indexed perpetualId, address indexed trader, bytes32 digest, string reason)
 func (_LimitOrderBook *LimitOrderBookFilterer) FilterExecutionFailed(opts *bind.FilterOpts, perpetualId []*big.Int, trader []common.Address) (*LimitOrderBookExecutionFailedIterator, error) {
-
 	var perpetualIdRule []interface{}
 	for _, perpetualIdItem := range perpetualId {
 		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
@@ -1154,7 +1150,6 @@ func (_LimitOrderBook *LimitOrderBookFilterer) FilterExecutionFailed(opts *bind.
 //
 // Solidity: event ExecutionFailed(uint24 indexed perpetualId, address indexed trader, bytes32 digest, string reason)
 func (_LimitOrderBook *LimitOrderBookFilterer) WatchExecutionFailed(opts *bind.WatchOpts, sink chan<- *LimitOrderBookExecutionFailed, perpetualId []*big.Int, trader []common.Address) (event.Subscription, error) {
-
 	var perpetualIdRule []interface{}
 	for _, perpetualIdItem := range perpetualId {
 		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
@@ -1285,7 +1280,6 @@ type LimitOrderBookInitialized struct {
 //
 // Solidity: event Initialized(uint8 version)
 func (_LimitOrderBook *LimitOrderBookFilterer) FilterInitialized(opts *bind.FilterOpts) (*LimitOrderBookInitializedIterator, error) {
-
 	logs, sub, err := _LimitOrderBook.contract.FilterLogs(opts, "Initialized")
 	if err != nil {
 		return nil, err
@@ -1297,7 +1291,6 @@ func (_LimitOrderBook *LimitOrderBookFilterer) FilterInitialized(opts *bind.Filt
 //
 // Solidity: event Initialized(uint8 version)
 func (_LimitOrderBook *LimitOrderBookFilterer) WatchInitialized(opts *bind.WatchOpts, sink chan<- *LimitOrderBookInitialized) (event.Subscription, error) {
-
 	logs, sub, err := _LimitOrderBook.contract.WatchLogs(opts, "Initialized")
 	if err != nil {
 		return nil, err
@@ -1423,7 +1416,6 @@ type LimitOrderBookPerpetualLimitOrderCreated struct {
 //
 // Solidity: event PerpetualLimitOrderCreated(uint24 indexed perpetualId, address indexed trader, address brokerAddr, (uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) order, bytes32 digest)
 func (_LimitOrderBook *LimitOrderBookFilterer) FilterPerpetualLimitOrderCreated(opts *bind.FilterOpts, perpetualId []*big.Int, trader []common.Address) (*LimitOrderBookPerpetualLimitOrderCreatedIterator, error) {
-
 	var perpetualIdRule []interface{}
 	for _, perpetualIdItem := range perpetualId {
 		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
@@ -1444,7 +1436,6 @@ func (_LimitOrderBook *LimitOrderBookFilterer) FilterPerpetualLimitOrderCreated(
 //
 // Solidity: event PerpetualLimitOrderCreated(uint24 indexed perpetualId, address indexed trader, address brokerAddr, (uint16,uint16,uint24,address,uint32,address,uint32,uint32,uint32,address,int128,int128,int128,bytes) order, bytes32 digest)
 func (_LimitOrderBook *LimitOrderBookFilterer) WatchPerpetualLimitOrderCreated(opts *bind.WatchOpts, sink chan<- *LimitOrderBookPerpetualLimitOrderCreated, perpetualId []*big.Int, trader []common.Address) (event.Subscription, error) {
-
 	var perpetualIdRule []interface{}
 	for _, perpetualIdItem := range perpetualId {
 		perpetualIdRule = append(perpetualIdRule, perpetualIdItem)
