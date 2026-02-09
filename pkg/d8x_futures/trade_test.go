@@ -39,10 +39,22 @@ func TestOrderHash(t *testing.T) {
 	if err := info.Load("./tmpXchInfo.json"); err != nil {
 		t.Skip("tmpXchInfo.json not found (run integration tests first): ", err)
 	}
+	// Check if the required symbol exists in the loaded exchange info
+	const testSymbol = "BTC-USD-MATIC"
+	found := false
+	for _, sym := range info.PerpetualIdToSymbol {
+		if sym == testSymbol {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Skipf("%s not found in exchange info (test requires specific chain data)", testSymbol)
+	}
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	var emptyArray [32]byte
 	order := Order{
-		Symbol:              "BTC-USD-MATIC",
+		Symbol:              testSymbol,
 		Side:                SIDE_BUY,
 		Type:                ORDER_TYPE_MARKET,
 		Quantity:            0.16,

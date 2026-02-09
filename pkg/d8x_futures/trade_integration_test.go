@@ -5,7 +5,7 @@ package d8x_futures
 import (
 	"context"
 	"fmt"
-	"log/slog"
+	"os"
 	"testing"
 	"time"
 
@@ -13,15 +13,10 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/spf13/viper"
 )
 
 func loadPk() string {
-	viper.SetConfigFile("../../.env")
-	if err := viper.ReadInConfig(); err != nil {
-		slog.Error("could not load .env file" + err.Error())
-	}
-	return viper.GetString("PK")
+	return os.Getenv("PK")
 }
 
 func TestSdkExec(t *testing.T) {
@@ -85,7 +80,7 @@ func TestSdkLiquidatePosition(t *testing.T) {
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
 	}
-	sdk, err := NewSdk([]string{pk}, "421614") // arbitrum sepolia
+	sdk, err := NewSdk([]string{pk}, "84532") 
 	if err != nil {
 		t.Fatalf("NewSdk: %v", err)
 	}
@@ -115,7 +110,7 @@ func TestAddCollateral(t *testing.T) {
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
 	}
-	sdk, err := NewSdk([]string{pk}, "195")
+	sdk, err := NewSdk([]string{pk}, "84532") // base sepolia
 	if err != nil {
 		t.Fatalf("NewSdk: %v", err)
 	}
@@ -137,8 +132,9 @@ func TestTradingFunc(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSdk: %v", err)
 	}
+	sym := getActiveSymbol(t, &sdk.Info)
 
-	orders, ids, err := sdk.QueryOpenOrders("BTC-USDC-USDC", sdk.Wallets[0].Address, nil)
+	orders, ids, err := sdk.QueryOpenOrders(sym, sdk.Wallets[0].Address, nil)
 	if err != nil {
 		t.Log(err.Error())
 	} else {
@@ -146,28 +142,28 @@ func TestTradingFunc(t *testing.T) {
 		t.Log("orders =", orders)
 	}
 	if len(ids) > 0 {
-		tx, err := sdk.CancelOrder("BTC-USDC-USDC", ids[0], nil)
+		tx, err := sdk.CancelOrder(sym, ids[0], nil)
 		if err != nil {
 			t.Log(err.Error())
 		} else {
 			t.Log("tx cancel order=", tx.Hash())
 		}
 	}
-	tx, err := sdk.AddCollateral("ETH-USD-MATIC", 100, nil)
+	tx, err := sdk.AddCollateral(sym, 100, nil)
 	if err != nil {
 		t.Log(err.Error())
 	} else {
 		t.Log("tx hash adding collateral=", tx.Hash())
 	}
 
-	tx, err = sdk.ApproveTknSpending("ETH-USD-MATIC", nil, nil)
+	tx, err = sdk.ApproveTknSpending(sym, nil, nil)
 	if err != nil {
 		t.Log(err.Error())
 	} else {
 		t.Log("tx hash=", tx.Hash())
 	}
 
-	order, err := sdk.NewOrder("BTC-USDC-USDC", SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
+	order, err := sdk.NewOrder(sym, SIDE_SELL, ORDER_TYPE_LIMIT, 0.1, 10, &OrderOptions{LimitPrice: 2240})
 	if err != nil {
 		t.Fatalf("NewOrder: %v", err)
 	}
@@ -177,20 +173,20 @@ func TestTradingFunc(t *testing.T) {
 	} else {
 		t.Log("order id =", orderId)
 	}
-	tx, err = sdk.CancelOrder("BTC-USDC-USDC", orderId, nil)
+	tx, err = sdk.CancelOrder(sym, orderId, nil)
 	if err != nil {
 		t.Log(err.Error())
 	} else {
 		t.Log("tx cancel order=", tx.Hash())
 	}
 
-	status, err := sdk.QueryOrderStatus("ETH-USD-MATIC", sdk.Wallets[0].Address, orderId, nil)
+	status, err := sdk.QueryOrderStatus(sym, sdk.Wallets[0].Address, orderId, nil)
 	if err != nil {
 		t.Log(err.Error())
 	} else {
 		t.Log("order status =", status)
 	}
-	pr, err := sdk.GetPositionRisk("ETH-USD-MATIC", sdk.Wallets[0].Address, nil)
+	pr, err := sdk.GetPositionRisk(sym, sdk.Wallets[0].Address, nil)
 	if err != nil {
 		t.Log(err.Error())
 	} else {
@@ -223,10 +219,11 @@ func TestPostOrder(t *testing.T) {
 	if err := xInfo.Load("./tmpXchInfo.json"); err != nil {
 		t.Fatalf("Load tmpXchInfo.json: %v", err)
 	}
+	sym := getAnySymbol(t, &xInfo)
 	traderAddr := common.HexToAddress("0x9d5aaB428e98678d0E645ea4AeBd25f744341a05")
 	var emptyArray [32]byte
 	order := Order{
-		Symbol:              "ETH-USD-MATIC",
+		Symbol:              sym,
 		Side:                SIDE_BUY,
 		Type:                ORDER_TYPE_MARKET,
 		Quantity:            333,

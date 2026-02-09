@@ -21,8 +21,19 @@ func getActiveSymbol(t *testing.T, info *StaticExchangeInfo) string {
 	return ""
 }
 
-// getLowLiqSymbol returns the first NORMAL-state perpetual symbol that uses a V2-type price feed,
-// or skips the test if none is found.
+func getAnySymbol(t *testing.T, info *StaticExchangeInfo) string {
+	t.Helper()
+	for _, p := range info.Perpetuals {
+		sym, ok := info.PerpetualIdToSymbol[p.Id]
+		if ok {
+			return sym
+		}
+	}
+	t.Skip("no perpetual found in exchange info")
+	return ""
+}
+
+
 func getLowLiqSymbol(t *testing.T, info *StaticExchangeInfo) string {
 	t.Helper()
 	for _, p := range info.Perpetuals {

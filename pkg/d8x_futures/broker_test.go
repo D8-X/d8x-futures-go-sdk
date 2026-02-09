@@ -3,6 +3,7 @@
 package d8x_futures
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -16,7 +17,11 @@ func TestQueryBrokerLots(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
-	lots, err := sdkRo.QueryBrokerLots("USDC", &addr, nil)
+	// Get pool symbol dynamically from first active perpetual
+	sym := getActiveSymbol(t, &sdkRo.Info)
+	parts := strings.Split(sym, "-")
+	pool := parts[len(parts)-1] // settlement currency = pool name
+	lots, err := sdkRo.QueryBrokerLots(pool, &addr, nil)
 	if err != nil {
 		t.Fatalf("QueryBrokerLots: %v", err)
 	}

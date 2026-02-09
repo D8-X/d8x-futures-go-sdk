@@ -75,7 +75,11 @@ func TestQueryPoolStaticInfo(t *testing.T) {
 }
 
 func TestTriangulate(t *testing.T) {
-	pxConf, err := config.GetDefaultPriceConfig(196)
+	chConf, err := config.GetDefaultChainConfig("base_sepolia")
+	if err != nil {
+		t.Fatalf("GetDefaultChainConfig: %v", err)
+	}
+	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
 		t.Fatalf("GetDefaultPriceConfig: %v", err)
 	}

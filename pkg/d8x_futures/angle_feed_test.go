@@ -10,7 +10,7 @@ import (
 
 func TestAngleFeed(t *testing.T) {
 
-	provider, err := ethclient.Dial("https://rpc.ankr.com/arbitrum")
+	provider, err := ethclient.Dial("https://arbitrum-one-rpc.publicnode.com")
 	if err != nil {
 		t.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}

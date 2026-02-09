@@ -3,6 +3,7 @@
 package d8x_futures
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -40,10 +41,13 @@ func TestSportSlot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
-	// https://sports.quantena.org/slots-info/84532
-	c, exists := sdk.SportSlot("CFB_NEB_MIN_251017")
-	t.Log(exists, c)
-	c, exists = sdk.SportSlot("NFL_ATL_SF_251019")
+
+	extSym, err := sdk.internalToSymbol("SP00-USD")
+	if err != nil {
+		t.Skip("no active sport event for SP00: " + err.Error())
+	}
+	gameName := strings.Split(extSym, "-")[0]
+	c, exists := sdk.SportSlot(gameName)
 	t.Log(exists, c)
 }
 
@@ -52,7 +56,12 @@ func TestSymbolToInternal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
-	c, err := sdk.symbolToInternal("NHL_FLA_DET_251015-USD")
+
+	extSym, err := sdk.internalToSymbol("SP00-USD")
+	if err != nil {
+		t.Skip("no active sport event for SP00: " + err.Error())
+	}
+	c, err := sdk.symbolToInternal(extSym)
 	if err != nil {
 		t.Fatalf("symbolToInternal: %v", err)
 	}

@@ -31,6 +31,9 @@ func TestGetSTUSDPrice(t *testing.T) {
 	for k := 0; k < 4; k++ {
 		px, ts, err := oracles.GetPrice("STUSD-USDC", true)
 		if err != nil {
+			if k == 0 {
+				t.Skipf("STUSD-USDC oracle not available: %v", err)
+			}
 			t.Fatalf("GetPrice STUSD-USDC: %v", err)
 		}
 		t.Logf("px=%.4f ts=%d", px, ts)

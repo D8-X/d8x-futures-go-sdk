@@ -6,9 +6,9 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -18,7 +18,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/spf13/viper"
 )
 
 func TestFetchPricesFromAPI(t *testing.T) {
@@ -50,8 +49,7 @@ func TestFetchPricesFromAPI(t *testing.T) {
 	}
 	_, err = fetchPricesFromAPI(priceIdsWrong, pxEp, false)
 	if err == nil {
-		slog.Error("Error: queried wrong price id but did not fail")
-		t.FailNow()
+		t.Fatal("Error: queried wrong price id but did not fail")
 	}
 	t.Log(err.Error())
 }
@@ -88,17 +86,13 @@ func CreateProxiedRpc(proxyRawUrl, rpcRawUrl string) (*ethclient.Client, error) 
 }
 
 func loadProxyUrl() string {
-	viper.SetConfigFile("../../.env")
-	if err := viper.ReadInConfig(); err != nil {
-		slog.Error("could not load .env file" + err.Error())
-	}
-	return viper.GetString("PROXY_URL")
+	return os.Getenv("PROXY_URL")
 }
 
 func TestCustomRpc(t *testing.T) {
 	proxyUrl := loadProxyUrl()
 	if proxyUrl == "" {
-		t.Fatal("need to define a proxy url in .env")
+		t.Skip("need to define PROXY_URL in .env")
 	}
 	rpcClient, err := CreateProxiedRpc(proxyUrl, "https://rpc.ankr.com/arbitrum")
 	if err != nil {
@@ -118,7 +112,11 @@ func TestCustomRpc(t *testing.T) {
 }
 
 func TestFetchPythPrices(t *testing.T) {
-	pxConf, err := config.GetDefaultPriceConfig(196)
+	chConf, err := config.GetDefaultChainConfig("base_sepolia")
+	if err != nil {
+		t.Fatalf("GetDefaultChainConfig: %v", err)
+	}
+	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
 	if err != nil {
 		t.Fatalf("GetDefaultPriceConfig: %v", err)
 	}
@@ -216,11 +214,29 @@ func TestFetchInfo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
-	p, err := sdkRo.IsPrdMktPerp("TRUMP24-USD-USDC")
-	if p == false || err != nil {
-		t.FailNow()
+	// Find a prediction market perpetual dynamically
+	var prdSym string
+	for _, p := range sdkRo.Info.Perpetuals {
+		if p.State() != NORMAL {
+			continue
+		}
+		sym, ok := sdkRo.Info.PerpetualIdToSymbol[p.Id]
+		if !ok {
+			continue
+		}
+		isPrd, _ := sdkRo.IsPrdMktPerp(sym)
+		if isPrd {
+			prdSym = sym
+			break
+		}
 	}
-	id, err := sdkRo.GetPriceId("TRUMP24-USD")
+	if prdSym == "" {
+		t.Skip("no prediction market perpetual found")
+	}
+	// Extract S2-quote symbol (e.g., "TRUMP24-USD" from "TRUMP24-USD-USDC")
+	parts := strings.Split(prdSym, "-")
+	s2Sym := parts[0] + "-" + parts[1]
+	id, err := sdkRo.GetPriceId(s2Sym)
 	if err != nil {
 		t.Fatalf("GetPriceId: %v", err)
 	}
@@ -236,13 +252,10 @@ func TestFetchInfo(t *testing.T) {
 	type ApiResponse struct {
 		EndDateISO string `json:"end_date_iso"`
 	}
-	// Read the response body
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		t.Fatalf("ReadAll: %v", err)
 	}
-
-	// Parse the JSON response
 	var apiResponse ApiResponse
 	err = json.Unmarshal(body, &apiResponse)
 	if err != nil {
@@ -251,9 +264,7 @@ func TestFetchInfo(t *testing.T) {
 }
 
 func TestGetPoolShareTknBalance(t *testing.T) {
-	sdkRo, err := NewSdkRO("84532",
-		WithPriceFeedEndpoint("https://hermes.pyth.network"),
-		WithRpcUrl("https://rpc.ankr.com/arbitrum/"))
+	sdkRo, err := NewSdkRO("84532")
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
@@ -271,13 +282,14 @@ func TestGetPoolShareTknBalance(t *testing.T) {
 }
 
 func TestSettlementToken(t *testing.T) {
-	sdkRo, err := NewSdkRO("84532")
+	// STUSD and WEETH are arbitrum-specific pools
+	sdkRo, err := NewSdkRO("42161")
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
 	addr, err := RawGetSettleTknAddr(&sdkRo.Info, "STUSD")
 	if err != nil {
-		t.Fatalf("RawGetSettleTknAddr STUSD: %v", err)
+		t.Skipf("STUSD pool not found (may not be on this chain): %v", err)
 	}
 	mgnAddr, err := RawGetMarginTknAddr(&sdkRo.Info, "STUSD")
 	if err != nil {
@@ -294,7 +306,7 @@ func TestSettlementToken(t *testing.T) {
 	}
 	addr, err = RawGetSettleTknAddr(&sdkRo.Info, "WEETH")
 	if err != nil {
-		t.Fatalf("RawGetSettleTknAddr WEETH: %v", err)
+		t.Skipf("WEETH pool not found: %v", err)
 	}
 	mgnAddr, err = RawGetMarginTknAddr(&sdkRo.Info, "USDC")
 	if err != nil {
@@ -356,7 +368,7 @@ func TestGetPerpetualData(t *testing.T) {
 }
 
 func TestPerpetualPrice(t *testing.T) {
-	sdkRo, err := NewSdkRO("421614")
+	sdkRo, err := NewSdkRO("84532")
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
@@ -393,7 +405,8 @@ func TestPerpetualPriceTuple(t *testing.T) {
 	startTime := time.Now()
 	tradeAmt := []float64{-0.06, -0.05, -0.01, 0, 0.01, 0.05}
 	ep := PriceFeedEndpoints{
-		PriceFeedEndpoint: sdkRo.ChainConfig.PriceFeedEndpoint,
+		PriceFeedEndpoint:  sdkRo.ChainConfig.PriceFeedEndpoint,
+		LowLiqFeedEndpoint: sdkRo.ChainConfig.LowLiqFeedEndpoint,
 	}
 	px, err := RawQueryPerpetualPriceTuple(sdkRo.Conn.Rpc, &sdkRo.Info, ep, sym, tradeAmt)
 	endTime := time.Now()
@@ -416,7 +429,7 @@ func getOrders(sdkRo SdkRO, sym string, nodeURL string, from, to int, resultChan
 }
 
 func TestMarginAccount(t *testing.T) {
-	sdkRo, err := NewSdkRO("42161") // arbitrum
+	sdkRo, err := NewSdkRO("84532") // base_sepolia
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
@@ -593,7 +606,13 @@ func TestFetchPricesForPerpetual(t *testing.T) {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
 	sym := getActiveSymbol(t, &sdkRo.Info)
-	pxBundle, err := RawFetchPricesForPerpetual(sdkRo.Info, sym, PriceFeedEndpoints{PriceFeedEndpoint: "https://hermes.pyth.network/api"})
+	ep := PriceFeedEndpoints{
+		PriceFeedEndpoint:  sdkRo.ChainConfig.PriceFeedEndpoint,
+		LowLiqFeedEndpoint: sdkRo.ChainConfig.LowLiqFeedEndpoint,
+		PrdMktFeedEndpoint: sdkRo.ChainConfig.PrdMktFeedEndpoint,
+		SportFeedEndpoint:  sdkRo.ChainConfig.SportFeedEndpoint,
+	}
+	pxBundle, err := RawFetchPricesForPerpetual(sdkRo.Info, sym, ep)
 	if err != nil {
 		t.Fatalf("RawFetchPricesForPerpetual: %v", err)
 	}
@@ -608,11 +627,7 @@ func TestGetPositionRisks(t *testing.T) {
 	sym := getActiveSymbol(t, &sdkRo.Info)
 	traderAddr := common.HexToAddress("0x96d570211cb7638783Af538DC07122763CF59b3a")
 	symbols := []string{sym}
-	client, err := ethclient.Dial("https://berachain.drpc.org")
-	if err != nil {
-		t.Fatalf("ethclient.Dial: %v", err)
-	}
-	pRisk, err := sdkRo.GetPositionRisks(symbols, traderAddr, &OptEndPoints{Rpc: client})
+	pRisk, err := sdkRo.GetPositionRisks(symbols, traderAddr, nil)
 	if err != nil {
 		t.Fatalf("GetPositionRisks: %v", err)
 	}
@@ -622,7 +637,7 @@ func TestGetPositionRisks(t *testing.T) {
 	}
 	t.Log(string(jason))
 
-	pRisk, err = sdkRo.GetPositionRiskAll(traderAddr, &OptEndPoints{Rpc: client})
+	pRisk, err = sdkRo.GetPositionRiskAll(traderAddr, nil)
 	if err != nil {
 		t.Fatalf("GetPositionRiskAll: %v", err)
 	}
@@ -651,10 +666,12 @@ func TestGetPositionRisk(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateBlockChainConnector: %v", err)
 	}
+	sym := getAnySymbol(t, &info)
 	ep := PriceFeedEndpoints{
-		PriceFeedEndpoint: "https://hermes.pyth.network/api",
+		PriceFeedEndpoint:  chConf.PriceFeedEndpoint,
+		LowLiqFeedEndpoint: chConf.LowLiqFeedEndpoint,
 	}
-	pRisk, err := RawGetPositionRisk(info, conn.Rpc, (*common.Address)(&traderAddr), "ETH-USD-MATIC", ep)
+	pRisk, err := RawGetPositionRisk(info, conn.Rpc, (*common.Address)(&traderAddr), sym, ep)
 	if err != nil {
 		t.Fatalf("RawGetPositionRisk: %v", err)
 	}
@@ -678,8 +695,21 @@ func TestQueryPerpetualState(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateBlockChainConnector: %v", err)
 	}
-	perpIds := []int32{100001, 100002}
-	ep := PriceFeedEndpoints{PriceFeedEndpoint: "https://hermes-beta.pyth.network/api"}
+	// Get perpIds dynamically from loaded exchange info
+	var perpIds []int32
+	for _, p := range info.Perpetuals {
+		perpIds = append(perpIds, int32(p.Id))
+		if len(perpIds) >= 2 {
+			break
+		}
+	}
+	if len(perpIds) == 0 {
+		t.Skip("no perpetuals found in exchange info")
+	}
+	ep := PriceFeedEndpoints{
+		PriceFeedEndpoint:  chConf.PriceFeedEndpoint,
+		LowLiqFeedEndpoint: chConf.LowLiqFeedEndpoint,
+	}
 	perpState, err := RawQueryPerpetualState(conn.Rpc, info, perpIds, ep)
 	if err != nil {
 		t.Fatalf("RawQueryPerpetualState: %v", err)
@@ -736,7 +766,7 @@ func TestQueryOpenOrders(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateBlockChainConnector: %v", err)
 	}
-	sym := getActiveSymbol(t, &info)
+	sym := getAnySymbol(t, &info)
 	orders, digests, err := RawQueryOpenOrders(conn.Rpc, info, sym, traderAddr)
 	if err != nil {
 		t.Fatalf("RawQueryOpenOrders: %v", err)
@@ -824,7 +854,7 @@ func TestQueryMaxTradeAmount(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateBlockChainConnector: %v", err)
 	}
-	sym := getActiveSymbol(t, &info)
+	sym := getAnySymbol(t, &info)
 	trade, err := RawQueryMaxTradeAmount(conn.Rpc, info, 0.01, sym, true)
 	if err != nil {
 		t.Fatalf("RawQueryMaxTradeAmount: %v", err)

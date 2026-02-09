@@ -104,6 +104,9 @@ func TestRefreshPerpetualStateEnum(t *testing.T) {
 		t.Fatalf("NewSdk: %v", err)
 	}
 	url := os.Getenv("RPC")
+	if url == "" {
+		t.Fatal("Provide RPC URL as environment variable RPC")
+	}
 	rpc, err := ethclient.Dial(url)
 	if err != nil {
 		t.Fatalf("ethclient.Dial: %v", err)
@@ -140,14 +143,17 @@ func TestInfo(t *testing.T) {
 }
 
 func TestSettlement(t *testing.T) {
-	url := os.Getenv("RPC")
-	rpc, err := ethclient.Dial(url)
-	if err != nil {
-		t.Fatalf("ethclient.Dial: %v", err)
-	}
 	pk := os.Getenv("PK")
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
+	}
+	url := os.Getenv("RPC")
+	if url == "" {
+		t.Fatal("Provide RPC URL as environment variable RPC")
+	}
+	rpc, err := ethclient.Dial(url)
+	if err != nil {
+		t.Fatalf("ethclient.Dial: %v", err)
 	}
 	sdk, err := NewSdk([]string{pk}, "84532", WithRpcClient(rpc))
 	if err != nil {
@@ -188,6 +194,9 @@ func TestEnable(t *testing.T) {
 		t.Fatalf("NewSdk: %v", err)
 	}
 	url := os.Getenv("RPC")
+	if url == "" {
+		t.Fatal("Provide RPC URL as environment variable RPC")
+	}
 	rpc, err := ethclient.Dial(url)
 	if err != nil {
 		t.Fatalf("ethclient.Dial: %v", err)
