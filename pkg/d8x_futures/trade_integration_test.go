@@ -100,7 +100,7 @@ func TestSdkLiquidatePosition(t *testing.T) {
 	for _, el := range acc2 {
 		for _, addr := range el.LiqAccounts {
 			t.Logf("liquidating %s", addr.Hex())
-			tx, err := sdk.LiquidatePosition(el.PerpId, &addr, nil, nil)
+			tx, err := sdk.LiquidatePosition(el.PerpId, []common.Address{addr}, nil, nil)
 			if err != nil {
 				t.Logf("error liquidating: %s", err.Error())
 				continue
