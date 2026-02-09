@@ -1,7 +1,8 @@
+//go:build integration
+
 package d8x_futures
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -11,15 +12,13 @@ func TestAngleFeed(t *testing.T) {
 
 	provider, err := ethclient.Dial("https://rpc.ankr.com/arbitrum")
 	if err != nil {
-		fmt.Println("Failed to connect to the Ethereum client:", err)
-		return
+		t.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}
 
 	rate, err := STUSDToUSDC(provider)
 	if err != nil {
-		fmt.Println("Failed to get conversion rate:", err)
-		return
+		t.Fatalf("Failed to get conversion rate: %v", err)
 	}
 
-	fmt.Println("Conversion rate:", rate)
+	t.Log("Conversion rate:", rate)
 }

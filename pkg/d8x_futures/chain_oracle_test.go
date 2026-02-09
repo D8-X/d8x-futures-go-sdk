@@ -1,7 +1,8 @@
+//go:build integration
+
 package d8x_futures
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
@@ -9,16 +10,14 @@ import (
 func TestGetWEETHPrice(t *testing.T) {
 	oracles, err := NewChainOracles(42161)
 	if err != nil {
-		fmt.Println(err.Error())
-		t.FailNow()
+		t.Fatalf("NewChainOracles: %v", err)
 	}
 	for k := 0; k < 4; k++ {
 		px, ts, err := oracles.GetPrice("WEETH-ETH", true)
 		if err != nil {
-			fmt.Println(err.Error())
-			t.FailNow()
+			t.Fatalf("GetPrice WEETH-ETH: %v", err)
 		}
-		fmt.Printf("px=%.4f ts=%d\n", px, ts)
+		t.Logf("px=%.4f ts=%d", px, ts)
 		// wait
 		time.Sleep(5 * time.Second)
 	}
@@ -27,16 +26,14 @@ func TestGetWEETHPrice(t *testing.T) {
 func TestGetSTUSDPrice(t *testing.T) {
 	oracles, err := NewChainOracles(42161)
 	if err != nil {
-		fmt.Println(err.Error())
-		t.FailNow()
+		t.Fatalf("NewChainOracles: %v", err)
 	}
 	for k := 0; k < 4; k++ {
 		px, ts, err := oracles.GetPrice("STUSD-USDC", true)
 		if err != nil {
-			fmt.Println(err.Error())
-			t.FailNow()
+			t.Fatalf("GetPrice STUSD-USDC: %v", err)
 		}
-		fmt.Printf("px=%.4f ts=%d\n", px, ts)
+		t.Logf("px=%.4f ts=%d", px, ts)
 		// wait
 		time.Sleep(5 * time.Second)
 	}
