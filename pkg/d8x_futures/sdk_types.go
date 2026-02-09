@@ -680,7 +680,7 @@ func NewSdk(privateKeys []string, networkName string, opts ...optionFunc) (*Sdk,
 	sdk.Wallets = make([]*Wallet, 0, len(privateKeys))
 	for _, privateKey := range privateKeys {
 		privateKey, _ = strings.CutPrefix(privateKey, "0x")
-		w, err := NewWallet(privateKey, sdk.ChainConfig.ChainId, sdk.Conn.Rpc)
+		w, err := NewWallet(privateKey, sdk.ChainConfig.ChainId)
 		if err != nil {
 			return nil, err
 		}
