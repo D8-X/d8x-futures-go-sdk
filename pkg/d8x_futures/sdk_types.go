@@ -205,6 +205,8 @@ func (s PerpetualStateEnum) String() string {
 		return "NORMAL"
 	case EMERGENCY:
 		return "EMERGENCY"
+	case CLEARED:
+		return "CLEARED"
 	case SETTLE:
 		return "SETTLE"
 	default:

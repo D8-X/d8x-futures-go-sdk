@@ -331,7 +331,11 @@ func TestQueryLiquidatableAccounts(t *testing.T) {
 }
 
 func TestGetPerpetualData(t *testing.T) {
-	sdkRo, err := NewSdkRO("421614") // arbitrum sepolia
+	// err := sdkRo.New("421614") //arbitrum sepolia
+	// err := sdkRo.New("195") //x1
+	// err := sdkRo.New("196") //xlayer
+	// err := sdkRo.New("80084") //bartio
+	sdkRo, err := NewSdkRO("84532") // base sepolia
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
