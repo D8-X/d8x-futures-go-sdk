@@ -55,10 +55,7 @@ jobs:
 
       - name: Create .env
         run: |
-          cat <<EOF > .env
-          PK=${{ secrets.PK }}
-          RPC=${{ secrets.RPC }}
-          EOF
+          printf 'PK=%s\nRPC=%s\n' '${{ secrets.PK }}' '${{ secrets.RPC }}' > .env
 
       - name: Integration tests
         run: gotestsum --junitfile integration-tests.xml -- -tags=integration ./pkg/d8x_futures/ -v -count=1 -timeout=10m
