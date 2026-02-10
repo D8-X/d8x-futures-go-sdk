@@ -12,11 +12,16 @@ func TestInternalToSymbol(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
+
 	c, err := sdk.internalToSymbol("SP00-USD")
 	if err != nil {
+		if strings.Contains(err.Error(), "no such symbol") {
+			t.Skipf("no active sport event for SP00: %v", err)
+		}
 		t.Fatalf("internalToSymbol SP00-USD: %v", err)
 	}
 	t.Log(c)
+	// test a regular symbol
 	c, err = sdk.internalToSymbol("BTC-USD")
 	if err != nil {
 		t.Fatalf("internalToSymbol BTC-USD: %v", err)
