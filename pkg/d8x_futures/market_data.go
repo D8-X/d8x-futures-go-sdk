@@ -1616,7 +1616,10 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 					if err != nil {
 						return PriceFeedData{}, fmt.Errorf("unable to convert prices.conf %s", err.Error())
 					}
-					params, _ := new(big.Int).SetString(d.EmaPrice.Conf, 10)
+					params, ok := new(big.Int).SetString(d.EmaPrice.Conf, 10)
+					if !ok {
+						return PriceFeedData{}, fmt.Errorf("unable to parse EmaPrice.Conf %q", d.EmaPrice.Conf)
+					}
 					pxData.Prices[i] = PriceObs{
 						Px:             utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
 						Ema:            utils.PythNToFloat64(d.EmaPrice.Price, d.EmaPrice.Expo),
