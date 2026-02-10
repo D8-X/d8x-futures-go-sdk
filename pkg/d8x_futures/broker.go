@@ -22,6 +22,9 @@ func (sdk *Sdk) PurchaseBrokerLots(numLots int, symbol string, opts *OptsOverrid
 		w = sdk.Wallets[0]
 		rpc = sdk.Conn.Rpc
 	} else {
+		if opts.WalletIdx < 0 || opts.WalletIdx >= len(sdk.Wallets) {
+			return nil, fmt.Errorf("wallet index %d out of range (have %d wallets)", opts.WalletIdx, len(sdk.Wallets))
+		}
 		w = sdk.Wallets[opts.WalletIdx]
 	}
 	if rpc == nil {

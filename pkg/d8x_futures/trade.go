@@ -53,12 +53,18 @@ func (sdk *Sdk) PostOrder(order *Order, overrides *OptsOverrides, gasOpts ...Gas
 }
 
 func (sdk *Sdk) CreateOrderBrokerSignature(iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32, optWalletIdx int) (string, string, error) {
+	if optWalletIdx < 0 || optWalletIdx >= len(sdk.Wallets) {
+		return "", "", fmt.Errorf("wallet index %d out of range (have %d wallets)", optWalletIdx, len(sdk.Wallets))
+	}
 	w := sdk.Wallets[optWalletIdx]
 	return RawCreateOrderBrokerSignature(sdk.ChainConfig.ProxyAddr,
 		sdk.ChainConfig.ChainId, w, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
 }
 
 func (sdk *Sdk) CreatePaymentBrokerSignature(ps *PaySummary, optWalletIdx int) (string, string, error) {
+	if optWalletIdx < 0 || optWalletIdx >= len(sdk.Wallets) {
+		return "", "", fmt.Errorf("wallet index %d out of range (have %d wallets)", optWalletIdx, len(sdk.Wallets))
+	}
 	w := sdk.Wallets[optWalletIdx]
 	return RawCreatePaymentBrokerSignature(ps, w)
 }
