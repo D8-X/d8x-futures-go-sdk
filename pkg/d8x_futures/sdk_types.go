@@ -539,7 +539,7 @@ func (sdk SdkRO) NewOrder(symbol string, side Side, orderType OrderType, quantit
 		Deadline:            options.Deadline,
 		ExecutionTimestamp:  options.ExecutionTs,
 		ParentChildOrderId1: *options.parentChildOrderId1,
-		ParentChildOrderId2: *options.parentChildOrderId1,
+		ParentChildOrderId2: *options.parentChildOrderId2,
 	}
 	return order, nil
 }
