@@ -499,8 +499,11 @@ func ContractSymbolToSymbol(cSym [4]byte, symMap *map[string]string) (string, er
 	return res, nil
 }
 
-func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Address) contracts.IClientOrderClientOrder {
+func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Address) (contracts.IClientOrderClientOrder, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
+	if j == -1 {
+		return contracts.IClientOrderClientOrder{}, fmt.Errorf("symbol %s not found in exchange info", order.Symbol)
+	}
 	var limitPx *big.Int
 	if (order.LimitPrice == 0 || order.LimitPrice == math.MaxFloat64) && order.Side == SIDE_BUY {
 		limitPx = utils.Max64x64()
@@ -548,7 +551,7 @@ func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Add
 		BrokerFeeTbps:      uint16(order.BrokerFeeTbps),
 	}
 
-	return cOrder
+	return cOrder, nil
 }
 
 func OrderTypeFromFlag(flags uint32) OrderType {

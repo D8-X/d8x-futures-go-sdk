@@ -71,7 +71,10 @@ func TestOrderHash(t *testing.T) {
 		ParentChildOrderId1: emptyArray,
 		ParentChildOrderId2: emptyArray,
 	}
-	scOrder := order.ToChainType(&info, traderAddr)
+	scOrder, err := order.ToChainType(&info, traderAddr)
+	if err != nil {
+		t.Fatalf("ToChainType: %v", err)
+	}
 	// override
 	lim, _ := new(big.Int).SetString("640000000000000000", 16)
 	scOrder.FLimitPrice = lim

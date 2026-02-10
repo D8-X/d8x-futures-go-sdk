@@ -80,7 +80,10 @@ func (sdk *SdkRO) SignOrder(order *Order, url string) error {
 	if order.OptTraderAddr == (common.Address{}) {
 		return fmt.Errorf("order must contain trader address")
 	}
-	sco := order.ToChainType(&sdk.Info, order.OptTraderAddr)
+	sco, err := order.ToChainType(&sdk.Info, order.OptTraderAddr)
+	if err != nil {
+		return err
+	}
 	type reqData struct {
 		Flags              uint32         `json:"flags"`
 		IPerpetualId       int            `json:"iPerpetualId"`

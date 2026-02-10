@@ -725,7 +725,7 @@ func RawGetPositionRisk(
 	}
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
-		panic("symbol does not exist in static perpetual info")
+		return PositionRisk{}, fmt.Errorf("symbol %s not found in exchange info", symbol)
 	}
 	indexPrices := [2]*big.Int{utils.Float64ToABDK(priceData.S2Price), utils.Float64ToABDK(priceData.S3Price)}
 
@@ -1148,6 +1148,9 @@ func RawQueryPositionRisks(
 	for k, call := range res {
 		outputs := call.Outputs.(*TraderStateOutput)
 		j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbols[k])
+		if j == -1 {
+			return nil, fmt.Errorf("symbol %s not found in exchange info", symbols[k])
+		}
 		ts := traderStateToPositionRisk(
 			symbols[k],
 			&xInfo.Perpetuals[j],
