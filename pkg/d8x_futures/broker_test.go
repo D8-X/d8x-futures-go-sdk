@@ -29,6 +29,7 @@ func TestQueryBrokerLots(t *testing.T) {
 }
 
 func TestPurchaseBrokerLots(t *testing.T) {
+	skipIfCI(t)
 	pk := loadPk()
 	if pk == "" {
 		t.Fatal("provide private key for testnet as environment variable PK")

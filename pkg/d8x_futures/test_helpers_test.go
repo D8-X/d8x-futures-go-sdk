@@ -1,10 +1,18 @@
 package d8x_futures
 
 import (
+	"os"
 	"testing"
 
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 )
+
+func skipIfCI(t *testing.T) {
+	t.Helper()
+	if os.Getenv("CI") != "" {
+		t.Skip("skipping write test in CI")
+	}
+}
 
 // getActiveSymbol returns the first NORMAL-state perpetual symbol from the exchange info.
 func getActiveSymbol(t *testing.T, info *StaticExchangeInfo) string {

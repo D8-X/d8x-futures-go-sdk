@@ -20,6 +20,7 @@ func loadPk() string {
 }
 
 func TestSdkExec(t *testing.T) {
+	skipIfCI(t)
 	pk := loadPk()
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
@@ -61,7 +62,8 @@ func TestSdkExec(t *testing.T) {
 		if err != nil {
 			t.Fatalf("WaitMined: %v", err)
 		}
-		// 92d891d3ae6d8695c8732d67fff2b59d309496796e1f369f8d5e0b4ab2a17cd4
+		// allow nonce to propagate before next tx
+		time.Sleep(5 * time.Second)
 		mktOrderIds = append(mktOrderIds, orderId)
 
 	}
@@ -76,6 +78,7 @@ func TestSdkExec(t *testing.T) {
 }
 
 func TestSdkLiquidatePosition(t *testing.T) {
+	skipIfCI(t)
 	pk := loadPk()
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
@@ -113,6 +116,7 @@ func TestSdkLiquidatePosition(t *testing.T) {
 }
 
 func TestAddCollateral(t *testing.T) {
+	skipIfCI(t)
 	pk := loadPk()
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
@@ -131,6 +135,7 @@ func TestAddCollateral(t *testing.T) {
 }
 
 func TestTradingFunc(t *testing.T) {
+	skipIfCI(t)
 	pk := loadPk()
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
@@ -202,6 +207,7 @@ func TestTradingFunc(t *testing.T) {
 }
 
 func TestPostOrder(t *testing.T) {
+	skipIfCI(t)
 	_, execPk, err := generateKey()
 	if err != nil {
 		t.Fatalf("generateKey: %v", err)

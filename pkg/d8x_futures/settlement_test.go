@@ -144,6 +144,7 @@ func TestInfo(t *testing.T) {
 }
 
 func TestSettlement(t *testing.T) {
+	skipIfCI(t)
 	pk := os.Getenv("PK")
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
@@ -186,6 +187,7 @@ func TestSettlement(t *testing.T) {
 }
 
 func TestEnable(t *testing.T) {
+	skipIfCI(t)
 	pk := os.Getenv("PK")
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
