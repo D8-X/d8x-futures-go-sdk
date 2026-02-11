@@ -725,7 +725,7 @@ func RawGetPositionRisk(
 	}
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
-		panic("symbol does not exist in static perpetual info")
+		return PositionRisk{}, fmt.Errorf("symbol %s not found in exchange info", symbol)
 	}
 	indexPrices := [2]*big.Int{utils.Float64ToABDK(priceData.S2Price), utils.Float64ToABDK(priceData.S3Price)}
 
@@ -891,12 +891,9 @@ func RawQueryPoolStates(rpc *ethclient.Client, xInfo StaticExchangeInfo) ([]Pool
 	}
 	for i := 0; i < iterations; i++ {
 		from := i * MAXPOOLS
-		to := (i+1)*MAXPOOLS - 1
-		if to > numPools {
-			to = numPools
-		}
+		to := min((i+1)*MAXPOOLS, numPools)
 
-		pools, err := proxy.GetLiquidityPools(nil, uint8(from+1), uint8(to+1))
+		pools, err := proxy.GetLiquidityPools(nil, uint8(from+1), uint8(to))
 		if err != nil {
 			return nil, err
 		}
@@ -940,12 +937,11 @@ outerLoop:
 				order := FromChainType(&corder, &xInfo)
 				orders.Orders = append(orders.Orders, order)
 				strDigests := "0x" + common.Bytes2Hex(currOrders.OrderHashes[k][:])
-				orders.HashIndex[strDigests] = k
+				orders.HashIndex[strDigests] = len(orders.Orders) - 1
 				orders.OrderHashes = append(orders.OrderHashes, strDigests)
+				orders.SubmittedTs = append(orders.SubmittedTs, currOrders.SubmittedTs[k])
 			}
 		}
-		orders.SubmittedTs = currOrders.SubmittedTs
-		from = from + count
 	}
 
 	return &orders, nil
@@ -1016,6 +1012,9 @@ outerLoop:
 		big.NewInt(int64(0)),
 		big.NewInt(int64(len(clientOrders))),
 	)
+	if err != nil {
+		return []Order{}, []string{}, err
+	}
 
 	// format digests into strings
 	strDigests := make([]string, len(digests))
@@ -1024,9 +1023,6 @@ outerLoop:
 	for i, d := range digests {
 		strDigests[i] = "0x" + common.Bytes2Hex(d[:])
 		orders[i] = FromChainType(&clientOrders[i], &xInfo)
-	}
-	if err != nil {
-		return []Order{}, []string{}, err
 	}
 	return orders, strDigests, nil
 }
@@ -1148,6 +1144,9 @@ func RawQueryPositionRisks(
 	for k, call := range res {
 		outputs := call.Outputs.(*TraderStateOutput)
 		j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbols[k])
+		if j == -1 {
+			return nil, fmt.Errorf("symbol %s not found in exchange info", symbols[k])
+		}
 		ts := traderStateToPositionRisk(
 			symbols[k],
 			&xInfo.Perpetuals[j],
@@ -1613,7 +1612,10 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 					if err != nil {
 						return PriceFeedData{}, fmt.Errorf("unable to convert prices.conf %s", err.Error())
 					}
-					params, _ := new(big.Int).SetString(d.EmaPrice.Conf, 10)
+					params, ok := new(big.Int).SetString(d.EmaPrice.Conf, 10)
+					if !ok {
+						return PriceFeedData{}, fmt.Errorf("unable to parse EmaPrice.Conf %q", d.EmaPrice.Conf)
+					}
 					pxData.Prices[i] = PriceObs{
 						Px:             utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
 						Ema:            utils.PythNToFloat64(d.EmaPrice.Price, d.EmaPrice.Expo),

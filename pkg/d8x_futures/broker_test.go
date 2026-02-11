@@ -1,7 +1,9 @@
+//go:build integration
+
 package d8x_futures
 
 import (
-	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -11,62 +13,59 @@ import (
 
 func TestQueryBrokerLots(t *testing.T) {
 	addr := common.HexToAddress("B0CBeeC370Af6ca2ed541F6a2264bc95b991F6E1")
-	sdkRo, err := NewSdkRO("testnet")
+	sdkRo, err := NewSdkRO("base_sepolia")
 	if err != nil {
-		t.Log(err.Error())
-		t.FailNow()
+		t.Fatalf("NewSdkRO: %v", err)
 	}
-	lots, err := sdkRo.QueryBrokerLots("USDC", &addr, nil)
+	// Get pool symbol dynamically from first active perpetual
+	sym := getActiveSymbol(t, &sdkRo.Info)
+	parts := strings.Split(sym, "-")
+	pool := parts[len(parts)-1] // settlement currency = pool name
+	lots, err := sdkRo.QueryBrokerLots(pool, &addr, nil)
 	if err != nil {
-		t.Log(err.Error())
-		t.FailNow()
+		t.Fatalf("QueryBrokerLots: %v", err)
 	}
-	fmt.Printf("lots = %d\n", lots)
+	t.Logf("lots = %d", lots)
 }
 
 func TestPurchaseBrokerLots(t *testing.T) {
+	skipIfCI(t)
 	pk := loadPk()
 	if pk == "" {
-		fmt.Println("provide private key for testnet as environment variable PK")
-		t.FailNow()
+		t.Fatal("provide private key for testnet as environment variable PK")
 	}
-	sdk, err := NewSdk([]string{pk}, "42161")
+	sdk, err := NewSdk([]string{pk}, "84532")
 	if err != nil {
-		t.Log(err.Error())
-		t.FailNow()
+		t.Fatalf("NewSdk: %v", err)
 	}
-	amountFlt, _, err := sdk.Allowance("BTC-USD-STUSD", sdk.Wallets[0].Address, nil)
+	sym := getActiveSymbol(t, &sdk.Info)
+	amountFlt, _, err := sdk.Allowance(sym, sdk.Wallets[0].Address, nil)
 	if err != nil {
-		t.Log(err.Error())
-		t.FailNow()
+		t.Fatalf("Allowance: %v", err)
 	}
 	var tx *types.Transaction
 	if amountFlt < 100 {
-		tx, err = sdk.ApproveTknSpending("BTC-USD-STUSD", nil, nil)
+		tx, err = sdk.ApproveTknSpending(sym, nil, nil)
 		if err != nil {
-			t.Log(err.Error())
-			t.FailNow()
+			t.Fatalf("ApproveTknSpending: %v", err)
 		}
-		fmt.Printf("approved tkn spending, tx = %s\n", tx.Hash().Hex())
+		t.Logf("approved tkn spending, tx = %s", tx.Hash().Hex())
 		time.Sleep(10 * time.Second)
-		amountFlt, _, err = sdk.Allowance("BTC-USD-STUSD", sdk.Wallets[0].Address, nil)
+		amountFlt, _, err = sdk.Allowance(sym, sdk.Wallets[0].Address, nil)
 		if err != nil {
-			t.Log(err.Error())
-			t.FailNow()
+			t.Fatalf("Allowance after approve: %v", err)
 		}
 	}
-	fmt.Printf("allowance %f = \n", amountFlt)
-	tx, err = sdk.PurchaseBrokerLots(1, "BTC-USD-STUSD", nil)
+	t.Logf("allowance %f = ", amountFlt)
+	tx, err = sdk.PurchaseBrokerLots(1, sym, nil)
 	if err != nil {
-		t.Log(err.Error())
-		t.FailNow()
+		t.Fatalf("PurchaseBrokerLots: %v", err)
 	}
-	fmt.Printf("success, tx = %s\n", tx.Hash().Hex())
+	t.Logf("success, tx = %s", tx.Hash().Hex())
 	time.Sleep(10 * time.Second)
-	num, err := sdk.QueryBrokerLots("BTC-USD-STUSD", &sdk.Wallets[0].Address, nil)
+	num, err := sdk.QueryBrokerLots(sym, &sdk.Wallets[0].Address, nil)
 	if err != nil {
-		t.Log(err.Error())
-		t.FailNow()
+		t.Fatalf("QueryBrokerLots: %v", err)
 	}
-	fmt.Printf("num lots = %d\n", num)
+	t.Logf("num lots = %d", num)
 }

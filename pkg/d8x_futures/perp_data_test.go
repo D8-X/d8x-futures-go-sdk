@@ -1,68 +1,11 @@
 package d8x_futures
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
 )
-
-func TestPerpetualStaticInfo(t *testing.T) {
-	sdk, err := NewSdkRO("84532")
-	if err != nil {
-		t.Log(err.Error())
-	}
-	info, err := sdk.GetPerpetualStaticInfo("NHL_BUF_MTL_251020")
-	if err != nil {
-		t.Log(err.Error())
-	}
-	fmt.Println(info)
-}
-
-func TestQueryNestedPerpetualInfo(t *testing.T) {
-	chConf, err := config.GetDefaultChainConfig("testnet")
-	if err != nil {
-		t.Log(err.Error())
-	}
-	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
-	if err != nil {
-		t.Log(err.Error())
-	}
-	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
-	p, err := QueryNestedPerpetualInfo(conn)
-	if err != nil {
-		t.Log(err.Error())
-	}
-	fmt.Println(p.PerpetualIds)
-}
-
-func TestReadSymbolList(t *testing.T) {
-	symMap, err := config.GetSymbolList()
-	if err != nil {
-		t.Log(err.Error())
-	}
-	fmt.Println((symMap)["MATC"])
-}
-
-func TestQueryPoolStaticInfo(t *testing.T) {
-	chConf, err := config.GetDefaultChainConfig("testnet")
-	if err != nil {
-		t.Log(err.Error())
-	}
-	pxConf, err := config.GetDefaultPriceConfig(chConf.ChainId)
-	if err != nil {
-		t.Log(err.Error())
-	}
-	conn, _ := CreateBlockChainConnector(pxConf, chConf, nil)
-	nest, err := QueryNestedPerpetualInfo(conn)
-	if err != nil {
-		t.Log(err.Error())
-	}
-	info, _ := QueryExchangeStaticInfo(&conn, &chConf, &pxConf, &nest)
-	fmt.Println(info)
-	info.Store("./tmpXchInfo.json")
-}
 
 func TestFindPath(t *testing.T) {
 	ccyBase := []string{"USD", "USDC", "EUR", "BTC", "BTC"}
@@ -70,41 +13,25 @@ func TestFindPath(t *testing.T) {
 	pair := "CHF-USDC"
 
 	paths := findPath(append(ccyBase, ccyQuote...), append(ccyQuote, ccyBase...), pair)
-	fmt.Println(paths)
+	t.Log(paths)
 }
 
 func TestPythNToFloat64(t *testing.T) {
 	v := utils.PythNToFloat64("314159265358979", -14)
-	fmt.Println("v=", v)
+	t.Log("v=", v)
 }
 
 func TestABDKToFloat64(t *testing.T) {
 	num := -1.370863664871871
 	v := utils.Float64ToABDK(num)
 	// 25265520445871489912
-	fmt.Println("v=", v)
-}
-
-func TestTriangulate(t *testing.T) {
-	pxConf, err := config.GetDefaultPriceConfig(196)
-	if err != nil {
-		t.FailNow()
-	}
-
-	triangs := Triangulate("CHF-USDC", pxConf.PriceFeedIds)
-	fmt.Println("Triangulate")
-	fmt.Println(triangs)
-
-	// test an impossible path
-	triangs2 := Triangulate("CHF-DOGE", pxConf.PriceFeedIds)
-	fmt.Println(triangs2)
+	t.Log("v=", v)
 }
 
 func TestConfig(t *testing.T) {
 	addr, err := config.GetMultiPayAddr(42161)
 	if err != nil {
-		t.Log(err.Error())
-		t.FailNow()
+		t.Fatalf("GetMultiPayAddr: %v", err)
 	}
-	fmt.Printf("addr = %s\n", addr)
+	t.Logf("addr = %s", addr)
 }

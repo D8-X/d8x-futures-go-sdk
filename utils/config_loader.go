@@ -101,6 +101,11 @@ var AssetClassMap = map[string]AssetClass{
 	"unknown":     ACLASS_UNKNOWN,
 }
 
+// MarshalJSON implements custom marshaling for PriceType
+func (p PriceType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(p.String())
+}
+
 // UnmarshalJSON implements custom unmarshaling for PriceType
 func (p *PriceType) UnmarshalJSON(data []byte) error {
 	var str string
