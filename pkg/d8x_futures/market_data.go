@@ -891,12 +891,9 @@ func RawQueryPoolStates(rpc *ethclient.Client, xInfo StaticExchangeInfo) ([]Pool
 	}
 	for i := 0; i < iterations; i++ {
 		from := i * MAXPOOLS
-		to := (i+1)*MAXPOOLS - 1
-		if to > numPools {
-			to = numPools
-		}
+		to := min((i+1)*MAXPOOLS, numPools)
 
-		pools, err := proxy.GetLiquidityPools(nil, uint8(from+1), uint8(to+1))
+		pools, err := proxy.GetLiquidityPools(nil, uint8(from+1), uint8(to))
 		if err != nil {
 			return nil, err
 		}
@@ -940,12 +937,11 @@ outerLoop:
 				order := FromChainType(&corder, &xInfo)
 				orders.Orders = append(orders.Orders, order)
 				strDigests := "0x" + common.Bytes2Hex(currOrders.OrderHashes[k][:])
-				orders.HashIndex[strDigests] = k
+				orders.HashIndex[strDigests] = len(orders.Orders) - 1
 				orders.OrderHashes = append(orders.OrderHashes, strDigests)
+				orders.SubmittedTs = append(orders.SubmittedTs, currOrders.SubmittedTs[k])
 			}
 		}
-		orders.SubmittedTs = currOrders.SubmittedTs
-		from = from + count
 	}
 
 	return &orders, nil
@@ -1016,6 +1012,9 @@ outerLoop:
 		big.NewInt(int64(0)),
 		big.NewInt(int64(len(clientOrders))),
 	)
+	if err != nil {
+		return []Order{}, []string{}, err
+	}
 
 	// format digests into strings
 	strDigests := make([]string, len(digests))
@@ -1024,9 +1023,6 @@ outerLoop:
 	for i, d := range digests {
 		strDigests[i] = "0x" + common.Bytes2Hex(d[:])
 		orders[i] = FromChainType(&clientOrders[i], &xInfo)
-	}
-	if err != nil {
-		return []Order{}, []string{}, err
 	}
 	return orders, strDigests, nil
 }
