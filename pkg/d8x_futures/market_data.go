@@ -1597,9 +1597,13 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 				if id.Type == utils.PXTYPE_PYTH {
 					// regular markets: we set the S2 as EMA and set the parameters
 					// to zero
+					px, err := utils.PythNToFloat64(d.Price.Price, d.Price.Expo)
+					if err != nil {
+						return PriceFeedData{}, fmt.Errorf("invalid price for %s: %w", d.Id, err)
+					}
 					pxData.Prices[i] = PriceObs{
-						Px:             utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
-						Ema:            utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
+						Px:             px,
+						Ema:            px,
 						Conf:           uint16(0),
 						CLOBParams:     0,
 						Ts:             int64(d.Price.PublishTime),
@@ -1608,6 +1612,14 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 					}
 				} else {
 					// lowliq & prediction markets: set ema and parameters
+					px, err := utils.PythNToFloat64(d.Price.Price, d.Price.Expo)
+					if err != nil {
+						return PriceFeedData{}, fmt.Errorf("invalid price for %s: %w", d.Id, err)
+					}
+					ema, err := utils.PythNToFloat64(d.EmaPrice.Price, d.EmaPrice.Expo)
+					if err != nil {
+						return PriceFeedData{}, fmt.Errorf("invalid ema price for %s: %w", d.Id, err)
+					}
 					conf, err := strconv.Atoi(d.Price.Conf)
 					if err != nil {
 						return PriceFeedData{}, fmt.Errorf("unable to convert prices.conf %s", err.Error())
@@ -1617,8 +1629,8 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 						return PriceFeedData{}, fmt.Errorf("unable to parse EmaPrice.Conf %q", d.EmaPrice.Conf)
 					}
 					pxData.Prices[i] = PriceObs{
-						Px:             utils.PythNToFloat64(d.Price.Price, d.Price.Expo),
-						Ema:            utils.PythNToFloat64(d.EmaPrice.Price, d.EmaPrice.Expo),
+						Px:             px,
+						Ema:            ema,
 						Conf:           uint16(conf),
 						CLOBParams:     params.Uint64(),
 						Ts:             int64(d.Price.PublishTime),

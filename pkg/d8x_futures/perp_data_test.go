@@ -17,7 +17,10 @@ func TestFindPath(t *testing.T) {
 }
 
 func TestPythNToFloat64(t *testing.T) {
-	v := utils.PythNToFloat64("314159265358979", -14)
+	v, err := utils.PythNToFloat64("314159265358979", -14)
+	if err != nil {
+		t.Fatal(err)
+	}
 	t.Log("v=", v)
 }
 
