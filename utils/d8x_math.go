@@ -103,9 +103,11 @@ func ABDKToFloat64(xIn *big.Int) float64 {
 	return res * sgn
 }
 
-func PythNToFloat64(price string, expo int32) float64 {
+func PythNToFloat64(price string, expo int32) (float64, error) {
 	var x big.Int
-	x.SetString(price, 10)
+	if _, ok := x.SetString(price, 10); !ok {
+		return 0, fmt.Errorf("invalid price string: %q", price)
+	}
 	dec := new(big.Int).Exp(big.NewInt(10), big.NewInt(-int64(expo)), nil)
 	var sgn float64 = float64(x.Sign())
 	x.Abs(&x)
@@ -117,9 +119,9 @@ func PythNToFloat64(price string, expo int32) float64 {
 	numberStr := xInt.String() + "." + pad + xRemainder.String()
 	res, err := strconv.ParseFloat(numberStr, 64)
 	if err != nil {
-		panic(err)
+		return 0, fmt.Errorf("invalid price float: %w", err)
 	}
-	return res * sgn
+	return res * sgn, nil
 }
 
 func Dec2Hex(num string) (string, error) {
