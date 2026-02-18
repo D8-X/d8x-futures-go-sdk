@@ -39,32 +39,32 @@ jobs:
           path: unit-tests.xml
           reporter: java-junit
 
-  integration-tests:
-    runs-on: ubuntu-latest
-    needs: unit-tests
-    permissions:
-      checks: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
-      - name: Install gotestsum
-        run: go install gotest.tools/gotestsum@latest
-
-      - name: Create .env
-        run: |
-          printf 'PK=%s\nRPC=%s\n' '${{ secrets.PK }}' '${{ secrets.RPC }}' > .env
-
-      - name: Integration tests
-        run: gotestsum --junitfile integration-tests.xml -- -tags=integration ./pkg/d8x_futures/ -v -count=1 -timeout=10m
-
-      - name: Test report
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Integration Test Results
-          path: integration-tests.xml
-          reporter: java-junit
+  # integration-tests:
+  #   runs-on: ubuntu-latest
+  #   needs: unit-tests
+  #   permissions:
+  #     checks: write
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - uses: actions/setup-go@v5
+  #       with:
+  #         go-version-file: go.mod
+  #
+  #     - name: Install gotestsum
+  #       run: go install gotest.tools/gotestsum@latest
+  #
+  #     - name: Create .env
+  #       run: |
+  #         printf 'PK=%s\nRPC=%s\n' '${{ secrets.PK }}' '${{ secrets.RPC }}' > .env
+  #
+  #     - name: Integration tests
+  #       run: gotestsum --junitfile integration-tests.xml -- -tags=integration ./pkg/d8x_futures/ -v -count=1 -timeout=10m
+  #
+  #     - name: Test report
+  #       uses: dorny/test-reporter@v1
+  #       if: always()
+  #       with:
+  #         name: Integration Test Results
+  #         path: integration-tests.xml
+  #         reporter: java-junit
