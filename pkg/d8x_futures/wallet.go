@@ -14,13 +14,18 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+type NonceProvider interface {
+	Next() (uint64, error)
+}
+
 type Wallet struct {
-	PrivateKey      *ecdsa.PrivateKey
-	Address         common.Address
-	Auth            *bind.TransactOpts
-	ChainId         int64
-	IsPostLondon    bool
-	gasInitialized  bool
+	PrivateKey     *ecdsa.PrivateKey
+	Address        common.Address
+	Auth           *bind.TransactOpts
+	ChainId        int64
+	IsPostLondon   bool
+	gasInitialized bool
+	NonceProvider  NonceProvider
 }
 
 type GasOptions struct {
@@ -44,7 +49,7 @@ func WithGasLimit(m uint64) GasOption {
 }
 
 // NewWallet constructs a new wallet. ChainId must be provided and privatekey must be of the form "abcdef012" (no 0x).
-// The wallet is usable for signing immediately. 
+// The wallet is usable for signing immediately.
 // The Chain specific gas configuration (IsPostLondon, signer type) is detected automatically on the first call to UpdateNonceAndGasPx.
 func NewWallet(privateKeyHex string, chainId int64) (*Wallet, error) {
 	var w Wallet
@@ -122,7 +127,7 @@ func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client, opts ...GasOption) e
 	return w.updateGasOptions(rpc, options)
 }
 
-// initGas detects the chain type and configures the appropriate transaction signer. 
+// initGas detects the chain type and configures the appropriate transaction signer.
 func (w *Wallet) initGas(rpc *ethclient.Client) error {
 	head, err := rpc.HeaderByNumber(context.Background(), nil)
 	w.IsPostLondon = err == nil && head.BaseFee != nil
@@ -173,6 +178,14 @@ func (w *Wallet) UpdateGasPrice(rpc *ethclient.Client) error {
 }
 
 func (w *Wallet) UpdateNonce(rpc *ethclient.Client) error {
+	if w.NonceProvider != nil {
+		n, err := w.NonceProvider.Next()
+		if err != nil {
+			return fmt.Errorf("nonce provider: %w", err)
+		}
+		w.Auth.Nonce = big.NewInt(int64(n))
+		return nil
+	}
 	n, err := GetNonce(rpc, w.Address)
 	if err != nil {
 		return errors.New("RPC could not determine nonce:" + err.Error())
