@@ -55,7 +55,10 @@ func GetLowLiqPrices(p ResponsePythLatestPriceFeed, tradeSizes []float64) ([]flo
 }
 
 func extractLowLiqParams(p ResponsePythLatestPriceFeed) (float64, float64, uint64, error) {
-	mid := utils.PythNToFloat64(p.Price.Price, p.Price.Expo)
+	mid, err := utils.PythNToFloat64(p.Price.Price, p.Price.Expo)
+	if err != nil {
+		return 0, 0, 0, fmt.Errorf("invalid mid price: %w", err)
+	}
 	hbaTbps, err := strconv.Atoi(p.Price.Conf)
 	if err != nil {
 		return 0, 0, 0, fmt.Errorf("unable to extract half-ba: %s", err.Error())

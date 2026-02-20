@@ -53,12 +53,18 @@ func (sdk *Sdk) PostOrder(order *Order, overrides *OptsOverrides, gasOpts ...Gas
 }
 
 func (sdk *Sdk) CreateOrderBrokerSignature(iPerpetualId int32, brokerFeeTbps uint32, traderAddr string, iDeadline uint32, optWalletIdx int) (string, string, error) {
+	if optWalletIdx < 0 || optWalletIdx >= len(sdk.Wallets) {
+		return "", "", fmt.Errorf("wallet index %d out of range (have %d wallets)", optWalletIdx, len(sdk.Wallets))
+	}
 	w := sdk.Wallets[optWalletIdx]
 	return RawCreateOrderBrokerSignature(sdk.ChainConfig.ProxyAddr,
 		sdk.ChainConfig.ChainId, w, iPerpetualId, brokerFeeTbps, traderAddr, iDeadline)
 }
 
 func (sdk *Sdk) CreatePaymentBrokerSignature(ps *PaySummary, optWalletIdx int) (string, string, error) {
+	if optWalletIdx < 0 || optWalletIdx >= len(sdk.Wallets) {
+		return "", "", fmt.Errorf("wallet index %d out of range (have %d wallets)", optWalletIdx, len(sdk.Wallets))
+	}
 	w := sdk.Wallets[optWalletIdx]
 	return RawCreatePaymentBrokerSignature(ps, w)
 }
@@ -170,7 +176,8 @@ func (sdk *Sdk) ExecuteOrders(
 // can be provided via OptsOverrides.
 func (sdk *Sdk) LiquidatePosition(
 	perpId int32,
-	traderAddr, optLiquidatorAddr *common.Address,
+	traderAddr []common.Address,
+	optLiquidatorAddr *common.Address,
 	opts *OptsOverrides,
 	gasOpts ...GasOption,
 ) (
@@ -250,11 +257,17 @@ func RawPostOrder(
 	gasOpts ...GasOption,
 ) (string, *types.Transaction, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, order.Symbol)
-	scOrder := order.ToChainType(xInfo, trader)
+	if j == -1 {
+		return "", nil, fmt.Errorf("rawPostOrder: symbol %s not found in exchange info", order.Symbol)
+	}
+	scOrder, err := order.ToChainType(xInfo, trader)
+	if err != nil {
+		return "", nil, fmt.Errorf("rawPostOrder: %v", err)
+	}
 	scOrders := []contracts.IClientOrderClientOrder{scOrder}
 	tsigs := [][]byte{traderSig}
 	ob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
-	err := postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...)
+	err = postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...)
 	if err != nil {
 		return "", nil, fmt.Errorf("rawPostOrder: %v", err)
 	}
@@ -282,6 +295,9 @@ func RawCancelOrder(
 	gasOpts ...GasOption,
 ) (*types.Transaction, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("RawCancelOrder: symbol %s not found in exchange info", symbol)
+	}
 	// first get the corresponding order and sign
 	var dig [32]byte
 	bytesDigest := common.Hex2Bytes(strings.TrimPrefix(orderId, "0x"))
@@ -334,6 +350,9 @@ func RawExecuteOrders(
 		pxEp.PriceFeedEndpoint = opts.PriceFeedEndPt
 	}
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("RawExecuteOrders: symbol %s not found in exchange info", symbol)
+	}
 
 	var digests [][32]byte
 	for _, orderId := range orderIds {
@@ -405,7 +424,7 @@ func RawLiquidatePosition(
 	xInfo *StaticExchangeInfo,
 	postingWallet *Wallet,
 	perpId int32,
-	traderAddr *common.Address,
+	traderAddr []common.Address,
 	liquidatorAddr *common.Address,
 	pxEp PriceFeedEndpoints,
 	opts *OptsOverrides,
@@ -442,7 +461,13 @@ func RawLiquidatePosition(
 	for k, p := range pxFeed.PriceFeed.Prices {
 		publishTimes[k] = uint64(p.Ts)
 	}
-	return perpCtrct.LiquidateByAMM(postingWallet.Auth, big.NewInt(int64(perpId)), *liquidatorAddr, *traderAddr, pxFeed.PriceFeed.Vaas, publishTimes)
+	return perpCtrct.LiquidateByAMM(postingWallet.Auth,
+		big.NewInt(int64(perpId)),
+		*liquidatorAddr,
+		traderAddr,
+		pxFeed.PriceFeed.Vaas,
+		publishTimes,
+	)
 }
 
 // estimateGasLimit estimates the gaslimit
@@ -508,6 +533,9 @@ func RawAddCollateral(
 	}
 
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("RawAddCollateral: symbol %s not found in exchange info", symbol)
+	}
 	id := int64(xInfo.Perpetuals[j].Id)
 	amount := utils.Float64ToABDK(math.Abs(amountCC))
 	perpCtrct, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)

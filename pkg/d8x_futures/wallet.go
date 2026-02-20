@@ -14,11 +14,18 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+type NonceProvider interface {
+	Next() (uint64, error)
+}
+
 type Wallet struct {
-	PrivateKey   *ecdsa.PrivateKey
-	Address      common.Address
-	Auth         *bind.TransactOpts
-	IsPostLondon bool
+	PrivateKey     *ecdsa.PrivateKey
+	Address        common.Address
+	Auth           *bind.TransactOpts
+	ChainId        int64
+	IsPostLondon   bool
+	gasInitialized bool
+	NonceProvider  NonceProvider
 }
 
 type GasOptions struct {
@@ -41,9 +48,10 @@ func WithGasLimit(m uint64) GasOption {
 	return func(o *GasOptions) { o.GasLimit = m }
 }
 
-// NewWallet constructs a new wallet. ChainId must be provided and privatekey must be of the form "abcdef012" (no 0x)
-// rpc can be nil
-func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wallet, error) {
+// NewWallet constructs a new wallet. ChainId must be provided and privatekey must be of the form "abcdef012" (no 0x).
+// The wallet is usable for signing immediately.
+// The Chain specific gas configuration (IsPostLondon, signer type) is detected automatically on the first call to UpdateNonceAndGasPx.
+func NewWallet(privateKeyHex string, chainId int64) (*Wallet, error) {
 	var w Wallet
 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
 	if err != nil {
@@ -56,39 +64,14 @@ func NewWallet(privateKeyHex string, chainId int64, rpc *ethclient.Client) (*Wal
 	}
 	w.Address = crypto.PubkeyToAddress(*publicKeyECDSA)
 	w.PrivateKey = privateKey
+	w.ChainId = chainId
 	var chainIdBI big.Int
 	chainIdBI.SetInt64(chainId)
 	w.Auth, err = bind.NewKeyedTransactorWithChainID(privateKey, &chainIdBI)
 	if err != nil {
 		return nil, err
 	}
-	// determine the type of RPC (post London EIP-1559 or pre)
-	head, err := rpc.HeaderByNumber(context.Background(), nil)
-	w.IsPostLondon = err == nil && head.BaseFee != nil
-	if w.IsPostLondon {
-		w.Auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
-			chainID := big.NewInt(chainId)
-			return types.SignTx(tx, types.NewLondonSigner(chainID), privateKey)
-		}
-		// we only have layer 2 chains with no tip amount, hence set here and
-		// no need to touch again
-		tip, err := rpc.SuggestGasTipCap(context.Background())
-		if err != nil {
-			return nil, err
-		}
-		w.Auth.GasTipCap = tip
-		w.updateGasOptions(rpc, GasOptions{BaseFeeMultiplier: 5, TipCapMultiplier: 2})
-	} else {
-		w.Auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
-			chainID := big.NewInt(chainId)
-			return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
-		}
-		w.UpdateGasPrice(rpc)
-	}
 	w.Auth.Value = big.NewInt(0)
-	if rpc == nil {
-		return &w, nil
-	}
 	return &w, nil
 }
 
@@ -121,8 +104,13 @@ func (w *Wallet) GetLastGasPrice() *big.Int {
 }
 
 // UpdateNonceAndGasPx updates nonce and gas price, or nonce and
-// gas fee cap if w.IsPostLondon
+// gas fee cap if w.IsPostLondon. On the first call, it detects the chain type and configures the appropriate signer.
 func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client, opts ...GasOption) error {
+	if !w.gasInitialized {
+		if err := w.initGas(rpc); err != nil {
+			return err
+		}
+	}
 	err := w.UpdateNonce(rpc)
 	if err != nil {
 		return err
@@ -137,6 +125,25 @@ func (w *Wallet) UpdateNonceAndGasPx(rpc *ethclient.Client, opts ...GasOption) e
 		opt(&options)
 	}
 	return w.updateGasOptions(rpc, options)
+}
+
+// initGas detects the chain type and configures the appropriate transaction signer.
+func (w *Wallet) initGas(rpc *ethclient.Client) error {
+	head, err := rpc.HeaderByNumber(context.Background(), nil)
+	w.IsPostLondon = err == nil && head.BaseFee != nil
+	chainId := w.ChainId
+	privateKey := w.PrivateKey
+	if w.IsPostLondon {
+		w.Auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
+			return types.SignTx(tx, types.NewLondonSigner(big.NewInt(chainId)), privateKey)
+		}
+	} else {
+		w.Auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
+			return types.SignTx(tx, types.NewEIP155Signer(big.NewInt(chainId)), privateKey)
+		}
+	}
+	w.gasInitialized = true
+	return nil
 }
 
 func (w *Wallet) updateGasOptions(rpc *ethclient.Client, opts GasOptions) error {
@@ -171,6 +178,14 @@ func (w *Wallet) UpdateGasPrice(rpc *ethclient.Client) error {
 }
 
 func (w *Wallet) UpdateNonce(rpc *ethclient.Client) error {
+	if w.NonceProvider != nil {
+		n, err := w.NonceProvider.Next()
+		if err != nil {
+			return fmt.Errorf("nonce provider: %w", err)
+		}
+		w.Auth.Nonce = big.NewInt(int64(n))
+		return nil
+	}
 	n, err := GetNonce(rpc, w.Address)
 	if err != nil {
 		return errors.New("RPC could not determine nonce:" + err.Error())

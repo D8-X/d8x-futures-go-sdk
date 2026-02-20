@@ -1,7 +1,8 @@
+//go:build integration
+
 package d8x_futures
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
@@ -25,27 +26,25 @@ func TestGetLowLiqPrices(t *testing.T) {
 	// onchain
 	sdkRo, err := NewSdkRO("84532")
 	if err != nil {
-		t.Log(err.Error())
+		t.Fatalf("NewSdkRO: %v", err)
 	}
-	px0, err := sdkRo.QueryPerpetualPrices("HENLO.1000-USD-BUSD", tradeAmt, nil)
+	sym := getLowLiqSymbol(t, &sdkRo.Info)
+	px0, err := sdkRo.QueryPerpetualPrices(sym, tradeAmt, nil)
 	if err != nil {
-		fmt.Println(err.Error())
-		t.FailNow()
+		t.Fatalf("QueryPerpetualPrices: %v", err)
 	}
 	// directly from odin
 	pxEp := PriceFeedEndpoints{PriceFeedEndpoint: "https://hermes.pyth.network", LowLiqFeedEndpoint: "https://odin-lowliq.d8x.xyz"}
 	p, err := fetchOraclePrices(priceIds, pxEp)
 	if err != nil {
-		fmt.Println(err.Error())
-		t.FailNow()
+		t.Fatalf("fetchOraclePrices: %v", err)
 	}
 	px, err := GetLowLiqPrices(p[0], tradeAmt)
 	if err != nil {
-		fmt.Println(err.Error())
-		t.FailNow()
+		t.Fatalf("GetLowLiqPrices: %v", err)
 	}
-	fmt.Println("quantity, price odin, price via onchain")
+	t.Log("quantity, price odin, price via onchain")
 	for k := 0; k < len(tradeAmt); k++ {
-		fmt.Printf("%f, %f, %f\n", tradeAmt[k], px[k], px0[k])
+		t.Logf("%f, %f, %f", tradeAmt[k], px[k], px0[k])
 	}
 }
