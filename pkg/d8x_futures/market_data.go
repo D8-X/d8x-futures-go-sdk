@@ -1612,30 +1612,38 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 					}
 				} else {
 					// lowliq & prediction markets: set ema and parameters
-					px, err := utils.PythNToFloat64(d.Price.Price, d.Price.Expo)
-					if err != nil {
-						return PriceFeedData{}, fmt.Errorf("invalid price for %s: %w", d.Id, err)
-					}
-					ema, err := utils.PythNToFloat64(d.EmaPrice.Price, d.EmaPrice.Expo)
-					if err != nil {
-						return PriceFeedData{}, fmt.Errorf("invalid ema price for %s: %w", d.Id, err)
-					}
-					conf, err := strconv.Atoi(d.Price.Conf)
-					if err != nil {
-						return PriceFeedData{}, fmt.Errorf("unable to convert prices.conf %s", err.Error())
-					}
-					params, ok := new(big.Int).SetString(d.EmaPrice.Conf, 10)
-					if !ok {
-						return PriceFeedData{}, fmt.Errorf("unable to parse EmaPrice.Conf %q", d.EmaPrice.Conf)
-					}
-					pxData.Prices[i] = PriceObs{
-						Px:             px,
-						Ema:            ema,
-						Conf:           uint16(conf),
-						CLOBParams:     params.Uint64(),
-						Ts:             int64(d.Price.PublishTime),
-						IsOffChain:     true,
-						IsClosedPrdMkt: d.PrdMktClosed,
+					if d.PrdMktClosed {
+						pxData.Prices[i] = PriceObs{
+							Ts:             int64(d.Price.PublishTime),
+							IsOffChain:     true,
+							IsClosedPrdMkt: true,
+						}
+					} else {
+						px, err := utils.PythNToFloat64(d.Price.Price, d.Price.Expo)
+						if err != nil {
+							return PriceFeedData{}, fmt.Errorf("invalid price for %s: %w", d.Id, err)
+						}
+						ema, err := utils.PythNToFloat64(d.EmaPrice.Price, d.EmaPrice.Expo)
+						if err != nil {
+							return PriceFeedData{}, fmt.Errorf("invalid ema price for %s: %w", d.Id, err)
+						}
+						conf, err := strconv.Atoi(d.Price.Conf)
+						if err != nil {
+							return PriceFeedData{}, fmt.Errorf("unable to convert prices.conf %s", err.Error())
+						}
+						params, ok := new(big.Int).SetString(d.EmaPrice.Conf, 10)
+						if !ok {
+							return PriceFeedData{}, fmt.Errorf("unable to parse EmaPrice.Conf %q", d.EmaPrice.Conf)
+						}
+						pxData.Prices[i] = PriceObs{
+							Px:             px,
+							Ema:            ema,
+							Conf:           uint16(conf),
+							CLOBParams:     params.Uint64(),
+							Ts:             int64(d.Price.PublishTime),
+							IsOffChain:     true,
+							IsClosedPrdMkt: false,
+						}
 					}
 				}
 				if !withVaa {
