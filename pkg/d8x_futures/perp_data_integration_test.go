@@ -92,3 +92,4 @@ func TestTriangulate(t *testing.T) {
 	triangs2 := Triangulate("CHF-DOGE", pxConf.PriceFeedIds)
 	t.Log(triangs2)
 }
+

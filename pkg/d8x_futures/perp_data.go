@@ -2,6 +2,7 @@ package d8x_futures
 
 import (
 	"bytes"
+	"context"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -17,7 +18,9 @@ import (
 	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -607,4 +610,74 @@ func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo *StaticExch
 		OptTraderAddr:       scOrder.TraderAddr,
 	}
 	return order
+}
+
+func (sdk *Sdk) SetPerpetualMarginRates(symbol string, im, mm float64, optRPC *ethclient.Client, optGas ...GasOption) (*types.Transaction, error) {
+	var err error
+	symbol, err = sdk.symbolToInternal(symbol)
+	if err != nil {
+		return nil, err
+	}
+	if optRPC == nil {
+		optRPC = sdk.Conn.Rpc
+	}
+	j := GetPerpetualStaticInfoIdxFromSymbol(&sdk.Info, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("no perpetual index found for symbol %s", symbol)
+	}
+	id := sdk.Info.Perpetuals[j].Id
+	tx, err := RawSetMarginRates(
+		&sdk.Conn,
+		optRPC,
+		id,
+		mm,
+		im,
+		&sdk.Info,
+		sdk.Wallets[0],
+		optGas...,
+	)
+	if err != nil {
+		return tx, err
+	}
+
+	if _, err := bind.WaitMined(context.Background(), optRPC, tx); err != nil {
+		return tx, fmt.Errorf("%s: failed to mine transaction: %w", symbol, err)
+	}
+	sdk.Info.Perpetuals[j].InitialMarginRate = im
+	sdk.Info.Perpetuals[j].MaintenanceMarginRate = mm
+	return tx, nil
+}
+
+func RawSetMarginRates(
+	conn *BlockChainConnector,
+	rpc *ethclient.Client,
+	perpId int32,
+	mm, im float64,
+	xInfo *StaticExchangeInfo,
+	postingWallet *Wallet,
+	gasOpts ...GasOption,
+) (*types.Transaction, error) {
+	if im <= mm {
+		return nil, fmt.Errorf("maintenance margin rate must be lower than initial")
+	}
+	perpCtrct, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return nil, fmt.Errorf("failed creating manager instance %w", err)
+	}
+	v := postingWallet.Auth.Value
+	defer func() { postingWallet.Auth.Value = v }()
+	postingWallet.Auth.Value = big.NewInt(0)
+
+	err = postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...)
+	if err != nil {
+		return nil, fmt.Errorf("RawLiquidatePosition: uptdateNonceAndGasPx %v", err)
+	}
+	fMM := utils.Float64ToABDK(mm)
+	fIM := utils.Float64ToABDK(im)
+	return perpCtrct.SetMarginRates(
+		postingWallet.Auth,
+		big.NewInt(int64(perpId)),
+		fMM,
+		fIM,
+	)
 }

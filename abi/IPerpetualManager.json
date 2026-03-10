@@ -2263,11 +2263,6 @@
                 "internalType": "int128",
                 "name": "_fS3",
                 "type": "int128"
-            },
-            {
-                "internalType": "int128",
-                "name": "_fS2",
-                "type": "int128"
             }
         ],
         "name": "getDepositAmountForLvgPosition",
@@ -2375,11 +2370,6 @@
         ],
         "name": "getDepositAmtPrdMkt",
         "outputs": [
-            {
-                "internalType": "int128",
-                "name": "",
-                "type": "int128"
-            },
             {
                 "internalType": "int128",
                 "name": "",
@@ -3046,7 +3036,7 @@
                     },
                     {
                         "internalType": "int32",
-                        "name": "fDFCoverNRate",
+                        "name": "fPerformanceFeeRate",
                         "type": "int32"
                     },
                     {
@@ -3462,7 +3452,7 @@
                     },
                     {
                         "internalType": "int32",
-                        "name": "fDFCoverNRate",
+                        "name": "fPerformanceFeeRate",
                         "type": "int32"
                     },
                     {
@@ -4368,6 +4358,55 @@
         "inputs": [
             {
                 "internalType": "int128",
+                "name": "_F",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_pnl",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_mu0",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_muM",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_varphi",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_a",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_b",
+                "type": "int128"
+            }
+        ],
+        "name": "pmMaxTradeSize",
+        "outputs": [
+            {
+                "internalType": "int128",
+                "name": "",
+                "type": "int128"
+            }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "int128",
                 "name": "_fPx",
                 "type": "int128"
             },
@@ -4389,6 +4428,11 @@
             {
                 "internalType": "int128",
                 "name": "_param",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fPerformanceFee",
                 "type": "int128"
             }
         ],
@@ -4669,32 +4713,6 @@
     {
         "inputs": [
             {
-                "internalType": "uint24",
-                "name": "_iPerpetualId",
-                "type": "uint24"
-            }
-        ],
-        "name": "resetMarkPremium",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint8",
-                "name": "_liqPoolID",
-                "type": "uint8"
-            }
-        ],
-        "name": "resetTargetAmmFundSizes",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "uint8",
                 "name": "_liqPoolID",
                 "type": "uint8"
@@ -4835,6 +4853,29 @@
             }
         ],
         "name": "setInitialVolumeForFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint24",
+                "name": "_iPerpetualId",
+                "type": "uint24"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fMaintenanceMarginRate",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fInitialMarginRate",
+                "type": "int128"
+            }
+        ],
+        "name": "setMarginRates",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
