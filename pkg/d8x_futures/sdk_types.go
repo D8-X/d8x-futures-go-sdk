@@ -155,6 +155,7 @@ type PriceObs struct {
 
 type Price struct {
 	Px         float64
+	Ema        float64 // ema field from pyth data
 	Ts         int64
 	IsOffChain bool
 }
@@ -162,6 +163,7 @@ type Price struct {
 type PerpetualPriceInfo struct {
 	S2Price          float64
 	S3Price          float64
+	DrawProb         float64 // draw probability for sports prediction markets
 	Ema              float64
 	Conf             uint16
 	CLOBParams       uint64

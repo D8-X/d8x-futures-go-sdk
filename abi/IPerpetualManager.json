@@ -2048,9 +2048,9 @@
                 "type": "uint24"
             },
             {
-                "internalType": "int128[2]",
+                "internalType": "int128[3]",
                 "name": "_fIndexPrice",
-                "type": "int128[2]"
+                "type": "int128[3]"
             }
         ],
         "name": "getAMMState",
@@ -2310,7 +2310,7 @@
             },
             {
                 "internalType": "int128",
-                "name": "_fMarkProb",
+                "name": "_fMarkPrice",
                 "type": "int128"
             },
             {
@@ -2511,9 +2511,9 @@
                 "type": "uint24"
             },
             {
-                "internalType": "int128[2]",
+                "internalType": "int128[3]",
                 "name": "_fIndexPrice",
-                "type": "int128[2]"
+                "type": "int128[3]"
             }
         ],
         "name": "getLiquidatableAccounts",
@@ -2893,9 +2893,9 @@
                 "type": "uint24"
             },
             {
-                "internalType": "int128[2]",
+                "internalType": "int128[3]",
                 "name": "_fIndexPrice",
-                "type": "int128[2]"
+                "type": "int128[3]"
             }
         ],
         "name": "getNextLiquidatableTrader",
@@ -3158,7 +3158,7 @@
                     },
                     {
                         "internalType": "int128",
-                        "name": "fTargetDFSize",
+                        "name": "fDrawProb",
                         "type": "int128"
                     },
                     {
@@ -3574,7 +3574,7 @@
                     },
                     {
                         "internalType": "int128",
-                        "name": "fTargetDFSize",
+                        "name": "fDrawProb",
                         "type": "int128"
                     },
                     {
@@ -4042,9 +4042,9 @@
                 "type": "address"
             },
             {
-                "internalType": "int128[2]",
+                "internalType": "int128[3]",
                 "name": "_fIndexPrice",
-                "type": "int128[2]"
+                "type": "int128[3]"
             }
         ],
         "name": "getTraderState",
@@ -4378,7 +4378,7 @@
             },
             {
                 "internalType": "int128",
-                "name": "_varphi",
+                "name": "_p",
                 "type": "int128"
             },
             {
@@ -4433,6 +4433,11 @@
             {
                 "internalType": "int128",
                 "name": "_fPerformanceFee",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fRho",
                 "type": "int128"
             }
         ],
@@ -4648,9 +4653,9 @@
                 "type": "int128"
             },
             {
-                "internalType": "int128[2]",
+                "internalType": "int128[3]",
                 "name": "_fIndexPrice",
-                "type": "int128[2]"
+                "type": "int128[3]"
             },
             {
                 "internalType": "uint16",

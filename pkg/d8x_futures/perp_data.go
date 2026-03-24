@@ -320,6 +320,13 @@ func isPrdMktPerp(perp *PerpetualStaticInfo) bool {
 	return result.Cmp(big.NewInt(0)) != 0
 }
 
+// isPrdMktPerp checks whether the prediction market flag
+// of the perpetual is set
+func hasPrdMktFlag(flag *big.Int) bool {
+	result := new(big.Int).And(big.NewInt(int64(FLAG_PREDICTION_MKT)), flag)
+	return result.Cmp(big.NewInt(0)) != 0
+}
+
 // isLowLiqPerp checks whether the loqliq market flag
 // of the perpetual is set
 func isLowLiqPerp(perp *PerpetualStaticInfo) bool {

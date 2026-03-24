@@ -107,9 +107,9 @@ const GET_LIQUIDATABLE_ACC_ABI = `[
                 "type": "uint24"
             },
             {
-                "internalType": "int128[2]",
+                "internalType": "int128[3]",
                 "name": "_fIndexPrice",
-                "type": "int128[2]"
+                "type": "int128[3]"
             }
         ],
         "name": "getLiquidatableAccounts",
@@ -727,7 +727,11 @@ func RawGetPositionRisk(
 	if j == -1 {
 		return PositionRisk{}, fmt.Errorf("symbol %s not found in exchange info", symbol)
 	}
-	indexPrices := [2]*big.Int{utils.Float64ToABDK(priceData.S2Price), utils.Float64ToABDK(priceData.S3Price)}
+	indexPrices := [3]*big.Int{
+		utils.Float64ToABDK(priceData.S2Price),
+		utils.Float64ToABDK(priceData.S3Price),
+		utils.Float64ToABDK(priceData.DrawProb),
+	}
 
 	proxy, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
 	if err != nil {
@@ -1322,7 +1326,11 @@ func RawQueryLiquidatableAccounts(
 	if err != nil {
 		return nil, errors.New("RawQueryLiquidatableAccounts: failed fetching oracle prices " + err.Error())
 	}
-	pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxFeed.S2Price), utils.Float64ToABDK(pxFeed.S3Price)}
+	pricesAbdk := [3]*big.Int{
+		utils.Float64ToABDK(pxFeed.S2Price),
+		utils.Float64ToABDK(pxFeed.S3Price),
+		utils.Float64ToABDK(pxFeed.DrawProb),
+	}
 	proxy, err := CreatePerpetualManagerInstance(client, xInfo.ProxyAddr)
 	if err != nil {
 		return nil, err
@@ -1399,8 +1407,8 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 			syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
 			for _, sym := range syms {
 				pxMap[sym] = Price{
-					// use EMA (=S2 if regular market)
-					Px:         feedData.Prices[k].Ema,
+					Px:         feedData.Prices[k].Px,
+					Ema:        feedData.Prices[k].Ema,
 					Ts:         int64(feedData.Prices[k].Ts),
 					IsOffChain: true,
 				}
@@ -1420,8 +1428,16 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 			if isMarketClosedS2 || isMarketClosedS3 {
 				continue
 			}
+			draw := float64(0)
+			if hasPrdMktFlag(xInfo.Perpetuals[j].PerpFlags) {
+				draw = pxMap[S2Sym].Ema
+			}
 			perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
-			pricesAbdk := [2]*big.Int{utils.Float64ToABDK(s2), utils.Float64ToABDK(s3)}
+			pricesAbdk := [3]*big.Int{
+				utils.Float64ToABDK(s2),
+				utils.Float64ToABDK(s3),
+				utils.Float64ToABDK(draw),
+			}
 			c := contract.NewCall(new(liqOutput), "getLiquidatableAccounts", perpId, pricesAbdk)
 			perpIds = append(perpIds, xInfo.Perpetuals[j].Id)
 			calls = append(calls, c)
@@ -1479,9 +1495,15 @@ func fetchPerpetualPriceInfo(xInfo *StaticExchangeInfo, j int, pxEp PriceFeedEnd
 	if err != nil {
 		return PerpetualPriceInfo{}, err
 	}
+	draw := float64(0)
+	if hasPrdMktFlag(xInfo.Perpetuals[j].PerpFlags) {
+		// draw probability is stored in EMA field of price struct
+		draw = pxMap[xInfo.Perpetuals[j].S2Symbol].Ema
+	}
 	p := PerpetualPriceInfo{
 		S2Price:          s2,
 		S3Price:          s3,
+		DrawProb:         draw,
 		Ema:              s2,
 		IsMarketClosedS2: isMarketClosedS2,
 		IsMarketClosedS3: isMarketClosedS3,
@@ -1516,7 +1538,7 @@ func fetchIndexPricesForPerpetual(xInfo *StaticExchangeInfo, j int, pxEp PriceFe
 	for k, id := range feedData.PriceIds {
 		syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
 		for _, sym := range syms {
-			pxMap[sym] = Price{Px: feedData.Prices[k].Px, Ts: int64(feedData.Prices[k].Ts), IsOffChain: true}
+			pxMap[sym] = Price{Px: feedData.Prices[k].Px, Ema: feedData.Prices[k].Ema, Ts: int64(feedData.Prices[k].Ts), IsOffChain: true}
 		}
 	}
 	return pxMap, feedData, nil
