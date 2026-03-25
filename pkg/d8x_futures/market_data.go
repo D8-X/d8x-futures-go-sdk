@@ -1060,7 +1060,7 @@ func RawQueryPerpetualPriceTuple(
 	perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
 	pxInfo, err := fetchPerpetualPriceInfo(xInfo, j, pxEp)
 	if err != nil {
-		return nil, errors.New("RawAddCollateral: failed fetching oracle prices " + err.Error())
+		return nil, fmt.Errorf("RawAddCollateral: failed fetching oracle prices: %w", err)
 	}
 	pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxInfo.S2Price), utils.Float64ToABDK(pxInfo.S3Price)}
 	caller, err := multicall.New(client)
@@ -1320,7 +1320,7 @@ func RawQueryLiquidatableAccounts(
 	}
 	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pxEp)
 	if err != nil {
-		return nil, errors.New("RawQueryLiquidatableAccounts: failed fetching oracle prices " + err.Error())
+		return nil, fmt.Errorf("RawQueryLiquidatableAccounts: failed fetching oracle prices: %w", err)
 	}
 	pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxFeed.S2Price), utils.Float64ToABDK(pxFeed.S3Price)}
 	proxy, err := CreatePerpetualManagerInstance(client, xInfo.ProxyAddr)
@@ -1651,8 +1651,7 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 				}
 				decodedVaaBytes, err := base64.StdEncoding.DecodeString(d.Vaa)
 				if err != nil {
-					err := errors.New("fetchPricesFromAPI decoding base64:" + err.Error())
-					return PriceFeedData{}, err
+					return PriceFeedData{}, fmt.Errorf("fetchPricesFromAPI decoding base64: %w", err)
 				}
 				pxData.Vaas[i] = decodedVaaBytes
 				break
@@ -1718,22 +1717,22 @@ func fetchOraclePrices(priceIds []PriceId, ep PriceFeedEndpoints) ([]ResponsePyt
 func fetchPythPrice(query string, resCh chan<- *PythLatestPxV2, errCh chan<- error) {
 	response, err := http.Get(query)
 	if err != nil {
-		errCh <- errors.New("error sending fetchPricesFromAPI request:" + err.Error())
+		errCh <- fmt.Errorf("fetchPricesFromAPI: error sending request: %w", err)
 		return
 	}
 	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		errCh <- errors.New("error reading response body:" + err.Error())
+		errCh <- fmt.Errorf("fetchPricesFromAPI: error reading response body: %w", err)
 	}
 	if response.StatusCode != 200 {
-		errCh <- errors.New("error fetchPricesFromAPI status " + strconv.Itoa(response.StatusCode) + " " + string(body[:]))
+		errCh <- fmt.Errorf("fetchPricesFromAPI: status %d: %s", response.StatusCode, string(body))
 		return
 	}
 	var data PythLatestPxV2
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		errCh <- errors.New("fetchPricesFromAPI:" + err.Error())
+		errCh <- fmt.Errorf("fetchPricesFromAPI: %w", err)
 		return
 	}
 	resCh <- &data

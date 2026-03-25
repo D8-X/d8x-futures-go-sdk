@@ -171,7 +171,7 @@ func (w *Wallet) updateGasOptions(rpc *ethclient.Client, opts GasOptions) error 
 func (w *Wallet) UpdateGasPrice(rpc *ethclient.Client) error {
 	g, err := GetGasPrice(rpc)
 	if err != nil {
-		return errors.New("RPC could not determine gas price:" + err.Error())
+		return fmt.Errorf("RPC could not determine gas price: %w", err)
 	}
 	w.Auth.GasPrice = g
 	return nil
@@ -188,7 +188,7 @@ func (w *Wallet) UpdateNonce(rpc *ethclient.Client) error {
 	}
 	n, err := GetNonce(rpc, w.Address)
 	if err != nil {
-		return errors.New("RPC could not determine nonce:" + err.Error())
+		return fmt.Errorf("RPC could not determine nonce: %w", err)
 	}
 	w.Auth.Nonce = big.NewInt(int64(n))
 	return nil
