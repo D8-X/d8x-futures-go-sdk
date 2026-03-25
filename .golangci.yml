@@ -1,5 +1,9 @@
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - unused
+version: "2"
+linters:
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - unused
+    presets:
+      - std-error-handling
