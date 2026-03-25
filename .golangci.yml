@@ -5,5 +5,8 @@ linters:
       - path: _test\.go
         linters:
           - unused
+      - linters:
+          - staticcheck
+        text: "ST1023"
     presets:
       - std-error-handling
