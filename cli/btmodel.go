@@ -72,8 +72,7 @@ var (
 
 type ScreenChoices struct {
 	chooseOptions []string
-	choiceName    string
-	cursor        int
+	cursor int
 }
 
 func initialModel() Model {
@@ -262,8 +261,6 @@ func (m *Model) perpDetailsView() string {
 		mkt = styleA.Render(mkt + "market open")
 	}
 	s += mkt + "\n"
-	const width = 78
-
 	style := lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderForeground(blue)

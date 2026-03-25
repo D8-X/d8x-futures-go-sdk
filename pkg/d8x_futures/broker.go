@@ -181,7 +181,9 @@ func RawPurchaseBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, pos
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(1_000_000))
-	postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...)
+	if err := postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...); err != nil {
+		return nil, fmt.Errorf("RawPurchaseBrokerLots: %w", err)
+	}
 	tx, err := perpCtrct.DepositBrokerLots(postingWallet.Auth, uint8(poolId), uint32(numLots))
 	if err != nil {
 		return nil, errors.New("RawPurchaseBrokerLots:" + err.Error())
