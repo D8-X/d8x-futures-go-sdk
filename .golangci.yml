@@ -7,6 +7,6 @@ linters:
           - unused
       - linters:
           - staticcheck
-        text: "ST1023"
+        text: "ST1023|QF1011"
     presets:
       - std-error-handling
