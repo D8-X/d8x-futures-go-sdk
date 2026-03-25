@@ -32,7 +32,7 @@ jobs:
         run: gotestsum --junitfile unit-tests.xml -- ./pkg/d8x_futures/ -v -count=1
 
       - name: Test report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: always()
         with:
           name: Unit Test Results
@@ -62,7 +62,7 @@ jobs:
   #       run: gotestsum --junitfile integration-tests.xml -- -tags=integration ./pkg/d8x_futures/ -v -count=1 -timeout=10m
   #
   #     - name: Test report
-  #       uses: dorny/test-reporter@v1
+  #       uses: dorny/test-reporter@v3
   #       if: always()
   #       with:
   #         name: Integration Test Results
