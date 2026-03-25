@@ -170,13 +170,13 @@ func RawQueryBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbol
 func RawPurchaseBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, postingWallet *Wallet, symbol string, numLots int, gasOpts ...GasOption) (*types.Transaction, error) {
 	j := GetPoolStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
-		return nil, errors.New("Could not find pool for symbol " + symbol)
+		return nil, fmt.Errorf("RawPurchaseBrokerLots: could not find pool for symbol %s", symbol)
 	}
 	pool := xInfo.Pools[j]
 	poolId := pool.PoolId
 	perpCtrct, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
 	if err != nil {
-		return nil, errors.New("RawPurchaseBrokerLots:" + err.Error())
+		return nil, fmt.Errorf("RawPurchaseBrokerLots: %w", err)
 	}
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
@@ -186,7 +186,7 @@ func RawPurchaseBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, pos
 	}
 	tx, err := perpCtrct.DepositBrokerLots(postingWallet.Auth, uint8(poolId), uint32(numLots))
 	if err != nil {
-		return nil, errors.New("RawPurchaseBrokerLots:" + err.Error())
+		return nil, fmt.Errorf("RawPurchaseBrokerLots: %w", err)
 	}
 	return tx, nil
 }
