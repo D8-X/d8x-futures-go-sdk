@@ -71,9 +71,9 @@ const QUERY_PERP_PX_ABI = `[{
                 "type": "int128"
             },
             {
-                "internalType": "int128[2]",
+                "internalType": "int128[3]",
                 "name": "_fIndexPrice",
-                "type": "int128[2]"
+                "type": "int128[3]"
             },
             {
                 "internalType": "uint16",
@@ -152,7 +152,7 @@ const GET_TRADER_STATE_ABI = `[{
   "inputs": [
     { "name": "_perpetualId", "type": "uint24" },
     { "name": "_traderAddress", "type": "address" },
-    { "name": "_fIndexPrice", "type": "int128[2]" }
+    { "name": "_fIndexPrice", "type": "int128[3]" }
   ],
   "outputs": [
     { "name": "", "type": "int128[11]" }
@@ -1066,7 +1066,7 @@ func RawQueryPerpetualPriceTuple(
 	if err != nil {
 		return nil, errors.New("RawAddCollateral: failed fetching oracle prices " + err.Error())
 	}
-	pricesAbdk := [2]*big.Int{utils.Float64ToABDK(pxInfo.S2Price), utils.Float64ToABDK(pxInfo.S3Price)}
+	pricesAbdk := [3]*big.Int{utils.Float64ToABDK(pxInfo.S2Price), utils.Float64ToABDK(pxInfo.S3Price), utils.Float64ToABDK(pxInfo.DrawProb)}
 	caller, err := multicall.New(client)
 	if err != nil {
 		return nil, err
@@ -1133,9 +1133,10 @@ func RawQueryPositionRisks(
 	}
 	for j := range symbols {
 		outputs := new(TraderStateOutput)
-		idxPx := [2]*big.Int{
+		idxPx := [3]*big.Int{
 			utils.Float64ToABDK(prices[j].S2Price),
 			utils.Float64ToABDK(prices[j].S3Price),
+			utils.Float64ToABDK(prices[j].DrawProb),
 		}
 		c := contract.NewCall(outputs, "getTraderState", perpIds[j], trader, idxPx)
 		calls = append(calls, c)
