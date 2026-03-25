@@ -111,7 +111,7 @@ func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.Chai
 func QueryNestedPerpetualInfo(conn BlockChainConnector) (NestedPerpetualIds, error) {
 	var idxFrom uint8 = 1
 	const queryLen uint8 = 5
-	lenReceived := queryLen
+	var lenReceived uint8
 	var nestedPerpetualIds [][]*big.Int
 	var poolShareTokenAddr []common.Address
 	var poolMarginTokenAddr []common.Address

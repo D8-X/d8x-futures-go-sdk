@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"strconv"
 	"strings"
 	"time"
 
@@ -236,7 +235,7 @@ func (sdk *Sdk) ApproveTknSpending(symbol string, amount *big.Int, overrides *Op
 	}
 	approvalTx, err := erc20Instance.Approve(w.Auth, sdk.Info.ProxyAddr, amt)
 	if err != nil {
-		return nil, errors.New("Error approving token for chain " + strconv.Itoa(int(sdk.Conn.ChainId)) + ": " + err.Error())
+		return nil, fmt.Errorf("error approving token for chain %d: %w", sdk.Conn.ChainId, err)
 	}
 	return approvalTx, nil
 }
@@ -305,7 +304,7 @@ func RawCancelOrder(
 
 	pxFeed, err := fetchPerpetualPriceInfo(xInfo, j, pxEp)
 	if err != nil {
-		return nil, errors.New("RawCancelOrder: failed fetching oracle prices " + err.Error())
+		return nil, fmt.Errorf("RawCancelOrder: failed fetching oracle prices: %w", err)
 	}
 	var tx *types.Transaction
 	v := postingWallet.Auth.Value
@@ -324,7 +323,7 @@ func RawCancelOrder(
 	}
 	tx, err = ob.CancelOrder(postingWallet.Auth, dig, []byte{}, pxFeed.PriceFeed.Vaas, publishTimes)
 	if err != nil {
-		return nil, errors.New("RawCancelOrder:" + err.Error())
+		return nil, fmt.Errorf("RawCancelOrder: %w", err)
 	}
 	return tx, nil
 }
@@ -379,7 +378,7 @@ func RawExecuteOrders(
 		// fetch prices
 		pxFeed, err = fetchPerpetualPriceInfo(xInfo, j, pxEp)
 		if err != nil {
-			return nil, errors.New("RawExecuteOrder: failed fetching oracle prices " + err.Error())
+			return nil, fmt.Errorf("RawExecuteOrder: failed fetching oracle prices: %w", err)
 		}
 		if opts.TsMin == 0 {
 			break
