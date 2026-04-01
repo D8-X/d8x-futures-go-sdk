@@ -1737,8 +1737,6 @@ func fetchPythPrice(query string, resCh chan<- *PythLatestPxV2, errCh chan<- err
 		errCh <- fmt.Errorf("[%s] error creating request: %w", host, err)
 		return
 	}
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "d8x-sdk/1.0")
 
 	response, err := priceFeedClient.Do(req)
 	if err != nil {
