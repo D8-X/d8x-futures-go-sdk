@@ -1467,9 +1467,10 @@ func RawFetchPricesForPerpetual(exchangeInfo StaticExchangeInfo, symbol string, 
 // fetchPerpetualPriceInfo gets prices from the VAA-endpoint and on-chain if needed,
 // j is the index of the perpetual in StaticExchangeInfo
 func fetchPerpetualPriceInfo(xInfo *StaticExchangeInfo, j int, pxEp PriceFeedEndpoints) (PerpetualPriceInfo, error) {
+	sym := xInfo.Perpetuals[j].S2Symbol
 	pxMap, feedData, err := fetchIndexPricesForPerpetual(xInfo, j, pxEp)
 	if err != nil {
-		return PerpetualPriceInfo{}, err
+		return PerpetualPriceInfo{}, fmt.Errorf("perpetual %s (id=%d): %w", sym, xInfo.Perpetuals[j].Id, err)
 	}
 	s2, s3, isMarketClosedS2, isMarketClosedS3, err := calculatePerpIdxPx(xInfo, pxMap, xInfo.Perpetuals[j].S2Symbol, xInfo.Perpetuals[j].S3Symbol)
 	for _, p := range feedData.Prices {
@@ -1507,11 +1508,11 @@ func fetchIndexPricesForPerpetual(xInfo *StaticExchangeInfo, j int, pxEp PriceFe
 	// get underlying data from rest-api with vaa
 	feedData, err := fetchPricesFromAPI(xInfo.Perpetuals[j].PriceIds, pxEp, true)
 	if err != nil {
-		return nil, PriceFeedData{}, err
+		return nil, PriceFeedData{}, fmt.Errorf("fetchPricesFromAPI: %w", err)
 	}
 	pxMap, err := fetchPricesFromChain(xInfo.Perpetuals[j].OnChainSymbols, xInfo.ChainOracles)
 	if err != nil {
-		return nil, PriceFeedData{}, err
+		return nil, PriceFeedData{}, fmt.Errorf("fetchPricesFromChain: %w", err)
 	}
 	for k, id := range feedData.PriceIds {
 		syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
@@ -1679,18 +1680,19 @@ func fetchOraclePrices(priceIds []PriceId, ep PriceFeedEndpoints) ([]ResponsePyt
 	query4 := fmt.Sprintf("%s/v3/updates/price/latest?encoding=base64&ids[]=", sportFeedEndpoint)
 	count := 0
 	for _, id := range priceIds {
+		idHex := strings.TrimPrefix(id.Id, "0x")
 		switch id.Type {
 		case utils.PXTYPE_PYTH:
-			fetchPythPrice(query1+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
+			fetchPythPrice(query1+idHex, resCh, errCh)
 			count++
 		case utils.PXTYPE_POLYMARKET:
-			fetchPythPrice(query2+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
+			fetchPythPrice(query2+idHex, resCh, errCh)
 			count++
 		case utils.PXTYPE_V2, utils.PXTYPE_V3:
-			fetchPythPrice(query3+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
+			fetchPythPrice(query3+idHex, resCh, errCh)
 			count++
 		case utils.PXTYPE_SPORT:
-			fetchPythPrice(query4+strings.TrimPrefix(id.Id, "0x"), resCh, errCh)
+			fetchPythPrice(query4+idHex, resCh, errCh)
 			count++
 		}
 	}
@@ -1715,25 +1717,53 @@ func fetchOraclePrices(priceIds []PriceId, ep PriceFeedEndpoints) ([]ResponsePyt
 	return res, nil
 }
 
+var priceFeedClient = &http.Client{
+	Timeout: 10 * time.Second,
+	Transport: &http.Transport{
+		IdleConnTimeout: 30 * time.Second,
+		MaxIdleConns:    10,
+	},
+}
+
 func fetchPythPrice(query string, resCh chan<- *PythLatestPxV2, errCh chan<- error) {
-	response, err := http.Get(query)
+	// extract endpoint host for error context
+	host := query
+	if idx := strings.Index(query, "/v"); idx > 0 {
+		host = query[:idx]
+	}
+
+	req, err := http.NewRequest("GET", query, nil)
 	if err != nil {
-		errCh <- errors.New("error sending fetchPricesFromAPI request:" + err.Error())
+		errCh <- fmt.Errorf("[%s] error creating request: %w", host, err)
+		return
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", "d8x-sdk/1.0")
+
+	response, err := priceFeedClient.Do(req)
+	if err != nil {
+		errCh <- fmt.Errorf("[%s] request failed: %w", host, err)
 		return
 	}
 	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		errCh <- errors.New("error reading response body:" + err.Error())
+		errCh <- fmt.Errorf("[%s] error reading response: %w", host, err)
+		return
 	}
 	if response.StatusCode != 200 {
-		errCh <- errors.New("error fetchPricesFromAPI status " + strconv.Itoa(response.StatusCode) + " " + string(body[:]))
+		// truncate body to 200 chars for readability
+		bodyStr := string(body)
+		if len(bodyStr) > 200 {
+			bodyStr = bodyStr[:200]
+		}
+		errCh <- fmt.Errorf("[%s] status %d: %s", host, response.StatusCode, bodyStr)
 		return
 	}
 	var data PythLatestPxV2
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		errCh <- errors.New("fetchPricesFromAPI:" + err.Error())
+		errCh <- fmt.Errorf("[%s] json decode error: %w", host, err)
 		return
 	}
 	resCh <- &data
