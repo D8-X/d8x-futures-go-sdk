@@ -445,32 +445,32 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		S3Symbol = base3 + "-" + quote3
 	}
 	isNormal := PerpetualStateEnum(pIn.PerpetualState) == NORMAL
-	priceIds := make([]PriceId, len(pIn.PriceIds))
-	if isNormal {
-		for i, uint8Array := range pIn.PriceIds {
-			byteArray := make([]byte, len(uint8Array))
-			for j, v := range uint8Array {
-				byteArray[j] = byte(v)
-			}
-			priceIds[i] = PriceId{
-				Id:   hex.EncodeToString(byteArray),
-				Type: utils.PXTYPE_UNKNOWN,
-			}
-			// find id in config
-			for _, v := range configPx.PriceFeedIds {
-				if v.Id != "0x"+priceIds[i].Id {
-					continue
-				}
-				priceIds[i].Origin = v.Origin
-				priceIds[i].Type = v.Type
-				break
-			}
-			if priceIds[i].Type == utils.PXTYPE_UNKNOWN {
-				// no price type found
-				return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", priceIds[i].Id)
-			}
-
+	priceIds := make([]PriceId, 0, len(pIn.PriceIds))
+	for _, uint8Array := range pIn.PriceIds {
+		byteArray := uint8Array[:]
+		if len(bytes.TrimRight(byteArray, "\x00")) == 0 { // here we skip the perps with no oracle for this price feed
+			continue
 		}
+		pid := PriceId{
+			Id:   hex.EncodeToString(byteArray),
+			Type: utils.PXTYPE_UNKNOWN,
+		}
+		// find id in config
+		for _, v := range configPx.PriceFeedIds {
+			if v.Id != "0x"+pid.Id {
+				continue
+			}
+			pid.Origin = v.Origin
+			pid.Type = v.Type
+			break
+		}
+		if pid.Type == utils.PXTYPE_UNKNOWN {
+			if isNormal {
+				return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", pid.Id)
+			}
+			continue
+		}
+		priceIds = append(priceIds, pid)
 	}
 	pOut := PerpetualStaticInfo{
 		Id:                     int32(pIn.Id.Int64()),
