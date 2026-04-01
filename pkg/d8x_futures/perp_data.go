@@ -437,15 +437,8 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 	isNormal := PerpetualStateEnum(pIn.PerpetualState) == NORMAL
 	priceIds := make([]PriceId, 0, len(pIn.PriceIds))
 	for _, uint8Array := range pIn.PriceIds {
-		byteArray := make([]byte, len(uint8Array))
-		allZero := true
-		for j, v := range uint8Array {
-			byteArray[j] = byte(v)
-			if v != 0 {
-				allZero = false
-			}
-		}
-		if allZero {
+		byteArray := uint8Array[:]
+		if len(bytes.TrimRight(byteArray, "\x00")) == 0 { // here we skip the perps with no oracle for this price feed
 			continue
 		}
 		pid := PriceId{
