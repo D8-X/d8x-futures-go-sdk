@@ -320,6 +320,13 @@ func isPrdMktPerp(perp *PerpetualStaticInfo) bool {
 	return result.Cmp(big.NewInt(0)) != 0
 }
 
+// isPrdMktPerp checks whether the prediction market flag
+// of the perpetual is set
+func hasPrdMktFlag(flag *big.Int) bool {
+	result := new(big.Int).And(big.NewInt(int64(FLAG_PREDICTION_MKT)), flag)
+	return result.Cmp(big.NewInt(0)) != 0
+}
+
 // isLowLiqPerp checks whether the loqliq market flag
 // of the perpetual is set
 func isLowLiqPerp(perp *PerpetualStaticInfo) bool {
@@ -438,32 +445,32 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		S3Symbol = base3 + "-" + quote3
 	}
 	isNormal := PerpetualStateEnum(pIn.PerpetualState) == NORMAL
-	priceIds := make([]PriceId, len(pIn.PriceIds))
-	if isNormal {
-		for i, uint8Array := range pIn.PriceIds {
-			byteArray := make([]byte, len(uint8Array))
-			for j, v := range uint8Array {
-				byteArray[j] = byte(v)
-			}
-			priceIds[i] = PriceId{
-				Id:   hex.EncodeToString(byteArray),
-				Type: utils.PXTYPE_UNKNOWN,
-			}
-			// find id in config
-			for _, v := range configPx.PriceFeedIds {
-				if v.Id != "0x"+priceIds[i].Id {
-					continue
-				}
-				priceIds[i].Origin = v.Origin
-				priceIds[i].Type = v.Type
-				break
-			}
-			if priceIds[i].Type == utils.PXTYPE_UNKNOWN {
-				// no price type found
-				return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", priceIds[i].Id)
-			}
-
+	priceIds := make([]PriceId, 0, len(pIn.PriceIds))
+	for _, uint8Array := range pIn.PriceIds {
+		byteArray := uint8Array[:]
+		if len(bytes.TrimRight(byteArray, "\x00")) == 0 { // here we skip the perps with no oracle for this price feed
+			continue
 		}
+		pid := PriceId{
+			Id:   hex.EncodeToString(byteArray),
+			Type: utils.PXTYPE_UNKNOWN,
+		}
+		// find id in config
+		for _, v := range configPx.PriceFeedIds {
+			if v.Id != "0x"+pid.Id {
+				continue
+			}
+			pid.Origin = v.Origin
+			pid.Type = v.Type
+			break
+		}
+		if pid.Type == utils.PXTYPE_UNKNOWN {
+			if isNormal {
+				return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", pid.Id)
+			}
+			continue
+		}
+		priceIds = append(priceIds, pid)
 	}
 	pOut := PerpetualStaticInfo{
 		Id:                     int32(pIn.Id.Int64()),
