@@ -53,7 +53,7 @@ const (
 var re = lipgloss.NewRenderer(os.Stdout)
 var (
 	focusedStyle = lipgloss.NewStyle().Foreground(blueHighlight)
-	cursorStyle  = focusedStyle.Copy()
+	cursorStyle  = focusedStyle
 	baseStyle    = lipgloss.NewStyle().
 			BorderStyle(lipgloss.NormalBorder()).
 			BorderForeground(blue)
@@ -63,16 +63,16 @@ var (
 	// CellStyle is the base lipgloss style used for the table rows.
 	CellStyle = re.NewStyle().Padding(0, 1).Width(14)
 	// OddRowStyle is the lipgloss style used for odd-numbered table rows.
-	OddRowStyle = CellStyle.Copy().Foreground(gray)
+	OddRowStyle = CellStyle.Foreground(gray)
 	// EvenRowStyle is the lipgloss style used for even-numbered table rows.
-	EvenRowStyle = CellStyle.Copy().Foreground(lightGray)
+	EvenRowStyle = CellStyle.Foreground(lightGray)
 	// BorderStyle is the lipgloss style used for the table border.
 	BorderStyle = lipgloss.NewStyle().Foreground(orange)
 )
 
 type ScreenChoices struct {
 	chooseOptions []string
-	cursor int
+	cursor        int
 }
 
 func initialModel() Model {
