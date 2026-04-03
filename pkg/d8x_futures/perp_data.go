@@ -2,6 +2,7 @@ package d8x_futures
 
 import (
 	"bytes"
+	"context"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -17,7 +18,9 @@ import (
 	"github.com/D8-X/d8x-futures-go-sdk/config"
 	"github.com/D8-X/d8x-futures-go-sdk/pkg/contracts"
 	"github.com/D8-X/d8x-futures-go-sdk/utils"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -108,7 +111,7 @@ func CreateBlockChainConnector(pxConfig utils.PriceFeedConfig, chConf utils.Chai
 func QueryNestedPerpetualInfo(conn BlockChainConnector) (NestedPerpetualIds, error) {
 	var idxFrom uint8 = 1
 	const queryLen uint8 = 5
-	lenReceived := queryLen
+	var lenReceived uint8
 	var nestedPerpetualIds [][]*big.Int
 	var poolShareTokenAddr []common.Address
 	var poolMarginTokenAddr []common.Address
@@ -317,6 +320,13 @@ func isPrdMktPerp(perp *PerpetualStaticInfo) bool {
 	return result.Cmp(big.NewInt(0)) != 0
 }
 
+// isPrdMktPerp checks whether the prediction market flag
+// of the perpetual is set
+func hasPrdMktFlag(flag *big.Int) bool {
+	result := new(big.Int).And(big.NewInt(int64(FLAG_PREDICTION_MKT)), flag)
+	return result.Cmp(big.NewInt(0)) != 0
+}
+
 // isLowLiqPerp checks whether the loqliq market flag
 // of the perpetual is set
 func isLowLiqPerp(perp *PerpetualStaticInfo) bool {
@@ -435,32 +445,32 @@ func getterDataToPerpetualStaticInfo(pIn *contracts.IPerpetualInfoPerpetualStati
 		S3Symbol = base3 + "-" + quote3
 	}
 	isNormal := PerpetualStateEnum(pIn.PerpetualState) == NORMAL
-	priceIds := make([]PriceId, len(pIn.PriceIds))
-	if isNormal {
-		for i, uint8Array := range pIn.PriceIds {
-			byteArray := make([]byte, len(uint8Array))
-			for j, v := range uint8Array {
-				byteArray[j] = byte(v)
-			}
-			priceIds[i] = PriceId{
-				Id:   hex.EncodeToString(byteArray),
-				Type: utils.PXTYPE_UNKNOWN,
-			}
-			// find id in config
-			for _, v := range configPx.PriceFeedIds {
-				if v.Id != "0x"+priceIds[i].Id {
-					continue
-				}
-				priceIds[i].Origin = v.Origin
-				priceIds[i].Type = v.Type
-				break
-			}
-			if priceIds[i].Type == utils.PXTYPE_UNKNOWN {
-				// no price type found
-				return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", priceIds[i].Id)
-			}
-
+	priceIds := make([]PriceId, 0, len(pIn.PriceIds))
+	for _, uint8Array := range pIn.PriceIds {
+		byteArray := uint8Array[:]
+		if len(bytes.TrimRight(byteArray, "\x00")) == 0 { // here we skip the perps with no oracle for this price feed
+			continue
 		}
+		pid := PriceId{
+			Id:   hex.EncodeToString(byteArray),
+			Type: utils.PXTYPE_UNKNOWN,
+		}
+		// find id in config
+		for _, v := range configPx.PriceFeedIds {
+			if v.Id != "0x"+pid.Id {
+				continue
+			}
+			pid.Origin = v.Origin
+			pid.Type = v.Type
+			break
+		}
+		if pid.Type == utils.PXTYPE_UNKNOWN {
+			if isNormal {
+				return PerpetualStaticInfo{}, fmt.Errorf("config requires entry for id %s", pid.Id)
+			}
+			continue
+		}
+		priceIds = append(priceIds, pid)
 	}
 	pOut := PerpetualStaticInfo{
 		Id:                     int32(pIn.Id.Int64()),
@@ -607,4 +617,74 @@ func FromChainType(scOrder *contracts.IClientOrderClientOrder, xInfo *StaticExch
 		OptTraderAddr:       scOrder.TraderAddr,
 	}
 	return order
+}
+
+func (sdk *Sdk) SetPerpetualMarginRates(symbol string, im, mm float64, optRPC *ethclient.Client, optGas ...GasOption) (*types.Transaction, error) {
+	var err error
+	symbol, err = sdk.symbolToInternal(symbol)
+	if err != nil {
+		return nil, err
+	}
+	if optRPC == nil {
+		optRPC = sdk.Conn.Rpc
+	}
+	j := GetPerpetualStaticInfoIdxFromSymbol(&sdk.Info, symbol)
+	if j == -1 {
+		return nil, fmt.Errorf("no perpetual index found for symbol %s", symbol)
+	}
+	id := sdk.Info.Perpetuals[j].Id
+	tx, err := RawSetMarginRates(
+		&sdk.Conn,
+		optRPC,
+		id,
+		mm,
+		im,
+		&sdk.Info,
+		sdk.Wallets[0],
+		optGas...,
+	)
+	if err != nil {
+		return tx, err
+	}
+
+	if _, err := bind.WaitMined(context.Background(), optRPC, tx); err != nil {
+		return tx, fmt.Errorf("%s: failed to mine transaction: %w", symbol, err)
+	}
+	sdk.Info.Perpetuals[j].InitialMarginRate = im
+	sdk.Info.Perpetuals[j].MaintenanceMarginRate = mm
+	return tx, nil
+}
+
+func RawSetMarginRates(
+	conn *BlockChainConnector,
+	rpc *ethclient.Client,
+	perpId int32,
+	mm, im float64,
+	xInfo *StaticExchangeInfo,
+	postingWallet *Wallet,
+	gasOpts ...GasOption,
+) (*types.Transaction, error) {
+	if im <= mm {
+		return nil, fmt.Errorf("maintenance margin rate must be lower than initial")
+	}
+	perpCtrct, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
+	if err != nil {
+		return nil, fmt.Errorf("failed creating manager instance %w", err)
+	}
+	v := postingWallet.Auth.Value
+	defer func() { postingWallet.Auth.Value = v }()
+	postingWallet.Auth.Value = big.NewInt(0)
+
+	err = postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...)
+	if err != nil {
+		return nil, fmt.Errorf("RawLiquidatePosition: uptdateNonceAndGasPx %v", err)
+	}
+	fMM := utils.Float64ToABDK(mm)
+	fIM := utils.Float64ToABDK(im)
+	return perpCtrct.SetMarginRates(
+		postingWallet.Auth,
+		big.NewInt(int64(perpId)),
+		fMM,
+		fIM,
+	)
 }

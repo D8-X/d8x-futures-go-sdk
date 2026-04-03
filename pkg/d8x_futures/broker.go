@@ -3,7 +3,6 @@ package d8x_futures
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math/big"
 	"net/http"
@@ -152,17 +151,17 @@ func (sdk *SdkRO) QueryBrokerLots(symbol string, addr *common.Address, optRpc *e
 func RawQueryBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbol string, addr *common.Address) (int, error) {
 	j := GetPoolStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
-		return -1, errors.New("Could not find pool for symbol " + symbol)
+		return -1, fmt.Errorf("RawQueryBrokerLots: could not find pool for symbol %s", symbol)
 	}
 	pool := xInfo.Pools[j]
 	poolId := pool.PoolId
 	perpCtrct, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
 	if err != nil {
-		return -1, errors.New("RawQueryBrokerLots:" + err.Error())
+		return -1, fmt.Errorf("RawQueryBrokerLots: %w", err)
 	}
 	lots, err := perpCtrct.GetBrokerDesignation(nil, uint8(poolId), *addr)
 	if err != nil {
-		return -1, errors.New("RawQueryBrokerLots:" + err.Error())
+		return -1, fmt.Errorf("RawQueryBrokerLots: %w", err)
 	}
 	return int(lots), nil
 }
@@ -170,21 +169,23 @@ func RawQueryBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbol
 func RawPurchaseBrokerLots(rpc *ethclient.Client, xInfo *StaticExchangeInfo, postingWallet *Wallet, symbol string, numLots int, gasOpts ...GasOption) (*types.Transaction, error) {
 	j := GetPoolStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
-		return nil, errors.New("Could not find pool for symbol " + symbol)
+		return nil, fmt.Errorf("RawPurchaseBrokerLots: could not find pool for symbol %s", symbol)
 	}
 	pool := xInfo.Pools[j]
 	poolId := pool.PoolId
 	perpCtrct, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
 	if err != nil {
-		return nil, errors.New("RawPurchaseBrokerLots:" + err.Error())
+		return nil, fmt.Errorf("RawPurchaseBrokerLots: %w", err)
 	}
 	g := postingWallet.Auth.GasLimit
 	defer postingWallet.SetGasLimit(g)
 	postingWallet.SetGasLimit(uint64(1_000_000))
-	postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...)
+	if err := postingWallet.UpdateNonceAndGasPx(rpc, gasOpts...); err != nil {
+		return nil, fmt.Errorf("RawPurchaseBrokerLots: %w", err)
+	}
 	tx, err := perpCtrct.DepositBrokerLots(postingWallet.Auth, uint8(poolId), uint32(numLots))
 	if err != nil {
-		return nil, errors.New("RawPurchaseBrokerLots:" + err.Error())
+		return nil, fmt.Errorf("RawPurchaseBrokerLots: %w", err)
 	}
 	return tx, nil
 }

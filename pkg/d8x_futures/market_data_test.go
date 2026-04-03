@@ -210,7 +210,7 @@ func TestFetchLowLiqPx(t *testing.T) {
 }
 
 func TestFetchInfo(t *testing.T) {
-	sdkRo, err := NewSdkRO("84532")
+	sdkRo, err := NewSdkRO("8453")
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
@@ -358,7 +358,7 @@ func TestGetPerpetualData(t *testing.T) {
 	// err := sdkRo.New("195") //x1
 	// err := sdkRo.New("196") //xlayer
 	// err := sdkRo.New("80084") //bartio
-	sdkRo, err := NewSdkRO("84532") // base sepolia
+	sdkRo, err := NewSdkRO("8453") // base
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
@@ -412,7 +412,7 @@ func TestPerpetualPriceTuple(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSdkRO: %v", err)
 	}
-	sym := getActiveSymbol(t, &sdkRo.Info)
+	sym := "SP0X-USD-PUSD" // getActiveSymbol(t, &sdkRo.Info)
 	startTime := time.Now()
 	tradeAmt := []float64{-0.06, -0.05, -0.01, 0, 0.01, 0.05}
 	ep := PriceFeedEndpoints{
