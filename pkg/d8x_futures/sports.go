@@ -64,7 +64,7 @@ func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 	now := time.Now().Unix()
 	sdk.Sport.SlotsMux.RLock()
 	ts := sdk.Sport.LastUpdateTs
-	symInt, _ = strings.CutSuffix(symInt, "-USD")
+	symInt = strings.Split(symInt, "-")[0]
 	contractId, exists := sdk.Sport.SlotnameToCtrct[symInt]
 	slot := sdk.Sport.Slots[contractId]
 	sdk.Sport.SlotsMux.RUnlock()
@@ -80,12 +80,14 @@ func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 	if !exists {
 		return "", fmt.Errorf("no such symbol conversion: %s", symInt)
 	}
-	return contractId + "-USD-" + slot.PoolSym, nil
+	// todo
+	s := fmt.Sprintf("%s-%s-%s", contractId, slot.PoolSym, slot.PoolSym)
+	return s, nil
 }
 
 // SportSlot checks whether the contractId (NFL_ATL_SF_251019)
 // is assigned to a perpetual slot. Returns the slot name
-// (e.g. NFL0-USD-PUSD) and true if found, "" and false otherwise
+// (e.g. NFL0-PUSD-PUSD) and true if found, "" and false otherwise
 func (sdk *SdkRO) SportSlot(contractId string) (string, bool) {
 	if contractId[3] != '_' {
 		return "", false
@@ -99,7 +101,7 @@ func (sdk *SdkRO) SportSlot(contractId string) (string, bool) {
 
 // symbolToInternal converts sports symbols
 // to the currently assigned perpetual symbol
-// E.g., MLB_TOR_NYY_251009 -> MLB1-USD-<poolsym>
+// E.g., MLB_TOR_NYY_251009 -> MLB1-<poolsym>-<poolsym>
 // Returns the symbol unchanged if not a long-form
 // sports symbol
 func (sdk *SdkRO) symbolToInternal(sym string) (string, error) {
@@ -125,7 +127,8 @@ func (sdk *SdkRO) symbolToInternal(sym string) (string, error) {
 	if !exists {
 		return "", fmt.Errorf("no such symbol %s", sym)
 	}
-	return slot.Slot + "-USD-" + slot.PoolSym, nil
+	s := fmt.Sprintf("%s-%s-%s", slot.Slot, slot.PoolSym, slot.PoolSym)
+	return s, nil
 }
 
 // refreshSlotAssignment updates sdk.Sport.Slots from
