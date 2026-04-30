@@ -873,7 +873,12 @@ func RawQueryPerpetualState(
 		perpStates[i].State = PerpetualStateEnum(perpData.State)
 		perpStates[i].IndexPrice = pxInfoFloat[i*2]
 		perpStates[i].CollToQuoteIndexPrice = pxInfoFloat[i*2+1]
-		perpStates[i].MarkPrice = pxInfoFloat[i*2] * (1 + utils.ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
+		j := GetPerpetualStaticInfoIdxFromId(&xInfo, int32(perpData.Id.Int64()))
+		if j >= 0 && hasPrdMktFlag(xInfo.Perpetuals[j].PerpFlags) {
+			perpStates[i].MarkPrice = pxInfoFloat[i*2]
+		} else {
+			perpStates[i].MarkPrice = pxInfoFloat[i*2] * (1 + utils.ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
+		}
 		perpStates[i].CurrentFundingRateBps = utils.ABDKToFloat64(perpData.FCurrentFundingRate)
 		perpStates[i].OpenInterestBC = utils.ABDKToFloat64(perpData.FOpenInterest)
 		perpStates[i].MidPrice = utils.ABDKToFloat64(pxMid[i])
