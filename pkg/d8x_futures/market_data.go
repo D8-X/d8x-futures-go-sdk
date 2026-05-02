@@ -230,7 +230,7 @@ func (sdkRo *SdkRO) ApproximateOrderBook(symbol string, optEndPt *OptEndPoints) 
 	// example: https://api.binance.com/api/v1/depth?symbol=BTCUSDC&limit=5000
 	j := GetPerpetualStaticInfoIdxFromSymbol(&sdkRo.Info, symbol)
 	if j == -1 {
-		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return nil, fmt.Errorf("symbol %s does not exist in static perpetual info", symbol)
 	}
 	if isLowLiqPerp(&sdkRo.Info.Perpetuals[j]) {
 		// we calculate off-chain
@@ -873,7 +873,12 @@ func RawQueryPerpetualState(
 		perpStates[i].State = PerpetualStateEnum(perpData.State)
 		perpStates[i].IndexPrice = pxInfoFloat[i*2]
 		perpStates[i].CollToQuoteIndexPrice = pxInfoFloat[i*2+1]
-		perpStates[i].MarkPrice = pxInfoFloat[i*2] * (1 + utils.ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
+		j := GetPerpetualStaticInfoIdxFromId(&xInfo, int32(perpData.Id.Int64()))
+		if j >= 0 && hasPrdMktFlag(xInfo.Perpetuals[j].PerpFlags) {
+			perpStates[i].MarkPrice = pxInfoFloat[i*2]
+		} else {
+			perpStates[i].MarkPrice = pxInfoFloat[i*2] * (1 + utils.ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
+		}
 		perpStates[i].CurrentFundingRateBps = utils.ABDKToFloat64(perpData.FCurrentFundingRate)
 		perpStates[i].OpenInterestBC = utils.ABDKToFloat64(perpData.FOpenInterest)
 		perpStates[i].MidPrice = utils.ABDKToFloat64(pxMid[i])
@@ -918,7 +923,7 @@ func RawQueryPoolStates(rpc *ethclient.Client, xInfo StaticExchangeInfo) ([]Pool
 func RawQueryAllOpenOrders(rpc *ethclient.Client, xInfo StaticExchangeInfo, symbol string) (*OpenOrders, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
-		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return nil, fmt.Errorf("symbol %s does not exist in static perpetual info", symbol)
 	}
 	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 
@@ -954,7 +959,7 @@ outerLoop:
 func RawQueryNumOrders(rpc *ethclient.Client, xInfo StaticExchangeInfo, symbol string) (int64, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
-		return 0, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return 0, fmt.Errorf("symbol %s does not exist in static perpetual info", symbol)
 	}
 	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	count, err := lob.OrderCount(nil)
@@ -967,7 +972,7 @@ func RawQueryNumOrders(rpc *ethclient.Client, xInfo StaticExchangeInfo, symbol s
 func RawQueryOpenOrderRange(rpc *ethclient.Client, xInfo StaticExchangeInfo, symbol string, from, to int) (*OpenOrders, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
-		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return nil, fmt.Errorf("symbol %s does not exist in static perpetual info", symbol)
 	}
 	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	ooSc, err := lob.PollRange(nil, big.NewInt(int64(from)), big.NewInt(int64(to-from)))
@@ -987,7 +992,7 @@ func RawQueryOpenOrderRange(rpc *ethclient.Client, xInfo StaticExchangeInfo, sym
 func RawQueryOpenOrders(rpc *ethclient.Client, xInfo StaticExchangeInfo, symbol string, traderAddr common.Address) ([]Order, []string, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
-		return []Order{}, []string{}, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return []Order{}, []string{}, fmt.Errorf("symbol %s does not exist in static perpetual info", symbol)
 	}
 	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 
@@ -1034,7 +1039,7 @@ outerLoop:
 func RawQueryOrderStatus(rpc *ethclient.Client, xInfo StaticExchangeInfo, traderAddr common.Address, orderDigest string, symbol string) (OrderStatus, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
-		return ORDER_STATUS_UNKNOWN, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return ORDER_STATUS_UNKNOWN, fmt.Errorf("symbol %s does not exist in static perpetual info", symbol)
 	}
 	lob := CreateLimitOrderBookInstance(rpc, xInfo.Perpetuals[j].LimitOrderBookAddr)
 	// convert digest string to bytes 32
@@ -1059,7 +1064,7 @@ func RawQueryPerpetualPriceTuple(
 ) ([]float64, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
-		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return nil, fmt.Errorf("symbol %s does not exist in static perpetual info", symbol)
 	}
 	perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
 	pxInfo, err := fetchPerpetualPriceInfo(xInfo, j, pxEp)
@@ -1110,7 +1115,7 @@ func RawQueryPositionRisks(
 	for k, s := range symbols {
 		j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, s)
 		if j == -1 {
-			return nil, fmt.Errorf("Symbol " + s + " does not exist in static perpetual info")
+			return nil, fmt.Errorf("symbol %s does not exist in static perpetual info", s)
 		}
 		perpIds[k] = big.NewInt(int64(xInfo.Perpetuals[j].Id))
 		prices[k], err = fetchPerpetualPriceInfo(xInfo, j, pxEp)
@@ -1167,7 +1172,7 @@ func RawQueryPositionRisks(
 func RawQueryMarginAccounts(client *ethclient.Client, xInfo *StaticExchangeInfo, symbol string, traders []common.Address) ([]MarginAccount, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
-		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return nil, fmt.Errorf("symbol %s does not exist in static perpetual info", symbol)
 	}
 	perpId := big.NewInt(int64(xInfo.Perpetuals[j].Id))
 	caller, err := multicall.New(client)
@@ -1208,11 +1213,10 @@ func RawQueryMarginAccounts(client *ethclient.Client, xInfo *StaticExchangeInfo,
 	return accounts, nil
 }
 
-// Not compatible with zkevm deployment
 func RawGetPerpetualData(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbol string) (*contracts.PerpStoragePerpetualData, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(xInfo, symbol)
 	if j == -1 {
-		return nil, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return nil, fmt.Errorf("symbol %s does not exist in static perpetual info", symbol)
 	}
 	proxy, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)
 	if err != nil {
@@ -1228,7 +1232,7 @@ func RawGetPerpetualData(rpc *ethclient.Client, xInfo *StaticExchangeInfo, symbo
 func RawQueryMaxTradeAmount(rpc *ethclient.Client, xInfo StaticExchangeInfo, currentPositionNotional float64, symbol string, isBuy bool) (float64, error) {
 	j := GetPerpetualStaticInfoIdxFromSymbol(&xInfo, symbol)
 	if j == -1 {
-		return 0, fmt.Errorf("Symbol " + symbol + " does not exist in static perpetual info")
+		return 0, fmt.Errorf("symbol %s does not exist in static perpetual info", symbol)
 	}
 	p := utils.Float64ToABDK(currentPositionNotional)
 	proxy, err := CreatePerpetualManagerInstance(rpc, xInfo.ProxyAddr)

@@ -43,7 +43,7 @@ func fetchConfigFromRepo(configName string) ([]byte, error) {
 func GetSymbolList() (map[string]string, error) {
 	jsonData, err := fetchConfigFromRepo("symbolList.json")
 	if err != nil {
-		return nil, fmt.Errorf("unable to fetch symbolList.json:" + err.Error())
+		return nil, fmt.Errorf("unable to fetch symbolList.json: %s", err.Error())
 	}
 	// Define a map to store the data
 	data := make(map[string]string)
@@ -143,7 +143,7 @@ func GetDefaultChainConfigFromId(chainId int64) (utils.ChainConfig, error) {
 func GetDefaultPriceConfig(chainId int64) (utils.PriceFeedConfig, error) {
 	data, err := fetchConfigFromRepo("priceFeedConfig.json")
 	if err != nil {
-		return utils.PriceFeedConfig{}, fmt.Errorf("unable to fetch priceFeedConfig.json:" + err.Error())
+		return utils.PriceFeedConfig{}, fmt.Errorf("unable to fetch priceFeedConfig.json: %s", err.Error())
 	}
 	ch, err := GetDefaultChainConfigFromId(chainId)
 	if err != nil {
@@ -157,7 +157,7 @@ func GetDefaultPriceConfig(chainId int64) (utils.PriceFeedConfig, error) {
 func GetDefaultPriceConfigByName(configNetwork string, chainId int) (utils.PriceFeedConfig, error) {
 	data, err := fetchConfigFromRepo("priceFeedConfig.json")
 	if err != nil {
-		return utils.PriceFeedConfig{}, fmt.Errorf("unable to fetch priceFeedConfig.json:" + err.Error())
+		return utils.PriceFeedConfig{}, fmt.Errorf("unable to fetch priceFeedConfig.json: %s", err.Error())
 	}
 	return utils.LoadPriceFeedConfig(data, chainId, configNetwork)
 }

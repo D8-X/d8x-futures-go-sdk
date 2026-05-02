@@ -25,11 +25,11 @@ func TestSdkExec(t *testing.T) {
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
 	}
-	sdk, err := NewSdk([]string{pk}, "84532")
+	sdk, err := NewSdk([]string{pk}, "8453")
 	if err != nil {
 		t.Fatalf("NewSdk: %v", err)
 	}
-	rpc, err := ethclient.Dial("https://sepolia.base.org")
+	rpc, err := ethclient.Dial("https://mainnet.base.org")
 	if err != nil {
 		t.Fatalf("ethclient.Dial: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestSdkLiquidatePosition(t *testing.T) {
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
 	}
-	sdk, err := NewSdk([]string{pk}, "84532") 
+	sdk, err := NewSdk([]string{pk}, "84532")
 	if err != nil {
 		t.Fatalf("NewSdk: %v", err)
 	}
@@ -140,7 +140,7 @@ func TestTradingFunc(t *testing.T) {
 	if pk == "" {
 		t.Fatal("Provide private key for testnet as environment variable PK")
 	}
-	sdk, err := NewSdk([]string{pk}, "base_sepolia")
+	sdk, err := NewSdk([]string{pk}, "base")
 	if err != nil {
 		t.Fatalf("NewSdk: %v", err)
 	}

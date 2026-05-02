@@ -61,6 +61,7 @@
     "prdMktFeedEndpoint": "",
     "lowLiqFeedEndpoint": "",
     "sportFeedEndpoint": "https://odin-sport-base.d8x.xyz/",
+	  "bettingLifecycleUrl": "https://sports-base.d8x.xyz/",
     "chainId": 8453,
     "proxyAddr": "0x38c4E93bac87b2fb96931dAB876Bb683D388f1A8",
     "multipayAddr": "0x00e7B648E6AD5CEfAeB0b423eEC6a7c3f0aA52dd",
