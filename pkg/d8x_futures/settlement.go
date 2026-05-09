@@ -351,14 +351,14 @@ func RawResetOrders(
 		}
 		txs = append(txs, tx)
 		j += batch
-		if j > int(N) {
-			break
-		}
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-		defer cancel()
 		_, err = bind.WaitMined(ctx, rpc, tx)
+		cancel()
 		if err != nil {
 			return nil, fmt.Errorf("failed to mine (reset orders): %w", err)
+		}
+		if j > int(N) {
+			break
 		}
 		time.Sleep(delay)
 	}
