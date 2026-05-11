@@ -871,7 +871,8 @@ func RawQueryPerpetualState(
 
 	perpStates := make([]PerpetualState, len(perps))
 	for i, perpData := range perps {
-		index := pxInfoFloat[i*3] / (1 - pxInfoFloat[i*3+2])
+		// convert to probability space, apply draw-prob correction, convert back
+		index := 1 + (pxInfoFloat[i*3]-1)/(1-pxInfoFloat[i*3+2])
 		perpStates[i].Id = int32(perpData.Id.Int64())
 		perpStates[i].State = PerpetualStateEnum(perpData.State)
 		perpStates[i].IndexPrice = index
