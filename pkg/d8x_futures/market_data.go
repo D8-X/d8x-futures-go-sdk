@@ -849,17 +849,19 @@ func RawQueryPerpetualState(
 		return nil, err
 	}
 	// gather perpetual index prices (offchain REST)
-	pxInfo := make([]*big.Int, len(perpetualIds)*2)
-	pxInfoFloat := make([]float64, len(perpetualIds)*2)
+	pxInfo := make([]*big.Int, len(perpetualIds)*3)
+	pxInfoFloat := make([]float64, len(perpetualIds)*3)
 	for i := range perpetualIds {
 		p, err := RawFetchPricesForPerpetualId(xInfo, perpetualIds[i], pxEp)
 		if err != nil {
 			return nil, err
 		}
-		pxInfoFloat[i*2] = p.S2Price
-		pxInfoFloat[i*2+1] = p.S3Price
-		pxInfo[i*2] = utils.Float64ToABDK(p.S2Price)
-		pxInfo[i*2+1] = utils.Float64ToABDK(p.S3Price)
+		pxInfoFloat[i*3] = p.S2Price
+		pxInfoFloat[i*3+1] = p.S3Price
+		pxInfoFloat[i*3+2] = p.DrawProb
+		pxInfo[i*3] = utils.Float64ToABDK(p.S2Price)
+		pxInfo[i*3+1] = utils.Float64ToABDK(p.S3Price)
+		pxInfo[i*3+2] = utils.Float64ToABDK(p.DrawProb)
 	}
 	// midprices via blockchain query
 	pxMid, err := proxy.QueryMidPrices(nil, bigIntSlice, pxInfo)
@@ -869,15 +871,16 @@ func RawQueryPerpetualState(
 
 	perpStates := make([]PerpetualState, len(perps))
 	for i, perpData := range perps {
+		index := pxInfoFloat[i*3] / (1 - pxInfoFloat[i*3+2])
 		perpStates[i].Id = int32(perpData.Id.Int64())
 		perpStates[i].State = PerpetualStateEnum(perpData.State)
-		perpStates[i].IndexPrice = pxInfoFloat[i*2]
-		perpStates[i].CollToQuoteIndexPrice = pxInfoFloat[i*2+1]
+		perpStates[i].IndexPrice = index
+		perpStates[i].CollToQuoteIndexPrice = pxInfoFloat[i*3+1]
 		j := GetPerpetualStaticInfoIdxFromId(&xInfo, int32(perpData.Id.Int64()))
 		if j >= 0 && hasPrdMktFlag(xInfo.Perpetuals[j].PerpFlags) {
-			perpStates[i].MarkPrice = pxInfoFloat[i*2]
+			perpStates[i].MarkPrice = index
 		} else {
-			perpStates[i].MarkPrice = pxInfoFloat[i*2] * (1 + utils.ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
+			perpStates[i].MarkPrice = pxInfoFloat[i*3] * (1 + utils.ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
 		}
 		perpStates[i].CurrentFundingRateBps = utils.ABDKToFloat64(perpData.FCurrentFundingRate)
 		perpStates[i].OpenInterestBC = utils.ABDKToFloat64(perpData.FOpenInterest)
