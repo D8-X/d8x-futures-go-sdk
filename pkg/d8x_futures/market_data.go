@@ -9,7 +9,6 @@ import (
 	"math"
 	"math/big"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -1636,7 +1635,7 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 					pxData.Prices[i] = PriceObs{
 						Px:             px,
 						Ema:            px,
-						Conf:           uint16(0),
+						Conf:           0,
 						CLOBParams:     0,
 						Ts:             int64(d.Price.PublishTime),
 						IsOffChain:     true,
@@ -1659,9 +1658,9 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 						if err != nil {
 							return PriceFeedData{}, fmt.Errorf("invalid ema price for %s: %w", d.Id, err)
 						}
-						conf, err := strconv.Atoi(d.Price.Conf)
-						if err != nil {
-							return PriceFeedData{}, fmt.Errorf("unable to convert prices.conf %s", err.Error())
+						conf, ok := new(big.Int).SetString(d.Price.Conf, 10)
+						if !ok {
+							return PriceFeedData{}, fmt.Errorf("unable to parse Price.Conf %q", d.Price.Conf)
 						}
 						params, ok := new(big.Int).SetString(d.EmaPrice.Conf, 10)
 						if !ok {
@@ -1670,7 +1669,7 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 						pxData.Prices[i] = PriceObs{
 							Px:             px,
 							Ema:            ema,
-							Conf:           uint16(conf),
+							Conf:           conf.Uint64(),
 							CLOBParams:     params.Uint64(),
 							Ts:             int64(d.Price.PublishTime),
 							IsOffChain:     true,

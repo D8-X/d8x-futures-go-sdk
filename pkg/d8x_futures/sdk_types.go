@@ -146,7 +146,7 @@ type OpenOrders struct {
 type PriceObs struct {
 	Px             float64
 	Ema            float64
-	Conf           uint16
+	Conf           uint64
 	CLOBParams     uint64
 	Ts             int64
 	IsOffChain     bool
@@ -165,8 +165,8 @@ type PerpetualPriceInfo struct {
 	S3Price          float64
 	DrawProb         float64 // draw probability for sports prediction markets
 	Ema              float64
-	Conf             uint16
-	CLOBParams       uint64
+	Conf             uint64 // bid/ask, fee params for pred mkts
+	CLOBParams       uint64 // slippage params for pred mkts/low liq
 	IsMarketClosedS2 bool
 	IsMarketClosedS3 bool
 	PriceFeed        PriceFeedData // off-chain price feeds

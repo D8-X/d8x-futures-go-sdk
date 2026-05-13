@@ -59,7 +59,7 @@ func extractLowLiqParams(p ResponsePythLatestPriceFeed) (float64, float64, uint6
 	if err != nil {
 		return 0, 0, 0, fmt.Errorf("invalid mid price: %w", err)
 	}
-	hbaTbps, err := strconv.Atoi(p.Price.Conf)
+	hbaTbps, err := strconv.ParseUint(p.Price.Conf, 10, 64)
 	if err != nil {
 		return 0, 0, 0, fmt.Errorf("unable to extract half-ba: %s", err.Error())
 	}
