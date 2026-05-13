@@ -224,6 +224,17 @@ const (
 	SIDE_SELL
 )
 
+func (t Side) Other() Side {
+	switch t {
+	case SIDE_BUY:
+		return SIDE_SELL
+	case SIDE_SELL:
+		return SIDE_BUY
+	default:
+		return SIDE_CLOSED
+	}
+}
+
 func (t Side) String() string {
 	switch t {
 	case SIDE_CLOSED:
