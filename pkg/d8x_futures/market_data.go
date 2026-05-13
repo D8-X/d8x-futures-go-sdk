@@ -1415,10 +1415,11 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 			syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
 			for _, sym := range syms {
 				pxMap[sym] = Price{
-					Px:         feedData.Prices[k].Px,
-					Ema:        feedData.Prices[k].Ema,
-					Ts:         int64(feedData.Prices[k].Ts),
-					IsOffChain: true,
+					Px:             feedData.Prices[k].Px,
+					Ema:            feedData.Prices[k].Ema,
+					Ts:             int64(feedData.Prices[k].Ts),
+					IsOffChain:     true,
+					IsPrdMktClosed: feedData.Prices[k].IsClosedPrdMkt,
 				}
 			}
 		}
@@ -1547,7 +1548,7 @@ func fetchIndexPricesForPerpetual(xInfo *StaticExchangeInfo, j int, pxEp PriceFe
 	for k, id := range feedData.PriceIds {
 		syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
 		for _, sym := range syms {
-			pxMap[sym] = Price{Px: feedData.Prices[k].Px, Ema: feedData.Prices[k].Ema, Ts: int64(feedData.Prices[k].Ts), IsOffChain: true}
+			pxMap[sym] = Price{Px: feedData.Prices[k].Px, Ema: feedData.Prices[k].Ema, Ts: int64(feedData.Prices[k].Ts), IsOffChain: true, IsPrdMktClosed: feedData.Prices[k].IsClosedPrdMkt}
 		}
 	}
 	return pxMap, feedData, nil

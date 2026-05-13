@@ -154,10 +154,11 @@ type PriceObs struct {
 }
 
 type Price struct {
-	Px         float64
-	Ema        float64 // ema field from pyth data
-	Ts         int64
-	IsOffChain bool
+	Px             float64
+	Ema            float64 // ema field from pyth data
+	Ts             int64
+	IsOffChain     bool
+	IsPrdMktClosed bool // only for prediction markets
 }
 
 type PerpetualPriceInfo struct {
