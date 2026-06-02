@@ -1183,6 +1183,55 @@
     {
         "inputs": [
             {
+                "internalType": "int128",
+                "name": "_param",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fp0",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fRho",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fp",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fm",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "_fm0",
+                "type": "int128"
+            }
+        ],
+        "name": "calcKappaEs",
+        "outputs": [
+            {
+                "internalType": "int128",
+                "name": "fKappa",
+                "type": "int128"
+            },
+            {
+                "internalType": "int128",
+                "name": "es",
+                "type": "int128"
+            }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "components": [
                     {
                         "internalType": "int128",
@@ -2315,11 +2364,6 @@
             },
             {
                 "internalType": "int128",
-                "name": "_fS3",
-                "type": "int128"
-            },
-            {
-                "internalType": "int128",
                 "name": "_fCmin",
                 "type": "int128"
             }
@@ -2355,11 +2399,6 @@
             {
                 "internalType": "int128",
                 "name": "_fMarkProb",
-                "type": "int128"
-            },
-            {
-                "internalType": "int128",
-                "name": "_fS3",
                 "type": "int128"
             },
             {
@@ -4336,11 +4375,6 @@
                 "internalType": "int128",
                 "name": "_marginRate",
                 "type": "int128"
-            },
-            {
-                "internalType": "int128",
-                "name": "_fS3",
-                "type": "int128"
             }
         ],
         "name": "pmMaintenanceMarginCash",
@@ -4407,12 +4441,12 @@
         "inputs": [
             {
                 "internalType": "int128",
-                "name": "_fPx",
+                "name": "_fP0",
                 "type": "int128"
             },
             {
                 "internalType": "int128",
-                "name": "_fPm",
+                "name": "_fWinProb",
                 "type": "int128"
             },
             {
@@ -4711,6 +4745,19 @@
             }
         ],
         "name": "reduceMarginCollateral",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint8",
+                "name": "_poolId",
+                "type": "uint8"
+            }
+        ],
+        "name": "resetRedemptionRate",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

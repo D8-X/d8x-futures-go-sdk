@@ -58,6 +58,25 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "address",
+                "name": "broker",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "authorized",
+                "type": "bool"
+            }
+        ],
+        "name": "SetBroker",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": true,
                 "internalType": "uint24",
                 "name": "perpetualId",
@@ -96,6 +115,19 @@
         "inputs": [
             {
                 "internalType": "address",
+                "name": "_broker",
+                "type": "address"
+            }
+        ],
+        "name": "addBroker",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
                 "name": "_executor",
                 "type": "address"
             }
@@ -113,12 +145,44 @@
                 "type": "address"
             }
         ],
+        "name": "approvedBroker",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
         "name": "approvedExecutor",
         "outputs": [
             {
                 "internalType": "bool",
                 "name": "",
                 "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "brokerCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -171,6 +235,25 @@
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "_broker",
+                "type": "address"
+            }
+        ],
+        "name": "isBrokerAllowed",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint24",
                 "name": "",
                 "type": "uint24"
@@ -198,6 +281,19 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_broker",
+                "type": "address"
+            }
+        ],
+        "name": "removeBroker",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {

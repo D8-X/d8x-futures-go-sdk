@@ -473,6 +473,11 @@
                 "internalType": "uint8",
                 "name": "_iCancelDelaySec",
                 "type": "uint8"
+            },
+            {
+                "internalType": "address",
+                "name": "_lobFactory",
+                "type": "address"
             }
         ],
         "name": "initialize",
@@ -517,6 +522,19 @@
                 "internalType": "bytes32[]",
                 "name": "",
                 "type": "bytes32[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "lobFactory",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
             }
         ],
         "stateMutability": "view",
