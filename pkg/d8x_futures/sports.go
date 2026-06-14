@@ -25,7 +25,7 @@ func SportsPrefix() []string {
 }
 
 func IsSportsSymbol(sym string) bool {
-	return len(sym) > 4 && sym[3] == '_'
+	return len(sym) > 4 && strings.Contains(sym, "_")
 }
 
 // SportSlotAssignment takes a slot (SP01, MLB0,...) and
@@ -50,15 +50,15 @@ func (sdk *SdkRO) SportSlotAssignment(slot string) (string, bool) {
 }
 
 // InternalToSymbol is the inversion to SymbolToInternal
-// Converts an internal symbol of the form MLB0 to its current
+// Converts an internal symbol of the form SP0X to its current
 // contract id -USD-<collateral>
 func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 	if sdk.ChainConfig.BettingLifecycleUrl == "" {
 		return symInt, nil
 	}
-	league := symInt[0:3]
-	leagues := SportsPrefix()
-	if !slices.Contains(leagues, league) {
+	slot := symInt[0:3]
+	slots := SportsPrefix()
+	if !slices.Contains(slots, slot) {
 		return symInt, nil
 	}
 	now := time.Now().Unix()
@@ -66,10 +66,10 @@ func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 	ts := sdk.Sport.LastUpdateTs
 	symInt = strings.Split(symInt, "-")[0]
 	contractId, exists := sdk.Sport.SlotnameToCtrct[symInt]
-	slot := sdk.Sport.Slots[contractId]
+	slotMeta := sdk.Sport.Slots[contractId]
 	sdk.Sport.SlotsMux.RUnlock()
 	if (!exists && now-ts > 5*60) ||
-		(exists && slot.Expiry.Before(time.Now()) && now-ts > 60) {
+		(exists && slotMeta.Expiry.Before(time.Now()) && now-ts > 60) {
 		if err := sdk.refreshSlotAssignment(); err != nil {
 			return "", fmt.Errorf("unable to refresh slot assignment: %w", err)
 		}
@@ -80,8 +80,7 @@ func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 	if !exists {
 		return "", fmt.Errorf("no such symbol conversion: %s", symInt)
 	}
-	// todo
-	s := fmt.Sprintf("%s-%s-%s", contractId, slot.PoolSym, slot.PoolSym)
+	s := fmt.Sprintf("%s-%s-%s", contractId, slotMeta.PoolSym, slotMeta.PoolSym)
 	return s, nil
 }
 
@@ -89,7 +88,7 @@ func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 // is assigned to a perpetual slot. Returns the slot name
 // (e.g. NFL0-PUSD-PUSD) and true if found, "" and false otherwise
 func (sdk *SdkRO) SportSlot(contractId string) (string, bool) {
-	if contractId[3] != '_' {
+	if !strings.Contains(contractId, "_") {
 		return "", false
 	}
 	sym, err := sdk.symbolToInternal(contractId)
@@ -101,11 +100,11 @@ func (sdk *SdkRO) SportSlot(contractId string) (string, bool) {
 
 // symbolToInternal converts sports symbols
 // to the currently assigned perpetual symbol
-// E.g., MLB_TOR_NYY_251009 -> MLB1-<poolsym>-<poolsym>
+// E.g., MLB_TOR_NYY_251009 -> SP01-<poolsym>-<poolsym>
 // Returns the symbol unchanged if not a long-form
 // sports symbol
 func (sdk *SdkRO) symbolToInternal(sym string) (string, error) {
-	if sym[3] != '_' {
+	if !strings.Contains(sym, "_") {
 		return sym, nil
 	}
 	sym = strings.Split(sym, "-")[0]
