@@ -1090,7 +1090,9 @@ func RawQueryPerpetualPriceTuple(
 	calls := make([]*multicall.Call, 0, len(tradeAmt))
 	for _, amt := range tradeAmt {
 		taAbdk := utils.Float64ToABDK(amt)
-		c := contract.NewCall(new(priceOutput), "queryPerpetualPrice", perpId, taAbdk, pricesAbdk, pxInfo.Conf, pxInfo.CLOBParams)
+		// extract minimal spread from pxInfo.Conf (we could just cast but more readable)
+		minSpread := uint16(pxInfo.Conf & 0xFFFF)
+		c := contract.NewCall(new(priceOutput), "queryPerpetualPrice", perpId, taAbdk, pricesAbdk, minSpread, pxInfo.CLOBParams)
 		calls = append(calls, c)
 	}
 	res, err := caller.Call(nil, calls...)
