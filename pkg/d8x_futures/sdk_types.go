@@ -146,7 +146,7 @@ type OpenOrders struct {
 type PriceObs struct {
 	Px             float64
 	Ema            float64
-	Conf           uint16
+	Conf           uint64
 	CLOBParams     uint64
 	Ts             int64
 	IsOffChain     bool
@@ -154,10 +154,11 @@ type PriceObs struct {
 }
 
 type Price struct {
-	Px         float64
-	Ema        float64 // ema field from pyth data
-	Ts         int64
-	IsOffChain bool
+	Px             float64
+	Ema            float64 // ema field from pyth data
+	Ts             int64
+	IsOffChain     bool
+	IsPrdMktClosed bool // only for prediction markets
 }
 
 type PerpetualPriceInfo struct {
@@ -165,8 +166,8 @@ type PerpetualPriceInfo struct {
 	S3Price          float64
 	DrawProb         float64 // draw probability for sports prediction markets
 	Ema              float64
-	Conf             uint16
-	CLOBParams       uint64
+	Conf             uint64 // bid/ask, fee params for pred mkts
+	CLOBParams       uint64 // slippage params for pred mkts/low liq
 	IsMarketClosedS2 bool
 	IsMarketClosedS3 bool
 	PriceFeed        PriceFeedData // off-chain price feeds
@@ -223,6 +224,17 @@ const (
 	SIDE_BUY
 	SIDE_SELL
 )
+
+func (t Side) Other() Side {
+	switch t {
+	case SIDE_BUY:
+		return SIDE_SELL
+	case SIDE_SELL:
+		return SIDE_BUY
+	default:
+		return SIDE_CLOSED
+	}
+}
 
 func (t Side) String() string {
 	switch t {

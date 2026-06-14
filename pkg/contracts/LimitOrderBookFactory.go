@@ -31,7 +31,7 @@ var (
 
 // LimitOrderBookFactoryMetaData contains all meta data concerning the LimitOrderBookFactory contract.
 var LimitOrderBookFactoryMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_implementation\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"perpManagerAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"limitOrderBookAddress\",\"type\":\"address\"}],\"name\":\"PerpetualLimitOrderBookDeployed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"gasLimit\",\"type\":\"uint32\"}],\"name\":\"SetCallbackGasLimit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"executor\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"authorized\",\"type\":\"bool\"}],\"name\":\"SetExecutor\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_executor\",\"type\":\"address\"}],\"name\":\"addExecutor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"approvedExecutor\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_perpetualManagerAddr\",\"type\":\"address\"},{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"deployLimitOrderBookProxy\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getBeacon\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getImplementation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"\",\"type\":\"uint24\"}],\"name\":\"orderBooks\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_executor\",\"type\":\"address\"}],\"name\":\"removeExecutor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_implementation\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"perpManagerAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"limitOrderBookAddress\",\"type\":\"address\"}],\"name\":\"PerpetualLimitOrderBookDeployed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"broker\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"authorized\",\"type\":\"bool\"}],\"name\":\"SetBroker\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint24\",\"name\":\"perpetualId\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"gasLimit\",\"type\":\"uint32\"}],\"name\":\"SetCallbackGasLimit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"executor\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"authorized\",\"type\":\"bool\"}],\"name\":\"SetExecutor\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_broker\",\"type\":\"address\"}],\"name\":\"addBroker\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_executor\",\"type\":\"address\"}],\"name\":\"addExecutor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"approvedBroker\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"approvedExecutor\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"brokerCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_perpetualManagerAddr\",\"type\":\"address\"},{\"internalType\":\"uint24\",\"name\":\"_perpetualId\",\"type\":\"uint24\"}],\"name\":\"deployLimitOrderBookProxy\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getBeacon\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getImplementation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_broker\",\"type\":\"address\"}],\"name\":\"isBrokerAllowed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"\",\"type\":\"uint24\"}],\"name\":\"orderBooks\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_broker\",\"type\":\"address\"}],\"name\":\"removeBroker\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_executor\",\"type\":\"address\"}],\"name\":\"removeExecutor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // LimitOrderBookFactoryABI is the input ABI used to generate the binding from.
@@ -180,6 +180,37 @@ func (_LimitOrderBookFactory *LimitOrderBookFactoryTransactorRaw) Transact(opts 
 	return _LimitOrderBookFactory.Contract.contract.Transact(opts, method, params...)
 }
 
+// ApprovedBroker is a free data retrieval call binding the contract method 0xfa107d9f.
+//
+// Solidity: function approvedBroker(address ) view returns(bool)
+func (_LimitOrderBookFactory *LimitOrderBookFactoryCaller) ApprovedBroker(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
+	var out []interface{}
+	err := _LimitOrderBookFactory.contract.Call(opts, &out, "approvedBroker", arg0)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// ApprovedBroker is a free data retrieval call binding the contract method 0xfa107d9f.
+//
+// Solidity: function approvedBroker(address ) view returns(bool)
+func (_LimitOrderBookFactory *LimitOrderBookFactorySession) ApprovedBroker(arg0 common.Address) (bool, error) {
+	return _LimitOrderBookFactory.Contract.ApprovedBroker(&_LimitOrderBookFactory.CallOpts, arg0)
+}
+
+// ApprovedBroker is a free data retrieval call binding the contract method 0xfa107d9f.
+//
+// Solidity: function approvedBroker(address ) view returns(bool)
+func (_LimitOrderBookFactory *LimitOrderBookFactoryCallerSession) ApprovedBroker(arg0 common.Address) (bool, error) {
+	return _LimitOrderBookFactory.Contract.ApprovedBroker(&_LimitOrderBookFactory.CallOpts, arg0)
+}
+
 // ApprovedExecutor is a free data retrieval call binding the contract method 0xd770f166.
 //
 // Solidity: function approvedExecutor(address ) view returns(bool)
@@ -209,6 +240,37 @@ func (_LimitOrderBookFactory *LimitOrderBookFactorySession) ApprovedExecutor(arg
 // Solidity: function approvedExecutor(address ) view returns(bool)
 func (_LimitOrderBookFactory *LimitOrderBookFactoryCallerSession) ApprovedExecutor(arg0 common.Address) (bool, error) {
 	return _LimitOrderBookFactory.Contract.ApprovedExecutor(&_LimitOrderBookFactory.CallOpts, arg0)
+}
+
+// BrokerCount is a free data retrieval call binding the contract method 0x6e37b6ef.
+//
+// Solidity: function brokerCount() view returns(uint256)
+func (_LimitOrderBookFactory *LimitOrderBookFactoryCaller) BrokerCount(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _LimitOrderBookFactory.contract.Call(opts, &out, "brokerCount")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// BrokerCount is a free data retrieval call binding the contract method 0x6e37b6ef.
+//
+// Solidity: function brokerCount() view returns(uint256)
+func (_LimitOrderBookFactory *LimitOrderBookFactorySession) BrokerCount() (*big.Int, error) {
+	return _LimitOrderBookFactory.Contract.BrokerCount(&_LimitOrderBookFactory.CallOpts)
+}
+
+// BrokerCount is a free data retrieval call binding the contract method 0x6e37b6ef.
+//
+// Solidity: function brokerCount() view returns(uint256)
+func (_LimitOrderBookFactory *LimitOrderBookFactoryCallerSession) BrokerCount() (*big.Int, error) {
+	return _LimitOrderBookFactory.Contract.BrokerCount(&_LimitOrderBookFactory.CallOpts)
 }
 
 // GetBeacon is a free data retrieval call binding the contract method 0x2d6b3a6b.
@@ -273,6 +335,37 @@ func (_LimitOrderBookFactory *LimitOrderBookFactoryCallerSession) GetImplementat
 	return _LimitOrderBookFactory.Contract.GetImplementation(&_LimitOrderBookFactory.CallOpts)
 }
 
+// IsBrokerAllowed is a free data retrieval call binding the contract method 0x4b7ce51c.
+//
+// Solidity: function isBrokerAllowed(address _broker) view returns(bool)
+func (_LimitOrderBookFactory *LimitOrderBookFactoryCaller) IsBrokerAllowed(opts *bind.CallOpts, _broker common.Address) (bool, error) {
+	var out []interface{}
+	err := _LimitOrderBookFactory.contract.Call(opts, &out, "isBrokerAllowed", _broker)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// IsBrokerAllowed is a free data retrieval call binding the contract method 0x4b7ce51c.
+//
+// Solidity: function isBrokerAllowed(address _broker) view returns(bool)
+func (_LimitOrderBookFactory *LimitOrderBookFactorySession) IsBrokerAllowed(_broker common.Address) (bool, error) {
+	return _LimitOrderBookFactory.Contract.IsBrokerAllowed(&_LimitOrderBookFactory.CallOpts, _broker)
+}
+
+// IsBrokerAllowed is a free data retrieval call binding the contract method 0x4b7ce51c.
+//
+// Solidity: function isBrokerAllowed(address _broker) view returns(bool)
+func (_LimitOrderBookFactory *LimitOrderBookFactoryCallerSession) IsBrokerAllowed(_broker common.Address) (bool, error) {
+	return _LimitOrderBookFactory.Contract.IsBrokerAllowed(&_LimitOrderBookFactory.CallOpts, _broker)
+}
+
 // OrderBooks is a free data retrieval call binding the contract method 0x2d558047.
 //
 // Solidity: function orderBooks(uint24 ) view returns(address)
@@ -335,6 +428,27 @@ func (_LimitOrderBookFactory *LimitOrderBookFactoryCallerSession) Owner() (commo
 	return _LimitOrderBookFactory.Contract.Owner(&_LimitOrderBookFactory.CallOpts)
 }
 
+// AddBroker is a paid mutator transaction binding the contract method 0x836cae65.
+//
+// Solidity: function addBroker(address _broker) returns()
+func (_LimitOrderBookFactory *LimitOrderBookFactoryTransactor) AddBroker(opts *bind.TransactOpts, _broker common.Address) (*types.Transaction, error) {
+	return _LimitOrderBookFactory.contract.Transact(opts, "addBroker", _broker)
+}
+
+// AddBroker is a paid mutator transaction binding the contract method 0x836cae65.
+//
+// Solidity: function addBroker(address _broker) returns()
+func (_LimitOrderBookFactory *LimitOrderBookFactorySession) AddBroker(_broker common.Address) (*types.Transaction, error) {
+	return _LimitOrderBookFactory.Contract.AddBroker(&_LimitOrderBookFactory.TransactOpts, _broker)
+}
+
+// AddBroker is a paid mutator transaction binding the contract method 0x836cae65.
+//
+// Solidity: function addBroker(address _broker) returns()
+func (_LimitOrderBookFactory *LimitOrderBookFactoryTransactorSession) AddBroker(_broker common.Address) (*types.Transaction, error) {
+	return _LimitOrderBookFactory.Contract.AddBroker(&_LimitOrderBookFactory.TransactOpts, _broker)
+}
+
 // AddExecutor is a paid mutator transaction binding the contract method 0x1f5a0bbe.
 //
 // Solidity: function addExecutor(address _executor) returns()
@@ -375,6 +489,27 @@ func (_LimitOrderBookFactory *LimitOrderBookFactorySession) DeployLimitOrderBook
 // Solidity: function deployLimitOrderBookProxy(address _perpetualManagerAddr, uint24 _perpetualId) returns()
 func (_LimitOrderBookFactory *LimitOrderBookFactoryTransactorSession) DeployLimitOrderBookProxy(_perpetualManagerAddr common.Address, _perpetualId *big.Int) (*types.Transaction, error) {
 	return _LimitOrderBookFactory.Contract.DeployLimitOrderBookProxy(&_LimitOrderBookFactory.TransactOpts, _perpetualManagerAddr, _perpetualId)
+}
+
+// RemoveBroker is a paid mutator transaction binding the contract method 0xd99d6f9a.
+//
+// Solidity: function removeBroker(address _broker) returns()
+func (_LimitOrderBookFactory *LimitOrderBookFactoryTransactor) RemoveBroker(opts *bind.TransactOpts, _broker common.Address) (*types.Transaction, error) {
+	return _LimitOrderBookFactory.contract.Transact(opts, "removeBroker", _broker)
+}
+
+// RemoveBroker is a paid mutator transaction binding the contract method 0xd99d6f9a.
+//
+// Solidity: function removeBroker(address _broker) returns()
+func (_LimitOrderBookFactory *LimitOrderBookFactorySession) RemoveBroker(_broker common.Address) (*types.Transaction, error) {
+	return _LimitOrderBookFactory.Contract.RemoveBroker(&_LimitOrderBookFactory.TransactOpts, _broker)
+}
+
+// RemoveBroker is a paid mutator transaction binding the contract method 0xd99d6f9a.
+//
+// Solidity: function removeBroker(address _broker) returns()
+func (_LimitOrderBookFactory *LimitOrderBookFactoryTransactorSession) RemoveBroker(_broker common.Address) (*types.Transaction, error) {
+	return _LimitOrderBookFactory.Contract.RemoveBroker(&_LimitOrderBookFactory.TransactOpts, _broker)
 }
 
 // RemoveExecutor is a paid mutator transaction binding the contract method 0x24788429.
@@ -733,6 +868,141 @@ func (_LimitOrderBookFactory *LimitOrderBookFactoryFilterer) WatchPerpetualLimit
 func (_LimitOrderBookFactory *LimitOrderBookFactoryFilterer) ParsePerpetualLimitOrderBookDeployed(log types.Log) (*LimitOrderBookFactoryPerpetualLimitOrderBookDeployed, error) {
 	event := new(LimitOrderBookFactoryPerpetualLimitOrderBookDeployed)
 	if err := _LimitOrderBookFactory.contract.UnpackLog(event, "PerpetualLimitOrderBookDeployed", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// LimitOrderBookFactorySetBrokerIterator is returned from FilterSetBroker and is used to iterate over the raw logs and unpacked data for SetBroker events raised by the LimitOrderBookFactory contract.
+type LimitOrderBookFactorySetBrokerIterator struct {
+	Event *LimitOrderBookFactorySetBroker // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *LimitOrderBookFactorySetBrokerIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(LimitOrderBookFactorySetBroker)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(LimitOrderBookFactorySetBroker)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *LimitOrderBookFactorySetBrokerIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *LimitOrderBookFactorySetBrokerIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// LimitOrderBookFactorySetBroker represents a SetBroker event raised by the LimitOrderBookFactory contract.
+type LimitOrderBookFactorySetBroker struct {
+	Broker     common.Address
+	Authorized bool
+	Raw        types.Log // Blockchain specific contextual infos
+}
+
+// FilterSetBroker is a free log retrieval operation binding the contract event 0x562b32fa3230ffc79cf2d4300edae22723253b27b6cb849e18e7c461f6f58924.
+//
+// Solidity: event SetBroker(address broker, bool authorized)
+func (_LimitOrderBookFactory *LimitOrderBookFactoryFilterer) FilterSetBroker(opts *bind.FilterOpts) (*LimitOrderBookFactorySetBrokerIterator, error) {
+
+	logs, sub, err := _LimitOrderBookFactory.contract.FilterLogs(opts, "SetBroker")
+	if err != nil {
+		return nil, err
+	}
+	return &LimitOrderBookFactorySetBrokerIterator{contract: _LimitOrderBookFactory.contract, event: "SetBroker", logs: logs, sub: sub}, nil
+}
+
+// WatchSetBroker is a free log subscription operation binding the contract event 0x562b32fa3230ffc79cf2d4300edae22723253b27b6cb849e18e7c461f6f58924.
+//
+// Solidity: event SetBroker(address broker, bool authorized)
+func (_LimitOrderBookFactory *LimitOrderBookFactoryFilterer) WatchSetBroker(opts *bind.WatchOpts, sink chan<- *LimitOrderBookFactorySetBroker) (event.Subscription, error) {
+
+	logs, sub, err := _LimitOrderBookFactory.contract.WatchLogs(opts, "SetBroker")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(LimitOrderBookFactorySetBroker)
+				if err := _LimitOrderBookFactory.contract.UnpackLog(event, "SetBroker", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseSetBroker is a log parse operation binding the contract event 0x562b32fa3230ffc79cf2d4300edae22723253b27b6cb849e18e7c461f6f58924.
+//
+// Solidity: event SetBroker(address broker, bool authorized)
+func (_LimitOrderBookFactory *LimitOrderBookFactoryFilterer) ParseSetBroker(log types.Log) (*LimitOrderBookFactorySetBroker, error) {
+	event := new(LimitOrderBookFactorySetBroker)
+	if err := _LimitOrderBookFactory.contract.UnpackLog(event, "SetBroker", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

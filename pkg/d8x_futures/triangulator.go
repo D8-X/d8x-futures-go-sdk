@@ -29,8 +29,9 @@ func calculateTriangulation(triang Triangulation, outDateOffChain, outDateOnChai
 		} else {
 			price = price * pxObs.Px
 		}
-		isFeedOutdated = isFeedOutdated || ((pxObs.IsOffChain && timestampNow-pxObs.Ts > outDateOffChain) ||
-			(!pxObs.IsOffChain && timestampNow-pxObs.Ts > outDateOnChain))
+		isFeedOutdated = isFeedOutdated || pxObs.IsPrdMktClosed ||
+			(pxObs.IsOffChain && timestampNow-pxObs.Ts > outDateOffChain) ||
+			(!pxObs.IsOffChain && timestampNow-pxObs.Ts > outDateOnChain)
 	}
 	return price, isFeedOutdated, nil
 }

@@ -9,7 +9,6 @@ import (
 	"math"
 	"math/big"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -849,17 +848,19 @@ func RawQueryPerpetualState(
 		return nil, err
 	}
 	// gather perpetual index prices (offchain REST)
-	pxInfo := make([]*big.Int, len(perpetualIds)*2)
-	pxInfoFloat := make([]float64, len(perpetualIds)*2)
+	pxInfo := make([]*big.Int, len(perpetualIds)*3)
+	pxInfoFloat := make([]float64, len(perpetualIds)*3)
 	for i := range perpetualIds {
 		p, err := RawFetchPricesForPerpetualId(xInfo, perpetualIds[i], pxEp)
 		if err != nil {
 			return nil, err
 		}
-		pxInfoFloat[i*2] = p.S2Price
-		pxInfoFloat[i*2+1] = p.S3Price
-		pxInfo[i*2] = utils.Float64ToABDK(p.S2Price)
-		pxInfo[i*2+1] = utils.Float64ToABDK(p.S3Price)
+		pxInfoFloat[i*3] = p.S2Price
+		pxInfoFloat[i*3+1] = p.S3Price
+		pxInfoFloat[i*3+2] = p.DrawProb
+		pxInfo[i*3] = utils.Float64ToABDK(p.S2Price)
+		pxInfo[i*3+1] = utils.Float64ToABDK(p.S3Price)
+		pxInfo[i*3+2] = utils.Float64ToABDK(p.DrawProb)
 	}
 	// midprices via blockchain query
 	pxMid, err := proxy.QueryMidPrices(nil, bigIntSlice, pxInfo)
@@ -869,15 +870,17 @@ func RawQueryPerpetualState(
 
 	perpStates := make([]PerpetualState, len(perps))
 	for i, perpData := range perps {
+		// convert to probability space, apply draw-prob correction, convert back
+		index := 1 + (pxInfoFloat[i*3]-1)/(1-pxInfoFloat[i*3+2])
 		perpStates[i].Id = int32(perpData.Id.Int64())
 		perpStates[i].State = PerpetualStateEnum(perpData.State)
-		perpStates[i].IndexPrice = pxInfoFloat[i*2]
-		perpStates[i].CollToQuoteIndexPrice = pxInfoFloat[i*2+1]
+		perpStates[i].IndexPrice = index
+		perpStates[i].CollToQuoteIndexPrice = pxInfoFloat[i*3+1]
 		j := GetPerpetualStaticInfoIdxFromId(&xInfo, int32(perpData.Id.Int64()))
 		if j >= 0 && hasPrdMktFlag(xInfo.Perpetuals[j].PerpFlags) {
-			perpStates[i].MarkPrice = pxInfoFloat[i*2]
+			perpStates[i].MarkPrice = index
 		} else {
-			perpStates[i].MarkPrice = pxInfoFloat[i*2] * (1 + utils.ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
+			perpStates[i].MarkPrice = pxInfoFloat[i*3] * (1 + utils.ABDKToFloat64(perpData.CurrentMarkPremiumRate.FPrice))
 		}
 		perpStates[i].CurrentFundingRateBps = utils.ABDKToFloat64(perpData.FCurrentFundingRate)
 		perpStates[i].OpenInterestBC = utils.ABDKToFloat64(perpData.FOpenInterest)
@@ -1087,7 +1090,9 @@ func RawQueryPerpetualPriceTuple(
 	calls := make([]*multicall.Call, 0, len(tradeAmt))
 	for _, amt := range tradeAmt {
 		taAbdk := utils.Float64ToABDK(amt)
-		c := contract.NewCall(new(priceOutput), "queryPerpetualPrice", perpId, taAbdk, pricesAbdk, pxInfo.Conf, pxInfo.CLOBParams)
+		// extract minimal spread from pxInfo.Conf (we could just cast but more readable)
+		minSpread := uint16(pxInfo.Conf & 0xFFFF)
+		c := contract.NewCall(new(priceOutput), "queryPerpetualPrice", perpId, taAbdk, pricesAbdk, minSpread, pxInfo.CLOBParams)
 		calls = append(calls, c)
 	}
 	res, err := caller.Call(nil, calls...)
@@ -1412,10 +1417,11 @@ func RawQueryLiquidatableAccountsInPool(client *ethclient.Client,
 			syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
 			for _, sym := range syms {
 				pxMap[sym] = Price{
-					Px:         feedData.Prices[k].Px,
-					Ema:        feedData.Prices[k].Ema,
-					Ts:         int64(feedData.Prices[k].Ts),
-					IsOffChain: true,
+					Px:             feedData.Prices[k].Px,
+					Ema:            feedData.Prices[k].Ema,
+					Ts:             int64(feedData.Prices[k].Ts),
+					IsOffChain:     true,
+					IsPrdMktClosed: feedData.Prices[k].IsClosedPrdMkt,
 				}
 			}
 		}
@@ -1544,7 +1550,7 @@ func fetchIndexPricesForPerpetual(xInfo *StaticExchangeInfo, j int, pxEp PriceFe
 	for k, id := range feedData.PriceIds {
 		syms := xInfo.PriceFeedInfo.PxIdToSymbols[id]
 		for _, sym := range syms {
-			pxMap[sym] = Price{Px: feedData.Prices[k].Px, Ema: feedData.Prices[k].Ema, Ts: int64(feedData.Prices[k].Ts), IsOffChain: true}
+			pxMap[sym] = Price{Px: feedData.Prices[k].Px, Ema: feedData.Prices[k].Ema, Ts: int64(feedData.Prices[k].Ts), IsOffChain: true, IsPrdMktClosed: feedData.Prices[k].IsClosedPrdMkt}
 		}
 	}
 	return pxMap, feedData, nil
@@ -1632,7 +1638,7 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 					pxData.Prices[i] = PriceObs{
 						Px:             px,
 						Ema:            px,
-						Conf:           uint16(0),
+						Conf:           0,
 						CLOBParams:     0,
 						Ts:             int64(d.Price.PublishTime),
 						IsOffChain:     true,
@@ -1655,9 +1661,9 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 						if err != nil {
 							return PriceFeedData{}, fmt.Errorf("invalid ema price for %s: %w", d.Id, err)
 						}
-						conf, err := strconv.Atoi(d.Price.Conf)
-						if err != nil {
-							return PriceFeedData{}, fmt.Errorf("unable to convert prices.conf %s", err.Error())
+						conf, ok := new(big.Int).SetString(d.Price.Conf, 10)
+						if !ok {
+							return PriceFeedData{}, fmt.Errorf("unable to parse Price.Conf %q", d.Price.Conf)
 						}
 						params, ok := new(big.Int).SetString(d.EmaPrice.Conf, 10)
 						if !ok {
@@ -1666,7 +1672,7 @@ func fetchPricesFromAPI(priceIds []PriceId, pxEndPts PriceFeedEndpoints, withVaa
 						pxData.Prices[i] = PriceObs{
 							Px:             px,
 							Ema:            ema,
-							Conf:           uint16(conf),
+							Conf:           conf.Uint64(),
 							CLOBParams:     params.Uint64(),
 							Ts:             int64(d.Price.PublishTime),
 							IsOffChain:     true,
