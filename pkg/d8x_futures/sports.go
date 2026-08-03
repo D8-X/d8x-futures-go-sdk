@@ -9,6 +9,13 @@ import (
 	"time"
 )
 
+// slotRefreshMinIntervalSec bounds how often we re-fetch slot assignments
+// from the betting-lifecycle API. A contract's own Expiry is a long lease
+// window (days), not a game-end signal, so it must not gate the refresh: a
+// slot can rotate to a new contract long before the old contract's lease
+// expires.
+const slotRefreshMinIntervalSec = 60
+
 type SlotAssignment struct {
 	ContractID string    `json:"contract_id"`
 	YYMMDD     string    `json:"yymmdd"`
@@ -68,13 +75,13 @@ func (sdk *SdkRO) internalToSymbol(symInt string) (string, error) {
 	contractId, exists := sdk.Sport.SlotnameToCtrct[symInt]
 	slotMeta := sdk.Sport.Slots[contractId]
 	sdk.Sport.SlotsMux.RUnlock()
-	if (!exists && now-ts > 5*60) ||
-		(exists && slotMeta.Expiry.Before(time.Now()) && now-ts > 60) {
+	if now-ts > slotRefreshMinIntervalSec {
 		if err := sdk.refreshSlotAssignment(); err != nil {
 			return "", fmt.Errorf("unable to refresh slot assignment: %w", err)
 		}
 		sdk.Sport.SlotsMux.RLock()
 		contractId, exists = sdk.Sport.SlotnameToCtrct[symInt]
+		slotMeta = sdk.Sport.Slots[contractId]
 		sdk.Sport.SlotsMux.RUnlock()
 	}
 	if !exists {
@@ -114,8 +121,7 @@ func (sdk *SdkRO) symbolToInternal(sym string) (string, error) {
 	sdk.Sport.SlotsMux.RUnlock()
 
 	now := time.Now().Unix()
-	if (!exists && now-ts > 5*60) ||
-		(exists && slot.Expiry.Before(time.Now()) && now-ts > 60) {
+	if now-ts > slotRefreshMinIntervalSec {
 		if err := sdk.refreshSlotAssignment(); err != nil {
 			return "", fmt.Errorf("unable to refresh slot assignment: %w", err)
 		}
