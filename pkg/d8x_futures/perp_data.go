@@ -515,7 +515,7 @@ func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Add
 		return contracts.IClientOrderClientOrder{}, fmt.Errorf("symbol %s not found in exchange info", order.Symbol)
 	}
 	var limitPx *big.Int
-	if (order.LimitPrice == 0 || order.LimitPrice == math.MaxFloat64) && order.Side == SIDE_BUY && !order.HasCollateralLimit {
+	if (order.LimitPrice == 0 || order.LimitPrice == math.MaxFloat64) && order.Side == SIDE_BUY {
 		limitPx = utils.Max64x64()
 	} else {
 		limitPx = utils.Float64ToABDK(order.LimitPrice)

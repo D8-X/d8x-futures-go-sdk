@@ -521,7 +521,7 @@ func (sdk SdkRO) NewOrder(symbol string, side Side, orderType OrderType, quantit
 		var op OrderOptions
 		options = &op
 	}
-	if options.LimitPrice == 0 && side == SIDE_BUY && !options.HasCollateralLimit {
+	if options.LimitPrice == 0 && side == SIDE_BUY {
 		// set limit to a large number
 		// if buy market order
 		options.LimitPrice = math.MaxFloat64
