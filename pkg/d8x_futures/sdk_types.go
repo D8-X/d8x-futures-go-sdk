@@ -356,6 +356,8 @@ var (
 	MASK_MARKET_ORDER      uint32 = 0x40000000
 	MASK_STOP_ORDER        uint32 = 0x20000000
 	MASK_KEEP_POS_LEVERAGE uint32 = 0x08000000
+	MASK_FILL_OR_KILL      uint32 = 0x10000000
+	MASK_COLL_LIMIT        uint32 = 0x02000000
 )
 
 var (
@@ -438,6 +440,8 @@ type Order struct {
 	LimitPrice          float64
 	TriggerPrice        float64
 	KeepPositionLvg     bool
+	FillOrKill          bool
+	HasCollateralLimit  bool
 	BrokerFeeTbps       uint16
 	BrokerAddr          common.Address
 	BrokerSignature     []byte
@@ -495,6 +499,8 @@ type OrderOptions struct {
 	TriggerPrice        float64
 	ReduceOnly          bool
 	KeepPositionLvg     bool
+	FillOrKill          bool
+	HasCollateralLimit  bool
 	Deadline            uint32
 	ExecutionTs         uint32
 	parentChildOrderId1 *[32]byte
@@ -546,6 +552,8 @@ func (sdk SdkRO) NewOrder(symbol string, side Side, orderType OrderType, quantit
 		LimitPrice:          options.LimitPrice,
 		TriggerPrice:        options.TriggerPrice,
 		KeepPositionLvg:     options.KeepPositionLvg,
+		FillOrKill:          options.FillOrKill,
+		HasCollateralLimit:  options.HasCollateralLimit,
 		BrokerFeeTbps:       0,
 		BrokerAddr:          common.Address{},
 		BrokerSignature:     []byte{},

@@ -527,6 +527,12 @@ func (order *Order) ToChainType(xInfo *StaticExchangeInfo, traderAddr common.Add
 	if order.KeepPositionLvg {
 		flags = flags | MASK_KEEP_POS_LEVERAGE
 	}
+	if order.FillOrKill {
+		flags = flags | MASK_FILL_OR_KILL
+	}
+	if order.HasCollateralLimit {
+		flags = flags | MASK_COLL_LIMIT
+	}
 	switch order.Type {
 	case ORDER_TYPE_LIMIT:
 		flags = flags | MASK_LIMIT_ORDER
