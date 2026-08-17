@@ -84,6 +84,7 @@ type PerpetualStaticInfo struct {
 	LimitOrderBookAddr     common.Address
 	InitialMarginRate      float64
 	MaintenanceMarginRate  float64
+	PerformanceFeeRate     float64
 	CollateralCurrencyType CollateralCCY
 	S2Symbol               string
 	S3Symbol               string

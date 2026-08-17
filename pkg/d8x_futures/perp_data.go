@@ -198,12 +198,26 @@ func QueryExchangeStaticInfo(conn *BlockChainConnector, config *utils.ChainConfi
 		if err != nil {
 			return StaticExchangeInfo{}, err
 		}
+		// GetPerpetualStaticInfo's own return struct doesn't carry the performance
+		// fee rate (it's not part of that getter's ABI), so it's backfilled from
+		// GetPerpetuals, which does expose it (FPerformanceFeeRate) - same batched
+		// call the TS SDK uses for this. One extra call per pool, not per
+		// perpetual, and only at static-info load time, not per request.
+		perpFullData, err := conn.PerpetualManager.GetPerpetuals(nil, poolPerpIds)
+		if err != nil {
+			return StaticExchangeInfo{}, err
+		}
+		performanceFeeById := make(map[int64]int32, len(perpFullData))
+		for _, pd := range perpFullData {
+			performanceFeeById[pd.Id.Int64()] = pd.FPerformanceFeeRate
+		}
 
 		for _, perpStatic := range perpGetterStaticInfos {
 			info, err := getterDataToPerpetualStaticInfo(&perpStatic, configPx, conn.SymbolMapping)
 			if err != nil {
 				return StaticExchangeInfo{}, err
 			}
+			info.PerformanceFeeRate = utils.I32ToFloat64(performanceFeeById[int64(info.Id)])
 			perpetuals = append(perpetuals, info)
 			symbolsSet.Add(info.S2Symbol)
 			if info.S3Symbol != "" {
@@ -363,6 +377,14 @@ func (perp *PerpetualStaticInfo) GetMaintenanceMarginRate() float64 {
 		return perp.MaintenanceMarginRate
 	}
 	return 0.1 // 10x
+}
+
+// GetPerformanceFeeRate returns the perpetual's performance fee rate
+// (fPerformanceFeeRate on the contract). Unlike the margin rate getters above,
+// this has no TradFi-market open/close override - the fee doesn't change outside
+// trading hours.
+func (perp *PerpetualStaticInfo) GetPerformanceFeeRate() float64 {
+	return perp.PerformanceFeeRate
 }
 
 // decodeMarketOpenCloseSeconds decodes the open/close times
